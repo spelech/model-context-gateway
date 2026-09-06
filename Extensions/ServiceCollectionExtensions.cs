@@ -195,7 +195,8 @@ namespace ModelContextGateway.Extensions
                 sp.GetRequiredService<IHttpClientFactory>().CreateClient("McpClient"),
                 sp.GetService<IConfiguration>(),
                 sp.GetService<ILogger<AdminMcpServer>>(),
-                sp.GetService<IMasterKeyManager>()
+                sp.GetService<IMasterKeyManager>(),
+                sp.GetService<CompositeSecretRetriever>() ?? (ISecretRetriever?)sp.GetService<ISecretRetriever>()
             ));
 
             // Configure CORS

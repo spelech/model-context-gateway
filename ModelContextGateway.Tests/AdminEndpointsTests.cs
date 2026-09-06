@@ -448,5 +448,131 @@ namespace ModelContextGateway.Tests
             Assert.True(root.GetProperty("result").TryGetProperty("tools", out var tools));
             Assert.Equal(10, tools.GetArrayLength());
         }
+
+        [Fact]
+        [Requirement("MCP-ADMIN-ZOD-STRICT-RESPONSE", "MCP", RequirementType.Positive, "JsonRpcResponse serialization omits null result, error, and _meta fields completely to satisfy Zod strict validation.")]
+        public void JsonRpcResponse_Serialization_OmitsNullFieldsCompletely()
+        {
+            var response = new JsonRpcResponse
+            {
+                Id = 1,
+                Result = JsonSerializer.SerializeToElement(new { status = "ok" }),
+                Error = null,
+                Meta = null
+            };
+
+            var json = JsonSerializer.Serialize(response);
+
+            Assert.DoesNotContain("\"error\"", json);
+            Assert.DoesNotContain("\"_meta\"", json);
+            Assert.Contains("\"result\"", json);
+            Assert.Contains("\"id\":1", json);
+            Assert.Contains("\"jsonrpc\":\"2.0\"", json);
+
+            var errorResponse = new JsonRpcResponse
+            {
+                Id = "err-1",
+                Result = null,
+                Error = new JsonRpcError { Code = -32600, Message = "Invalid Request" },
+                Meta = null
+            };
+
+            var errorJson = JsonSerializer.Serialize(errorResponse);
+            Assert.DoesNotContain("\"result\"", errorJson);
+            Assert.DoesNotContain("\"_meta\"", errorJson);
+            Assert.Contains("\"error\"", errorJson);
+            Assert.Contains("\"code\":-32600", errorJson);
+        }
+
+        [Fact]
+        [Requirement("MCP-ADMIN-SSE-ZOD-COMPLIANT", "MCP", RequirementType.Positive, "Admin endpoint direct POST response does not serialize null error or _meta fields.")]
+        public async Task AdminEndpoint_DirectPost_SerializesResponseWithoutNullErrorOrMeta()
+        {
+            var client = CreateAdminClient();
+
+            var req = new
+            {
+                jsonrpc = "2.0",
+                id = "tools-list-zod",
+                method = "tools/list"
+            };
+
+            using var postReq = new HttpRequestMessage(HttpMethod.Post, "/admin/sse");
+            postReq.Headers.Add("Accept", "application/json");
+            postReq.Content = new StringContent(JsonSerializer.Serialize(req), Encoding.UTF8, "application/json");
+
+            var res = await client.SendAsync(postReq);
+            Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+
+            var json = await res.Content.ReadAsStringAsync();
+            Assert.DoesNotContain("\"error\":null", json);
+            Assert.DoesNotContain("\"_meta\":null", json);
+            Assert.DoesNotContain("\"error\"", json);
+            Assert.DoesNotContain("\"_meta\"", json);
+        }
+
+        [Fact]
+        [Requirement("MCP-ADMIN-REVERSE-PROXY-X-FORWARDED-HOST", "MCP", RequirementType.Positive, "Admin SSE endpoint prioritizes X-Forwarded-Host header over Request.Host in endpoint URI advertising.")]
+        public async Task AdminEndpoint_SseHandshake_UsesXForwardedHost()
+        {
+            var client = CreateAdminClient();
+
+            using var sseCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var sseRequest = new HttpRequestMessage(HttpMethod.Get, "/admin/sse");
+            sseRequest.Headers.Add("Accept", "text/event-stream");
+            sseRequest.Headers.Add("X-Forwarded-Host", "mcp.wileyriley.com:443");
+            sseRequest.Headers.Add("X-Forwarded-Proto", "https");
+
+            var sseResponse = await client.SendAsync(sseRequest, HttpCompletionOption.ResponseHeadersRead, sseCts.Token);
+            Assert.Equal(HttpStatusCode.OK, sseResponse.StatusCode);
+
+            var sseStream = await sseResponse.Content.ReadAsStreamAsync(sseCts.Token);
+            using var reader = new StreamReader(sseStream, Encoding.UTF8);
+
+            string? endpointLine = null;
+            while (endpointLine == null)
+            {
+                var line = await reader.ReadLineAsync(sseCts.Token);
+                if (line == null)
+                {
+                    break;
+                }
+                if (line.StartsWith("data: "))
+                {
+                    endpointLine = line.Substring("data: ".Length).Trim();
+                }
+            }
+
+            Assert.NotNull(endpointLine);
+            Assert.StartsWith("https://mcp.wileyriley.com:443/admin/message?sessionId=", endpointLine);
+        }
+
+        [Fact]
+        [Requirement("MCP-ADMIN-REQUEST-WITHOUT-ID-NOT-DROPPED", "MCP", RequirementType.Positive, "Admin endpoint executes requests without an ID and does not drop them as notifications.")]
+        public async Task AdminEndpoint_DirectPost_RequestWithoutId_ExecutesSuccessfully()
+        {
+            var client = CreateAdminClient();
+
+            var req = new
+            {
+                jsonrpc = "2.0",
+                method = "tools/list"
+            };
+
+            using var postReq = new HttpRequestMessage(HttpMethod.Post, "/admin/sse");
+            postReq.Headers.Add("Accept", "application/json");
+            postReq.Content = new StringContent(JsonSerializer.Serialize(req), Encoding.UTF8, "application/json");
+
+            var res = await client.SendAsync(postReq);
+            Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+
+            var json = await res.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            Assert.True(root.TryGetProperty("result", out var result));
+            Assert.True(result.TryGetProperty("tools", out var tools));
+            Assert.Equal(10, tools.GetArrayLength());
+        }
     }
 }
