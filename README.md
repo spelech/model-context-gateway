@@ -19,16 +19,16 @@ An enterprise C# ASP.NET Core gateway, OAuth 2.0 provider, and semantic proxy fo
 
 ---
 
-## Why Model Context Gateway? (The Airport Hub Metaphor)
+## Why Model Context Gateway?
 
-Connecting AI clients directly to dozens of isolated microservices creates severe operational friction: credentials leak across workstations, connection shapes diverge, and dumping hundreds of tool schemas saturates the LLM's context window.
+Connecting AI clients directly to dozens of isolated microservices creates severe operational friction: credentials leak across workstations, connection configurations diverge, and loading hundreds of tool schemas saturates the LLM's context window.
 
-**Model Context Gateway functions as an international airport hub for your AI tools:**
+**Model Context Gateway provides a unified, secure control plane for all your MCP tools:**
 
-* **Single Terminal Gate (`/sse`)**: Clients connect once to a single, governed endpoint.
-* **Security Checkpoint**: The gateway authenticates users (Active Directory Windows SIDs, OIDC reverse proxy headers, or scoped AppKeys), enforces least-privilege RBAC, and automatically scrubs sensitive PII before requests touch backend infrastructure.
-* **The Concierge (Meta-Mode)**: Instead of handing an LLM an overwhelming 500-page directory of every tool on every server, Meta-Mode provides an on-demand concierge: `search_tools` and `execute_tool`. The model asks in plain English (*"Restart the Plex service"*), and the gateway ranks, exposes, and executes the exact tool dynamically.
-* **Flight Dispatch**: The gateway seamlessly routes traffic across Docker containers, remote HTTP/SSE endpoints, and local STDIO subprocesses without client-side reconfiguration.
+* **Single Connection Endpoint (`/sse`)**: AI assistants connect once to a centralized gateway instead of managing separate connection configurations for every individual service.
+* **Context Window Optimization (Meta-Mode)**: Rather than overwhelming the model's context window with hundreds of tool schemas upfront, Meta-Mode exposes only `search_tools` and `execute_tool`. The model searches for and loads tools semantically on demand.
+* **Centralized Governance & Security**: Authenticates users via Active Directory Windows SIDs, OIDC reverse-proxy headers, or scoped AppKeys. Enforces least-privilege RBAC policies and redacts sensitive credentials before logging.
+* **Universal Transport Support**: Transparently routes requests across Docker containers (auto-discovered via socket), remote HTTP/SSE services, and local STDIO subprocesses without client-side reconfiguration.
 
 ---
 
@@ -75,8 +75,8 @@ docker run -d \
 
 ### 1. General Tool Access (Meta-Mode Gateway)
 When using agentic coding assistants connected to `/sse`:
-1. **Search (The Concierge)**: The agent calls `search_tools` with a natural language query describing the desired action (e.g. `"restart actual budget container"`).
-2. **Execute**: The agent invokes the returned namespaced tool (e.g. `docker/restart_container` or `docker__restart_container`) via `execute_tool(name, arguments)`.
+1. **Search Tools**: The agent calls `search_tools` with a natural language query describing the desired action (e.g. `"restart actual budget container"`).
+2. **Execute Tool**: The agent invokes the returned namespaced tool (e.g. `docker/restart_container` or `docker__restart_container`) via `execute_tool(name, arguments)`.
 
 ### 2. Autonomous Gateway Administration (Admin MCP Server)
 Autonomous agents (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) can directly manage gateway configuration by connecting to `/admin` or `/mcg-admin`:

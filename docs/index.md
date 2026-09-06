@@ -18,16 +18,16 @@
 
 It aggregates hundreds of tools from isolated backend servers (Docker, Home Assistant, SQL databases, Plex, Actual Budget, Excel, custom APIs, and STDIO subprocesses) and proxies them to AI clients (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) through a single unified connection.
 
-### The Problem & Mental Model: An Airport Hub for AI Tools
+### The Problem & Solution
 
-Connecting AI clients directly to dozens of disparate backend tools is like managing dozens of point-to-point charter flights: credentials leak, protocol shapes differ, and loading 300+ tool schemas blows out the model's context window with irrelevant tokens.
+Connecting AI clients directly to dozens of disparate backend tools creates significant operational overhead: credentials leak across developer environments, protocol configurations diverge, and loading hundreds of tool schemas saturates the model's context window with irrelevant tokens.
 
-**Model Context Gateway acts as an international airport hub for your AI tools:**
+**Model Context Gateway provides a unified, governed front-door for all your AI tools:**
 
-* **Single Terminal Gate (`/sse`)**: AI assistants connect once to a single, dependable endpoint.
-* **Security Checkpoint**: The gateway enforces RBAC, authenticates Active Directory SIDs or OIDC headers, derives AppKeys, and scrubs PII before requests touch backend infrastructure.
-* **Intelligent Concierge (Meta-Mode)**: Instead of handing an LLM a 500-page directory of every tool on every server, Meta-Mode gives the model an intelligent concierge (`search_tools` and `execute_tool`). The LLM asks in plain English (*"Who can reboot the budget service?"*), and the concierge finds and executes the exact tool on demand.
-* **Flight Dispatch**: The gateway seamlessly routes requests across Docker containers, remote HTTP/SSE services, and local STDIO subprocesses without client-side reconfiguration.
+* **Single Connection Endpoint (`/sse`)**: AI assistants connect once to a dependable gateway rather than juggling dozens of point-to-point connections.
+* **Context Optimization (Meta-Mode)**: Instead of injecting a massive catalog of tool schemas into the model's prompt, Meta-Mode exposes lightweight discovery tools (`search_tools` and `execute_tool`). The LLM finds and executes the exact tool it needs on demand.
+* **Centralized Governance & Security**: Enforces role-based access control (RBAC), authenticates Active Directory SIDs or OIDC headers, derives scoped AppKeys, and redacts PII before requests touch backend infrastructure.
+* **Universal Transport Routing**: Seamlessly routes requests across Docker containers, remote HTTP/SSE services, and local STDIO subprocesses without client-side reconfiguration.
 
 ![Model Context Gateway Dashboard](assets/dashboard.jpg)
 
