@@ -172,7 +172,7 @@ namespace ModelContextGateway.Middleware
 
                 if (!string.IsNullOrEmpty(method))
                 {
-                    bool isNotification = method.StartsWith("notifications/") || id == null;
+                    bool isNotification = method.StartsWith("notifications/", StringComparison.OrdinalIgnoreCase);
 
                     context.Items["MCP_METHOD"] = method;
                     context.Items["MCP_ITEM_NAME"] = itemName;

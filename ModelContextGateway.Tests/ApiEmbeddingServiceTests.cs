@@ -21,7 +21,8 @@ namespace ModelContextGateway.Tests
             var service = new ApiEmbeddingService(new HttpClient(), new RouterSettings());
             var settings = new RouterSettings { EmbeddingProvider = "ollama", EmbeddingApiUrl = "http://localhost:11434" };
             service.ReloadSettings(settings);
-            Assert.NotNull(service);
+            Assert.Equal("http://localhost:11434", service.GetSettings().EmbeddingApiUrl);
+            Assert.Equal("ollama", service.GetSettings().EmbeddingProvider);
         }
     }
 }

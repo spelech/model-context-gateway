@@ -18,6 +18,8 @@ namespace ModelContextGateway.Core.Routing
             _settings = settings;
         }
 
+        public RouterSettings GetSettings() => _settings;
+
         public async Task<float[]> GetEmbeddingAsync(string text)
         {
             if (SecurityValidationHelper.IsPrivateOrLoopback(_settings.EmbeddingApiUrl))

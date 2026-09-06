@@ -88,13 +88,19 @@ namespace ModelContextGateway.Tests
             var logger = NullLogger<DockerAutoDiscoveryService>.Instance;
 
             var discovery = new DockerAutoDiscoveryService(sp, logger);
-            using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(200));
-            try
+            var act = async () =>
             {
-                await discovery.StartAsync(cts.Token);
-                await discovery.StopAsync(cts.Token);
-            }
-            catch (OperationCanceledException) { }
+                using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(50));
+                try
+                {
+                    await discovery.StartAsync(cts.Token);
+                    await discovery.StopAsync(cts.Token);
+                }
+                catch (OperationCanceledException) { }
+            };
+
+            var exception = await Record.ExceptionAsync(act);
+            Assert.Null(exception);
         }
 
         [Fact]

@@ -36,6 +36,9 @@ namespace ModelContextGateway.Core.Routing
             }
         }
 
+        public RouterSettings GetSettings() => _settings;
+        public string GetModelDir() => _modelDir;
+
         private void SetupPaths()
         {
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;

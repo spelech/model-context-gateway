@@ -124,12 +124,15 @@ namespace ModelContextGateway.Core.Protocol
         public object? Id { get; set; }
 
         [JsonPropertyName("result")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public JsonElement? Result { get; set; }
 
         [JsonPropertyName("error")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public JsonRpcError? Error { get; set; }
 
         [JsonPropertyName("_meta")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public JsonElement? Meta { get; set; }
     }
 

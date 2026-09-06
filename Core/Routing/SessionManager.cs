@@ -68,6 +68,11 @@ namespace ModelContextGateway.Core.Routing
             return session;
         }
 
+        public void RegisterSession(string sessionId, ClientSession session)
+        {
+            _sessions[sessionId] = session;
+        }
+
         public ClientSession? GetSession(string sessionId)
         {
             _sessions.TryGetValue(sessionId, out var session);
