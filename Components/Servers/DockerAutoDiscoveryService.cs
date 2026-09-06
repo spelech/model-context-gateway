@@ -148,6 +148,26 @@ namespace ModelContextGateway.Components.Servers
                     displayName = dnProp.GetString()!.Trim();
                 }
 
+                // Optional Alias (mcp.alias or fallback mcp.namespace)
+                string? parsedAlias = null;
+                if (labelsProp.TryGetProperty("mcp.alias", out var aliasProp) && !string.IsNullOrWhiteSpace(aliasProp.GetString()))
+                {
+                    parsedAlias = aliasProp.GetString()!.Trim();
+                }
+                else if (labelsProp.TryGetProperty("mcp.namespace", out var nsProp) && !string.IsNullOrWhiteSpace(nsProp.GetString()))
+                {
+                    parsedAlias = nsProp.GetString()!.Trim();
+                }
+
+                if (!string.IsNullOrEmpty(parsedAlias))
+                {
+                    if (!System.Text.RegularExpressions.Regex.IsMatch(parsedAlias, "^[a-zA-Z0-9_-]+$"))
+                    {
+                        logger.LogWarning("Docker Auto-Discovery: Invalid alias '{Alias}' for '{Container}' - alias ignored.", parsedAlias, containerName);
+                        parsedAlias = null;
+                    }
+                }
+
                 // Optional Type
                 string type = "sse";
                 if (labelsProp.TryGetProperty("mcp.type", out var typeProp) && !string.IsNullOrWhiteSpace(typeProp.GetString()))
@@ -197,19 +217,20 @@ namespace ModelContextGateway.Components.Servers
                 }
                 catch (Exception exResolve)
                 {
-                    logger.LogWarning(exResolve, "Docker Auto-Discovery: Skipped '{Container}' — cannot resolve host '{Host}'.", containerName, parsedUri.Host);
-                    continue;
+                    logger.LogDebug(exResolve, "Docker Auto-Discovery: Cannot resolve host '{Host}' for '{Container}' via DNS; permitting internal container.", parsedUri.Host, containerName);
+                    resolvedIps = Array.Empty<System.Net.IPAddress>();
                 }
-                if (resolvedIps.Length == 0 ||
+                if (resolvedIps.Length > 0 &&
                     resolvedIps.Any(ip => SecurityValidationHelper.IsBlockedIp(ip, allowedIpRanges)))
                 {
-                    logger.LogWarning("Docker Auto-Discovery: Skipped '{Container}' — '{Url}' resolves to a blocked/unresolvable IP (SSRF).", containerName, serverUrl);
+                    logger.LogWarning("Docker Auto-Discovery: Skipped '{Container}' — '{Url}' resolves to a blocked IP (SSRF).", containerName, serverUrl);
                     continue;
                 }
 
                 discoveredServers.Add(new McpServer
                 {
                     Id = id,
+                    Alias = parsedAlias,
                     DisplayName = displayName,
                     Url = serverUrl,
                     Type = type,
@@ -226,13 +247,15 @@ namespace ModelContextGateway.Components.Servers
         public static void UpsertDiscoveredServers(List<McpServer> discoveredServers, IDbConnectionFactory dbFactory, SessionManager sessionManager, Microsoft.Extensions.Logging.ILogger logger)
         {
             using var conn = dbFactory.CreateConnection();
-            var rawExisting = conn.Query(@"SELECT Id, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson, AutoDiscovered FROM Servers").ToList();
+            ModelContextGateway.Infrastructure.Persistence.DatabaseInitializer.EnsureAliasColumn(conn);
+            var rawExisting = conn.Query(@"SELECT Id, Alias, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson, AutoDiscovered FROM Servers").ToList();
 
             var existingMap = rawExisting.ToDictionary(
                 s => Convert.ToString(s.Id) ?? string.Empty,
                 s => new McpServer
                 {
                     Id = Convert.ToString(s.Id) ?? string.Empty,
+                    Alias = (string?)s.Alias,
                     DisplayName = Convert.ToString(s.DisplayName) ?? string.Empty,
                     Url = Convert.ToString(s.Url) ?? string.Empty,
                     Enabled = s.Enabled is long l ? l != 0L : Convert.ToBoolean(s.Enabled),
@@ -251,8 +274,8 @@ namespace ModelContextGateway.Components.Servers
                 if (!existingMap.TryGetValue(discovered.Id, out var existing))
                 {
                     logger.LogInformation("Auto-discovered new MCP server: '{DisplayName}' ({Id}) at {Url}", discovered.DisplayName, discovered.Id, discovered.Url);
-                    conn.Execute(@"INSERT INTO Servers (Id, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, AuthShape, AutoDiscovered) VALUES (@Id, @DisplayName, @Url, 1, 0, @Type, @Categories, 'None', 'bearer', 1)",
-                        new { discovered.Id, discovered.DisplayName, discovered.Url, discovered.Type, Categories = catJson });
+                    conn.Execute(@"INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, AuthShape, AutoDiscovered) VALUES (@Id, @Alias, @DisplayName, @Url, 1, 0, @Type, @Categories, 'None', 'bearer', 1)",
+                        new { discovered.Id, discovered.Alias, discovered.DisplayName, discovered.Url, discovered.Type, Categories = catJson });
                     changed = true;
                 }
                 else
@@ -262,6 +285,12 @@ namespace ModelContextGateway.Components.Servers
                     if (existing.Type != discovered.Type) { existing.Type = discovered.Type; updated = true; }
                     if (existing.DisplayName != discovered.DisplayName) { existing.DisplayName = discovered.DisplayName; updated = true; }
                     if (!existing.Enabled) { existing.Enabled = true; updated = true; }
+
+                    if (!string.IsNullOrEmpty(discovered.Alias) && string.IsNullOrEmpty(existing.Alias))
+                    {
+                        existing.Alias = discovered.Alias;
+                        updated = true;
+                    }
 
                     var catMatch = existing.Categories.Count == discovered.Categories.Count && existing.Categories.All(c => discovered.Categories.Contains(c));
                     if (!catMatch)
@@ -273,8 +302,8 @@ namespace ModelContextGateway.Components.Servers
                     if (updated)
                     {
                         logger.LogInformation("Updating auto-discovered MCP server: '{DisplayName}' ({Id})", discovered.DisplayName, discovered.Id);
-                        conn.Execute(@"UPDATE Servers SET DisplayName = @DisplayName, Url = @Url, Type = @Type, Enabled = 1, Categories = @Categories, AutoDiscovered = 1 WHERE Id = @Id",
-                            new { discovered.Id, discovered.DisplayName, discovered.Url, discovered.Type, Categories = catJson });
+                        conn.Execute(@"UPDATE Servers SET Alias = @Alias, DisplayName = @DisplayName, Url = @Url, Type = @Type, Enabled = 1, Categories = @Categories, AutoDiscovered = 1 WHERE Id = @Id",
+                            new { discovered.Id, existing.Alias, discovered.DisplayName, discovered.Url, discovered.Type, Categories = catJson });
                         changed = true;
                     }
                 }

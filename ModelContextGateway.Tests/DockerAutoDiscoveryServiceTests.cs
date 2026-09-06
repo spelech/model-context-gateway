@@ -20,6 +20,7 @@ namespace ModelContextGateway.Tests
             masterConn.Execute(@"
                 CREATE TABLE IF NOT EXISTS Servers (
                     Id TEXT PRIMARY KEY,
+                    Alias TEXT,
                     DisplayName TEXT,
                     Url TEXT,
                     Enabled INTEGER DEFAULT 1,
@@ -182,6 +183,148 @@ namespace ModelContextGateway.Tests
 
             var newSrv = conn.QueryFirstOrDefault<McpServer>("SELECT * FROM Servers WHERE Id = 'new-server'");
             Assert.NotNull(newSrv);
+        }
+
+        [Fact]
+        [Requirement("MCP-31", "MCP", RequirementType.Positive, "DockerAutoDiscoveryService parses mcp.alias from Docker container labels")]
+        public void ParseDiscoveredServers_Parses_McpAlias_Label()
+        {
+            // MCP-31: Parses mcp.alias from Docker container labels
+            var json = @"
+            [
+              {
+                ""Names"": [""/postgres-mcp-homebox""],
+                ""Labels"": {
+                  ""mcp.enabled"": ""true"",
+                  ""mcp.id"": ""postgres-mcp-homebox"",
+                  ""mcp.port"": ""8000"",
+                  ""mcp.alias"": ""homebox_db""
+                }
+              }
+            ]";
+
+            using var doc = JsonDocument.Parse(json);
+            var servers = DockerAutoDiscoveryService.ParseDiscoveredServers(doc.RootElement, NullLogger.Instance, new[] { "10.0.0.0/8", "127.0.0.0/8" });
+
+            Assert.Single(servers);
+            Assert.Equal("homebox_db", servers[0].Alias);
+        }
+
+        [Fact]
+        [Requirement("MCP-31", "MCP", RequirementType.Positive, "DockerAutoDiscoveryService parses fallback mcp.namespace label if mcp.alias is absent")]
+        public void ParseDiscoveredServers_Parses_McpNamespace_Fallback_Label()
+        {
+            var json = @"
+            [
+              {
+                ""Names"": [""/postgres-mcp-homebox""],
+                ""Labels"": {
+                  ""mcp.enabled"": ""true"",
+                  ""mcp.id"": ""postgres-mcp-homebox"",
+                  ""mcp.port"": ""8000"",
+                  ""mcp.namespace"": ""homebox_db""
+                }
+              }
+            ]";
+
+            using var doc = JsonDocument.Parse(json);
+            var servers = DockerAutoDiscoveryService.ParseDiscoveredServers(doc.RootElement, NullLogger.Instance, new[] { "10.0.0.0/8", "127.0.0.0/8" });
+
+            Assert.Single(servers);
+            Assert.Equal("homebox_db", servers[0].Alias);
+        }
+
+        [Fact]
+        [Requirement("MCP-31", "MCP", RequirementType.Negative, "DockerAutoDiscoveryService ignores invalid alias characters in container labels")]
+        public void ParseDiscoveredServers_Ignores_Invalid_Alias_Characters()
+        {
+            var json = @"
+            [
+              {
+                ""Names"": [""/postgres-mcp-homebox""],
+                ""Labels"": {
+                  ""mcp.enabled"": ""true"",
+                  ""mcp.id"": ""postgres-mcp-homebox"",
+                  ""mcp.port"": ""8000"",
+                  ""mcp.alias"": ""invalid alias with spaces!""
+                }
+              }
+            ]";
+
+            using var doc = JsonDocument.Parse(json);
+            var servers = DockerAutoDiscoveryService.ParseDiscoveredServers(doc.RootElement, NullLogger.Instance, new[] { "10.0.0.0/8", "127.0.0.0/8" });
+
+            Assert.Single(servers);
+            Assert.Null(servers[0].Alias);
+        }
+
+        [Fact]
+        [Requirement("MCP-31", "MCP", RequirementType.Positive, "DockerAutoDiscoveryService.UpsertDiscoveredServers preserves existing DB alias and sets alias on new servers")]
+        public void UpsertDiscoveredServers_PreservesExistingDbAlias_AndInsertsDiscoveredAlias()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var mockFactory = new Mock<IHttpClientFactory>();
+            var services = new ServiceCollection();
+            var sp = services.BuildServiceProvider();
+            var sessionManager = new SessionManager(sp, mockFactory.Object, NullLogger<SessionManager>.Instance);
+
+            conn.Execute(@"
+                INSERT INTO Servers (Id, Alias, DisplayName, Url, AutoDiscovered, Enabled, Categories)
+                VALUES ('existing-server', 'custom_manual_alias', 'Existing Server', 'http://existing:8080/sse', 1, 1, '[""default""]')
+            ");
+
+            conn.Execute(@"
+                INSERT INTO Servers (Id, Alias, DisplayName, Url, AutoDiscovered, Enabled, Categories)
+                VALUES ('no-alias-server', NULL, 'No Alias Server', 'http://noalias:8080/sse', 1, 1, '[""default""]')
+            ");
+
+            var discovered = new List<McpServer>
+            {
+                new McpServer
+                {
+                    Id = "existing-server",
+                    Alias = "discovered_alias_should_be_ignored",
+                    DisplayName = "Existing Server",
+                    Url = "http://existing:8080/sse",
+                    AutoDiscovered = true,
+                    Enabled = true,
+                    Categories = new List<string> { "default" }
+                },
+                new McpServer
+                {
+                    Id = "no-alias-server",
+                    Alias = "newly_discovered_alias",
+                    DisplayName = "No Alias Server",
+                    Url = "http://noalias:8080/sse",
+                    AutoDiscovered = true,
+                    Enabled = true,
+                    Categories = new List<string> { "default" }
+                },
+                new McpServer
+                {
+                    Id = "brand-new-server",
+                    Alias = "brand_new_alias",
+                    DisplayName = "Brand New Server",
+                    Url = "http://brandnew:8080/sse",
+                    AutoDiscovered = true,
+                    Enabled = true,
+                    Categories = new List<string> { "default" }
+                }
+            };
+
+            DockerAutoDiscoveryService.UpsertDiscoveredServers(discovered, dbFactory, sessionManager, NullLogger.Instance);
+
+            var existing = conn.QueryFirstOrDefault<McpServer>("SELECT * FROM Servers WHERE Id = 'existing-server'");
+            Assert.NotNull(existing);
+            Assert.Equal("custom_manual_alias", existing.Alias);
+
+            var populated = conn.QueryFirstOrDefault<McpServer>("SELECT * FROM Servers WHERE Id = 'no-alias-server'");
+            Assert.NotNull(populated);
+            Assert.Equal("newly_discovered_alias", populated.Alias);
+
+            var brandNew = conn.QueryFirstOrDefault<McpServer>("SELECT * FROM Servers WHERE Id = 'brand-new-server'");
+            Assert.NotNull(brandNew);
+            Assert.Equal("brand_new_alias", brandNew.Alias);
         }
     }
 }
