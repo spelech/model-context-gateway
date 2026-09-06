@@ -9,7 +9,7 @@ namespace ModelContextGateway.Core.Routing
     public partial class ClientSession
     {
         private readonly string _sessionId;
-        private readonly HttpResponse _clientResponse;
+        private HttpResponse? _clientResponse;
         private readonly Microsoft.Extensions.Logging.ILogger _logger;
         private readonly HttpClient _httpClient;
         private readonly List<McpServer> _servers;
@@ -38,7 +38,7 @@ namespace ModelContextGateway.Core.Routing
 
         private readonly SessionManager? _sessionManager;
 
-        public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, SessionManager? sessionManager, Microsoft.Extensions.Logging.ILogger logger, IServiceProvider? rootServices = null)
+        public ClientSession(string sessionId, HttpResponse? clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, SessionManager? sessionManager, Microsoft.Extensions.Logging.ILogger logger, IServiceProvider? rootServices = null)
         {
             _sessionId = sessionId;
             _clientResponse = clientResponse;
@@ -50,9 +50,21 @@ namespace ModelContextGateway.Core.Routing
             _rootServices = rootServices;
         }
 
-        public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, Microsoft.Extensions.Logging.ILogger logger, IServiceProvider? rootServices = null)
+        public ClientSession(string sessionId, HttpResponse? clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, Microsoft.Extensions.Logging.ILogger logger, IServiceProvider? rootServices = null)
             : this(sessionId, clientResponse, servers, httpClient, embeddingService, sessionManager: null, logger, rootServices)
         {
+        }
+
+        public HttpResponse? GetClientResponse() => _clientResponse;
+
+        public void UpdateClientResponse(HttpResponse? clientResponse)
+        {
+            _clientResponse = clientResponse;
+        }
+
+        public void DecoupleClientResponse()
+        {
+            _clientResponse = null;
         }
 
 

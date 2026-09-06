@@ -86,6 +86,19 @@ namespace ModelContextGateway.Components.Capabilities
                         bool isMetaMode = httpContext.Request.Query["meta"] != "false";
                         activeSession = await sessionManager.CreateSessionAsync(globalSessionId, httpContext.Response, targetServerId: null, isMetaMode);
                     }
+                    else
+                    {
+                        activeSession.UpdateClientResponse(httpContext.Response);
+                    }
+
+                    httpContext.Response.OnCompleted(() =>
+                    {
+                        if (activeSession.GetClientResponse() == httpContext.Response)
+                        {
+                            activeSession.DecoupleClientResponse();
+                        }
+                        return Task.CompletedTask;
+                    });
 
                     sessionManager.IncrementTotalRequests();
                     logger.LogInformation("Routing stateless POST /sse request method {Method} to global session", method);
@@ -341,10 +354,26 @@ namespace ModelContextGateway.Components.Capabilities
                 if (existingSession != null)
                 {
                     session = existingSession;
+                    if (sessionId == "global-stateless-session")
+                    {
+                        session.UpdateClientResponse(httpContext.Response);
+                    }
                 }
                 else
                 {
                     session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId: null, metaMode);
+                }
+
+                if (sessionId == "global-stateless-session")
+                {
+                    httpContext.Response.OnCompleted(() =>
+                    {
+                        if (session.GetClientResponse() == httpContext.Response)
+                        {
+                            session.DecoupleClientResponse();
+                        }
+                        return Task.CompletedTask;
+                    });
                 }
 
                 if (httpContext.Request.Method == "POST")

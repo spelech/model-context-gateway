@@ -99,17 +99,45 @@ namespace ModelContextGateway.Core.Routing
                     _logger.LogInformation("Attempting to connect to backend {ServerId} (attempt {Attempt}/{MaxAttempts}) at {Url}...", server.Id, attempt, maxAttempts, server.Url);
                     _sessionManager?.UpdateBackendStatus(server.Id, "Connecting", attempt, "");
 
-                    var retriever = _rootServices?.GetService<CompositeSecretRetriever>()
-                        ?? _clientResponse?.HttpContext?.RequestServices?.GetService<CompositeSecretRetriever>();
+                    var retriever = _rootServices?.GetService<CompositeSecretRetriever>();
+                    if (retriever == null)
+                    {
+                        try
+                        {
+                            retriever = _clientResponse?.HttpContext?.RequestServices?.GetService<CompositeSecretRetriever>();
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            // Disposed HttpContext
+                        }
+                    }
                     string? passThroughToken = null;
 
-                    var identity = await ResolveUserIdentityAsync(_clientResponse?.HttpContext);
+                    UserIdentityContext identity;
+                    try
+                    {
+                        identity = await ResolveUserIdentityAsync(_clientResponse?.HttpContext);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        identity = new UserIdentityContext("system", "System", new List<string>());
+                    }
                     string? forwardedUser = string.IsNullOrEmpty(identity.Username) ? null : identity.Username;
 
                     if (server.SecretProvider == "UserProvided")
                     {
-                        var userSecretStore = _rootServices?.GetService<IUserSecretStore>()
-                            ?? _clientResponse?.HttpContext?.RequestServices?.GetService<IUserSecretStore>();
+                        var userSecretStore = _rootServices?.GetService<IUserSecretStore>();
+                        if (userSecretStore == null)
+                        {
+                            try
+                            {
+                                userSecretStore = _clientResponse?.HttpContext?.RequestServices?.GetService<IUserSecretStore>();
+                            }
+                            catch (ObjectDisposedException)
+                            {
+                                // Disposed HttpContext
+                            }
+                        }
                         if (userSecretStore != null)
                         {
                             var secretJson = await userSecretStore.GetSecretAsync(identity.Username, server.Id);
@@ -125,11 +153,18 @@ namespace ModelContextGateway.Core.Routing
                             throw new Exception("IUserSecretStore is not registered in DI.");
                         }
                     }
-                    else if (server.AllowPassThroughAuth && _clientResponse?.HttpContext != null)
+                    else if (server.AllowPassThroughAuth)
                     {
-                        if (_clientResponse.HttpContext.Request.Headers.TryGetValue("X-Target-Auth", out var tokenVals))
+                        try
                         {
-                            passThroughToken = tokenVals.ToString();
+                            if (_clientResponse?.HttpContext?.Request.Headers.TryGetValue("X-Target-Auth", out var tokenVals) == true)
+                            {
+                                passThroughToken = tokenVals.ToString();
+                            }
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            // Disposed HttpContext
                         }
                     }
                     conn = new BackendConnection(server, _httpClient, _logger, retriever, passThroughToken, forwardedUser);
