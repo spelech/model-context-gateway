@@ -15,7 +15,7 @@ namespace ModelContextGateway.Components.Servers
                 try
                 {
                     using var conn = dbFactory.CreateConnection();
-                    var rawServers = (await conn.QueryAsync(@"SELECT Id, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson, AllowPassThroughAuth, DynamicAuthPrompt FROM Servers")).ToList();
+                    var rawServers = (await conn.QueryAsync(@"SELECT Id, Alias, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson, AllowPassThroughAuth, DynamicAuthPrompt FROM Servers")).ToList();
                     var statuses = sessionManager.BackendStatuses;
 
                     var sanitized = rawServers.Select(s =>
@@ -76,6 +76,7 @@ namespace ModelContextGateway.Components.Servers
                         return new
                         {
                             Id = idStr,
+                            Alias = (string?)s.Alias,
                             DisplayName = (string)s.DisplayName,
                             Url = (string)s.Url,
                             Enabled = isEnabled,
@@ -221,12 +222,25 @@ namespace ModelContextGateway.Components.Servers
                     server.HeadersJson = update.HeadersJson;
                 }
 
+                if (update.Alias != null)
+                {
+                    var existingServers = (await conn.QueryAsync<McpServer>("SELECT * FROM Servers")).ToList();
+                    var aliasErr = ServerValidationHelper.ValidateAlias(update.Alias, id, existingServers);
+                    if (aliasErr != null)
+                    {
+                        _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, JsonSerializer.Serialize(update), false, aliasErr);
+                        return Results.BadRequest(new { error = aliasErr });
+                    }
+                    server.Alias = string.IsNullOrWhiteSpace(update.Alias) ? null : update.Alias.Trim();
+                }
+
                 var catJson = JsonSerializer.Serialize(server.Categories ?? new());
-                await conn.ExecuteAsync(@"UPDATE Servers SET DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
+                await conn.ExecuteAsync(@"UPDATE Servers SET Alias = @Alias, DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
                     SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, AuthShape = @AuthShape, CustomHeaderName = @CustomHeaderName,
                     Categories = @Categories, ApiKey = @ApiKey, HeadersJson = @HeadersJson, AllowPassThroughAuth = @AllowPassThroughAuth, DynamicAuthPrompt = @DynamicAuthPrompt WHERE Id = @Id",
                     new
                     {
+                        server.Alias,
                         server.DisplayName,
                         server.Url,
                         Enabled = server.Enabled ? 1 : 0,
@@ -290,13 +304,31 @@ namespace ModelContextGateway.Components.Servers
                 }
 
                 using var conn = dbFactory.CreateConnection();
+                var existingServers = (await conn.QueryAsync<McpServer>("SELECT * FROM Servers")).ToList();
+                var aliasErr = ServerValidationHelper.ValidateAlias(server.Alias, server.Id, existingServers);
+                if (aliasErr != null)
+                {
+                    _ = auditLogger.LogAdminActionAsync(username, "CreateServer", server.Id, JsonSerializer.Serialize(server), false, aliasErr);
+                    return Results.BadRequest(new { error = aliasErr });
+                }
+
+                if (!string.IsNullOrWhiteSpace(server.Alias))
+                {
+                    server.Alias = server.Alias.Trim();
+                }
+                else
+                {
+                    server.Alias = null;
+                }
+
                 var catJson = JsonSerializer.Serialize(server.Categories ?? new());
                 var dbStart = sw.ElapsedMilliseconds;
-                await conn.ExecuteAsync(@"INSERT INTO Servers (Id, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AllowPassThroughAuth, DynamicAuthPrompt)
-                    VALUES (@Id, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AllowPassThroughAuth, @DynamicAuthPrompt)",
+                await conn.ExecuteAsync(@"INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AllowPassThroughAuth, DynamicAuthPrompt)
+                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AllowPassThroughAuth, @DynamicAuthPrompt)",
                     new
                     {
                         server.Id,
+                        server.Alias,
                         server.DisplayName,
                         server.Url,
                         Enabled = server.Enabled ? 1 : 0,
@@ -391,7 +423,7 @@ namespace ModelContextGateway.Components.Servers
 
                     return Results.Ok(new
                     {
-                        server = new { id = server.Id, displayName = server.DisplayName, type = server.Type, url = server.Url, enabled = server.Enabled },
+                        server = new { id = server.Id, alias = server.Alias, displayName = server.DisplayName, type = server.Type, url = server.Url, enabled = server.Enabled },
                         tools,
                         prompts,
                         resources
@@ -402,7 +434,7 @@ namespace ModelContextGateway.Components.Servers
                     logger.LogError(ex, "Error creating session or connecting to server {ServerId} during inspect", id);
                     return Results.Ok(new
                     {
-                        server = new { id = server.Id, displayName = server.DisplayName, type = server.Type, url = server.Url, enabled = server.Enabled },
+                        server = new { id = server.Id, alias = server.Alias, displayName = server.DisplayName, type = server.Type, url = server.Url, enabled = server.Enabled },
                         tools = new List<object>(),
                         prompts = new List<object>(),
                         resources = new List<object>(),

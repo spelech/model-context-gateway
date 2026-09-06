@@ -68,5 +68,92 @@ namespace ModelContextGateway.Tests
             Assert.False(sseValid);
             Assert.NotNull(sseErr);
         }
+
+        [Fact]
+        [Requirement("MCP-29", "MCP", RequirementType.Negative, "ServerValidationHelper rejects invalid characters in Alias.")]
+        public void ValidateServer_Rejects_Invalid_Alias_Characters()
+        {
+            // MCP-29: Rejects invalid characters in Alias
+            var server = new McpServer
+            {
+                Id = "test-server",
+                Alias = "invalid alias!@#",
+                Url = "http://localhost:8000/sse"
+            };
+
+            var error = ServerValidationHelper.ValidateAlias(server.Alias, server.Id, new List<McpServer>());
+            Assert.NotNull(error);
+            Assert.Contains("letters, numbers, underscores, and hyphens", error);
+        }
+
+        [Fact]
+        [Requirement("MCP-29", "MCP", RequirementType.Negative, "ServerValidationHelper rejects Alias colliding with another server's Id.")]
+        public void ValidateServer_Rejects_Alias_Colliding_With_Existing_ServerId()
+        {
+            // MCP-29: Rejects Alias colliding with another server's Id
+            var existing = new List<McpServer>
+            {
+                new McpServer { Id = "docker", DisplayName = "Docker" }
+            };
+
+            var error = ServerValidationHelper.ValidateAlias("docker", "other-server", existing);
+            Assert.NotNull(error);
+            Assert.Contains("collides with an existing server ID", error);
+        }
+
+        [Fact]
+        [Requirement("MCP-29", "MCP", RequirementType.Negative, "ServerValidationHelper rejects Alias colliding with another server's Alias.")]
+        public void ValidateServer_Rejects_Alias_Colliding_With_Existing_Server_Alias()
+        {
+            // MCP-29: Rejects Alias colliding with another server's Alias
+            var existing = new List<McpServer>
+            {
+                new McpServer { Id = "db1", Alias = "shared_db" }
+            };
+
+            var error = ServerValidationHelper.ValidateAlias("shared_db", "db2", existing);
+            Assert.NotNull(error);
+            Assert.Contains("already in use by another server", error);
+        }
+
+        [Fact]
+        [Requirement("MCP-29", "MCP", RequirementType.Positive, "ServerValidationHelper accepts valid alias and permits server to keep its own alias.")]
+        public void ValidateServer_Accepts_Valid_Alias_And_Self_Retention()
+        {
+            var existing = new List<McpServer>
+            {
+                new McpServer { Id = "db1", Alias = "shared_db" }
+            };
+
+            // Updating db1 with its own existing alias should not collide with itself
+            var errorSelf = ServerValidationHelper.ValidateAlias("shared_db", "db1", existing);
+            Assert.Null(errorSelf);
+
+            // Valid alias that doesn't collide
+            var errorNew = ServerValidationHelper.ValidateAlias("new_db-2", "db2", existing);
+            Assert.Null(errorNew);
+
+            // Null or whitespace alias is valid (clearing alias)
+            Assert.Null(ServerValidationHelper.ValidateAlias(null, "db2", existing));
+            Assert.Null(ServerValidationHelper.ValidateAlias("   ", "db2", existing));
+        }
+
+        [Fact]
+        [Requirement("MCP-29", "MCP", RequirementType.Negative, "ServerValidationHelper rejects case-insensitive collisions with IDs and Aliases.")]
+        public void ValidateServer_Rejects_CaseInsensitive_Collisions()
+        {
+            var existing = new List<McpServer>
+            {
+                new McpServer { Id = "Docker-Server", Alias = "My_Alias" }
+            };
+
+            var errId = ServerValidationHelper.ValidateAlias("docker-server", "other", existing);
+            Assert.NotNull(errId);
+            Assert.Contains("collides with an existing server ID", errId);
+
+            var errAlias = ServerValidationHelper.ValidateAlias("MY_ALIAS", "other", existing);
+            Assert.NotNull(errAlias);
+            Assert.Contains("already in use by another server", errAlias);
+        }
     }
 }
