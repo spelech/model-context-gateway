@@ -461,7 +461,7 @@ namespace ModelContextGateway.Infrastructure.Transports
 
         public async Task SendNotificationAsync(string method, string bodyJson)
         {
-            if (_process == null || _process.HasExited)
+            if (_disposed || _process == null || _process.HasExited)
             {
                 return;
             }

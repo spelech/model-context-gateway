@@ -551,7 +551,7 @@ namespace ModelContextGateway.Infrastructure.Transports
 
             if (_stateManager.IsDisconnected)
             {
-                throw new InvalidOperationException($"Backend {_server.Id} is disconnected.");
+                return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Not connected" } };
             }
 
             if (_messageUrl == null)
@@ -574,7 +574,7 @@ namespace ModelContextGateway.Infrastructure.Transports
 
             if (_messageUrl == null)
             {
-                throw new InvalidOperationException($"Backend {_server.Id} has not sent its endpoint event yet.");
+                return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Not connected" } };
             }
 
             var tcs = _stateManager.CreateTrackedRequest(upstreamRequestId, originalId, _sessionId, _cts.Token, RequestTimeout);

@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-06T21:32:25.6521212Z",
+    "generatedAt": "2026-09-06T21:42:06.7575222Z",
     "totalRequirements": 423,
     "positiveCount": 336,
     "guardrailCount": 87,
@@ -2350,7 +2350,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs",
-          "lineNumber": 111,
+          "lineNumber": 116,
           "testName": "BuildInitializeRequest_GeneratesValidJsonRpc",
           "details": null
         }
@@ -2366,7 +2366,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs",
-          "lineNumber": 128,
+          "lineNumber": 133,
           "testName": "MetadataConstants_ReturnExpectedValues",
           "details": null
         }
@@ -2382,14 +2382,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs",
-          "lineNumber": 91,
+          "lineNumber": 96,
           "testName": "ExtractRequestedProtocolVersion_FromJsonElement_ParsesValidVersion",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs",
-          "lineNumber": 100,
+          "lineNumber": 105,
           "testName": "ExtractRequestedProtocolVersion_FromJsonElement_FallsBackToDefault",
           "details": null
         }
@@ -2399,7 +2399,7 @@
       "id": "CORE-GATEWAY-METADATA-EXTRACTION-STRING",
       "category": "CORE",
       "type": "Positive",
-      "description": "ExtractRequestedProtocolVersion parses protocolVersion from valid JSON-RPC request body string.",
+      "description": "ExtractRequestedProtocolVersion parses protocolVersion from initialize request payload or isolated params.",
       "proofCount": 2,
       "proofs": [
         {
@@ -2412,7 +2412,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs",
-          "lineNumber": 77,
+          "lineNumber": 82,
           "testName": "ExtractRequestedProtocolVersion_FromString_FallsBackToDefault",
           "details": null
         }
@@ -2475,7 +2475,7 @@
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs",
           "lineNumber": 49,
-          "testName": "NegotiateProtocolVersion_EchoesCustomVersion_WhenUnrecognized",
+          "testName": "NegotiateProtocolVersion_FallsBackToDefault_WhenUnrecognized",
           "details": null
         },
         {
@@ -6621,7 +6621,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs",
-          "lineNumber": 121,
+          "lineNumber": 123,
           "testName": "MockDownstreamMcpServer_HandlesResourcesAndPrompts",
           "details": null
         }
@@ -8679,14 +8679,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs",
-          "lineNumber": 57,
+          "lineNumber": 59,
           "testName": "HttpTransport_SendRequestAsync_ReturnsDisposedError_WhenDisposed",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs",
-          "lineNumber": 78,
+          "lineNumber": 80,
           "testName": "HttpTransport_CallMethodAsync_ReturnsDisposedError_WhenDisposed",
           "details": null
         }
@@ -8760,14 +8760,14 @@
       "id": "TRANS-SSE-CALLMETHOD-DISCONNECT-GUARD",
       "category": "TRANS",
       "type": "Negative",
-      "description": "SseTransport CallMethodAsync throws InvalidOperationException when backend is disconnected.",
+      "description": "SseTransport CallMethodAsync returns -32001 Not Connected when backend is disconnected.",
       "proofCount": 1,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs",
           "lineNumber": 12,
-          "testName": "SseTransport_CallMethodAsync_ThrowsInvalidOperationException_WhenDisconnected",
+          "testName": "SseTransport_CallMethodAsync_ReturnsNotConnected_WhenDisconnected",
           "details": null
         }
       ]
@@ -8830,7 +8830,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs",
-          "lineNumber": 34,
+          "lineNumber": 36,
           "testName": "SseTransport_SendRequestAsync_ReturnsNotConnected_WhenDisconnected",
           "details": null
         }
@@ -8885,7 +8885,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs",
-          "lineNumber": 99,
+          "lineNumber": 101,
           "testName": "StdioTransport_SendRequestAsync_ReturnsProcessNotRunning_WhenDisposed",
           "details": null
         }

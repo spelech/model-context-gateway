@@ -670,27 +670,27 @@
 * **Category:** `CORE` (CORE)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L111`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L111) (`BuildInitializeRequest_GeneratesValidJsonRpc`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L116`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L116) (`BuildInitializeRequest_GeneratesValidJsonRpc`)
 
 ### `[CORE-GATEWAY-METADATA-CONSTANTS]` Metadata constants and assembly version return consistent non-empty identifiers.
 * **Category:** `CORE` (CORE)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L128`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L128) (`MetadataConstants_ReturnExpectedValues`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L133`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L133) (`MetadataConstants_ReturnExpectedValues`)
 
 ### `[CORE-GATEWAY-METADATA-EXTRACTION-JSONELEMENT]` ExtractRequestedProtocolVersion parses protocolVersion from JsonElement params object.
 * **Category:** `CORE` (CORE)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (2):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L91`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L91) (`ExtractRequestedProtocolVersion_FromJsonElement_ParsesValidVersion`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L100`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L100) (`ExtractRequestedProtocolVersion_FromJsonElement_FallsBackToDefault`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L96`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L96) (`ExtractRequestedProtocolVersion_FromJsonElement_ParsesValidVersion`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L105`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L105) (`ExtractRequestedProtocolVersion_FromJsonElement_FallsBackToDefault`)
 
-### `[CORE-GATEWAY-METADATA-EXTRACTION-STRING]` ExtractRequestedProtocolVersion parses protocolVersion from valid JSON-RPC request body string.
+### `[CORE-GATEWAY-METADATA-EXTRACTION-STRING]` ExtractRequestedProtocolVersion parses protocolVersion from initialize request payload or isolated params.
 * **Category:** `CORE` (CORE)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (2):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L68`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L68) (`ExtractRequestedProtocolVersion_FromString_ParsesValidVersion`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L77`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L77) (`ExtractRequestedProtocolVersion_FromString_FallsBackToDefault`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L82`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L82) (`ExtractRequestedProtocolVersion_FromString_FallsBackToDefault`)
 
 ### `[CORE-GATEWAY-METADATA-SUPPORTED-VERSIONS]` IsSupportedProtocolVersion validates supported protocol versions case-insensitively with whitespace trimming.
 * **Category:** `CORE` (CORE)
@@ -704,7 +704,7 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (3):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L41`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L41) (`NegotiateProtocolVersion_ReturnsCanonicalVersion_WhenMatchFound`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L49`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L49) (`NegotiateProtocolVersion_EchoesCustomVersion_WhenUnrecognized`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L49`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L49) (`NegotiateProtocolVersion_FallsBackToDefault_WhenUnrecognized`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L57`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L57) (`NegotiateProtocolVersion_FallsBackToDefault_WhenNullOrEmpty`)
 
 ### `[DB-02]` MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly
@@ -1487,7 +1487,7 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L121`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L121) (`MockDownstreamMcpServer_HandlesResourcesAndPrompts`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L123`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L123) (`MockDownstreamMcpServer_HandlesResourcesAndPrompts`)
 
 ### `[MCP-RESILIENT-01]` Prefix-based resilient routing: execute_tool called with unregistered but prefixed tool name dynamically resolves server and executes.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -2989,26 +2989,26 @@
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (2):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L57`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L57) (`HttpTransport_SendRequestAsync_ReturnsDisposedError_WhenDisposed`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L78`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L78) (`HttpTransport_CallMethodAsync_ReturnsDisposedError_WhenDisposed`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L59`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L59) (`HttpTransport_SendRequestAsync_ReturnsDisposedError_WhenDisposed`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L80`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L80) (`HttpTransport_CallMethodAsync_ReturnsDisposedError_WhenDisposed`)
 
-### `[TRANS-SSE-CALLMETHOD-DISCONNECT-GUARD]` SseTransport CallMethodAsync throws InvalidOperationException when backend is disconnected.
+### `[TRANS-SSE-CALLMETHOD-DISCONNECT-GUARD]` SseTransport CallMethodAsync returns -32001 Not Connected when backend is disconnected.
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L12`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L12) (`SseTransport_CallMethodAsync_ThrowsInvalidOperationException_WhenDisconnected`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L12`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L12) (`SseTransport_CallMethodAsync_ReturnsNotConnected_WhenDisconnected`)
 
 ### `[TRANS-SSE-SENDREQUEST-DISCONNECT-GUARD]` SseTransport SendRequestAsync returns -32001 Not Connected when backend is disconnected.
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L34`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L34) (`SseTransport_SendRequestAsync_ReturnsNotConnected_WhenDisconnected`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L36`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L36) (`SseTransport_SendRequestAsync_ReturnsNotConnected_WhenDisconnected`)
 
 ### `[TRANS-STDIO-DISPOSED-GUARD]` StdioTransport SendRequestAsync returns -32001 Process Not Running when transport has been disposed.
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L99`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L99) (`StdioTransport_SendRequestAsync_ReturnsProcessNotRunning_WhenDisposed`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L101`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L101) (`StdioTransport_SendRequestAsync_ReturnsProcessNotRunning_WhenDisposed`)
 
 ### `[UI-31]` Fetches registered OAuth clients and updates store state.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -3154,10 +3154,10 @@
 | `UI-USER-STORE-ROLE-EXTRACTION` | Positive | `AUTH` | correctly handles non-admin user role extraction | [`useUserStore.test.ts:L89`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L89) | Frontend Vitest |
 | `UI-USER-STORE-VERSION-FALLBACK` | Positive | `AUTH` | keeps existing fallback version on error | [`useUserStore.test.ts:L128`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L128) | Frontend Vitest |
 | `CORE-101` | Positive | `CORE` | Auto-added requirement tracking | [`SessionManagerTests.cs:L9`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SessionManagerTests.cs#L9) | Backend xUnit |
-| `CORE-GATEWAY-METADATA-BUILD-INIT-REQUEST` | Positive | `CORE` | BuildInitializeRequest formats standard JSON-RPC 2.0 initialize request with dynamic protocol version. | [`GatewayMetadataTests.cs:L111`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L111) | Backend xUnit |
-| `CORE-GATEWAY-METADATA-CONSTANTS` | Positive | `CORE` | Metadata constants and assembly version return consistent non-empty identifiers. | [`GatewayMetadataTests.cs:L128`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L128) | Backend xUnit |
-| `CORE-GATEWAY-METADATA-EXTRACTION-JSONELEMENT` | Positive | `CORE` | ExtractRequestedProtocolVersion parses protocolVersion from JsonElement params object. | [`GatewayMetadataTests.cs:L91`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L91) | Backend xUnit |
-| `CORE-GATEWAY-METADATA-EXTRACTION-STRING` | Positive | `CORE` | ExtractRequestedProtocolVersion parses protocolVersion from valid JSON-RPC request body string. | [`GatewayMetadataTests.cs:L68`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L68) | Backend xUnit |
+| `CORE-GATEWAY-METADATA-BUILD-INIT-REQUEST` | Positive | `CORE` | BuildInitializeRequest formats standard JSON-RPC 2.0 initialize request with dynamic protocol version. | [`GatewayMetadataTests.cs:L116`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L116) | Backend xUnit |
+| `CORE-GATEWAY-METADATA-CONSTANTS` | Positive | `CORE` | Metadata constants and assembly version return consistent non-empty identifiers. | [`GatewayMetadataTests.cs:L133`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L133) | Backend xUnit |
+| `CORE-GATEWAY-METADATA-EXTRACTION-JSONELEMENT` | Positive | `CORE` | ExtractRequestedProtocolVersion parses protocolVersion from JsonElement params object. | [`GatewayMetadataTests.cs:L96`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L96) | Backend xUnit |
+| `CORE-GATEWAY-METADATA-EXTRACTION-STRING` | Positive | `CORE` | ExtractRequestedProtocolVersion parses protocolVersion from initialize request payload or isolated params. | [`GatewayMetadataTests.cs:L68`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L68) | Backend xUnit |
 | `CORE-GATEWAY-METADATA-SUPPORTED-VERSIONS` | Positive | `CORE` | IsSupportedProtocolVersion validates supported protocol versions case-insensitively with whitespace trimming. | [`GatewayMetadataTests.cs:L8`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L8) | Backend xUnit |
 | `CORE-GATEWAY-METADATA-UNSUPPORTED-VERSIONS` | **Guardrail** | `CORE` | IsSupportedProtocolVersion rejects unrecognized protocol versions. | [`GatewayMetadataTests.cs:L32`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L32) | Backend xUnit |
 | `CORE-GATEWAY-METADATA-VERSION-NEGOTIATION` | Positive | `CORE` | NegotiateProtocolVersion canonicalizes casing for known protocol versions. | [`GatewayMetadataTests.cs:L41`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GatewayMetadataTests.cs#L41) | Backend xUnit |
@@ -3340,7 +3340,7 @@
 | `MCP-JSONRPC-POLYMORPHIC-DESERIALIZATION` | Positive | `MCP` | Polymorphic JSON-RPC message deserializer accurately instantiates request, response, and notification subclasses. | [`McpIntegrationTests.cs:L259`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L259) | Backend xUnit |
 | `MCP-JSONRPC-SERIALIZE-PLAIN-NO-OVERFLOW` | Positive | `MCP` | Serializing plain JsonRpcMessage does not cause recursive converter invocation or stack overflow. | [`McpIntegrationTests.cs:L303`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L303) | Backend xUnit |
 | `MCP-MOCK-JSONRPC-FLOW` | Positive | `MCP` | MockDownstreamMcpServer handles initialize, initialized, tools/list, and tools/call JSON-RPC 2.0 protocol cycles. | [`MockDownstreamMcpServerTests.cs:L11`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L11) | Backend xUnit |
-| `MCP-MOCK-RESOURCES-PROMPTS-SUPPORT` | Positive | `MCP` | MockDownstreamMcpServer handles resources/list and prompts/list MCP protocol methods. | [`TransportResilienceTests.cs:L121`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L121) | Backend xUnit |
+| `MCP-MOCK-RESOURCES-PROMPTS-SUPPORT` | Positive | `MCP` | MockDownstreamMcpServer handles resources/list and prompts/list MCP protocol methods. | [`TransportResilienceTests.cs:L123`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L123) | Backend xUnit |
 | `MCP-RESILIENT-01` | Positive | `MCP` | Prefix-based resilient routing: execute_tool called with unregistered but prefixed tool name dynamically resolves server and executes. | [`DownstreamSessionIntegrationTests.cs:L294`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L294) | Backend xUnit |
 | `MCP-SESSION-BUILTIN-PROMPTS` | Positive | `MCP` | ClientSession lists built-in diagnostic and routing prompts. | [`ClientSessionTests.cs:L115`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L115) | Backend xUnit |
 | `MCP-SESSION-BUILTIN-RESOURCES` | Positive | `MCP` | ClientSession lists built-in resources including router://status. | [`ClientSessionTests.cs:L99`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L99) | Backend xUnit |
@@ -3438,19 +3438,19 @@
 | `TRANS-EXPLICIT-NULL-ID-ISOLATION` | Positive | `TRANS` | Handles JSON-RPC requests with explicit null IDs and multiplexes upstream calls correctly. | [`ConcurrentResponseIsolationTests.cs:L346`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L346) | Backend xUnit |
 | `TRANS-HIGH-CONCURRENCY-ISOLATION` | Positive | `TRANS` | Maintains strict response isolation under high concurrency with 100+ callers reusing identical RPC IDs. | [`ConcurrentResponseIsolationTests.cs:L111`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L111) | Backend xUnit |
 | `TRANS-HTTP-AUTH-CUSTOM-HEADER` | Positive | `TRANS` | HttpTransport formats custom header authentication for target servers. | [`TransportsAuthShapeTests.cs:L90`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L90) | Backend xUnit |
-| `TRANS-HTTP-DISPOSED-GUARD` | **Guardrail** | `TRANS` | HttpTransport SendRequestAsync returns -32001 Not Connected when transport has been disposed. | [`TransportResilienceTests.cs:L57`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L57) | Backend xUnit |
+| `TRANS-HTTP-DISPOSED-GUARD` | **Guardrail** | `TRANS` | HttpTransport SendRequestAsync returns -32001 Not Connected when transport has been disposed. | [`TransportResilienceTests.cs:L59`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L59) | Backend xUnit |
 | `TRANS-HTTP-RESOLVE-STATIC-APIKEY` | Positive | `TRANS` | HTTP stateless transport resolves static API keys when secret provider is None | [`HttpTransportTests.cs:L11`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/HttpTransportTests.cs#L11) | Backend xUnit |
 | `TRANS-ISOLATION-SAME-ID-REVERSED-ORDER` | Positive | `TRANS` | Multiplexes concurrent client calls sharing identical JSON-RPC IDs and routes reversed responses correctly. | [`ConcurrentResponseIsolationTests.cs:L12`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L12) | Backend xUnit |
 | `TRANS-MIXED-ID-TYPES-ISOLATION` | Positive | `TRANS` | Handles mixed numeric, string, and null JSON-RPC IDs concurrently across backend transports. | [`ConcurrentResponseIsolationTests.cs:L614`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L614) | Backend xUnit |
 | `TRANS-NOTIFICATION-NO-RESPONSE-LISTENER` | Positive | `TRANS` | Handles JSON-RPC notifications without registering pending response listeners. | [`ConcurrentResponseIsolationTests.cs:L419`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L419) | Backend xUnit |
-| `TRANS-SSE-CALLMETHOD-DISCONNECT-GUARD` | **Guardrail** | `TRANS` | SseTransport CallMethodAsync throws InvalidOperationException when backend is disconnected. | [`TransportResilienceTests.cs:L12`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L12) | Backend xUnit |
+| `TRANS-SSE-CALLMETHOD-DISCONNECT-GUARD` | **Guardrail** | `TRANS` | SseTransport CallMethodAsync returns -32001 Not Connected when backend is disconnected. | [`TransportResilienceTests.cs:L12`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L12) | Backend xUnit |
 | `TRANS-SSE-LOG-ENDPOINT-WAIT-EXCEPTION` | Positive | `TRANS` | SSE transport logs exceptions gracefully when waiting for endpoint URL without throwing unhandled exceptions. | [`SseTransportTests.cs:L76`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L76) | Backend xUnit |
 | `TRANS-SSE-NOTIF-FORWARD-FIELDS-INTACT` | Positive | `TRANS` | SSE backend notifications are forwarded to client sessions with all payload fields intact. | [`ChallengerTests.cs:L419`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L419) | Backend xUnit |
 | `TRANS-SSE-RESOLVE-STATIC-APIKEY` | Positive | `TRANS` | SSE transport resolves static plaintext API keys when provider is None | [`SseTransportTests.cs:L13`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L13) | Backend xUnit |
-| `TRANS-SSE-SENDREQUEST-DISCONNECT-GUARD` | **Guardrail** | `TRANS` | SseTransport SendRequestAsync returns -32001 Not Connected when backend is disconnected. | [`TransportResilienceTests.cs:L34`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L34) | Backend xUnit |
+| `TRANS-SSE-SENDREQUEST-DISCONNECT-GUARD` | **Guardrail** | `TRANS` | SseTransport SendRequestAsync returns -32001 Not Connected when backend is disconnected. | [`TransportResilienceTests.cs:L36`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L36) | Backend xUnit |
 | `TRANS-SSE-STREAM-LIFECYCLE` | Positive | `TRANS` | SSE transport correctly resolves relative endpoint URLs and ignores keep-alive SSE comments. | [`SseTransportTests.cs:L100`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L100) | Backend xUnit |
 | `TRANS-STATELESS-CANCELLATION-ISOLATION` | Positive | `TRANS` | Isolates cancellation tokens between concurrent stateless client requests. | [`ConcurrentResponseIsolationTests.cs:L482`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L482) | Backend xUnit |
-| `TRANS-STDIO-DISPOSED-GUARD` | **Guardrail** | `TRANS` | StdioTransport SendRequestAsync returns -32001 Process Not Running when transport has been disposed. | [`TransportResilienceTests.cs:L99`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L99) | Backend xUnit |
+| `TRANS-STDIO-DISPOSED-GUARD` | **Guardrail** | `TRANS` | StdioTransport SendRequestAsync returns -32001 Process Not Running when transport has been disposed. | [`TransportResilienceTests.cs:L101`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportResilienceTests.cs#L101) | Backend xUnit |
 | `TRANS-STDIO-DRAIN-BUFFER-EOF` | Positive | `TRANS` | STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly | [`StdioTransportTests.cs:L472`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs#L472) | Backend xUnit |
 | `TRANS-STDIO-SPAWN-TOOL-CALL` | Positive | `TRANS` | STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls | [`StdioTransportTests.cs:L49`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs#L49) | Backend xUnit |
 | `TRANS-STDIO-STREAM-STDERR-LOGS` | Positive | `TRANS` | STDIO transport streams subprocess stderr asynchronously to structured router diagnostic logs | [`StdioTransportTests.cs:L170`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs#L170) | Backend xUnit |

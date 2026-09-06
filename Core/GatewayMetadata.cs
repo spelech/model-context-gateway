@@ -58,9 +58,8 @@ namespace ModelContextGateway.Core
 
         /// <summary>
         /// Negotiates the highest compatible protocol version. If requestedVersion matches a supported
-        /// version (case-insensitively), it returns the canonical matching string. If unrecognized but non-empty,
-        /// it echoes the requested version to support future or custom protocol extensions gracefully.
-        /// If null or whitespace, it defaults to the primary ProtocolVersion.
+        /// version (case-insensitively), it returns the canonical matching string. If unrecognized or omitted,
+        /// it falls back to the primary supported ProtocolVersion per MCP specification.
         /// </summary>
         public static string NegotiateProtocolVersion(string? requestedVersion)
         {
@@ -70,7 +69,7 @@ namespace ModelContextGateway.Core
             }
             var trimmed = requestedVersion.Trim();
             var match = SupportedProtocolVersions.FirstOrDefault(v => string.Equals(v, trimmed, StringComparison.OrdinalIgnoreCase));
-            return match ?? trimmed;
+            return match ?? ProtocolVersion;
         }
 
         /// <summary>
@@ -89,6 +88,10 @@ namespace ModelContextGateway.Core
                 if (doc.RootElement.TryGetProperty("params", out var pElem))
                 {
                     return ExtractRequestedProtocolVersion(pElem);
+                }
+                else if (doc.RootElement.TryGetProperty("protocolVersion", out _))
+                {
+                    return ExtractRequestedProtocolVersion(doc.RootElement);
                 }
             }
             catch

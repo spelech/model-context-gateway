@@ -47,11 +47,11 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("CORE-GATEWAY-METADATA-VERSION-NEGOTIATION", "CORE", RequirementType.Positive, "NegotiateProtocolVersion echoes unrecognized non-empty protocol version for forward compatibility.")]
-        public void NegotiateProtocolVersion_EchoesCustomVersion_WhenUnrecognized()
+        [Requirement("CORE-GATEWAY-METADATA-VERSION-NEGOTIATION", "CORE", RequirementType.Positive, "NegotiateProtocolVersion falls back to supported ProtocolVersion when requested version is unrecognized.")]
+        public void NegotiateProtocolVersion_FallsBackToDefault_WhenUnrecognized()
         {
             var result = GatewayMetadata.NegotiateProtocolVersion("custom-experimental-v1");
-            result.Should().Be("custom-experimental-v1");
+            result.Should().Be(GatewayMetadata.ProtocolVersion);
         }
 
         [Theory]
@@ -66,12 +66,17 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("CORE-GATEWAY-METADATA-EXTRACTION-STRING", "CORE", RequirementType.Positive, "ExtractRequestedProtocolVersion parses protocolVersion from valid JSON-RPC request body string.")]
+        [Requirement("CORE-GATEWAY-METADATA-EXTRACTION-STRING", "CORE", RequirementType.Positive, "ExtractRequestedProtocolVersion parses protocolVersion from initialize request payload or isolated params.")]
         public void ExtractRequestedProtocolVersion_FromString_ParsesValidVersion()
         {
-            var json = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2024-11-05\"}}";
+            var json = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2024-11-05\"}}";
             var result = GatewayMetadata.ExtractRequestedProtocolVersion(json);
             result.Should().Be("2024-11-05");
+
+            // Also test isolated params JSON string without outer jsonrpc envelope
+            var isolatedJson = "{\"protocolVersion\":\"2024-11-05\"}";
+            var isolatedResult = GatewayMetadata.ExtractRequestedProtocolVersion(isolatedJson);
+            isolatedResult.Should().Be("2024-11-05");
         }
 
         [Theory]

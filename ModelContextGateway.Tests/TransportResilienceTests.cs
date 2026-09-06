@@ -10,8 +10,8 @@ namespace ModelContextGateway.Tests
     public class TransportResilienceTests
     {
         [Fact]
-        [Requirement("TRANS-SSE-CALLMETHOD-DISCONNECT-GUARD", "TRANS", RequirementType.Negative, "SseTransport CallMethodAsync throws InvalidOperationException when backend is disconnected.")]
-        public async Task SseTransport_CallMethodAsync_ThrowsInvalidOperationException_WhenDisconnected()
+        [Requirement("TRANS-SSE-CALLMETHOD-DISCONNECT-GUARD", "TRANS", RequirementType.Negative, "SseTransport CallMethodAsync returns -32001 Not Connected when backend is disconnected.")]
+        public async Task SseTransport_CallMethodAsync_ReturnsNotConnected_WhenDisconnected()
         {
             var server = new McpServer
             {
@@ -26,9 +26,11 @@ namespace ModelContextGateway.Tests
             // Dispose sets stateManager to Disconnected
             transport.Dispose();
 
-            var act = async () => await transport.CallMethodAsync("tools/list", new { });
-            await act.Should().ThrowAsync<InvalidOperationException>()
-                .WithMessage("*is disconnected*");
+            var response = await transport.CallMethodAsync("tools/list", new { });
+            response.Should().NotBeNull();
+            response.Error.Should().NotBeNull();
+            response.Error!.Code.Should().Be(-32001);
+            response.Error.Message.Should().Be("Not connected");
         }
 
         [Fact]
