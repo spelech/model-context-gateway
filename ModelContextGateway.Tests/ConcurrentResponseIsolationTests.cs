@@ -508,7 +508,7 @@ namespace ModelContextGateway.Tests
 
             var session = new ClientSession(
                 "global-stateless-session",
-                context1.Response, // placeholder
+                context1.Response,
                 servers,
                 new HttpClient(),
                 embeddingMock.Object,
@@ -516,34 +516,24 @@ namespace ModelContextGateway.Tests
             );
 
             // Simulating two clients registering active requests with duplicate ID 1 concurrently
-            var doc1 = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"tool1\"}}";
-            var doc2 = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"tool1\"}}";
+            using var cts1 = new CancellationTokenSource();
+            using var cts2 = new CancellationTokenSource();
 
-            // Act 1 & Assert 1: Calling CallToolAsync with duplicate original IDs should NOT throw duplicate token keys
-            // because they are client-scoped/request-scoped via TraceIdentifier in ClientSession!
-            var callTask1 = Task.Run(async () =>
-            {
-                try
-                {
-                    await session.CallToolAsync("ha__turn_on", doc1, null!, context1);
-                }
-                catch { }
-            });
+            var reg1 = session.RegisterRequestCancellation("1", cts1, context1.TraceIdentifier);
+            var reg2 = session.RegisterRequestCancellation("1", cts2, context2.TraceIdentifier);
 
-            var callTask2 = Task.Run(async () =>
-            {
-                try
-                {
-                    await session.CallToolAsync("ha__turn_on", doc2, null!, context2);
-                }
-                catch { }
-            });
+            reg1.Should().BeTrue("Stateless request 1 should register under its trace identifier");
+            reg2.Should().BeTrue("Stateless request 2 should register under its distinct trace identifier without key collision");
 
-            await Task.Delay(100);
+            // Duplicate registration within the same trace identifier should be rejected
+            using var ctsDuplicate = new CancellationTokenSource();
+            var duplicateReg = session.RegisterRequestCancellation("1", ctsDuplicate, context1.TraceIdentifier);
+            duplicateReg.Should().BeFalse("Duplicate request ID for the same trace identifier must not be registered");
 
-            // Both registrations should succeed and exist side-by-side without any duplicate-key exceptions
-            callTask1.Exception.Should().BeNull();
-            callTask2.Exception.Should().BeNull();
+            // Cancellation of one does not cancel the other
+            session.CancelRequest("1", context1.TraceIdentifier);
+            cts1.IsCancellationRequested.Should().BeTrue("Request 1 cancellation must be isolated");
+            cts2.IsCancellationRequested.Should().BeFalse("Request 2 must remain active and isolated");
 
             // Clean up
             session.Close();
@@ -575,10 +565,23 @@ namespace ModelContextGateway.Tests
                 loggerMock.Object
             );
 
+            using var cts1 = new CancellationTokenSource();
+            using var cts2 = new CancellationTokenSource();
+
+            var reg1 = session.RegisterRequestCancellation("1", cts1, "client-1-trace");
+            var reg2 = session.RegisterRequestCancellation("1", cts2, "client-2-trace");
+
+            reg1.Should().BeTrue("Client 1 request registration must succeed");
+            reg2.Should().BeTrue("Client 2 request registration with identical RPC ID must succeed without collision");
+
             // Act - Cancel only client 1's request "1"
             session.CancelRequest("1", "client-1-trace");
 
-            // Client 2's request should not be affected
+            // Assert: client 1 is cancelled while client 2's token is NOT cancelled
+            cts1.IsCancellationRequested.Should().BeTrue("Client 1 token must be cancelled");
+            cts2.IsCancellationRequested.Should().BeFalse("Client 2 token must not be cancelled");
+
+            // Clean up
             session.Close();
         }
 

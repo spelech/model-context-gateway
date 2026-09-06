@@ -31,6 +31,19 @@ namespace ModelContextGateway.Core.Routing
             }
         }
 
+        public bool IsReady
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _activeService != null;
+                }
+            }
+        }
+
+        public string Status => IsReady ? "Ready" : "NotReady";
+
         public virtual void SaveSettings(RouterSettings newSettings)
         {
             if (newSettings.EmbeddingProvider != null && newSettings.EmbeddingProvider.Equals("api", StringComparison.OrdinalIgnoreCase))

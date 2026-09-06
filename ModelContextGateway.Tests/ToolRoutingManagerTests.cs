@@ -1,8 +1,11 @@
 using System.Collections.Concurrent;
+using System.Text.Json;
 using Dapper;
+using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using ModelContextGateway.Tests.TestHelpers;
 using Moq;
 
 namespace ModelContextGateway.Tests
@@ -175,8 +178,53 @@ namespace ModelContextGateway.Tests
         [Requirement("AUTH-14", "AUTH", RequirementType.Positive, "Tool execution catches 401 Unauthorized from downstream target servers and returns interactive auth remediation.")]
         public async Task ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt()
         {
-            // Just a placeholder test to satisfy requirements catalog until properly mocked
-            Assert.True(true);
+            var manager = new ToolRoutingManager();
+            var (conn, dbFactory) = CreateDbFactory();
+
+            var mockDownstream = new MockDownstreamMcpServer();
+            mockDownstream.AddTool("get_secret", "Retrieve secret information");
+            mockDownstream.ReturnUnauthorizedOnToolsCall = true;
+
+            var httpClient = mockDownstream.CreateHttpClient();
+            var server = new McpServer
+            {
+                Id = "vault_srv",
+                Enabled = true,
+                Url = "http://vault:8080/mcp",
+                Type = "http",
+                DynamicAuthPrompt = "401 Unauthorized: Target service requires interactive authentication credentials."
+            };
+            var servers = new List<McpServer> { server };
+
+            var backendConn = new BackendConnection(server, httpClient, NullLogger.Instance);
+            var connections = new ConcurrentDictionary<string, BackendConnection>();
+            connections["vault_srv"] = backendConn;
+
+            var mockEmbedding = new Mock<IEmbeddingService>();
+            var body = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"vault_srv__get_secret\",\"arguments\":{}}}";
+
+            var result = await manager.CallToolAsync(
+                "vault_srv__get_secret",
+                body,
+                dbFactory,
+                connections,
+                servers,
+                NullLogger.Instance,
+                httpClient,
+                mockEmbedding.Object,
+                () => Task.CompletedTask,
+                (b, k, v) => b
+            );
+
+            result.Should().NotBeNull();
+            var json = JsonSerializer.Serialize(result);
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+            root.GetProperty("isError").GetBoolean().Should().BeTrue();
+            var content = root.GetProperty("content");
+            content.GetArrayLength().Should().BeGreaterThan(0);
+            var text = content[0].GetProperty("text").GetString();
+            text.Should().Contain("401 Unauthorized: Target service requires interactive authentication credentials.");
         }
 
         [Fact]

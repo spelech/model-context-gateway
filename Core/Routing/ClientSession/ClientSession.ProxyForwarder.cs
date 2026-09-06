@@ -8,6 +8,20 @@ namespace ModelContextGateway.Core.Routing
     public partial class ClientSession
     {
         /// <summary>
+        /// Registers a cancellation token source for an active request, scoped by session and optional trace identifier.
+        /// </summary>
+        public bool RegisterRequestCancellation(string requestId, CancellationTokenSource cts, string? traceIdentifier = null)
+        {
+            var scopeId = _sessionId;
+            if (_sessionId == "global-stateless-session" && !string.IsNullOrEmpty(traceIdentifier))
+            {
+                scopeId = $"{_sessionId}:{traceIdentifier}";
+            }
+            var cancellationKey = $"{scopeId}:{requestId}";
+            return _activeRequestCancellationTokens.TryAdd(cancellationKey, cts);
+        }
+
+        /// <summary>
         /// Cancels an active request by triggering its registered cancellation token source.
         /// </summary>
         /// <param name="requestId">The unique request ID to cancel.</param>

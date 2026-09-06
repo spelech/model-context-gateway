@@ -23,11 +23,14 @@ namespace ModelContextGateway.Tests
         {
             var settings1 = new RouterSettings { EmbeddingModelDir = "models/v1" };
             var service = new OnnxEmbeddingService(new HttpClient(), settings1, NullLogger<OnnxEmbeddingService>.Instance);
+            Assert.Equal("models/v1", service.GetSettings().EmbeddingModelDir);
+            Assert.EndsWith("models/v1", service.GetModelDir().Replace('\\', '/'));
 
             var settings2 = new RouterSettings { EmbeddingModelDir = "models/v2" };
             service.ReloadSettings(settings2);
 
-            // Verified state reload executes without throwing
+            Assert.Equal("models/v2", service.GetSettings().EmbeddingModelDir);
+            Assert.EndsWith("models/v2", service.GetModelDir().Replace('\\', '/'));
         }
 
         [Fact]
@@ -52,12 +55,15 @@ namespace ModelContextGateway.Tests
         [Requirement("MCP-12", "MCP", RequirementType.Positive, "OnnxEmbeddingService returns standardized 384-dimensional vector format for empty query input.")]
         public async Task GetEmbeddingAsync_ReturnsEmpty384Vector_ForEmptyString()
         {
-            var settings = new RouterSettings { EmbeddingModelDir = "models/test" };
-            _ = new OnnxEmbeddingService(new HttpClient(), settings, NullLogger<OnnxEmbeddingService>.Instance);
+            var settings = new RouterSettings { EmbeddingModelDir = "data/models" };
+            var service = new OnnxEmbeddingService(new HttpClient(), settings, NullLogger<OnnxEmbeddingService>.Instance);
 
-            // Verified zero-token path return length
-            var emptyVector = new float[384];
-            Assert.Equal(384, emptyVector.Length);
+            var vector = await service.GetEmbeddingAsync("");
+
+            Assert.NotNull(vector);
+            Assert.Equal(384, vector.Length);
+            Assert.IsType<float[]>(vector);
+            Assert.All(vector, val => Assert.False(float.IsNaN(val)));
         }
     }
 }
