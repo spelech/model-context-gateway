@@ -83,9 +83,9 @@ namespace ModelContextGateway.Core.Routing
                 if (paramsElement.Value.TryGetProperty("protocolVersion", out var versionProp))
                 {
                     var requestedVersion = versionProp.GetString();
-                    if (!string.IsNullOrEmpty(requestedVersion) && requestedVersion.StartsWith("2024", StringComparison.OrdinalIgnoreCase))
+                    if (!string.IsNullOrWhiteSpace(requestedVersion))
                     {
-                        negotiatedVersion = LegacyProtocolVersion;
+                        negotiatedVersion = requestedVersion;
                     }
                 }
             }

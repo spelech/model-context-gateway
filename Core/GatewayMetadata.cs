@@ -31,12 +31,21 @@ namespace ModelContextGateway.Core
         public const string LegacyProtocolVersion = "2024-11-05";
 
         /// <summary>
-        /// List of supported protocol versions.
+        /// List of protocol versions advertised for discovery.
         /// </summary>
-        public static readonly string[] SupportedProtocolVersions = new[] { "2026-07-28", "2024-11-05", "2024-10-07" };
+        public static readonly string[] SupportedProtocolVersions = new[]
+        {
+            "2026-07-28",
+            "2025-11-25",
+            "2025-06-18",
+            "2025-03-26",
+            "2024-11-05",
+            "2024-10-07"
+        };
 
         /// <summary>
         /// Checks whether a protocol version string is supported by the gateway.
+        /// Dynamically accepts any valid non-empty protocol version string.
         /// </summary>
         public static bool IsSupportedProtocolVersion(string? version)
         {
@@ -55,7 +64,7 @@ namespace ModelContextGateway.Core
         /// <summary>
         /// Builds a standard JSON-RPC 2.0 initialize request payload with dynamic versioning.
         /// </summary>
-        public static string BuildInitializeRequest(string id = "auto-init", string clientName = "ModelContextGatewayAuto")
+        public static string BuildInitializeRequest(string id = "auto-init", string clientName = "ModelContextGatewayAuto", string? protocolVersion = null)
         {
             return JsonSerializer.Serialize(new
             {
@@ -64,7 +73,7 @@ namespace ModelContextGateway.Core
                 id,
                 @params = new
                 {
-                    protocolVersion = ProtocolVersion,
+                    protocolVersion = protocolVersion ?? ProtocolVersion,
                     capabilities = new { },
                     clientInfo = new
                     {
@@ -78,9 +87,9 @@ namespace ModelContextGateway.Core
         /// <summary>
         /// Builds an initialize request payload for the interactive test bench.
         /// </summary>
-        public static string BuildTestBenchInitializeRequest(string id = "test-init")
+        public static string BuildTestBenchInitializeRequest(string id = "test-init", string? protocolVersion = null)
         {
-            return BuildInitializeRequest(id, "McpTestBench");
+            return BuildInitializeRequest(id, "McpTestBench", protocolVersion);
         }
     }
 }

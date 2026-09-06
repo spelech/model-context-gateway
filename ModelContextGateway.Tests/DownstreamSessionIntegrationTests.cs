@@ -368,6 +368,110 @@ namespace ModelContextGateway.Tests
             directJson.Should().Contain("Media status: Approved");
         }
 
+        [Fact]
+        [Requirement("MCP-22", "MCP", RequirementType.Positive, "Downstream backend protocol version mismatch dynamically negotiates down to backend supported versions.")]
+        public async Task DownstreamBackend_ProtocolVersionMismatch_NegotiatesOlderVersionSuccessfully()
+        {
+            // Arrange: register a backend that only supports older protocol versions (2025-11-25)
+            await _dbConnection.ExecuteAsync(@"
+                INSERT INTO Servers (Id, DisplayName, Url, Enabled, Hidden, Type, AutoDiscovered)
+                VALUES ('srv-legacy-llm', 'Legacy LLM Server', 'http://mock-llm:5000/mcp', 1, 0, 'http', 0);
+            ");
+
+            int initializeAttempts = 0;
+            string lastReceivedProtocolVersion = string.Empty;
+
+            _mockHttpHandler.Handler = async (req) =>
+            {
+                var contentStr = req.Content != null ? await req.Content.ReadAsStringAsync() : "";
+
+                if (contentStr.Contains("\"method\":\"initialize\""))
+                {
+                    initializeAttempts++;
+                    using var doc = JsonDocument.Parse(contentStr);
+                    var idRaw = doc.RootElement.TryGetProperty("id", out var idElem) ? idElem.GetRawText() : "1";
+
+                    if (doc.RootElement.TryGetProperty("params", out var pElem) && pElem.TryGetProperty("protocolVersion", out var verElem))
+                    {
+                        lastReceivedProtocolVersion = verElem.GetString() ?? "";
+                    }
+
+                    if (lastReceivedProtocolVersion == "2026-07-28")
+                    {
+                        // Simulate server rejecting 2026-07-28 with standard -32022 error
+                        return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                $"{{\"jsonrpc\":\"2.0\",\"id\":{idRaw},\"error\":{{\"code\":-32022,\"message\":\"Protocol version '2026-07-28' is not available through the initialize handshake.\",\"data\":{{\"supported\":[\"2024-11-05\",\"2025-03-26\",\"2025-06-18\",\"2025-11-25\"]}}}}}}",
+                                System.Text.Encoding.UTF8, "application/json")
+                        };
+                    }
+                    else if (lastReceivedProtocolVersion == "2025-11-25")
+                    {
+                        // Simulate server accepting 2025-11-25
+                        return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                $"{{\"jsonrpc\":\"2.0\",\"id\":{idRaw},\"result\":{{\"protocolVersion\":\"2025-11-25\",\"capabilities\":{{\"tools\":{{}}}},\"serverInfo\":{{\"name\":\"MockLlm\",\"version\":\"1.0\"}}}}}}",
+                                System.Text.Encoding.UTF8, "application/json")
+                        };
+                    }
+                }
+
+                if (contentStr.Contains("\"method\":\"notifications/initialized\""))
+                {
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json")
+                    };
+                }
+
+                if (contentStr.Contains("\"method\":\"tools/list\""))
+                {
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                    {
+                        Content = new StringContent(
+                            "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"tools\":[{\"name\":\"get_gpu_vram\",\"description\":\"VRAM stats\",\"inputSchema\":{\"type\":\"object\"}}]}}",
+                            System.Text.Encoding.UTF8, "application/json")
+                    };
+                }
+
+                if (contentStr.Contains("\"method\":\"tools/call\""))
+                {
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                    {
+                        Content = new StringContent(
+                            "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"GPU VRAM 16GB\"}]}}",
+                            System.Text.Encoding.UTF8, "application/json")
+                    };
+                }
+
+                return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{}}", System.Text.Encoding.UTF8, "application/json")
+                };
+            };
+
+            var sessionManager = _serviceProvider.GetRequiredService<SessionManager>();
+            var httpContext = CreateAdminHttpContext();
+
+            // Act: create session and initialize backends
+            var session = await sessionManager.CreateSessionAsync("test-negotiation-session", httpContext.Response, targetServerId: null, metaMode: true);
+            await session.EnsureBackendsInitializedAsync();
+
+            // Assert: backend negotiated down to 2025-11-25 and connected
+            initializeAttempts.Should().BeGreaterThanOrEqualTo(2);
+            lastReceivedProtocolVersion.Should().Be("2025-11-25");
+
+            // Execute tool to verify end-to-end dispatch through negotiated session
+            var execPayload = "{\"jsonrpc\":\"2.0\",\"id\":\"exec-vram\",\"method\":\"tools/call\",\"params\":{\"name\":\"execute_tool\",\"arguments\":{\"name\":\"srv-legacy-llm__get_gpu_vram\",\"arguments\":{}}}}";
+            var result = await session.CallToolAsync("execute_tool", execPayload, _dbFactory, httpContext);
+
+            result.Should().NotBeNull();
+            var resultJson = JsonSerializer.Serialize(result);
+            resultJson.Should().Contain("GPU VRAM 16GB");
+        }
+
         private class DisposedFeatureCollection : IFeatureCollection
         {
             public object? this[Type key]
