@@ -211,22 +211,7 @@ namespace ModelContextGateway.Infrastructure.Transports
         public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
         {
             _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(bodyJson));
-
-            string payloadToSend = bodyJson;
-            try
-            {
-                using var doc = JsonDocument.Parse(bodyJson);
-                var root = doc.RootElement;
-                if (!root.TryGetProperty("id", out _) && root.TryGetProperty("method", out _) && !method.StartsWith("notifications/", StringComparison.OrdinalIgnoreCase))
-                {
-                    var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(bodyJson) ?? new();
-                    dict["id"] = Guid.NewGuid().ToString("N");
-                    payloadToSend = JsonSerializer.Serialize(dict);
-                }
-            }
-            catch { }
-
-            var content = new StringContent(payloadToSend, Encoding.UTF8, "application/json");
+            var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             using var req = new HttpRequestMessage(HttpMethod.Post, _server.Url) { Content = content };
 
