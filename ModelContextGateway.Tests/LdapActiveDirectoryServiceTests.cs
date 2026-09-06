@@ -130,7 +130,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "LdapActiveDirectoryService fails closed with SecurityException when LDAP connection throws an exception.")]
+        [Requirement("GUARD-LDAP-FAIL-CLOSED", "AUTH", RequirementType.Negative, "LdapActiveDirectoryService fails closed with SecurityException when LDAP connection throws an exception.")]
         public async Task ResolveUserSidsAsync_ThrowsSecurityException_OnConnectionFailure()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>

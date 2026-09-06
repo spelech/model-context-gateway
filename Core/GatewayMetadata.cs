@@ -57,6 +57,51 @@ namespace ModelContextGateway.Core
         }
 
         /// <summary>
+        /// Negotiates the highest compatible protocol version. If requestedVersion matches a supported
+        /// version (case-insensitively), it returns the canonical matching string. If unrecognized but non-empty,
+        /// it echoes the requested version to support future or custom protocol extensions gracefully.
+        /// If null or whitespace, it defaults to the primary ProtocolVersion.
+        /// </summary>
+        public static string NegotiateProtocolVersion(string? requestedVersion)
+        {
+            if (string.IsNullOrWhiteSpace(requestedVersion))
+            {
+                return ProtocolVersion;
+            }
+            var trimmed = requestedVersion.Trim();
+            var match = SupportedProtocolVersions.FirstOrDefault(v => string.Equals(v, trimmed, StringComparison.OrdinalIgnoreCase));
+            return match ?? trimmed;
+        }
+
+        /// <summary>
+        /// Extracts the client's requested protocol version from an initialize JSON-RPC payload,
+        /// falling back to ProtocolVersion if omitted or malformed.
+        /// </summary>
+        public static string ExtractRequestedProtocolVersion(string? jsonRpcBody)
+        {
+            if (string.IsNullOrWhiteSpace(jsonRpcBody))
+            {
+                return ProtocolVersion;
+            }
+            try
+            {
+                using var doc = JsonDocument.Parse(jsonRpcBody);
+                if (doc.RootElement.TryGetProperty("params", out var pElem) && pElem.TryGetProperty("protocolVersion", out var pvElem))
+                {
+                    var ver = pvElem.GetString();
+                    if (!string.IsNullOrWhiteSpace(ver))
+                    {
+                        return NegotiateProtocolVersion(ver);
+                    }
+                }
+            }
+            catch
+            {
+            }
+            return ProtocolVersion;
+        }
+
+        /// <summary>
         /// Canonical semantic version dynamically resolved from the executing assembly.
         /// </summary>
         public static string Version => Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "5.6.0";

@@ -123,7 +123,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Fails closed and denies access when no valid group mapping exists for a restricted target.")]
+        [Requirement("GUARD-MAPPING-UNMAPPED-DENY", "GUARD", RequirementType.Negative, "Fails closed and denies access when no valid group mapping exists for a restricted target.")]
         public async Task GroupMapping_RejectsUser_WhenNoMappingExistsForRestrictedTarget()
         {
             SeedPolicy("pol-3", "tool:ha__write", "smarthome_writers", true);

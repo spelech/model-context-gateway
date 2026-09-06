@@ -58,11 +58,36 @@ namespace ModelContextGateway.Tests
 
         [Fact]
         [Requirement("MCP-02", "MCP", RequirementType.Positive, "ToolRoutingManager clears cached tools table upon cache invalidation.")]
-        public void InvalidateCache_ClearsPopulatedState()
+        public async Task InvalidateCache_ClearsPopulatedState()
         {
             var manager = new ToolRoutingManager();
+            var mockDownstream = new MockDownstreamMcpServer();
+            mockDownstream.AddTool("sample_tool", "Sample tool description");
+
+            var server = new McpServer
+            {
+                Id = "backend_srv",
+                Enabled = true,
+                Url = "http://backend:8080/mcp",
+                Type = "http"
+            };
+            var backendConn = new BackendConnection(server, mockDownstream.CreateHttpClient(), NullLogger.Instance);
+            var connections = new Dictionary<string, BackendConnection> { ["backend_srv"] = backendConn };
+
+            var populatedTools = await manager.ListToolsAsync(
+                body: "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}",
+                isMetaMode: false,
+                backendConnections: connections,
+                logger: NullLogger.Instance,
+                ensureBackendsInitializedAsync: () => Task.CompletedTask,
+                servers: new[] { server }
+            );
+
+            populatedTools.Should().NotBeEmpty();
+            manager.GetCachedTools().Should().NotBeEmpty();
+
             manager.InvalidateCache();
-            Assert.Empty(manager.GetCachedTools());
+            manager.GetCachedTools().Should().BeEmpty();
         }
 
         [Fact]
@@ -91,11 +116,14 @@ namespace ModelContextGateway.Tests
                 (b, k, v) => b
             );
 
-            Assert.NotNull(result);
+            result.Should().NotBeNull();
+            var json = JsonSerializer.Serialize(result);
+            json.Should().Contain("\"resultType\":\"complete\"");
+            json.Should().Contain("\"content\"");
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "ToolRoutingManager returns an error when execute_tool is invoked without the mandatory tool name parameter.")]
+        [Requirement("GUARD-TOOL-MANDATORY-PARAMS", "GUARD", RequirementType.Negative, "ToolRoutingManager returns an error when execute_tool is invoked without the mandatory tool name parameter.")]
         public async Task CallToolAsync_ExecuteTool_ReturnsError_WhenNameMissing()
         {
             var manager = new ToolRoutingManager();
@@ -118,11 +146,14 @@ namespace ModelContextGateway.Tests
                 (b, k, v) => b
             );
 
-            Assert.NotNull(result);
+            result.Should().NotBeNull();
+            var json = JsonSerializer.Serialize(result);
+            json.Should().Contain("\"isError\":true");
+            json.Should().Contain("target tool name is required");
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "ToolRoutingManager propagates task cancellation gracefully with a standardized JSON-RPC error response.")]
+        [Requirement("GUARD-TOOL-CANCELLATION", "GUARD", RequirementType.Negative, "ToolRoutingManager propagates task cancellation gracefully with a standardized JSON-RPC error response.")]
         public async Task CallToolAsync_ReturnsCancellationError_WhenCancelled()
         {
             var manager = new ToolRoutingManager();
@@ -147,11 +178,14 @@ namespace ModelContextGateway.Tests
                 cts.Token
             );
 
-            Assert.NotNull(result);
+            result.Should().NotBeNull();
+            var json = JsonSerializer.Serialize(result);
+            json.Should().Contain("\"isError\":true");
+            json.Should().Contain("request was cancelled by the client");
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "ToolRoutingManager throws KeyNotFoundException when calling a tool not registered in the routing table.")]
+        [Requirement("GUARD-ROUTING-UNKNOWN-TOOL", "GUARD", RequirementType.Negative, "ToolRoutingManager throws KeyNotFoundException when calling a tool not registered in the routing table.")]
         public async Task CallToolAsync_ThrowsKeyNotFound_WhenToolNotInRoutingTable()
         {
             var manager = new ToolRoutingManager();

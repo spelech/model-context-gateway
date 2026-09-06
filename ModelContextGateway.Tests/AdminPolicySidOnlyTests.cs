@@ -14,7 +14,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that users with standard/unconfigured role names lacking explicit Admin SID claim or Admin Group are denied by AdminPolicy.
         /// </summary>
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy rejects principal with unconfigured regular role without Admin SID or Admin Group")]
+        [Requirement("AUTH-ADMIN-POLICY-REJECT-REGULAR", "AUTH", RequirementType.Negative, "AdminPolicy rejects principal with unconfigured regular role without Admin SID or Admin Group")]
         public async Task AdminPolicy_Denies_StandardRole_Without_AdminSid()
         {
             // Arrange
@@ -56,7 +56,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that principals with the configured Admin SID are granted administrative policy access.
         /// </summary>
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "AdminPolicy allows principal with configured Admin SID")]
+        [Requirement("AUTH-ADMIN-POLICY-ALLOW-SID", "AUTH", RequirementType.Positive, "AdminPolicy allows principal with configured Admin SID")]
         public async Task AdminPolicy_Allows_Principal_With_AdminSid()
         {
             // Arrange

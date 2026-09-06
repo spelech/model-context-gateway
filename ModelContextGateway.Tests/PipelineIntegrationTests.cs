@@ -168,7 +168,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "Dashboard management API suite executes for authorized administrators.")]
+        [Requirement("AUTH-PIPELINE-ADMIN-DASHBOARD", "AUTH", RequirementType.Positive, "Dashboard management API suite executes for authorized administrators.")]
         public async Task Pipeline_Dashboard_Management_Suite()
         {
             var client = CreateAuthenticatedClient();
@@ -302,7 +302,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "Permissions policy and group mapping CRUD endpoints manage RBAC rules.")]
+        [Requirement("AUTH-PIPELINE-PERM-CRUD", "AUTH", RequirementType.Positive, "Permissions policy and group mapping CRUD endpoints manage RBAC rules.")]
         public async Task Pipeline_Permissions_Policy_And_Mapping_CRUD()
         {
             var client = CreateAuthenticatedClient();
@@ -346,7 +346,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "GET /api/clients returns active client sessions with 200 OK.")]
+        [Requirement("AUTH-PIPELINE-GET-CLIENTS", "AUTH", RequirementType.Positive, "GET /api/clients returns active client sessions with 200 OK.")]
         public async Task Pipeline_GET_Clients_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -355,7 +355,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "GET /api/permissions/policies returns access policies with 200 OK.")]
+        [Requirement("AUTH-PIPELINE-GET-POLICIES", "AUTH", RequirementType.Positive, "GET /api/permissions/policies returns access policies with 200 OK.")]
         public async Task Pipeline_GET_Permissions_Policies_Returns200()
         {
             var client = CreateAuthenticatedClient();

@@ -404,6 +404,11 @@ namespace ModelContextGateway.Infrastructure.Transports
 
         public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
         {
+            if (_stateManager.IsDisconnected)
+            {
+                return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Not connected" } };
+            }
+
             if (_messageUrl == null)
             {
                 using var ctsTimeout = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
@@ -543,6 +548,11 @@ namespace ModelContextGateway.Infrastructure.Transports
 
             var bodyObj = new { jsonrpc = "2.0", method = method, @params = parameters, id = upstreamRequestId };
             var bodyJson = JsonSerializer.Serialize(bodyObj);
+
+            if (_stateManager.IsDisconnected)
+            {
+                throw new InvalidOperationException($"Backend {_server.Id} is disconnected.");
+            }
 
             if (_messageUrl == null)
             {

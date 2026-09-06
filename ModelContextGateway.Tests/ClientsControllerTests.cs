@@ -268,7 +268,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "CreateClient fails closed when DisplayName is missing")]
+        [Requirement("GUARD-CLIENT-MISSING-NAME", "GUARD", RequirementType.Negative, "CreateClient fails closed when DisplayName is missing")]
         public async Task CreateClient_ReturnsBadRequest_WhenDisplayNameMissing()
         {
             var (_, dbFactory, repo) = CreateDbEnvironment();
@@ -281,7 +281,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "CreateClient fails closed when category scope is empty")]
+        [Requirement("GUARD-CLIENT-EMPTY-SCOPE", "GUARD", RequirementType.Negative, "CreateClient fails closed when category scope is empty")]
         public async Task CreateClient_ReturnsBadRequest_WhenCategoryScopeEmpty()
         {
             var (_, dbFactory, repo) = CreateDbEnvironment();
@@ -298,7 +298,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "CreateClient returns 500 when repository throws")]
+        [Requirement("GUARD-CLIENT-CREATE-REPO-ERR", "GUARD", RequirementType.Negative, "CreateClient returns 500 when repository throws")]
         public async Task CreateClient_Returns500_WhenOAuthClientRepositoryThrows()
         {
             var (_, dbFactory, _) = CreateDbEnvironment();
@@ -315,7 +315,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "DeleteClient returns 500 when repository throws")]
+        [Requirement("GUARD-CLIENT-DELETE-REPO-ERR", "GUARD", RequirementType.Negative, "DeleteClient returns 500 when repository throws")]
         public async Task DeleteClient_Returns500_WhenOAuthClientRepositoryThrows()
         {
             var (_, dbFactory, _) = CreateDbEnvironment();
@@ -350,7 +350,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "CleanupClients returns 500 when repository throws.")]
+        [Requirement("GUARD-CLIENT-CLEANUP-REPO-ERR", "GUARD", RequirementType.Negative, "CleanupClients returns 500 when repository throws.")]
         public async Task CleanupClients_Returns500_WhenOAuthClientRepositoryThrows()
         {
             var (_, dbFactory, _) = CreateDbEnvironment();

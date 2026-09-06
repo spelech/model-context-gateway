@@ -32,6 +32,7 @@ namespace ModelContextGateway.Tests
             var loggerMock = new Mock<ILogger>();
 
             var interceptedRequests = new ConcurrentBag<(string UpstreamId, string OriginalId, string Payload)>();
+            var bothReceivedTcs = new TaskCompletionSource<bool>();
 
             mockHandler.Handler = async (req) =>
             {
@@ -51,6 +52,10 @@ namespace ModelContextGateway.Tests
                     var payload = root.GetProperty("params").GetProperty("data").GetString()!;
 
                     interceptedRequests.Add((upstreamId, originalId, payload));
+                    if (interceptedRequests.Count >= 2)
+                    {
+                        bothReceivedTcs.TrySetResult(true);
+                    }
                     return new HttpResponseMessage(System.Net.HttpStatusCode.Accepted);
                 }
                 return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
@@ -65,18 +70,12 @@ namespace ModelContextGateway.Tests
                 await Task.CompletedTask;
             });
 
-            // Wait a short moment for reader to resolve endpoint
-            await Task.Delay(200);
-
             // Act - Send two concurrent requests with identical original ID 1 but different payloads
             var task1 = conn.SendRequestAsync("tools/call", "{\"jsonrpc\":\"2.0\",\"id\":1,\"params\":{\"data\":\"payload_one\"}}");
             var task2 = conn.SendRequestAsync("tools/call", "{\"jsonrpc\":\"2.0\",\"id\":1,\"params\":{\"data\":\"payload_two\"}}");
 
             // Wait for both requests to be posted to the backend and intercepted
-            while (interceptedRequests.Count < 2)
-            {
-                await Task.Delay(50);
-            }
+            await bothReceivedTcs.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
             var requestList = interceptedRequests.ToList();
             var reqOne = requestList.First(r => r.Payload == "payload_one");
@@ -89,8 +88,6 @@ namespace ModelContextGateway.Tests
             var responseTwoPayload = $"event: message\ndata: {{\"jsonrpc\":\"2.0\",\"id\":\"{reqTwo.UpstreamId}\",\"result\":{{\"text\":\"result_two\"}}}}\n\n";
             sseStream.PushMessage(responseTwoPayload);
 
-            // Wait a bit, then respond to the first request
-            await Task.Delay(200);
             var responseOnePayload = $"event: message\ndata: {{\"jsonrpc\":\"2.0\",\"id\":\"{reqOne.UpstreamId}\",\"result\":{{\"text\":\"result_one\"}}}}\n\n";
             sseStream.PushMessage(responseOnePayload);
 
@@ -135,6 +132,8 @@ namespace ModelContextGateway.Tests
 
             var interceptedRequests = new ConcurrentDictionary<string, string>(); // UpstreamId -> ExpectedResultValue
 
+            var allReceivedTcs = new TaskCompletionSource<bool>();
+
             mockHandler.Handler = async (req) =>
             {
                 if (req.Method == HttpMethod.Get)
@@ -152,6 +151,10 @@ namespace ModelContextGateway.Tests
                     var payloadIndex = root.GetProperty("params").GetProperty("index").GetInt32();
 
                     interceptedRequests[upstreamId] = $"result_{payloadIndex}";
+                    if (interceptedRequests.Count >= 40)
+                    {
+                        allReceivedTcs.TrySetResult(true);
+                    }
                     return new HttpResponseMessage(System.Net.HttpStatusCode.Accepted);
                 }
                 return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
@@ -165,8 +168,6 @@ namespace ModelContextGateway.Tests
             {
                 await Task.CompletedTask;
             });
-
-            await Task.Delay(200);
 
             int totalRequests = 40;
             var tasks = new List<Task<(int Index, int OriginalId, JsonRpcResponse Response)>>();
@@ -186,10 +187,7 @@ namespace ModelContextGateway.Tests
             }
 
             // Wait for all requests to be registered
-            while (interceptedRequests.Count < totalRequests)
-            {
-                await Task.Delay(50);
-            }
+            await allReceivedTcs.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
             // Push all responses concurrently out-of-order/scrambled
             var random = new Random();
@@ -266,8 +264,6 @@ namespace ModelContextGateway.Tests
                 await Task.CompletedTask;
             });
 
-            await Task.Delay(200);
-
             // Act - Send request and let it time out
             var task = conn.SendRequestAsync("tools/call", "{\"jsonrpc\":\"2.0\",\"id\":1,\"params\":{}}");
 
@@ -327,8 +323,6 @@ namespace ModelContextGateway.Tests
                 await Task.CompletedTask;
             });
 
-            await Task.Delay(200);
-
             // Send request
             var task = conn.SendRequestAsync("tools/call", "{\"jsonrpc\":\"2.0\",\"id\":1,\"params\":{}}");
 
@@ -340,10 +334,10 @@ namespace ModelContextGateway.Tests
             // Act - Force disconnect by completing/disposing the stream
             sseStream.Complete();
 
-            // Wait a moment for reader to detect disconnect and cancel/clear pending requests
-            await Task.Delay(200);
+            // The pending request task is cancelled when reader detects disconnect
+            await Assert.ThrowsAnyAsync<Exception>(async () => await task);
 
-            // Assert - The pending request task should be completed with error or cancelled
+            // Assert - The pending request table should be empty
             conn.PendingRequests.Should().BeEmpty();
 
             conn.Dispose();
@@ -411,8 +405,6 @@ namespace ModelContextGateway.Tests
                 }
             });
 
-            await Task.Delay(200);
-
             // Act - Send request with explicit JSON-RPC ID null
             var result = await conn.SendRequestAsync("tools/call", "{\"jsonrpc\":\"2.0\",\"id\":null,\"params\":{}}");
 
@@ -471,8 +463,6 @@ namespace ModelContextGateway.Tests
             {
                 await Task.CompletedTask;
             });
-
-            await Task.Delay(200);
 
             // Act - Send a notification (no "id" property)
             var sendTask = conn.SendRequestAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
@@ -586,7 +576,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "JsonRpcStateManager rejects registration and cancels pending completions upon disconnect.")]
+        [Requirement("GUARD-STATE-DISCONNECT-CANCELLATION", "GUARD", RequirementType.Negative, "JsonRpcStateManager rejects registration and cancels pending completions upon disconnect.")]
         public void JsonRpcStateManager_Disconnect_PreventsRegistrationAndCancelsPending()
         {
             var stateManager = new JsonRpcStateManager();
@@ -644,6 +634,7 @@ namespace ModelContextGateway.Tests
             var loggerMock = new Mock<ILogger>();
 
             var intercepted = new ConcurrentDictionary<string, (string UpstreamId, string OriginalIdRaw)>();
+            var allThreeTcs = new TaskCompletionSource<bool>();
 
             mockHandler.Handler = async (req) =>
             {
@@ -662,6 +653,10 @@ namespace ModelContextGateway.Tests
                     var tag = root.GetProperty("params").GetProperty("tag").GetString()!;
 
                     intercepted[tag] = (upstreamId, tag);
+                    if (intercepted.Count >= 3)
+                    {
+                        allThreeTcs.TrySetResult(true);
+                    }
                     return new HttpResponseMessage(System.Net.HttpStatusCode.Accepted);
                 }
                 return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
@@ -676,17 +671,12 @@ namespace ModelContextGateway.Tests
                 await Task.CompletedTask;
             });
 
-            await Task.Delay(200);
-
             // Send 3 concurrent requests: numeric, string, null
             var taskNumeric = conn.SendRequestAsync("tools/call", "{\"jsonrpc\":\"2.0\",\"id\":42,\"params\":{\"tag\":\"numeric\"}}");
             var taskString = conn.SendRequestAsync("tools/call", "{\"jsonrpc\":\"2.0\",\"id\":\"str-id-99\",\"params\":{\"tag\":\"string\"}}");
             var taskNull = conn.SendRequestAsync("tools/call", "{\"jsonrpc\":\"2.0\",\"id\":null,\"params\":{\"tag\":\"null\"}}");
 
-            while (intercepted.Count < 3)
-            {
-                await Task.Delay(50);
-            }
+            await allThreeTcs.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
             // Respond in reverse order
             sseStream.PushMessage($"event: message\ndata: {{\"jsonrpc\":\"2.0\",\"id\":\"{intercepted["null"].UpstreamId}\",\"result\":{{\"val\":\"null_done\"}}}}\n\n");

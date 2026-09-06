@@ -466,7 +466,7 @@ namespace ModelContextGateway.Tests
         /// Ensures null or whitespace capability targets fail closed immediately.
         /// </summary>
         [Theory]
-        [Requirement("GUARD-01", "Null or empty capability targets must immediately fail closed and return unauthorized", Type = RequirementType.Negative, Category = "GUARD")]
+        [Requirement("GUARD-AUTH-NULL-TARGET", "Null or empty capability targets must immediately fail closed and return unauthorized", Type = RequirementType.Negative, Category = "GUARD")]
         [InlineData(null)]
         [InlineData("")]
         [InlineData(" ")]
@@ -488,7 +488,7 @@ namespace ModelContextGateway.Tests
         /// Ensures corrupted AppKey scopes JSON fails closed safely and rejects execution.
         /// </summary>
         [Fact]
-        [Requirement("GUARD-01", "Corrupted AppKey scopes JSON must fail closed and reject execution", Type = RequirementType.Negative, Category = "GUARD")]
+        [Requirement("GUARD-APPKEY-MALFORMED-SCOPES", "Corrupted AppKey scopes JSON must fail closed and reject execution", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task Pairwise_CorruptedAppKeyScopesJson_FailsClosed_ReturnsFalse()
         {
             // Arrange - AppKey with unparseable corrupt JSON string in items

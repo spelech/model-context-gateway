@@ -380,22 +380,7 @@ namespace ModelContextGateway.Components.Capabilities
                 {
                     if (method == "initialize")
                     {
-                        string clientProtocolVersion = GatewayMetadata.ProtocolVersion;
-                        try
-                        {
-                            using var doc = JsonDocument.Parse(requestBody);
-                            if (doc.RootElement.TryGetProperty("params", out var pElem) && pElem.TryGetProperty("protocolVersion", out var pvElem))
-                            {
-                                var reqVer = pvElem.GetString();
-                                if (!string.IsNullOrWhiteSpace(reqVer))
-                                {
-                                    clientProtocolVersion = reqVer;
-                                }
-                            }
-                        }
-                        catch
-                        {
-                        }
+                        string clientProtocolVersion = GatewayMetadata.ExtractRequestedProtocolVersion(requestBody);
 
                         var response = new
                         {
@@ -803,7 +788,7 @@ namespace ModelContextGateway.Components.Capabilities
                             id = id != null ? (object)id : null,
                             result = ProtocolHelper.EnsureResultType(new
                             {
-                                protocolVersion = "2024-11-05",
+                                protocolVersion = GatewayMetadata.ExtractRequestedProtocolVersion(requestBody),
                                 capabilities = new
                                 {
                                     tools = new { listChanged = true },
@@ -900,7 +885,7 @@ namespace ModelContextGateway.Components.Capabilities
                             id = id != null ? (object)id : null,
                             result = ProtocolHelper.EnsureResultType(new
                             {
-                                protocolVersion = "2024-11-05",
+                                protocolVersion = GatewayMetadata.ExtractRequestedProtocolVersion(body),
                                 capabilities = new
                                 {
                                     tools = new { listChanged = true },

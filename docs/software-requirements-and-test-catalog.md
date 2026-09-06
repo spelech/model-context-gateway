@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **205 Requirements Verified** across **877 Test Proofs** (170 Functional Capabilities, 35 Safety Guardrails).
+> **Catalog Statistics:** **275 Requirements Verified** across **888 Test Proofs** (200 Functional Capabilities, 75 Safety Guardrails).
 
 ---
 
@@ -9,14 +9,14 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **41** | 39 | 2 | 211 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **69** | 65 | 4 | 211 proofs |
 | **`CORE`** | CORE | **1** | 1 | 0 | 2 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **3** | 2 | 1 | 32 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
-| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **17** | 1 | 16 | 135 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **68** | 64 | 4 | 197 proofs |
+| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **56** | 2 | 54 | 135 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **70** | 66 | 4 | 206 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **39** | 30 | 9 | 132 proofs |
-| **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **6** | 6 | 0 | 32 proofs |
+| **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **7** | 7 | 0 | 34 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **26** | 23 | 3 | 132 proofs |
 
 ---
@@ -34,6 +34,29 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserCredentialsControllerTests.cs#L11`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserCredentialsControllerTests.cs#L11) (`GetUserCredentials_ReturnsServerIds`)
+
+### `[AUTH-01]` initializes with empty policies and mappings
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (18):**
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L21`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L21) (`initializes with empty policies and mappings`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L38`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L38) (`fetches access policies and updates store`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L53`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L53) (`creates/saves a policy (ALLOW rule) and closes modal`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L156`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L156) (`fetches group mappings and updates store`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L171`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L171) (`saves a group mapping and closes mapping modal`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L314`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L314) (`handles policy modal open and close`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L330`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L330) (`handles mapping modal open and close`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L23`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L23) (`successfully loads user profile from /api/me`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L50`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L50) (`handles error response gracefully and sets unauthenticated user state`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L69`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L69) (`handles network failure gracefully`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L89`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L89) (`correctly handles non-admin user role extraction`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L113`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L113) (`successfully updates version and service from /health endpoint`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L128`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L128) (`keeps existing fallback version on error`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L12`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L12) (`renders Active Directory disabled initially, toggles on and exposes fields`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L46`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L46) (`fills LDAP parameters and executes test connection`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L28`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L28) (`renders create policy form with default inputs`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L44`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L44) (`renders edit policy form pre-filled with policy data`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L87`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L87) (`closes modal on cancel click`)
 
 ### `[AUTH-02]` AppKey scopes restrict access precisely across all MCP capabilities and backend targets
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -111,7 +134,7 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L384`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L384) (`Pipeline_GET_Providers_Auth_Returns200`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L93`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L93) (`GroupMapping_AllowsUser_WhenMappingResolvesToAllowedInternalGroup`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L111`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L111) (`GroupMapping_AllowsUser_WhenOidcGroupMapsToAllowedInternalGroup`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L644`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L644) (`AuthMiddleware_Allows_SSO_Session_With_RemoteUser_Header`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L629`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L629) (`AuthMiddleware_Allows_SSO_Session_With_RemoteUser_Header`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L137`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L137) (`GetMappings_ReturnsOk`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L207`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L207) (`DeleteMapping_DeletesSuccessfully`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useProviderStore.test.ts#L60`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useProviderStore.test.ts#L60) (`handles provider fetch warnings gracefully when endpoints are unavailable`)
@@ -185,7 +208,7 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (2):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L62`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L62) (`MockDownstreamMcpServer_Simulates401Unauthorized`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L177`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L177) (`ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L211`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L211) (`ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt`)
 
 ### `[AUTH-15]` OpenIddict initializes ephemeral development signing certificates in Development environment.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -224,6 +247,67 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L211`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L211) (`ZeroConfig_Startup_DefaultsEnterpriseProviders_ToDisabled`)
 
+### `[AUTH-ADMIN-FULL-ACCESS]` Administrator identities bypass granular capability policies and have full access to all MCP methods.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L154`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L154) (`AdminBypass_AllowsAllCapabilities_EvenWithoutDbPolicies`)
+
+### `[AUTH-ADMIN-POLICY-ALLOW-GROUPNAME]` AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin)
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L13`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L13) (`AdminPolicy_Allows_Principal_With_AdminGroupName`)
+
+### `[AUTH-ADMIN-POLICY-ALLOW-GROUPS-ARRAY]` AdminPolicy allows principal with configured Admin Groups array
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L81`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L81) (`AdminPolicy_Allows_Principal_With_ConfiguredAdminGroups`)
+
+### `[AUTH-ADMIN-POLICY-ALLOW-SID]` AdminPolicy allows principal with configured Admin SID
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (2):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L47`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L47) (`AdminPolicy_Allows_Principal_With_AdminSid`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs#L58`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs#L58) (`AdminPolicy_Allows_Principal_With_AdminSid`)
+
+### `[AUTH-ADMIN-VALIDATE-GROUPNAME]` SecurityValidationHelper authorizes principals via Admin Group Name
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L246`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L246) (`SecurityValidationHelper_IsAdmin_AllowsAdminGroupName`)
+
+### `[AUTH-ADMIN-VALIDATE-GROUPS-ARRAY]` SecurityValidationHelper authorizes principals via custom configured Admin:Groups array
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L277`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L277) (`SecurityValidationHelper_IsAdmin_AllowsCustomAdminGroupsArray`)
+
+### `[AUTH-ADMIN-VALIDATE-MAPPED-GROUPS]` SecurityValidationHelper authorizes principals via mappedGroups database resolution
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L292`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L292) (`SecurityValidationHelper_IsAdmin_AllowsMappedGroups`)
+
+### `[AUTH-ADMIN-VALIDATE-SID]` SecurityValidationHelper authorizes principals via Admin Group SID
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L228`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L228) (`SecurityValidationHelper_IsAdmin_RequiresAdminGroupSid`)
+
+### `[AUTH-APPKEY-ADMIN-FUTURE-CATEGORY]` Admin callers can create forward-looking AppKeys for unconfigured categories
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L258`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L258) (`AppKeysController_CreateAppKey_UnknownCategory_Admin_Succeeds`)
+
+### `[AUTH-APPKEY-ADMIN-QUOTA]` Administrator can create, update, and delete custom user quota overrides.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L403`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L403) (`QuotaEndpoints_Admin_CanManageCustomUserQuotas`)
+
 ### `[AUTH-APPKEY-ADMIN-SCOPE-ALLOW]` AppKeys with admin scope grant Administrator role and pass AdminPolicy.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
@@ -256,6 +340,24 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L241`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L241) (`Startup_SeedsCustomAdminKey_WhenMcgAdminKeyConfigured`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L292`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L292) (`Startup_UpdatesAdminKeyHash_WhenEnvironmentKeyChanges`)
 
+### `[AUTH-OIDC-PRESERVE-GROUP-NAMES]` OidcIdentityProvider preserves group names without synthesizing Windows SIDs
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L307`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L307) (`OidcIdentityProvider_DoesNotGrantAdminSid_FromGroupOrUserNames`)
+
+### `[AUTH-PERM-POLICY-LIST]` PermissionsController returns access policies list with 200 OK.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L48`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L48) (`GetPolicies_ReturnsOk`)
+
+### `[AUTH-PERM-POLICY-REMOVE]` PermissionsController removes access policies.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L114`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L114) (`DeletePolicy_DeletesSuccessfully`)
+
 ### `[AUTH-PERSONAL-APPKEY-LIST]` Non-admin users can view their personal App Keys
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
@@ -278,6 +380,30 @@
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L222`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L222) (`manages custom user quotas in admin quotas tab`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L135`](file:////containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L135) (`Admin Context: configures custom user quota override`)
 
+### `[AUTH-PIPELINE-ADMIN-DASHBOARD]` Dashboard management API suite executes for authorized administrators.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L170`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L170) (`Pipeline_Dashboard_Management_Suite`)
+
+### `[AUTH-PIPELINE-GET-CLIENTS]` GET /api/clients returns active client sessions with 200 OK.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L348`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L348) (`Pipeline_GET_Clients_Returns200`)
+
+### `[AUTH-PIPELINE-GET-POLICIES]` GET /api/permissions/policies returns access policies with 200 OK.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L357`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L357) (`Pipeline_GET_Permissions_Policies_Returns200`)
+
+### `[AUTH-PIPELINE-PERM-CRUD]` Permissions policy and group mapping CRUD endpoints manage RBAC rules.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L304`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L304) (`Pipeline_Permissions_Policy_And_Mapping_CRUD`)
+
 ### `[AUTH-PREFIX-EXTRACTION]` ExtractKeyPrefix parses semantic prefixes, Base62 selectors, and legacy tokens accurately.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
@@ -290,6 +416,54 @@
 * **Verification Proofs (2):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EndpointAuthorizationTests.cs#L7`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EndpointAuthorizationTests.cs#L7) (`QueryStringTokenMiddleware_Extracts_AccessToken_To_AuthorizationHeader`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EndpointAuthorizationTests.cs#L45`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EndpointAuthorizationTests.cs#L45) (`QueryStringTokenMiddleware_Extracts_Token_To_AuthorizationHeader`)
+
+### `[AUTH-RBAC-GROUP-ALLOW]` RBAC grants access when user claims match the required policy security group.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L94`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L94) (`RBAC_AllowsUser_WhenPolicyMatchesRequiredGroup`)
+
+### `[AUTH-RBAC-PROMPT-FILTER]` prompts/list filters exposed prompts according to caller permissions.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L362`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L362) (`ListPromptsAsync_FiltersUnauthorizedPrompts`)
+
+### `[AUTH-RBAC-RESOURCE-FILTER]` resources/list filters exposed resources according to caller permissions.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L405`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L405) (`ListResourcesAsync_FiltersUnauthorizedResources`)
+
+### `[AUTH-RBAC-TEMPLATE-FILTER]` resources/templates/list filters exposed resource templates according to caller permissions.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L448`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L448) (`ListResourceTemplatesAsync_FiltersUnauthorizedTemplates`)
+
+### `[AUTH-RBAC-TOOL-FILTER]` tools/list filters exposed backend tools according to caller permissions.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L317`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L317) (`ListToolsAsync_FiltersUnauthorizedTools`)
+
+### `[AUTH-RBAC-TOOLS-FILTER]` tools/list filters exposed backend tools according to caller role and RBAC policy permissions.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L200`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L200) (`ToolsList_FiltersByAuthorization`)
+
+### `[AUTH-SERVER-LEVEL-POLICY]` Server-level access policies authorize all child tools, prompts, and resources under that server.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L212`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L212) (`ServerLevelPolicy_AuthorizesAllCapabilitiesUnderServer`)
+
+### `[AUTH-SSE-PER-MESSAGE-IDENTITY]` SSE streams re-validate caller identity and permissions per message payload.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L121`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L121) (`SSE_ValidatesIdentityPerMessage`)
 
 ### `[AUTH-STANDALONE-ADMINPOLICY-LOOPBACK-ALLOW]` AdminPolicy succeeds in standalone mode for unauthenticated loopback requests.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -433,10 +607,16 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L225`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L225) (`StatelessHttpLifecycle_DisposedHttpContext_CompletesInitializationWithoutThrowing`)
 
+### `[GUARD-SECURITY-IDENTIFIER-VALIDATION]` SecurityValidationHelper validates tool and prompt names against namespaced server identifiers.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L44`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L44) (`ValidateToolOrPromptName_ValidatesNames`)
+
 ### `[MCP-01]` RewriteRequestJson accurately parses JSON batches, comments, and trailing commas using System.Text.Json JsonNode.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (61):**
+* **Verification Proofs (68):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L191`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L191) (`JsonNode_Rewrite_HandlesBatchCommentsAndCommas`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L336`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L336) (`SendRequestAsync_Succeeds_When_Response_Has_Method_Property`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L572`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L572) (`JsonNode_Rewrite_HandlesAdversarialEdgeCases`)
@@ -445,7 +625,14 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolErrorFormatterTests.cs#L7`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolErrorFormatterTests.cs#L7) (`TransformError_FormatsJsonRpcErrorWithRemediation`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolErrorFormatterTests.cs#L27`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolErrorFormatterTests.cs#L27) (`TransformException_FormatsExceptionWithRemediation`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolErrorFormatterTests.cs#L42`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolErrorFormatterTests.cs#L42) (`GetActionableSuggestion_ReturnsExpectedCategory`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L59`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L59) (`ClientSession_InitializationAndLifecycle_ExecutesSuccessfully`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L80`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L80) (`ListToolsAsync_WhenInMetaMode_ExposesSearchAndExecuteTools`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L99`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L99) (`ListResourcesAsync_ReturnsBuiltinRouterStatusResource`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L115`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L115) (`ListPromptsAsync_ReturnsBuiltinDiagnosticPrompts`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L132`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L132) (`CallToolAsync_SearchTools_ExecutesSuccessfullyWithStructuredContent`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L153`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L153) (`ReadResourceAsync_RouterStatus_ReturnsOnlineStatusPayload`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L176`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L176) (`GetPromptAsync_DiagnoseFailure_ReturnsDiagnosticInstructions`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L198`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L198) (`RegisterRequestCancellation_And_CancelRequest_CancelsActiveToken`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L214`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientSessionTests.cs#L214) (`TryHandleClientResponse_ReturnsFalse_WhenNoPendingRequest`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L428`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L428) (`ClientSession_ExecuteTool_EnforcesCategoryScopeOnInnerTarget`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L85`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L85) (`Pipeline_POST_Sse_JSONRPC_Full_Protocol_Suite`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L142`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L142) (`Pipeline_POST_Message_FullProtocolSession_Suite`)
@@ -461,13 +648,13 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L190`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L190) (`ProbeServerAsync_Sets_Connected_For_Valid_Stdio_Server_Without_Http_Probe`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L264`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L264) (`ProbeServerAsync_Sets_Connected_For_Custom_Server`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L11`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L11) (`MockDownstreamMcpServer_HandlesStandardJsonRpcFlow`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L274`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L274) (`PolymorphicDeserialization_Correctly_Deserializes_JsonRpcMessage_Subclasses`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L302`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L302) (`Deserializing_Plain_JsonRpcMessage_Does_Not_Cause_StackOverflow`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L318`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L318) (`Serializing_Plain_JsonRpcMessage_Does_Not_Cause_StackOverflow`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L332`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L332) (`TestInitializationDiagnostics`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L895`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L895) (`ErrorTransformation_Cancellation_And_Sampling_Works_Correctly`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1084`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1084) (`CustomFilesDirectoryHelper_CreatesDirectoriesCorrectly`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1099`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1099) (`SessionManager_PerServerCache_WorksCorrectly`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L259`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L259) (`PolymorphicDeserialization_Correctly_Deserializes_JsonRpcMessage_Subclasses`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L287`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L287) (`Deserializing_Plain_JsonRpcMessage_Does_Not_Cause_StackOverflow`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L303`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L303) (`Serializing_Plain_JsonRpcMessage_Does_Not_Cause_StackOverflow`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L317`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L317) (`TestInitializationDiagnostics`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L880`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L880) (`ErrorTransformation_Cancellation_And_Sampling_Works_Correctly`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1069`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1069) (`CustomFilesDirectoryHelper_CreatesDirectoriesCorrectly`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1084`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1084) (`SessionManager_PerServerCache_WorksCorrectly`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MinimalApiEndpointsTests.cs#L55`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MinimalApiEndpointsTests.cs#L55) (`Post_Put_Delete_Server_Lifecycle_Works`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L24`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L24) (`initializes with default state`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L46`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L46) (`successfully loads servers and updates state`)
@@ -506,7 +693,7 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385) (`Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L38`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L38) (`ListToolsAsync_ReturnsMetaTools_InMetaMode`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L59`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L59) (`InvalidateCache_ClearsPopulatedState`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L363`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L363) (`ToolListing_And_Remapping_Works_Correctly`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L348`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L348) (`ToolListing_And_Remapping_Works_Correctly`)
 
 ### `[MCP-05]` ResourceRoutingManager returns all registered resources when search query is empty.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -516,9 +703,9 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L23`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L23) (`SearchResourcesAsync_FiltersByQuery_MatchingNameOrDescription`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L41`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L41) (`ReadResourceAsync_LocalBuiltInResources_ReturnCorrectJson`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L82`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L82) (`ListResourceTemplatesAsync_ReturnsBuiltInTemplates`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L426`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L426) (`ResourceRouting_And_UriTranslation_Works_Correctly`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L782`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L782) (`BuiltInResources_Templates_And_Autocompletion_Works_Correctly`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L992`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L992) (`CustomUserPrompts_And_Resources_Work_Correctly`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L411`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L411) (`ResourceRouting_And_UriTranslation_Works_Correctly`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L767`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L767) (`BuiltInResources_Templates_And_Autocompletion_Works_Correctly`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L977`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L977) (`CustomUserPrompts_And_Resources_Work_Correctly`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L61`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L61) (`ValidateResourceUri_ValidatesUris`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingTests.cs#L5`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingTests.cs#L5) (`SearchResourcesAsync_FiltersResourcesCorrectly`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ResourceTesterCard.test.tsx#L47`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ResourceTesterCard.test.tsx#L47) (`handles custom URI input and submit`)
@@ -527,8 +714,8 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (3):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L514`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L514) (`PromptListAggregation_And_Routing_Works_Correctly`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L868`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L868) (`MetaPrompts_Works_Correctly`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L499`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L499) (`PromptListAggregation_And_Routing_Works_Correctly`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L853`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L853) (`MetaPrompts_Works_Correctly`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/PromptTesterCard.test.tsx#L53`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/PromptTesterCard.test.tsx#L53) (`triggers arg change and form submit`)
 
 ### `[MCP-08]` completion/complete forwards prompt completions to backend when caller is authorized.
@@ -568,8 +755,8 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SemanticSearchServiceTests.cs#L78`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SemanticSearchServiceTests.cs#L78) (`SearchToolsSemanticAsync_FallsBackToKeyword_WhenEmbeddingServiceThrows`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L106`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L106) (`SemanticSearchService_Fallback_With_DummyEmbeddings`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EmbeddingServiceTests.cs#L61`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EmbeddingServiceTests.cs#L61) (`ApiEmbeddingService_GetEmbeddingAsync_Returns_Vector_From_OpenAI_Response`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L68`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L68) (`CallToolAsync_SearchTools_ReturnsSemanticResults`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L683`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L683) (`SemanticToolSearchRanking_Sorts_By_Score`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L93`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L93) (`CallToolAsync_SearchTools_ReturnsSemanticResults`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L668`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L668) (`SemanticToolSearchRanking_Sorts_By_Score`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs#L5`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs#L5) (`CalculateCosineSimilarity_ComputesSimilarity`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs#L17`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs#L17) (`ReloadSettings_UpdatesSettings`)
 
@@ -613,16 +800,16 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L230`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L230) (`CallToolAsync_SearchTools_FallsBackToGlobalSessionManagerCache_WhenLocalCacheEmpty`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L264`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L264) (`CallToolAsync_SearchTools_FallsBackToGlobalSessionManagerCache_WhenLocalCacheEmpty`)
 
 ### `[MCP-26]` ToolRoutingManager normalizes tool name delimiters (slash and colon) to canonical double-underscore format.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (4):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L285`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L285) (`NormalizeTargetToolName_NormalizesSlashAndColonDelimiters`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L301`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L301) (`NormalizeTargetToolName_ResolvesBareToolName_WhenUnambiguous`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L314`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L314) (`NormalizeTargetToolName_ReturnsAmbiguityError_WhenToolExistsAcrossMultipleServers`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L334`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L334) (`SearchTools_ReturnsValidJsonArray_WhenNoToolsMatch`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L319`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L319) (`NormalizeTargetToolName_NormalizesSlashAndColonDelimiters`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L335`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L335) (`NormalizeTargetToolName_ResolvesBareToolName_WhenUnambiguous`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L348`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L348) (`NormalizeTargetToolName_ReturnsAmbiguityError_WhenToolExistsAcrossMultipleServers`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L368`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L368) (`SearchTools_ReturnsValidJsonArray_WhenNoToolsMatch`)
 
 ### `[MCP-27]` McpServer supports Alias property
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -630,8 +817,8 @@
 * **Verification Proofs (4):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpServerTests.cs#L15`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpServerTests.cs#L15) (`McpServer_Supports_Alias_Property`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpServerTests.cs#L30`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpServerTests.cs#L30) (`DatabaseInitializer_EnsureAliasColumn_AddsColumnSuccessfully`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L371`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L371) (`CacheTools_Exposes_Slash_Formatted_Name_With_Server_Alias`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L407`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L407) (`CacheTools_Exposes_Slash_Formatted_Name_With_Server_Id_When_Alias_Empty`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L405`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L405) (`CacheTools_Exposes_Slash_Formatted_Name_With_Server_Alias`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L441`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L441) (`CacheTools_Exposes_Slash_Formatted_Name_With_Server_Id_When_Alias_Empty`)
 
 ### `[MCP-30]` IsUserAuthorizedAsync matches granular tool policies across /, :, and __ delimiters.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -639,7 +826,7 @@
 * **Verification Proofs (3):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L284`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L284) (`IsUserAuthorizedAsync_MatchesToolPolicy_AcrossDelimiters`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L300`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L300) (`IsUserAuthorizedAsync_ResolvesAliasesAndServerIds_ForServerPolicies`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L432`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L432) (`NormalizeTargetToolName_Resolves_Multiple_Delimiters_And_Aliases`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L466`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L466) (`NormalizeTargetToolName_Resolves_Multiple_Delimiters_And_Aliases`)
 
 ### `[MCP-ADMIN-ENDPOINT-CALL-TOOL]` Admin endpoint /admin/message executes tools/call for manage_system diagnostics.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -892,6 +1079,18 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L294`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L294) (`PrefixBasedResilientRouting_DynamicallyRegistersAndDispatchesTool`)
+
+### `[MCP-WIRE-JSONRPC-SPEC]` MockDownstreamMcpServer treats messages with omitted id as notifications returning 202 Accepted with empty body.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L98`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L98) (`MockDownstreamMcpServer_TreatsOmittedIdAsNotification_ReturningAccepted`)
+
+### `[MCP-WIRE-PROTOCOL-MATRIX]` MockDownstreamMcpServer dynamically negotiates requested protocol version.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L80`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L80) (`MockDownstreamMcpServer_DynamicallyNegotiatesProtocolVersion`)
 
 ### `[UI-104]` renders resource tester with servers and resources
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1163,8 +1362,8 @@
 * **Verification Proofs (12):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L276`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L276) (`SendRequestAsync_TimesOutCleanly_AndDoesNotLeak`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L419`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L419) (`SseBackend_Notification_IsForwardedToClient_WithAllFieldsIntact`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L11`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L11) (`ResolveTokenAsync_ReturnsApiKey_WhenProviderNone`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L74`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L74) (`SendRequestAsync_HandlesEndpointWaitTimeoutGracefully`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L13`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L13) (`ResolveTokenAsync_ReturnsApiKey_WhenProviderNone`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L76`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L76) (`SendRequestAsync_HandlesEndpointWaitTimeoutGracefully`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L7`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L7) (`IsValidStdioCommand_ValidatesExecutableAndDisallowsUnsafeCommands`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L38`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L38) (`IsValidServerUrl_Accepts_Valid_Http_Urls`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L17`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L17) (`SseTransport_ApplyAuthAndCustomHeaders_Formats_Standard_Headers`)
@@ -1180,14 +1379,14 @@
 * **Verification Proofs (12):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L494`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L494) (`AsynchronousRouting_HighVolumeAndPolymorphic_DoesNotHang`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L12`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L12) (`ConcurrentResponseIsolation_TwoCallersSameId_SucceedsWithReversedResponseOrder`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L114`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L114) (`HighConcurrencyResponseIsolation_RepeatedIdsAcrossCallers`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L219`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L219) (`TimeoutAndCancellationCleanup_DoesNotLeavePendingRequests`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L281`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L281) (`BackendDisconnectCleanup_ClearsPendingRequests`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L352`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L352) (`ConcurrentResponseIsolation_ExplicitNullId_Succeeds`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L427`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L427) (`ConcurrentResponseIsolation_Notification_DoesNotExpectResponse`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L492`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L492) (`ClientSession_ConcurrentStatelessRequestIsolateCancellation`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L542`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L542) (`ClientSession_TargetedCancellation_DoesNotCancelOtherClientsReusingId`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L624`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L624) (`ConcurrentResponseIsolation_MixedNumericStringNullIds`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L111`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L111) (`HighConcurrencyResponseIsolation_RepeatedIdsAcrossCallers`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L217`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L217) (`TimeoutAndCancellationCleanup_DoesNotLeavePendingRequests`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L277`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L277) (`BackendDisconnectCleanup_ClearsPendingRequests`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L346`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L346) (`ConcurrentResponseIsolation_ExplicitNullId_Succeeds`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L419`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L419) (`ConcurrentResponseIsolation_Notification_DoesNotExpectResponse`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L482`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L482) (`ClientSession_ConcurrentStatelessRequestIsolateCancellation`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L532`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L532) (`ClientSession_TargetedCancellation_DoesNotCancelOtherClientsReusingId`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L614`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L614) (`ConcurrentResponseIsolation_MixedNumericStringNullIds`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/HttpTransportTests.cs#L11`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/HttpTransportTests.cs#L11) (`ResolveTokenAsync_ReturnsApiKey_WhenProviderNone`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-stdio-env.spec.ts#L8`](file:////containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-stdio-env.spec.ts#L8) (`should register STDIO server, verify card, and execute echo tool via Test Bench`)
 
@@ -1218,6 +1417,13 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/HttpTransportTests.cs#L146`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/HttpTransportTests.cs#L146) (`SendRequestAsync_ParsesMultiLineDataLinesInSse`)
+
+### `[TRANS-SSE-STREAM-LIFECYCLE]` SSE transport correctly resolves relative endpoint URLs and ignores keep-alive SSE comments.
+* **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
+* **Type:** Positive Feature Capability
+* **Verification Proofs (2):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L100`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L100) (`SseTransport_ResolvesRelativeEndpointUrl_AndProcessesKeepAliveComments`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L143`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L143) (`SseTransport_MultiplexesResponse_CorrelatingUpstreamRequestId`)
 
 ### `[UI-01]` opens confirmation modal and resolves true when confirmed
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -1442,58 +1648,18 @@
 > [!IMPORTANT]
 > The following guardrails define strict security boundaries, fail-closed fault invariants, and forbidden application states.
 
-### `[AUTH-01]` AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin)
+### `[AUTH-ADMIN-POLICY-REJECT-REGULAR]` AdminPolicy rejects principal with unconfigured regular role without Admin SID or Admin Group
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (48):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L13`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L13) (`AdminPolicy_Allows_Principal_With_AdminGroupName`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L47`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L47) (`AdminPolicy_Allows_Principal_With_AdminSid`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L81`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L81) (`AdminPolicy_Allows_Principal_With_ConfiguredAdminGroups`)
+* **Verification Proofs (2):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L116`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L116) (`AdminPolicy_Denies_StandardRole_WithoutAdminSidOrGroup`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L403`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L403) (`QuotaEndpoints_Admin_CanManageCustomUserQuotas`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs#L16`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs#L16) (`AdminPolicy_Denies_StandardRole_Without_AdminSid`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs#L58`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs#L58) (`AdminPolicy_Allows_Principal_With_AdminSid`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L258`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L258) (`AppKeysController_CreateAppKey_UnknownCategory_Admin_Succeeds`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L121`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L121) (`SSE_ValidatesIdentityPerMessage`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L228`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L228) (`SecurityValidationHelper_IsAdmin_RequiresAdminGroupSid`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L246`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L246) (`SecurityValidationHelper_IsAdmin_AllowsAdminGroupName`)
+
+### `[AUTH-ADMIN-REJECT-NONADMIN]` SecurityValidationHelper rejects non-admin groups and guest identities
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L260`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L260) (`SecurityValidationHelper_IsAdmin_RejectsNonAdminGroups`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L277`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L277) (`SecurityValidationHelper_IsAdmin_AllowsCustomAdminGroupsArray`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L292`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L292) (`SecurityValidationHelper_IsAdmin_AllowsMappedGroups`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L307`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L307) (`OidcIdentityProvider_DoesNotGrantAdminSid_FromGroupOrUserNames`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L170`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L170) (`Pipeline_Dashboard_Management_Suite`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L304`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L304) (`Pipeline_Permissions_Policy_And_Mapping_CRUD`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L348`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L348) (`Pipeline_GET_Clients_Returns200`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L357`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L357) (`Pipeline_GET_Permissions_Policies_Returns200`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L94`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L94) (`RBAC_AllowsUser_WhenPolicyMatchesRequiredGroup`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L200`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L200) (`ToolsList_FiltersByAuthorization`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L154`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L154) (`AdminBypass_AllowsAllCapabilities_EvenWithoutDbPolicies`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L212`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L212) (`ServerLevelPolicy_AuthorizesAllCapabilitiesUnderServer`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L317`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L317) (`ListToolsAsync_FiltersUnauthorizedTools`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L362`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L362) (`ListPromptsAsync_FiltersUnauthorizedPrompts`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L405`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L405) (`ListResourcesAsync_FiltersUnauthorizedResources`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L448`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L448) (`ListResourceTemplatesAsync_FiltersUnauthorizedTemplates`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L48`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L48) (`GetPolicies_ReturnsOk`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L114`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L114) (`DeletePolicy_DeletesSuccessfully`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L132`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L132) (`ResolveUserSidsAsync_ThrowsSecurityException_OnConnectionFailure`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L21`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L21) (`initializes with empty policies and mappings`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L38`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L38) (`fetches access policies and updates store`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L53`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L53) (`creates/saves a policy (ALLOW rule) and closes modal`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L156`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L156) (`fetches group mappings and updates store`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L171`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L171) (`saves a group mapping and closes mapping modal`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L314`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L314) (`handles policy modal open and close`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L330`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L330) (`handles mapping modal open and close`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L23`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L23) (`successfully loads user profile from /api/me`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L50`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L50) (`handles error response gracefully and sets unauthenticated user state`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L69`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L69) (`handles network failure gracefully`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L89`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L89) (`correctly handles non-admin user role extraction`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L113`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L113) (`successfully updates version and service from /health endpoint`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L128`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L128) (`keeps existing fallback version on error`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L12`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L12) (`renders Active Directory disabled initially, toggles on and exposes fields`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L46`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L46) (`fills LDAP parameters and executes test connection`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L28`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L28) (`renders create policy form with default inputs`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L44`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L44) (`renders edit policy form pre-filled with policy data`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L87`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L87) (`closes modal on cancel click`)
 
 ### `[AUTH-PERSONAL-APPKEY-CREATE]` Non-admin users can create personal App Keys up to quota
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -1508,6 +1674,12 @@
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L192`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L192) (`disables submit button when quota limit is reached`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L217`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L217) (`displays one-time secret result and copies plaintext key to clipboard`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L33`](file:////containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L33) (`Non-Admin Context: mints personal key, views snippet, and revokes key`)
+
+### `[GUARD-LDAP-FAIL-CLOSED]` LdapActiveDirectoryService fails closed with SecurityException when LDAP connection throws an exception.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L132`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L132) (`ResolveUserSidsAsync_ThrowsSecurityException_OnConnectionFailure`)
 
 ### `[DB-01]` SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data
 * **Category:** `DB` (Multi-Database Persistence & Migrations)
@@ -1550,51 +1722,10 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L57`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L57) (`IsAdmin_StandaloneMode_UntrustedIp_ReturnsFalse`)
 
-### `[GUARD-01]` ResourceRoutingManager throws KeyNotFoundException when reading an unregistered resource URI.
+### `[GUARD-01]` handles policy save failure with error toast
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (43):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L67`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L67) (`ReadResourceAsync_ThrowsKeyNotFound_WhenResourceNotRegistered`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L468`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L468) (`Pairwise_NullOrEmptyTarget_FailsClosed_ReturnsFalse`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L490`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L490) (`Pairwise_CorruptedAppKeyScopesJson_FailsClosed_ReturnsFalse`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L588`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L588) (`JsonRpcStateManager_Disconnect_PreventsRegistrationAndCancelsPending`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L312`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L312) (`CreateAppKey_ReturnsBadRequest_WhenNameMissing`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L324`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L324) (`CreateAppKey_EnforcesUserLimit_ForNonAdmin`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L369`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L369) (`RevokeAppKey_ReturnsNotFound_WhenIdDoesNotExist`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L378`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L378) (`RevokeAppKey_ReturnsForbid_WhenUserNotOwnerOrAdmin`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L433`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L433) (`QuotaEndpoints_Validation_ReturnsBadRequest_OnInvalidInputs`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProvidersControllerTests.cs#L90`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProvidersControllerTests.cs#L90) (`SaveSecretProvider_ReturnsBadRequest_WhenProviderNameMissing`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProvidersControllerTests.cs#L172`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProvidersControllerTests.cs#L172) (`SaveAuthProvider_ReturnsBadRequest_WhenProviderNameMissing`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L220`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L220) (`AppKeysController_CreateAppKey_UnknownCategory_NonAdmin_FailsWithBadRequest`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L239`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L239) (`AppKeysController_CreateAppKey_EmptyCategory_FailsWithBadRequest`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L304`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L304) (`ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L84`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L84) (`RBAC_DefaultsToDenied_WhenNoPoliciesConfigured`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L106`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L106) (`RBAC_RejectsUser_WhenPolicyRequiresDifferentGroup`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L118`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L118) (`RBAC_RejectsUser_OnExplicitDeny`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L130`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L130) (`CallToolAsync_ReturnsError_WhenUnauthorized`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L145`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L145) (`GetPromptAsync_ThrowsUnauthorized_WhenUnauthorized`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L159`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L159) (`ReadResourceAsync_ThrowsUnauthorized_WhenUnauthorized`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L125`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L125) (`GroupMapping_RejectsUser_WhenNoMappingExistsForRestrictedTarget`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L177`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L177) (`NonAdmin_DefaultsToDeny_WhenNoMatchingPoliciesConfigured`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L198`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L198) (`IsUserAuthorizedAsync_FailsClosed_OnNullOrWhitespaceTarget`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L235`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L235) (`ExplicitDeny_OverridesGroupAllow`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L613`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L613) (`CompleteAsync_ForPrompt_ThrowsUnauthorized_WhenCallerDenied`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L645`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L645) (`CompleteAsync_ForResourceTemplate_ThrowsUnauthorized_WhenCallerDenied`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L677`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L677) (`CompleteAsync_FailsClosed_OnUnknownOrUnresolvedTargets`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L97`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L97) (`CallToolAsync_ExecuteTool_ReturnsError_WhenNameMissing`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L124`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L124) (`CallToolAsync_ReturnsCancellationError_WhenCancelled`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L153`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L153) (`CallToolAsync_ThrowsKeyNotFound_WhenToolNotInRoutingTable`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L606`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L606) (`AuthMiddleware_Blocks_Unauthorized_Request`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L44`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L44) (`ValidateToolOrPromptName_ValidatesNames`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L270`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L270) (`CreateClient_ReturnsBadRequest_WhenDisplayNameMissing`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L283`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L283) (`CreateClient_ReturnsBadRequest_WhenCategoryScopeEmpty`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L300`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L300) (`CreateClient_Returns500_WhenOAuthClientRepositoryThrows`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L317`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L317) (`DeleteClient_Returns500_WhenOAuthClientRepositoryThrows`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L352`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L352) (`CleanupClients_Returns500_WhenOAuthClientRepositoryThrows`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L58`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L58) (`SavePolicy_ReturnsBadRequest_WhenTargetIdMissing`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L69`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L69) (`SavePolicy_ReturnsBadRequest_WhenRequiredGroupMissing`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L160`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L160) (`SaveMapping_ReturnsBadRequest_WhenExternalIdMissing`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L171`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L171) (`SaveMapping_ReturnsBadRequest_WhenInternalGroupMissing`)
+* **Verification Proofs (2):**
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L86`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L86) (`handles policy save failure with error toast`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L60`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L60) (`submits form with constructed payload for DENY policy`)
 
@@ -1602,8 +1733,8 @@
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (15):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L32`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L32) (`ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L53`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L53) (`ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L34`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L34) (`ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L55`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L55) (`ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L37`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L37) (`ResolveUserSidsAsync_ThrowsInvalidOperation_WhenDbConfigSpecifiesPlaintextLdap`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L78`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L78) (`ResolveUserSidsAsync_FailsClosedWithSecurityException_OnUnreachableServer`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L283`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L283) (`ResolveDbEncryptionKey_ThrowsInvalidOperationException_WhenVaultFails`)
@@ -1658,7 +1789,7 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuditLoggerTests.cs#L91`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuditLoggerTests.cs#L91) (`LogInvocationAsync_ThrowsInvalidOperationException_OnConnectionFailure`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuditLoggerTests.cs#L104`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuditLoggerTests.cs#L104) (`LogAdminActionAsync_ThrowsInvalidOperationException_OnConnectionFailure`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L173`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L173) (`RBAC_DefaultsToDenied_WhenDbExceptionThrown`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L104`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L104) (`AuditLogger_AuditFailClosed_RefusesInvocation_OnAuditWriteError`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L89`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L89) (`AuditLogger_AuditFailClosed_RefusesInvocation_OnAuditWriteError`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L124`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L124) (`DeletePolicy_Returns500_OnDbException`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L147`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L147) (`GetMappings_Returns500_OnDbException`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L193`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L193) (`SaveMapping_Returns500_OnDbException`)
@@ -1681,8 +1812,8 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L232`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L232) (`ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L59`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L59) (`DockerDiscovery_SkipsContainer_ResolvingToPrivateIp`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EmbeddingServiceTests.cs#L83`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EmbeddingServiceTests.cs#L83) (`ApiEmbeddingService_GetEmbeddingAsync_Throws_On_Http_Error`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L73`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L73) (`McpClient_NamedHttpClient_Applies_SsrfConnectCallback_AndBlocksPrivateIps`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1069`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1069) (`CustomFilesSanitization_PreventsDirectoryTraversal`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L58`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L58) (`McpClient_NamedHttpClient_Applies_SsrfConnectCallback_AndBlocksPrivateIps`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1054`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1054) (`CustomFilesSanitization_PreventsDirectoryTraversal`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L7`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L7) (`IsBlockedIp_ValidatesSpecialIpRanges`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L31`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L31) (`IsInSubnet_HandlesSpecialCases`)
 
@@ -1740,6 +1871,236 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L596`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L596) (`CallToolAsync_UnknownToolOrAction_ReturnsErrorResponse`)
 
+### `[GUARD-APPKEY-EMPTY-CATEGORY]` AppKey creation with empty or whitespace category must fail closed with BadRequest
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L239`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L239) (`AppKeysController_CreateAppKey_EmptyCategory_FailsWithBadRequest`)
+
+### `[GUARD-APPKEY-MALFORMED-SCOPES]` Corrupted AppKey scopes JSON must fail closed and reject execution
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L490`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L490) (`Pairwise_CorruptedAppKeyScopesJson_FailsClosed_ReturnsFalse`)
+
+### `[GUARD-APPKEY-MISSING-NAME]` Rejects AppKey creation with BadRequest when name is missing.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L312`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L312) (`CreateAppKey_ReturnsBadRequest_WhenNameMissing`)
+
+### `[GUARD-APPKEY-QUOTA-INVALID-PARAM]` Returns BadRequest on invalid quota override input parameters.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L433`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L433) (`QuotaEndpoints_Validation_ReturnsBadRequest_OnInvalidInputs`)
+
+### `[GUARD-APPKEY-REVOKE-FORBID]` Returns Forbid when non-owner/non-admin attempts to revoke an AppKey.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L378`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L378) (`RevokeAppKey_ReturnsForbid_WhenUserNotOwnerOrAdmin`)
+
+### `[GUARD-APPKEY-REVOKE-NOTFOUND]` Returns NotFound when revoking non-existent AppKey ID.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L369`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L369) (`RevokeAppKey_ReturnsNotFound_WhenIdDoesNotExist`)
+
+### `[GUARD-APPKEY-UNKNOWN-CATEGORY]` Non-admin callers cannot create AppKeys with unconfigured categories
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L220`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L220) (`AppKeysController_CreateAppKey_UnknownCategory_NonAdmin_FailsWithBadRequest`)
+
+### `[GUARD-APPKEY-USER-QUOTA]` Enforces user AppKey limit and returns BadRequest when quota is exceeded.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L324`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L324) (`CreateAppKey_EnforcesUserLimit_ForNonAdmin`)
+
+### `[GUARD-AUTH-MIDDLEWARE-UNAUTHORIZED]` Auth middleware blocks unauthorized requests with HTTP 401 Unauthorized.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L591`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L591) (`AuthMiddleware_Blocks_Unauthorized_Request`)
+
+### `[GUARD-AUTH-NULL-TARGET]` Null or empty capability targets must immediately fail closed and return unauthorized
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L468`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L468) (`Pairwise_NullOrEmptyTarget_FailsClosed_ReturnsFalse`)
+
+### `[GUARD-CLIENT-CLEANUP-REPO-ERR]` CleanupClients returns 500 when repository throws.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L352`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L352) (`CleanupClients_Returns500_WhenOAuthClientRepositoryThrows`)
+
+### `[GUARD-CLIENT-CREATE-REPO-ERR]` CreateClient returns 500 when repository throws
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L300`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L300) (`CreateClient_Returns500_WhenOAuthClientRepositoryThrows`)
+
+### `[GUARD-CLIENT-DELETE-REPO-ERR]` DeleteClient returns 500 when repository throws
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L317`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L317) (`DeleteClient_Returns500_WhenOAuthClientRepositoryThrows`)
+
+### `[GUARD-CLIENT-EMPTY-CATEGORY]` Client creation with empty category scope must fail closed with BadRequest
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L304`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L304) (`ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest`)
+
+### `[GUARD-CLIENT-EMPTY-SCOPE]` CreateClient fails closed when category scope is empty
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L283`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L283) (`CreateClient_ReturnsBadRequest_WhenCategoryScopeEmpty`)
+
+### `[GUARD-CLIENT-MISSING-NAME]` CreateClient fails closed when DisplayName is missing
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L270`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L270) (`CreateClient_ReturnsBadRequest_WhenDisplayNameMissing`)
+
+### `[GUARD-MAPPING-MISSING-EXT-ID]` PermissionsController rejects mapping save missing external ID with BadRequest.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L160`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L160) (`SaveMapping_ReturnsBadRequest_WhenExternalIdMissing`)
+
+### `[GUARD-MAPPING-MISSING-GROUP]` PermissionsController rejects mapping save missing internal group with BadRequest.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L171`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L171) (`SaveMapping_ReturnsBadRequest_WhenInternalGroupMissing`)
+
+### `[GUARD-MAPPING-UNMAPPED-DENY]` Fails closed and denies access when no valid group mapping exists for a restricted target.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L125`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L125) (`GroupMapping_RejectsUser_WhenNoMappingExistsForRestrictedTarget`)
+
+### `[GUARD-POLICY-MISSING-GROUP]` PermissionsController rejects policy saves missing requiredGroup with BadRequest.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L69`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L69) (`SavePolicy_ReturnsBadRequest_WhenRequiredGroupMissing`)
+
+### `[GUARD-POLICY-MISSING-TARGET]` PermissionsController rejects policy saves missing targetId with BadRequest.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L58`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L58) (`SavePolicy_ReturnsBadRequest_WhenTargetIdMissing`)
+
+### `[GUARD-PROVIDER-MISSING-AUTH-NAME]` ProvidersController rejects saving auth provider without providerName with BadRequest.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProvidersControllerTests.cs#L172`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProvidersControllerTests.cs#L172) (`SaveAuthProvider_ReturnsBadRequest_WhenProviderNameMissing`)
+
+### `[GUARD-PROVIDER-MISSING-SECRET-NAME]` ProvidersController rejects saving secret provider without providerName with BadRequest.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProvidersControllerTests.cs#L90`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProvidersControllerTests.cs#L90) (`SaveSecretProvider_ReturnsBadRequest_WhenProviderNameMissing`)
+
+### `[GUARD-RBAC-COMPLETION-PROMPT]` completion/complete throws UnauthorizedAccessException when caller lacks prompt permissions.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L613`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L613) (`CompleteAsync_ForPrompt_ThrowsUnauthorized_WhenCallerDenied`)
+
+### `[GUARD-RBAC-COMPLETION-TEMPLATE]` completion/complete throws UnauthorizedAccessException when caller lacks resource template permissions.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L645`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L645) (`CompleteAsync_ForResourceTemplate_ThrowsUnauthorized_WhenCallerDenied`)
+
+### `[GUARD-RBAC-COMPLETION-UNRESOLVED]` completion/complete fails closed on unknown or unresolved completion references.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L677`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L677) (`CompleteAsync_FailsClosed_OnUnknownOrUnresolvedTargets`)
+
+### `[GUARD-RBAC-DEFAULT-DENY]` RBAC defaults to deny when no matching access policies are configured.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (2):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L84`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L84) (`RBAC_DefaultsToDenied_WhenNoPoliciesConfigured`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L177`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L177) (`NonAdmin_DefaultsToDeny_WhenNoMatchingPoliciesConfigured`)
+
+### `[GUARD-RBAC-EXPLICIT-DENY]` RBAC enforces explicit policy denials to reject unauthorized callers.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (2):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L118`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L118) (`RBAC_RejectsUser_OnExplicitDeny`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L235`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L235) (`ExplicitDeny_OverridesGroupAllow`)
+
+### `[GUARD-RBAC-MISSING-GROUP]` RBAC denies access when user does not possess the required security group.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L106`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L106) (`RBAC_RejectsUser_WhenPolicyRequiresDifferentGroup`)
+
+### `[GUARD-RBAC-NULL-TARGET]` IsUserAuthorizedAsync fails closed on null, empty, or whitespace target identifiers.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L198`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L198) (`IsUserAuthorizedAsync_FailsClosed_OnNullOrWhitespaceTarget`)
+
+### `[GUARD-RBAC-PROMPT-UNAUTHORIZED]` GetPromptAsync throws UnauthorizedAccessException when user lacks permissions for target prompt.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L145`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L145) (`GetPromptAsync_ThrowsUnauthorized_WhenUnauthorized`)
+
+### `[GUARD-RBAC-RESOURCE-UNAUTHORIZED]` ReadResourceAsync throws UnauthorizedAccessException when user lacks permissions for target resource.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L159`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L159) (`ReadResourceAsync_ThrowsUnauthorized_WhenUnauthorized`)
+
+### `[GUARD-RBAC-TOOL-UNAUTHORIZED]` CallToolAsync returns a formatted security error when user is unauthorized.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L130`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L130) (`CallToolAsync_ReturnsError_WhenUnauthorized`)
+
+### `[GUARD-ROUTING-UNKNOWN-TOOL]` ToolRoutingManager throws KeyNotFoundException when calling a tool not registered in the routing table.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L187`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L187) (`CallToolAsync_ThrowsKeyNotFound_WhenToolNotInRoutingTable`)
+
+### `[GUARD-ROUTING-UNREGISTERED-RESOURCE]` ResourceRoutingManager throws KeyNotFoundException when reading an unregistered resource URI.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L67`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L67) (`ReadResourceAsync_ThrowsKeyNotFound_WhenResourceNotRegistered`)
+
+### `[GUARD-STATE-DISCONNECT-CANCELLATION]` JsonRpcStateManager rejects registration and cancels pending completions upon disconnect.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L578`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L578) (`JsonRpcStateManager_Disconnect_PreventsRegistrationAndCancelsPending`)
+
+### `[GUARD-TOOL-CANCELLATION]` ToolRoutingManager propagates task cancellation gracefully with a standardized JSON-RPC error response.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L155`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L155) (`CallToolAsync_ReturnsCancellationError_WhenCancelled`)
+
+### `[GUARD-TOOL-MANDATORY-PARAMS]` ToolRoutingManager returns an error when execute_tool is invoked without the mandatory tool name parameter.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L125`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L125) (`CallToolAsync_ExecuteTool_ReturnsError_WhenNameMissing`)
+
 ### `[MCP-ADMIN-TOOL-TEST-CALL-ERROR]` AdminMcpServer test_tool_call propagates downstream backend errors with visibility.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
@@ -1759,7 +2120,7 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L455`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L455) (`NormalizeTargetToolName_Returns_Ambiguity_Error_Listing_Aliases_For_Duplicates`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L489`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L489) (`NormalizeTargetToolName_Returns_Ambiguity_Error_Listing_Aliases_For_Duplicates`)
 
 ### `[MCP-29]` ServerValidationHelper rejects invalid characters in Alias.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1872,8 +2233,8 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuditLoggerTests.cs#L75`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuditLoggerTests.cs#L75) (`LogAdminActionAsync_WritesEntryToDatabase`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L393`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L393) (`Pipeline_GET_Audit_Returns200`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L420`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L420) (`Pipeline_GET_Logs_Returns200`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L143`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L143) (`AuditLogger_RecordsPerRequestActor_NotHandshakeActor`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1134`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1134) (`Mcp_SessionId_IsOpaque_NotBearerToken`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L128`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L128) (`AuditLogger_RecordsPerRequestActor_NotHandshakeActor`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1119`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L1119) (`Mcp_SessionId_IsOpaque_NotBearerToken`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PiiSanitizerTests.cs#L5`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PiiSanitizerTests.cs#L5) (`SanitizePayload_Redacts_Bearer_Tokens`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PiiSanitizerTests.cs#L16`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PiiSanitizerTests.cs#L16) (`SanitizePayload_Redacts_Api_Keys_And_Passwords`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PiiSanitizerTests.cs#L29`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PiiSanitizerTests.cs#L29) (`SanitizePayload_Redacts_ConnectionString_Passwords`)
@@ -1940,7 +2301,7 @@
 | :--- | :---: | :--- | :--- | :--- | :--- |
 | `AUTH-001` | Positive | `AUTH` | Verify DatabaseUserSecretStore encrypts and decrypts secret correctly. | [`UserSecretStoreTests.cs:L8`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserSecretStoreTests.cs#L8) | Backend xUnit |
 | `AUTH-002` | Positive | `AUTH` | Verify UserCredentialsController returns configured server IDs. | [`UserCredentialsControllerTests.cs:L11`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserCredentialsControllerTests.cs#L11) | Backend xUnit |
-| `AUTH-01` | **Guardrail** | `AUTH` | AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin) | [`AdminPolicyHybridAuthTests.cs:L13`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L13) | Backend xUnit |
+| `AUTH-01` | Positive | `AUTH` | initializes with empty policies and mappings | [`usePolicyStore.test.ts:L21`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L21) | Frontend Vitest |
 | `AUTH-02` | Positive | `AUTH` | AppKey scopes restrict access precisely across all MCP capabilities and backend targets | [`PairwiseIntegrationMatrixTests.cs:L242`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L242) | Backend xUnit |
 | `AUTH-03` | Positive | `AUTH` | Auth middleware allows bypass routes and extracts SSO headers in a case-insensitive manner. | [`ChallengerTests.cs:L603`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L603) | Backend xUnit |
 | `AUTH-04` | Positive | `AUTH` | ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP | [`ActiveDirectoryWindowsIdentityTests.cs:L12`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs#L12) | Backend xUnit |
@@ -1957,20 +2318,48 @@
 | `AUTH-37` | Positive | `AUTH` | AppKeys with server and category scopes enforce precise tool execution boundaries | [`SingleUserHomelabTests.cs:L168`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L168) | Backend xUnit |
 | `AUTH-38` | Positive | `AUTH` | LAN CIDR network configuration allows standalone web dashboard access from local subnet | [`SingleUserHomelabTests.cs:L183`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L183) | Backend xUnit |
 | `AUTH-39` | Positive | `AUTH` | Zero-config startup defaults enterprise auth providers and secret providers to disabled | [`SingleUserHomelabTests.cs:L211`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L211) | Backend xUnit |
+| `AUTH-ADMIN-FULL-ACCESS` | Positive | `AUTH` | Administrator identities bypass granular capability policies and have full access to all MCP methods. | [`UnifiedMcpAuthorizationTests.cs:L154`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L154) | Backend xUnit |
+| `AUTH-ADMIN-POLICY-ALLOW-GROUPNAME` | Positive | `AUTH` | AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin) | [`AdminPolicyHybridAuthTests.cs:L13`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L13) | Backend xUnit |
+| `AUTH-ADMIN-POLICY-ALLOW-GROUPS-ARRAY` | Positive | `AUTH` | AdminPolicy allows principal with configured Admin Groups array | [`AdminPolicyHybridAuthTests.cs:L81`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L81) | Backend xUnit |
+| `AUTH-ADMIN-POLICY-ALLOW-SID` | Positive | `AUTH` | AdminPolicy allows principal with configured Admin SID | [`AdminPolicyHybridAuthTests.cs:L47`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L47) | Backend xUnit |
+| `AUTH-ADMIN-POLICY-REJECT-REGULAR` | **Guardrail** | `AUTH` | AdminPolicy rejects principal with unconfigured regular role without Admin SID or Admin Group | [`AdminPolicyHybridAuthTests.cs:L116`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L116) | Backend xUnit |
+| `AUTH-ADMIN-REJECT-NONADMIN` | **Guardrail** | `AUTH` | SecurityValidationHelper rejects non-admin groups and guest identities | [`IdentityProviderTests.cs:L260`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L260) | Backend xUnit |
+| `AUTH-ADMIN-VALIDATE-GROUPNAME` | Positive | `AUTH` | SecurityValidationHelper authorizes principals via Admin Group Name | [`IdentityProviderTests.cs:L246`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L246) | Backend xUnit |
+| `AUTH-ADMIN-VALIDATE-GROUPS-ARRAY` | Positive | `AUTH` | SecurityValidationHelper authorizes principals via custom configured Admin:Groups array | [`IdentityProviderTests.cs:L277`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L277) | Backend xUnit |
+| `AUTH-ADMIN-VALIDATE-MAPPED-GROUPS` | Positive | `AUTH` | SecurityValidationHelper authorizes principals via mappedGroups database resolution | [`IdentityProviderTests.cs:L292`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L292) | Backend xUnit |
+| `AUTH-ADMIN-VALIDATE-SID` | Positive | `AUTH` | SecurityValidationHelper authorizes principals via Admin Group SID | [`IdentityProviderTests.cs:L228`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L228) | Backend xUnit |
+| `AUTH-APPKEY-ADMIN-FUTURE-CATEGORY` | Positive | `AUTH` | Admin callers can create forward-looking AppKeys for unconfigured categories | [`CategoryScopedAppKeysTests.cs:L258`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L258) | Backend xUnit |
+| `AUTH-APPKEY-ADMIN-QUOTA` | Positive | `AUTH` | Administrator can create, update, and delete custom user quota overrides. | [`AppKeysControllerTests.cs:L403`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L403) | Backend xUnit |
 | `AUTH-APPKEY-ADMIN-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with admin scope grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L79`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L79) | Backend xUnit |
 | `AUTH-APPKEY-ITEMS-SCOPE-ALLOW` | Positive | `AUTH` | SecurityValidationHelper recognizes admin scopes in HttpContext.Items. | [`StandaloneAdminAuthTests.cs:L255`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L255) | Backend xUnit |
 | `AUTH-APPKEY-WILDCARD-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with wildcard scope '*' grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L140`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L140) | Backend xUnit |
 | `AUTH-COMPACT-APPKEY-TAXONOMY` | Positive | `AUTH` | Generates compact ~32-character Base62 AppKeys with semantic prefixes. | [`AppKeyAuthenticationTests.cs:L417`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L417) | Backend xUnit |
 | `AUTH-CUSTOM-ADMIN-KEY-SEEDING` | Positive | `AUTH` | Seeds custom MCG_ADMIN_AUTH_KEY when provided in configuration. | [`DatabaseSeederServiceTests.cs:L189`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L189) | Backend xUnit |
+| `AUTH-OIDC-PRESERVE-GROUP-NAMES` | Positive | `AUTH` | OidcIdentityProvider preserves group names without synthesizing Windows SIDs | [`IdentityProviderTests.cs:L307`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L307) | Backend xUnit |
+| `AUTH-PERM-POLICY-LIST` | Positive | `AUTH` | PermissionsController returns access policies list with 200 OK. | [`PermissionsControllerTests.cs:L48`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L48) | Backend xUnit |
+| `AUTH-PERM-POLICY-REMOVE` | Positive | `AUTH` | PermissionsController removes access policies. | [`PermissionsControllerTests.cs:L114`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L114) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-CREATE` | **Guardrail** | `AUTH` | Non-admin users can create personal App Keys up to quota | [`AppKeysControllerTests.cs:L191`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L191) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-LIST` | Positive | `AUTH` | Non-admin users can view their personal App Keys | [`AppKeysControllerTests.cs:L125`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L125) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE` | Positive | `AUTH` | Custom user quotas override default limit | [`AppKeysControllerTests.cs:L223`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L223) | Backend xUnit |
+| `AUTH-PIPELINE-ADMIN-DASHBOARD` | Positive | `AUTH` | Dashboard management API suite executes for authorized administrators. | [`PipelineIntegrationTests.cs:L170`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L170) | Backend xUnit |
+| `AUTH-PIPELINE-GET-CLIENTS` | Positive | `AUTH` | GET /api/clients returns active client sessions with 200 OK. | [`PipelineIntegrationTests.cs:L348`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L348) | Backend xUnit |
+| `AUTH-PIPELINE-GET-POLICIES` | Positive | `AUTH` | GET /api/permissions/policies returns access policies with 200 OK. | [`PipelineIntegrationTests.cs:L357`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L357) | Backend xUnit |
+| `AUTH-PIPELINE-PERM-CRUD` | Positive | `AUTH` | Permissions policy and group mapping CRUD endpoints manage RBAC rules. | [`PipelineIntegrationTests.cs:L304`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L304) | Backend xUnit |
 | `AUTH-PREFIX-EXTRACTION` | Positive | `AUTH` | ExtractKeyPrefix parses semantic prefixes, Base62 selectors, and legacy tokens accurately. | [`AppKeyAuthenticationTests.cs:L451`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L451) | Backend xUnit |
 | `AUTH-QUERY-TOKEN-EXTRACTION` | Positive | `AUTH` | Query string token middleware extracts access_token or token query parameter to Authorization header. | [`EndpointAuthorizationTests.cs:L7`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EndpointAuthorizationTests.cs#L7) | Backend xUnit |
+| `AUTH-RBAC-GROUP-ALLOW` | Positive | `AUTH` | RBAC grants access when user claims match the required policy security group. | [`FineGrainedRbacTests.cs:L94`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L94) | Backend xUnit |
+| `AUTH-RBAC-PROMPT-FILTER` | Positive | `AUTH` | prompts/list filters exposed prompts according to caller permissions. | [`UnifiedMcpAuthorizationTests.cs:L362`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L362) | Backend xUnit |
+| `AUTH-RBAC-RESOURCE-FILTER` | Positive | `AUTH` | resources/list filters exposed resources according to caller permissions. | [`UnifiedMcpAuthorizationTests.cs:L405`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L405) | Backend xUnit |
+| `AUTH-RBAC-TEMPLATE-FILTER` | Positive | `AUTH` | resources/templates/list filters exposed resource templates according to caller permissions. | [`UnifiedMcpAuthorizationTests.cs:L448`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L448) | Backend xUnit |
+| `AUTH-RBAC-TOOL-FILTER` | Positive | `AUTH` | tools/list filters exposed backend tools according to caller permissions. | [`UnifiedMcpAuthorizationTests.cs:L317`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L317) | Backend xUnit |
+| `AUTH-RBAC-TOOLS-FILTER` | Positive | `AUTH` | tools/list filters exposed backend tools according to caller role and RBAC policy permissions. | [`FineGrainedRbacTests.cs:L200`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L200) | Backend xUnit |
+| `AUTH-SERVER-LEVEL-POLICY` | Positive | `AUTH` | Server-level access policies authorize all child tools, prompts, and resources under that server. | [`UnifiedMcpAuthorizationTests.cs:L212`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L212) | Backend xUnit |
+| `AUTH-SSE-PER-MESSAGE-IDENTITY` | Positive | `AUTH` | SSE streams re-validate caller identity and permissions per message payload. | [`IdentityProviderTests.cs:L121`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L121) | Backend xUnit |
 | `AUTH-STANDALONE-ADMINPOLICY-LOOPBACK-ALLOW` | Positive | `AUTH` | AdminPolicy succeeds in standalone mode for unauthenticated loopback requests. | [`StandaloneAdminAuthTests.cs:L176`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L176) | Backend xUnit |
 | `AUTH-STANDALONE-CUSTOM-CIDR-ALLOW` | Positive | `AUTH` | Standalone mode grants admin access to client IPs matching Admin:StandaloneAllowedNetworks CIDR ranges. | [`StandaloneAdminAuthTests.cs:L35`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L35) | Backend xUnit |
 | `AUTH-STANDALONE-LOOPBACK-ALLOW` | Positive | `AUTH` | Standalone mode without external IDP grants admin access to loopback IP addresses. | [`StandaloneAdminAuthTests.cs:L14`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L14) | Backend xUnit |
 | `AUTH-SYSTEM-APPKEY-SEPARATION` | Positive | `AUTH` | System keys are distinct and require admin permissions | [`AppKeysControllerTests.cs:L151`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L151) | Backend xUnit |
+| `GUARD-LDAP-FAIL-CLOSED` | **Guardrail** | `AUTH` | LdapActiveDirectoryService fails closed with SecurityException when LDAP connection throws an exception. | [`LdapActiveDirectoryServiceTests.cs:L132`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L132) | Backend xUnit |
 | `UI-100` | Positive | `AUTH` | initializes with empty providers | [`useProviderStore.test.ts:L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useProviderStore.test.ts#L1) | Frontend Vitest |
 | `UI-101` | Positive | `AUTH` | should initialize with default values | [`useUserStore.test.ts:L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useUserStore.test.ts#L1) | Frontend Vitest |
 | `UI-114` | Positive | `AUTH` | renders nothing when isPolicyModalOpen is false | [`PolicyModal.test.tsx:L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/PolicyModal.test.tsx#L1) | Frontend Vitest |
@@ -1990,8 +2379,8 @@
 | `AUTH-EXTERNAL-IDP-DENIES-ANONYMOUS-LOOPBACK` | **Guardrail** | `GUARD` | When an external IDP is configured, anonymous loopback requests do not bypass authentication. | [`StandaloneAdminAuthTests.cs:L224`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L224) | Backend xUnit |
 | `AUTH-STANDALONE-ADMINPOLICY-EXTERNAL-DENY` | **Guardrail** | `GUARD` | AdminPolicy rejects unauthenticated requests from non-whitelisted external IPs in standalone mode. | [`StandaloneAdminAuthTests.cs:L200`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L200) | Backend xUnit |
 | `AUTH-STANDALONE-EXTERNAL-DENY` | **Guardrail** | `GUARD` | Standalone mode denies admin access to non-whitelisted external IPs without an Admin AppKey. | [`StandaloneAdminAuthTests.cs:L57`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L57) | Backend xUnit |
-| `GUARD-01` | **Guardrail** | `GUARD` | ResourceRoutingManager throws KeyNotFoundException when reading an unregistered resource URI. | [`ResourceRoutingManagerTests.cs:L67`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L67) | Backend xUnit |
-| `GUARD-02` | **Guardrail** | `GUARD` | SSE transport fails closed with SecurityException when secret provider resolution fails | [`SseTransportTests.cs:L32`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L32) | Backend xUnit |
+| `GUARD-01` | **Guardrail** | `GUARD` | handles policy save failure with error toast | [`usePolicyStore.test.ts:L86`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L86) | Frontend Vitest |
+| `GUARD-02` | **Guardrail** | `GUARD` | SSE transport fails closed with SecurityException when secret provider resolution fails | [`SseTransportTests.cs:L34`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L34) | Backend xUnit |
 | `GUARD-03` | **Guardrail** | `GUARD` | CompositeSecretRetriever throws InvalidOperationException when an unregistered secret provider is requested. | [`CompositeSecretRetrieverTests.cs:L17`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CompositeSecretRetrieverTests.cs#L17) | Backend xUnit |
 | `GUARD-04` | **Guardrail** | `GUARD` | Malformed completion payloads or unmapped backends must fail closed safely | [`PairwiseIntegrationMatrixTests.cs:L508`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L508) | Backend xUnit |
 | `GUARD-05` | **Guardrail** | `GUARD` | Socket-level SSRF protection blocks private and loopback IP connections unless explicitly allowlisted. | [`ChallengerTests.cs:L712`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L712) | Backend xUnit |
@@ -2002,12 +2391,51 @@
 | `GUARD-ADMIN-PROVIDERS-LDAP-PLAINTEXT` | **Guardrail** | `GUARD` | manage_providers rejects unencrypted LDAP connections on port 389. | [`AdminToolsParityTests.cs:L650`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs#L650) | Backend xUnit |
 | `GUARD-ADMIN-SERVERS-VALIDATION` | **Guardrail** | `GUARD` | Verifies that the manage_servers tool accurately enforces validation by rejecting malformed transport types, missing required parameters, and requests for non-existent servers. | [`AdminToolsParityTests.cs:L324`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs#L324) | Backend xUnit |
 | `GUARD-ADMIN-UNKNOWN-TOOL` | **Guardrail** | `GUARD` | AdminMcpServer returns an error response for unknown tool or action invocations. | [`AdminMcpServerTests.cs:L596`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L596) | Backend xUnit |
+| `GUARD-APPKEY-EMPTY-CATEGORY` | **Guardrail** | `GUARD` | AppKey creation with empty or whitespace category must fail closed with BadRequest | [`CategoryScopedAppKeysTests.cs:L239`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L239) | Backend xUnit |
+| `GUARD-APPKEY-MALFORMED-SCOPES` | **Guardrail** | `GUARD` | Corrupted AppKey scopes JSON must fail closed and reject execution | [`PairwiseIntegrationMatrixTests.cs:L490`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L490) | Backend xUnit |
+| `GUARD-APPKEY-MISSING-NAME` | **Guardrail** | `GUARD` | Rejects AppKey creation with BadRequest when name is missing. | [`AppKeysControllerTests.cs:L312`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L312) | Backend xUnit |
+| `GUARD-APPKEY-QUOTA-INVALID-PARAM` | **Guardrail** | `GUARD` | Returns BadRequest on invalid quota override input parameters. | [`AppKeysControllerTests.cs:L433`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L433) | Backend xUnit |
+| `GUARD-APPKEY-REVOKE-FORBID` | **Guardrail** | `GUARD` | Returns Forbid when non-owner/non-admin attempts to revoke an AppKey. | [`AppKeysControllerTests.cs:L378`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L378) | Backend xUnit |
+| `GUARD-APPKEY-REVOKE-NOTFOUND` | **Guardrail** | `GUARD` | Returns NotFound when revoking non-existent AppKey ID. | [`AppKeysControllerTests.cs:L369`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L369) | Backend xUnit |
+| `GUARD-APPKEY-UNKNOWN-CATEGORY` | **Guardrail** | `GUARD` | Non-admin callers cannot create AppKeys with unconfigured categories | [`CategoryScopedAppKeysTests.cs:L220`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L220) | Backend xUnit |
+| `GUARD-APPKEY-USER-QUOTA` | **Guardrail** | `GUARD` | Enforces user AppKey limit and returns BadRequest when quota is exceeded. | [`AppKeysControllerTests.cs:L324`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L324) | Backend xUnit |
+| `GUARD-AUTH-MIDDLEWARE-UNAUTHORIZED` | **Guardrail** | `GUARD` | Auth middleware blocks unauthorized requests with HTTP 401 Unauthorized. | [`McpIntegrationTests.cs:L591`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L591) | Backend xUnit |
+| `GUARD-AUTH-NULL-TARGET` | **Guardrail** | `GUARD` | Null or empty capability targets must immediately fail closed and return unauthorized | [`PairwiseIntegrationMatrixTests.cs:L468`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L468) | Backend xUnit |
+| `GUARD-CLIENT-CLEANUP-REPO-ERR` | **Guardrail** | `GUARD` | CleanupClients returns 500 when repository throws. | [`ClientsControllerTests.cs:L352`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L352) | Backend xUnit |
+| `GUARD-CLIENT-CREATE-REPO-ERR` | **Guardrail** | `GUARD` | CreateClient returns 500 when repository throws | [`ClientsControllerTests.cs:L300`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L300) | Backend xUnit |
+| `GUARD-CLIENT-DELETE-REPO-ERR` | **Guardrail** | `GUARD` | DeleteClient returns 500 when repository throws | [`ClientsControllerTests.cs:L317`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L317) | Backend xUnit |
+| `GUARD-CLIENT-EMPTY-CATEGORY` | **Guardrail** | `GUARD` | Client creation with empty category scope must fail closed with BadRequest | [`CategoryScopedAppKeysTests.cs:L304`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L304) | Backend xUnit |
+| `GUARD-CLIENT-EMPTY-SCOPE` | **Guardrail** | `GUARD` | CreateClient fails closed when category scope is empty | [`ClientsControllerTests.cs:L283`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L283) | Backend xUnit |
+| `GUARD-CLIENT-MISSING-NAME` | **Guardrail** | `GUARD` | CreateClient fails closed when DisplayName is missing | [`ClientsControllerTests.cs:L270`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L270) | Backend xUnit |
 | `GUARD-DISPOSED-01` | Positive | `GUARD` | Stateless HTTP POST lifecycle: HTTP response completes, HttpContext is marked disposed, background backend initialization completes successfully without ObjectDisposedException. | [`DownstreamSessionIntegrationTests.cs:L225`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L225) | Backend xUnit |
+| `GUARD-MAPPING-MISSING-EXT-ID` | **Guardrail** | `GUARD` | PermissionsController rejects mapping save missing external ID with BadRequest. | [`PermissionsControllerTests.cs:L160`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L160) | Backend xUnit |
+| `GUARD-MAPPING-MISSING-GROUP` | **Guardrail** | `GUARD` | PermissionsController rejects mapping save missing internal group with BadRequest. | [`PermissionsControllerTests.cs:L171`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L171) | Backend xUnit |
+| `GUARD-MAPPING-UNMAPPED-DENY` | **Guardrail** | `GUARD` | Fails closed and denies access when no valid group mapping exists for a restricted target. | [`GroupMappingsAndSpecAuthTests.cs:L125`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L125) | Backend xUnit |
+| `GUARD-POLICY-MISSING-GROUP` | **Guardrail** | `GUARD` | PermissionsController rejects policy saves missing requiredGroup with BadRequest. | [`PermissionsControllerTests.cs:L69`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L69) | Backend xUnit |
+| `GUARD-POLICY-MISSING-TARGET` | **Guardrail** | `GUARD` | PermissionsController rejects policy saves missing targetId with BadRequest. | [`PermissionsControllerTests.cs:L58`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L58) | Backend xUnit |
+| `GUARD-PROVIDER-MISSING-AUTH-NAME` | **Guardrail** | `GUARD` | ProvidersController rejects saving auth provider without providerName with BadRequest. | [`ProvidersControllerTests.cs:L172`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProvidersControllerTests.cs#L172) | Backend xUnit |
+| `GUARD-PROVIDER-MISSING-SECRET-NAME` | **Guardrail** | `GUARD` | ProvidersController rejects saving secret provider without providerName with BadRequest. | [`ProvidersControllerTests.cs:L90`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProvidersControllerTests.cs#L90) | Backend xUnit |
+| `GUARD-RBAC-COMPLETION-PROMPT` | **Guardrail** | `GUARD` | completion/complete throws UnauthorizedAccessException when caller lacks prompt permissions. | [`UnifiedMcpAuthorizationTests.cs:L613`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L613) | Backend xUnit |
+| `GUARD-RBAC-COMPLETION-TEMPLATE` | **Guardrail** | `GUARD` | completion/complete throws UnauthorizedAccessException when caller lacks resource template permissions. | [`UnifiedMcpAuthorizationTests.cs:L645`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L645) | Backend xUnit |
+| `GUARD-RBAC-COMPLETION-UNRESOLVED` | **Guardrail** | `GUARD` | completion/complete fails closed on unknown or unresolved completion references. | [`UnifiedMcpAuthorizationTests.cs:L677`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L677) | Backend xUnit |
+| `GUARD-RBAC-DEFAULT-DENY` | **Guardrail** | `GUARD` | RBAC defaults to deny when no matching access policies are configured. | [`FineGrainedRbacTests.cs:L84`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L84) | Backend xUnit |
+| `GUARD-RBAC-EXPLICIT-DENY` | **Guardrail** | `GUARD` | RBAC enforces explicit policy denials to reject unauthorized callers. | [`FineGrainedRbacTests.cs:L118`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L118) | Backend xUnit |
+| `GUARD-RBAC-MISSING-GROUP` | **Guardrail** | `GUARD` | RBAC denies access when user does not possess the required security group. | [`FineGrainedRbacTests.cs:L106`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L106) | Backend xUnit |
+| `GUARD-RBAC-NULL-TARGET` | **Guardrail** | `GUARD` | IsUserAuthorizedAsync fails closed on null, empty, or whitespace target identifiers. | [`UnifiedMcpAuthorizationTests.cs:L198`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L198) | Backend xUnit |
+| `GUARD-RBAC-PROMPT-UNAUTHORIZED` | **Guardrail** | `GUARD` | GetPromptAsync throws UnauthorizedAccessException when user lacks permissions for target prompt. | [`FineGrainedRbacTests.cs:L145`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L145) | Backend xUnit |
+| `GUARD-RBAC-RESOURCE-UNAUTHORIZED` | **Guardrail** | `GUARD` | ReadResourceAsync throws UnauthorizedAccessException when user lacks permissions for target resource. | [`FineGrainedRbacTests.cs:L159`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L159) | Backend xUnit |
+| `GUARD-RBAC-TOOL-UNAUTHORIZED` | **Guardrail** | `GUARD` | CallToolAsync returns a formatted security error when user is unauthorized. | [`FineGrainedRbacTests.cs:L130`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L130) | Backend xUnit |
+| `GUARD-ROUTING-UNKNOWN-TOOL` | **Guardrail** | `GUARD` | ToolRoutingManager throws KeyNotFoundException when calling a tool not registered in the routing table. | [`ToolRoutingManagerTests.cs:L187`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L187) | Backend xUnit |
+| `GUARD-ROUTING-UNREGISTERED-RESOURCE` | **Guardrail** | `GUARD` | ResourceRoutingManager throws KeyNotFoundException when reading an unregistered resource URI. | [`ResourceRoutingManagerTests.cs:L67`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L67) | Backend xUnit |
+| `GUARD-SECURITY-IDENTIFIER-VALIDATION` | Positive | `GUARD` | SecurityValidationHelper validates tool and prompt names against namespaced server identifiers. | [`SecurityValidationHelperTests.cs:L44`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L44) | Backend xUnit |
+| `GUARD-STATE-DISCONNECT-CANCELLATION` | **Guardrail** | `GUARD` | JsonRpcStateManager rejects registration and cancels pending completions upon disconnect. | [`ConcurrentResponseIsolationTests.cs:L578`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L578) | Backend xUnit |
+| `GUARD-TOOL-CANCELLATION` | **Guardrail** | `GUARD` | ToolRoutingManager propagates task cancellation gracefully with a standardized JSON-RPC error response. | [`ToolRoutingManagerTests.cs:L155`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L155) | Backend xUnit |
+| `GUARD-TOOL-MANDATORY-PARAMS` | **Guardrail** | `GUARD` | ToolRoutingManager returns an error when execute_tool is invoked without the mandatory tool name parameter. | [`ToolRoutingManagerTests.cs:L125`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L125) | Backend xUnit |
 | `MCP-ADMIN-TOOL-TEST-CALL-ERROR` | **Guardrail** | `GUARD` | AdminMcpServer test_tool_call propagates downstream backend errors with visibility. | [`AdminMcpServerTests.cs:L637`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L637) | Backend xUnit |
 | `MCP-01` | Positive | `MCP` | RewriteRequestJson accurately parses JSON batches, comments, and trailing commas using System.Text.Json JsonNode. | [`ChallengerTests.cs:L191`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ChallengerTests.cs#L191) | Backend xUnit |
 | `MCP-02` | Positive | `MCP` | All MCP protocol capabilities enforce caller role authorizations consistently | [`PairwiseIntegrationMatrixTests.cs:L385`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385) | Backend xUnit |
 | `MCP-05` | Positive | `MCP` | ResourceRoutingManager returns all registered resources when search query is empty. | [`ResourceRoutingManagerTests.cs:L8`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L8) | Backend xUnit |
-| `MCP-06` | Positive | `MCP` | prompts/list aggregates, namespaces, and routes prompts to target backends. | [`McpIntegrationTests.cs:L514`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L514) | Backend xUnit |
+| `MCP-06` | Positive | `MCP` | prompts/list aggregates, namespaces, and routes prompts to target backends. | [`McpIntegrationTests.cs:L499`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpIntegrationTests.cs#L499) | Backend xUnit |
 | `MCP-08` | Positive | `MCP` | completion/complete forwards prompt completions to backend when caller is authorized. | [`UnifiedMcpAuthorizationTests.cs:L473`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L473) | Backend xUnit |
 | `MCP-10` | Positive | `MCP` | DockerAutoDiscoveryService handles missing Docker socket gracefully without throwing unhandled exceptions. | [`SeederAndDiscoveryTests.cs:L83`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L83) | Backend xUnit |
 | `MCP-12` | Positive | `MCP` | DynamicEmbeddingService retrieves and persists embedding provider configurations in Settings table. | [`DynamicEmbeddingServiceTests.cs:L62`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L62) | Backend xUnit |
@@ -2016,10 +2444,10 @@
 | `MCP-22` | **Guardrail** | `MCP` | AdminMcpServer ProcessRequestAsync handles server/discover request returning supported versions and subscriptions capability. | [`AdminMcpServerTests.cs:L686`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L686) | Backend xUnit |
 | `MCP-23` | Positive | `MCP` | AdminMcpServer HandleInitializeAsync includes subscriptions capability in capabilities object. | [`AdminMcpServerTests.cs:L655`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L655) | Backend xUnit |
 | `MCP-24` | Positive | `MCP` | McpSpecMiddleware extracts OpenTelemetry W3C traceparent, tracestate, and baggage from headers and _meta. | [`McpSpecMiddlewareTests.cs:L219`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs#L219) | Backend xUnit |
-| `MCP-25` | Positive | `MCP` | ToolRoutingManager falls back to SessionManager global server tools cache during cold-start search_tools execution | [`ToolRoutingManagerTests.cs:L230`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L230) | Backend xUnit |
-| `MCP-26` | Positive | `MCP` | ToolRoutingManager normalizes tool name delimiters (slash and colon) to canonical double-underscore format. | [`ToolRoutingManagerTests.cs:L285`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L285) | Backend xUnit |
+| `MCP-25` | Positive | `MCP` | ToolRoutingManager falls back to SessionManager global server tools cache during cold-start search_tools execution | [`ToolRoutingManagerTests.cs:L264`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L264) | Backend xUnit |
+| `MCP-26` | Positive | `MCP` | ToolRoutingManager normalizes tool name delimiters (slash and colon) to canonical double-underscore format. | [`ToolRoutingManagerTests.cs:L319`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L319) | Backend xUnit |
 | `MCP-27` | Positive | `MCP` | McpServer supports Alias property | [`McpServerTests.cs:L15`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpServerTests.cs#L15) | Backend xUnit |
-| `MCP-28` | **Guardrail** | `MCP` | ToolRoutingManager rejects ambiguous bare tool calls when duplicate tool names exist across distinct servers, listing candidates with namespaces. | [`ToolRoutingManagerTests.cs:L455`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L455) | Backend xUnit |
+| `MCP-28` | **Guardrail** | `MCP` | ToolRoutingManager rejects ambiguous bare tool calls when duplicate tool names exist across distinct servers, listing candidates with namespaces. | [`ToolRoutingManagerTests.cs:L489`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L489) | Backend xUnit |
 | `MCP-29` | **Guardrail** | `MCP` | ServerValidationHelper rejects invalid characters in Alias. | [`ServerEndpointsValidationTests.cs:L72`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L72) | Backend xUnit |
 | `MCP-30` | Positive | `MCP` | IsUserAuthorizedAsync matches granular tool policies across /, :, and __ delimiters. | [`UnifiedMcpAuthorizationTests.cs:L284`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L284) | Backend xUnit |
 | `MCP-31` | **Guardrail** | `MCP` | DockerAutoDiscoveryService parses mcp.alias from Docker container labels | [`DockerAutoDiscoveryServiceTests.cs:L188`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L188) | Backend xUnit |
@@ -2065,6 +2493,8 @@
 | `MCP-ADMIN-ZOD-STRICT-RESPONSE` | Positive | `MCP` | JsonRpcResponse serialization omits null result, error, and _meta fields completely to satisfy Zod strict validation. | [`AdminEndpointsTests.cs:L452`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs#L452) | Backend xUnit |
 | `MCP-COLDSTART-01` | Positive | `MCP` | Full cold-start cycle: SessionManager cache seeded -> search_tools -> execute_tool dispatches to downstream mock server and returns output. | [`DownstreamSessionIntegrationTests.cs:L130`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L130) | Backend xUnit |
 | `MCP-RESILIENT-01` | Positive | `MCP` | Prefix-based resilient routing: execute_tool called with unregistered but prefixed tool name dynamically resolves server and executes. | [`DownstreamSessionIntegrationTests.cs:L294`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L294) | Backend xUnit |
+| `MCP-WIRE-JSONRPC-SPEC` | Positive | `MCP` | MockDownstreamMcpServer treats messages with omitted id as notifications returning 202 Accepted with empty body. | [`MockDownstreamMcpServerTests.cs:L98`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L98) | Backend xUnit |
+| `MCP-WIRE-PROTOCOL-MATRIX` | Positive | `MCP` | MockDownstreamMcpServer dynamically negotiates requested protocol version. | [`MockDownstreamMcpServerTests.cs:L80`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L80) | Backend xUnit |
 | `UI-104` | Positive | `MCP` | renders resource tester with servers and resources | [`ResourceTesterCard.test.tsx:L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ResourceTesterCard.test.tsx#L1) | Frontend Vitest |
 | `UI-106` | Positive | `MCP` | renders connected server details with badges and triggers actions | [`ServerCard.test.tsx:L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerCard.test.tsx#L1) | Frontend Vitest |
 | `UI-107` | Positive | `MCP` | renders prompt dropdown and filters by selected server | [`PromptTesterCard.test.tsx:L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/PromptTesterCard.test.tsx#L1) | Frontend Vitest |
@@ -2117,6 +2547,7 @@
 | `TRANS-04` | Positive | `TRANS` | HTTP stateless transport correctly accumulates multi-line SSE streams and skips intermediate notification events | [`HttpTransportTests.cs:L72`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/HttpTransportTests.cs#L72) | Backend xUnit |
 | `TRANS-05` | Positive | `TRANS` | HTTP stateless transport reads entire multi-line and formatted JSON response bodies without premature truncation | [`HttpTransportTests.cs:L109`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/HttpTransportTests.cs#L109) | Backend xUnit |
 | `TRANS-06` | Positive | `TRANS` | HTTP stateless transport joins multi-line SSE data fields into complete JSON payloads | [`HttpTransportTests.cs:L146`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/HttpTransportTests.cs#L146) | Backend xUnit |
+| `TRANS-SSE-STREAM-LIFECYCLE` | Positive | `TRANS` | SSE transport correctly resolves relative endpoint URLs and ignores keep-alive SSE comments. | [`SseTransportTests.cs:L100`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L100) | Backend xUnit |
 | `UI-01` | Positive | `UI` | opens confirmation modal and resolves true when confirmed | [`useConfirmStore.test.ts:L31`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useConfirmStore.test.ts#L31) | Frontend Vitest |
 | `UI-02` | Positive | `UI` | Inspect modal displays spinner loading state while querying server capabilities | [`ServerInspectModal.test.tsx:L61`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L61) | Frontend Vitest |
 | `UI-03` | Positive | `UI` | Grouped server view renders category sections and supports collapsible groups | [`DashboardView.test.tsx:L63`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L63) | Frontend Vitest |

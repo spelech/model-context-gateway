@@ -46,7 +46,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "PermissionsController returns access policies list with 200 OK.")]
+        [Requirement("AUTH-PERM-POLICY-LIST", "AUTH", RequirementType.Positive, "PermissionsController returns access policies list with 200 OK.")]
         public async Task GetPolicies_ReturnsOk()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -56,7 +56,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "PermissionsController rejects policy saves missing targetId with BadRequest.")]
+        [Requirement("GUARD-POLICY-MISSING-TARGET", "GUARD", RequirementType.Negative, "PermissionsController rejects policy saves missing targetId with BadRequest.")]
         public async Task SavePolicy_ReturnsBadRequest_WhenTargetIdMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -67,7 +67,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "PermissionsController rejects policy saves missing requiredGroup with BadRequest.")]
+        [Requirement("GUARD-POLICY-MISSING-GROUP", "GUARD", RequirementType.Negative, "PermissionsController rejects policy saves missing requiredGroup with BadRequest.")]
         public async Task SavePolicy_ReturnsBadRequest_WhenRequiredGroupMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -112,7 +112,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "PermissionsController removes access policies.")]
+        [Requirement("AUTH-PERM-POLICY-REMOVE", "AUTH", RequirementType.Positive, "PermissionsController removes access policies.")]
         public async Task DeletePolicy_DeletesSuccessfully()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -158,7 +158,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "PermissionsController rejects mapping save missing external ID with BadRequest.")]
+        [Requirement("GUARD-MAPPING-MISSING-EXT-ID", "GUARD", RequirementType.Negative, "PermissionsController rejects mapping save missing external ID with BadRequest.")]
         public async Task SaveMapping_ReturnsBadRequest_WhenExternalIdMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -169,7 +169,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "PermissionsController rejects mapping save missing internal group with BadRequest.")]
+        [Requirement("GUARD-MAPPING-MISSING-GROUP", "GUARD", RequirementType.Negative, "PermissionsController rejects mapping save missing internal group with BadRequest.")]
         public async Task SaveMapping_ReturnsBadRequest_WhenInternalGroupMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);

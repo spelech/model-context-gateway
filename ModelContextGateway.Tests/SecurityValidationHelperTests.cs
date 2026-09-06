@@ -42,7 +42,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Positive, "SecurityValidationHelper validates tool and prompt names against namespaced server identifiers.")]
+        [Requirement("GUARD-SECURITY-IDENTIFIER-VALIDATION", "GUARD", RequirementType.Positive, "SecurityValidationHelper validates tool and prompt names against namespaced server identifiers.")]
         public void ValidateToolOrPromptName_ValidatesNames()
         {
             var validServers = new List<string> { "docker", "plex" };

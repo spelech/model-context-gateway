@@ -119,7 +119,7 @@ namespace ModelContextGateway.Tests
         ///   - Bob's per-request context resolves to no SID/groups → tool call is denied (isError:true).
         /// </summary>
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "SSE streams re-validate caller identity and permissions per message payload.")]
+        [Requirement("AUTH-SSE-PER-MESSAGE-IDENTITY", "AUTH", RequirementType.Positive, "SSE streams re-validate caller identity and permissions per message payload.")]
         public async Task SSE_ValidatesIdentityPerMessage()
         {
             const string AdminSid = "S-1-5-32-544";
@@ -226,7 +226,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "SecurityValidationHelper authorizes principals via Admin Group SID", Type = RequirementType.Positive, Category = "AUTH")]
+        [Requirement("AUTH-ADMIN-VALIDATE-SID", "SecurityValidationHelper authorizes principals via Admin Group SID", Type = RequirementType.Positive, Category = "AUTH")]
         public void SecurityValidationHelper_IsAdmin_RequiresAdminGroupSid()
         {
             var configDict = new Dictionary<string, string?>
@@ -244,7 +244,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "SecurityValidationHelper authorizes principals via Admin Group Name", Type = RequirementType.Positive, Category = "AUTH")]
+        [Requirement("AUTH-ADMIN-VALIDATE-GROUPNAME", "SecurityValidationHelper authorizes principals via Admin Group Name", Type = RequirementType.Positive, Category = "AUTH")]
         public void SecurityValidationHelper_IsAdmin_AllowsAdminGroupName()
         {
             var configDict = new Dictionary<string, string?>
@@ -258,7 +258,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "SecurityValidationHelper rejects non-admin groups and guest identities", Type = RequirementType.Negative, Category = "AUTH")]
+        [Requirement("AUTH-ADMIN-REJECT-NONADMIN", "SecurityValidationHelper rejects non-admin groups and guest identities", Type = RequirementType.Negative, Category = "AUTH")]
         public void SecurityValidationHelper_IsAdmin_RejectsNonAdminGroups()
         {
             var configDict = new Dictionary<string, string?>
@@ -275,7 +275,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "SecurityValidationHelper authorizes principals via custom configured Admin:Groups array", Type = RequirementType.Positive, Category = "AUTH")]
+        [Requirement("AUTH-ADMIN-VALIDATE-GROUPS-ARRAY", "SecurityValidationHelper authorizes principals via custom configured Admin:Groups array", Type = RequirementType.Positive, Category = "AUTH")]
         public void SecurityValidationHelper_IsAdmin_AllowsCustomAdminGroupsArray()
         {
             var configDict = new Dictionary<string, string?>
@@ -290,7 +290,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "SecurityValidationHelper authorizes principals via mappedGroups database resolution", Type = RequirementType.Positive, Category = "AUTH")]
+        [Requirement("AUTH-ADMIN-VALIDATE-MAPPED-GROUPS", "SecurityValidationHelper authorizes principals via mappedGroups database resolution", Type = RequirementType.Positive, Category = "AUTH")]
         public void SecurityValidationHelper_IsAdmin_AllowsMappedGroups()
         {
             var configDict = new Dictionary<string, string?>
@@ -305,7 +305,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "OidcIdentityProvider preserves group names without synthesizing Windows SIDs", Type = RequirementType.Positive, Category = "AUTH")]
+        [Requirement("AUTH-OIDC-PRESERVE-GROUP-NAMES", "OidcIdentityProvider preserves group names without synthesizing Windows SIDs", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task OidcIdentityProvider_DoesNotGrantAdminSid_FromGroupOrUserNames()
         {
             var context = new DefaultHttpContext();

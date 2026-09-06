@@ -33,7 +33,7 @@ namespace ModelContextGateway.Tests
                 Content = new StringContent("{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}", Encoding.UTF8, "application/json")
             };
             var notifResp = await client.SendAsync(notifReq);
-            notifResp.StatusCode.Should().Be(HttpStatusCode.OK);
+            notifResp.StatusCode.Should().Be(HttpStatusCode.Accepted);
 
             // 3. tools/list
             var listReq = new HttpRequestMessage(HttpMethod.Post, "http://localhost/mcp")
@@ -75,6 +75,41 @@ namespace ModelContextGateway.Tests
             };
             var resp = await client.SendAsync(req);
             resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+
+        [Fact]
+        [Requirement("MCP-WIRE-PROTOCOL-MATRIX", "MCP", RequirementType.Positive, "MockDownstreamMcpServer dynamically negotiates requested protocol version.")]
+        public async Task MockDownstreamMcpServer_DynamicallyNegotiatesProtocolVersion()
+        {
+            var server = new MockDownstreamMcpServer();
+            var client = server.CreateHttpClient();
+
+            var initReq = new HttpRequestMessage(HttpMethod.Post, "http://localhost/mcp")
+            {
+                Content = new StringContent("{\"jsonrpc\":\"2.0\",\"id\":99,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2024-11-05\"}}", Encoding.UTF8, "application/json")
+            };
+            var initResp = await client.SendAsync(initReq);
+            initResp.StatusCode.Should().Be(HttpStatusCode.OK);
+            var initBody = await initResp.Content.ReadAsStringAsync();
+            using var initDoc = JsonDocument.Parse(initBody);
+            initDoc.RootElement.GetProperty("result").GetProperty("protocolVersion").GetString().Should().Be("2024-11-05");
+        }
+
+        [Fact]
+        [Requirement("MCP-WIRE-JSONRPC-SPEC", "MCP", RequirementType.Positive, "MockDownstreamMcpServer treats messages with omitted id as notifications returning 202 Accepted with empty body.")]
+        public async Task MockDownstreamMcpServer_TreatsOmittedIdAsNotification_ReturningAccepted()
+        {
+            var server = new MockDownstreamMcpServer();
+            var client = server.CreateHttpClient();
+
+            var reqWithoutId = new HttpRequestMessage(HttpMethod.Post, "http://localhost/mcp")
+            {
+                Content = new StringContent("{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"name\":\"mock_tool\",\"arguments\":{}}}", Encoding.UTF8, "application/json")
+            };
+            var resp = await client.SendAsync(reqWithoutId);
+            resp.StatusCode.Should().Be(HttpStatusCode.Accepted);
+            var body = await resp.Content.ReadAsStringAsync();
+            body.Should().BeEmpty();
         }
     }
 }
