@@ -1,10 +1,10 @@
-# 🚀 Model Context Gateway (MCG) Features Guide
+# Model Context Gateway Features Guide
 
-This guide details the features of the Model Context Gateway (MCG).
+This guide details the core capabilities and operational modes of the **Model Context Gateway (MCG)**.
 
 ---
 
-## 🖥️ 1. Dynamic Server Management
+## 1. Dynamic Server Management
 
 Model Context Gateway (MCG) supports four methods to manage backend Model Context Protocol (MCP) servers:
 
@@ -15,7 +15,8 @@ Manage servers dynamically without restarting the gateway:
 3. Complete the **Add MCP Server** modal:
    - **Display Name**: User-friendly label (e.g., `Home Assistant`).
    - **URL**: Backend SSE endpoint or HTTP server (e.g., `http://ha-mcp:8086/mcp`).
-   - **Transport Type**: Select `sse` (stateful) or `http` (stateless).
+   - **Transport Type**: Select `sse` (stateful), `http` (stateless), or `stdio` (subprocess).
+   - **Alias**: Optional short namespace alias for tool prefixes (e.g., `ha` instead of `homeassistant`).
    - **Category**: Classify the server (e.g., `homecontrol`, `infrastructure`, `development`).
    - **API Token/Key**: Downstream credentials.
    - **Secret Provider**: Secret retrieval method (`None`, `Vault`, `WindowsRegistry`, or `Environment`). See [Pluggable Secret Retrievers](#6-pluggable-secret-retrievers).
@@ -32,6 +33,7 @@ For declarative configurations:
      {
        "id": "my-mcp-server",
        "displayName": "My Custom Server",
+       "alias": "custom",
        "url": "http://10.0.0.15:3000/sse",
        "type": "sse",
        "category": "infrastructure",
@@ -61,6 +63,7 @@ services:
     labels:
       - mcp.enabled=true
       - mcp.id=myservice
+      - mcp.alias=srv
       - mcp.displayName=My Custom Service
       - mcp.port=8080
       - mcp.type=sse
@@ -74,6 +77,7 @@ services:
 | :--- | :--- | :--- | :--- |
 | `mcp.enabled` | **Yes** | `false` | Enables router auto-discovery. Must be `"true"`. |
 | `mcp.id` | **Yes** | — | Unique server identifier (e.g., `/myservice`). |
+| `mcp.alias` | No | — | Optional custom namespace alias for tool prefixing (e.g. `ha` instead of `homeassistant`). Also supports `mcp.namespace`. |
 | `mcp.port` | **Yes** | — | Internal container port (e.g., `8080`, `3000`). |
 | `mcp.displayName`| No | Value of `mcp.id` | Friendly name for dashboard and tools. |
 | `mcp.type` | No | `sse` | Transport type (`sse`, `http`, or `stdio`). |
@@ -85,7 +89,7 @@ services:
 
 ---
 
-## 📡 2. Routing Modes
+## 2. Routing Modes
 
 Connect clients via these SSE endpoints:
 
@@ -94,7 +98,14 @@ Connect clients via these SSE endpoints:
 | `/sse` or `/sse?meta=true` | **Meta-Mode (Default)** | Hides backend tools during bootstrap; exposes only `search_tools` and `execute_tool`. Conserves context window. |
 | `/sse?meta=false` | **Full-List Mode** | Exposes all underlying tools from all connected servers. |
 | `/{targetServerId}` | **Target-Specific Proxying** | Proxies connections directly to the specified target server (e.g., `/docker` or `/ha`). |
-| `/admin` or `/router-admin` | **Admin MCP Server** | Virtual in-process control plane providing 10 consolidated entity tools for autonomous agents to manage router state. |
+| `/admin` or `/mcg-admin` | **Admin MCP Server** | Virtual in-process control plane providing 10 consolidated entity tools for autonomous agents to manage router state. |
+
+### Modern Slash Formatting & Dual-Key Routing
+
+Tools are exposed to AI clients using modern slash formatting:
+- **Default Exposure**: `{namespace}/{tool_name}` (e.g., `docker/list_containers`, `ha/turn_on`). If an `Alias` is configured on the server, the alias is used as the namespace.
+- **Dual-Key Routing**: The router transparently accepts both `{namespace}/{tool_name}` and canonical double-underscore `{serverId}__{toolName}` delimiters across execution and RBAC evaluation.
+- **Multi-Server Collision Guard**: If an agent requests an unambiguous bare tool name (`list_containers`), the router resolves and executes it automatically. If multiple backends register the same tool name, the router rejects the ambiguous call and returns a descriptive error listing candidate namespaced options.
 
 > For transport protocol comparisons (`sse`, `http`, `stdio`), concurrency, security policies, and error recovery, see [**Transport Capability & Configuration Guide**](transports.md).
 
@@ -106,7 +117,7 @@ Connect clients via these SSE endpoints:
   "mcpServers": {
     "mcg": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8026/sse"]
+      "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8080/sse"]
     }
   }
 }
@@ -117,10 +128,10 @@ Connect clients via these SSE endpoints:
 {
   "mcpServers": {
     "mcg": {
-      "url": "http://localhost:8026/sse",
+      "url": "http://localhost:8080/sse",
       "type": "sse",
       "trust": true,
-      "serverUrl": "http://localhost:8026/sse"
+      "serverUrl": "http://localhost:8080/sse"
     }
   }
 }
@@ -128,7 +139,7 @@ Connect clients via these SSE endpoints:
 
 ---
 
-## 🤖 3. Admin MCP Server & Autonomous Agent Administration
+## 3. Admin MCP Server & Autonomous Agent Administration
 
 The **Admin MCP Server** (`/admin`, `/admin/sse`, `/mcg-admin`) is an in-process virtual MCP server exposing 10 consolidated tools enabling autonomous AI agents (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) to configure and administer the entire gateway programmatically.
 
@@ -136,7 +147,7 @@ The **Admin MCP Server** (`/admin`, `/admin/sse`, `/mcg-admin`) is an in-process
 
 | Tool Name | Actions | Description | Key Parameters |
 | :--- | :--- | :--- | :--- |
-| `manage_servers` | `list`, `get`, `create`, `update`, `delete`, `toggle`, `reconnect`, `reconnect_all` | Manage backend MCP server registrations, URLs, transports, categories, and secret providers. | `action`, `id`, `name`, `url`, `type`, `category`, `enabled`, `secret_provider`, `secret_key` |
+| `manage_servers` | `list`, `get`, `create`, `update`, `delete`, `toggle`, `reconnect`, `reconnect_all` | Manage backend MCP server registrations, URLs, transports, categories, aliases, and secret providers. | `action`, `id`, `name`, `url`, `type`, `alias`, `category`, `enabled`, `secret_provider`, `secret_key` |
 | `manage_appkeys` | `list`, `get_limits`, `create`, `revoke` | Issue and revoke API AppKeys, enforce key quotas, expiration, and configure capability scopes. | `action`, `name`, `scopes`, `expires_in_days`, `prefix` |
 | `manage_clients` | `list`, `register`, `delete` | Manage dynamic OAuth 2.0 client registrations. | `action`, `client_id`, `client_name`, `redirect_uris`, `grant_types`, `scopes` |
 | `manage_policies` | `list`, `save`, `delete` | Manage role-based access control (RBAC) authorization policies across servers and categories. | `action`, `policy_id`, `role_name`, `server_id`, `category`, `allowed`, `priority` |
@@ -155,7 +166,7 @@ The **Admin MCP Server** (`/admin`, `/admin/sse`, `/mcg-admin`) is an in-process
   "mcpServers": {
     "mcg-admin": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8026/admin"]
+      "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8080/admin"]
     }
   }
 }
@@ -166,7 +177,7 @@ The **Admin MCP Server** (`/admin`, `/admin/sse`, `/mcg-admin`) is an in-process
 {
   "mcpServers": {
     "mcg-admin": {
-      "url": "http://localhost:8026/admin",
+      "url": "http://localhost:8080/admin",
       "headers": {
         "Authorization": "Bearer mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
       }
@@ -180,10 +191,10 @@ The **Admin MCP Server** (`/admin`, `/admin/sse`, `/mcg-admin`) is an in-process
 {
   "mcpServers": {
     "mcg-admin": {
-      "url": "http://localhost:8026/admin",
+      "url": "http://localhost:8080/admin",
       "type": "sse",
       "trust": true,
-      "serverUrl": "http://localhost:8026/admin"
+      "serverUrl": "http://localhost:8080/admin"
     }
   }
 }
@@ -191,7 +202,7 @@ The **Admin MCP Server** (`/admin`, `/admin/sse`, `/mcg-admin`) is an in-process
 
 ---
 
-## 🔍 4. Semantic Search
+## 4. Semantic Search
 
 In **Meta-Mode**, clients must semantically search for tools before execution.
 
@@ -209,7 +220,7 @@ Configure via the Settings panel:
 
 ---
 
-## 🔐 5. Authentication, Group Mapping & Unified MCP Capability Authorization
+## 5. Authentication, Group Mapping & Unified MCP Capability Authorization
 
 Model Context Gateway (MCG) implements a **Unified Authorization Pipeline** across MCP capabilities:
 - **Tools**: `tools/list`, `tools/call`
@@ -312,7 +323,7 @@ For production, configure allowed origins via the `CORS_ALLOWED_ORIGINS` (or `Al
 
 ---
 
-## 🔑 6. Pluggable Secret Retrievers
+## 6. Pluggable Secret Retrievers
 
 The router dynamically fetches downstream API keys and passwords via pluggable retrievers to prevent plaintext storage in the database.
 
@@ -331,7 +342,7 @@ The `CompositeSecretRetriever` resolves secrets from:
 
 ---
 
-## 🧪 7. Developer Test Bench & Diagnostics
+## 7. Developer Test Bench & Diagnostics
 
 The Web Dashboard includes a developer environment to debug and verify setups:
 
@@ -345,13 +356,13 @@ The Web Dashboard includes a developer environment to debug and verify setups:
 
 ---
 
-## 🗄️ 8. Database Engine Support & Deployment
+## 8. Database Engine Support & Deployment
 
 For SQLite, MS SQL Server, and MySQL dialect specifications, the 12-table [**Entity-Relationship Diagram (ERD)**](database-providers.md#unified-database-entity-relationship-diagram-erd), stored procedure catalogs, AES-256-GCM envelope encryption, and Docker Compose configurations, see the [**Database Provider Support & Deployment Matrix**](database-providers.md).
 
 ---
 
-## 📋 9. Software Requirements Specification & Automated Test Catalog
+## 9. Software Requirements Specification & Automated Test Catalog
 
 For requirements traceability, feature proofs, guardrails, and verified invariants across test suites, reference:
 * [**Software Requirements Specification (SRS) & Test Verification Catalog**](software-requirements-and-test-catalog.md)
@@ -359,7 +370,7 @@ For requirements traceability, feature proofs, guardrails, and verified invarian
 
 ---
 
-## ⚡ 10. Universal Setup Skill (`mcg-setup`)
+## 10. Universal Setup Skill (`mcg-setup`)
 
 The `mcg-setup` skill adheres to the [AgentSkills.io](https://agentskills.io) open standard, enabling any AI coding or operations assistant (Antigravity, Claude Code, Cursor, Cline, Windsurf, Copilot CLI) to guide administrators through installing, configuring, and bootstrapping **Model Context Gateway (MCG)** in any workspace without cloning or compiling the repository source code.
 
@@ -395,7 +406,7 @@ The skill includes pre-tested scaffold templates under `skills/mcg-setup/templat
 
 ---
 
-## 🤖 11. Universal Admin MCP Automation Skill (`mcg-admin`)
+## 11. Universal Admin MCP Automation Skill (`mcg-admin`)
 
 The `mcg-admin` skill enables AI coding assistants and automation pipelines to connect directly to the in-process **Admin MCP Server** (`/admin/sse` or `/mcg-admin/sse`) to configure, manage, and verify any gateway deployment from a blank slate with zero human dashboard interaction.
 
@@ -418,7 +429,7 @@ mkdir -p .agents/skills/mcg-admin && curl -fsSL https://raw.githubusercontent.co
 
 ---
 
-## 👁️ 11. Observability & PII Audit Logging
+## 12. Observability & PII Audit Logging
 
 Model Context Gateway includes built-in observability features with a strong focus on privacy and security.
 
@@ -434,7 +445,7 @@ Administrative actions and tool executions are persistently recorded via stored 
 
 ---
 
-## 🏢 12. Enterprise Identity Delegation
+## 13. Enterprise Identity Delegation
 
 For complex enterprise networks, the gateway manages downstream identity flow dynamically, allowing backend services to enforce Row-Level Security (RLS) based on the user's origin identity.
 
@@ -450,7 +461,7 @@ For complex enterprise networks, the gateway manages downstream identity flow dy
 
 ---
 
-## 🐳 13. Batteries-Included Docker Environment
+## 14. Batteries-Included Docker Environment
 
 The official Docker image simplifies deployment of STDIO-based subprocess servers without requiring complex sidecar networking.
 
@@ -460,7 +471,7 @@ The official Docker image simplifies deployment of STDIO-based subprocess server
 
 ---
 
-## ⚡ 14. Model Context Protocol Specification Alignment (MCP 2026-07-28)
+## 15. Model Context Protocol Specification Alignment (MCP 2026-07-28)
 
 Model Context Gateway strictly implements the MCP 2026-07-28 specification:
 
@@ -500,7 +511,7 @@ Per the 2026-07-28 specification deprecation schedule:
 
 ---
 
-## 🔒 15. OAuth 2.1 Dynamic Client Registration & RFC 7591 Security
+## 16. OAuth 2.1 Dynamic Client Registration & RFC 7591 Security
 
 The integrated OAuth 2.0 / 2.1 authorization server complies with RFC 7591 and OAuth 2.1 standards:
 - **Mandatory `application_type`**: Dynamic Client Registration (`/api/register`) requires explicit `application_type` (`"web"` or `"native"`). Public native clients default to PKCE with `token_endpoint_auth_method: "none"`.

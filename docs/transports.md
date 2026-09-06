@@ -1,12 +1,12 @@
-# 🚀 Model Context Gateway (MCG) Transport Capability & Configuration Guide
+# Model Context Gateway Transport Capability & Configuration Guide
 
-The **Model Context Protocol (MCP) Gateway Router** supports multiple downstream transport mechanisms to communicate with backend tools, services, and local processes, as well as multiple upstream client connectivity models.
+The **Model Context Protocol (MCP) Gateway** supports multiple downstream transport mechanisms to communicate with backend tools, services, and local processes, as well as multiple upstream client connectivity models.
 
 This guide details supported transports, security policies, concurrency architectures, configuration parameters, and troubleshooting procedures.
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 1. [Transport Comparison & Capability Matrix](#1-transport-comparison-capability-matrix)
 2. [Subprocess STDIO Deep-Dive](#2-subprocess-stdio-deep-dive)
@@ -362,7 +362,7 @@ Backend servers can be configured dynamically via the Web Dashboard or declarati
       "args": [
         "-y",
         "@modelcontextprotocol/client-sse",
-        "http://localhost:8026/sse"
+        "http://localhost:8080/sse"
       ],
       "env": {
         "X_APP_KEY": "mcp_app_live_your_app_key_here"
@@ -377,10 +377,10 @@ Backend servers can be configured dynamically via the Web Dashboard or declarati
 {
   "mcpServers": {
     "mcg": {
-      "url": "http://localhost:8026/sse",
+      "url": "http://localhost:8080/sse",
       "type": "sse",
       "trust": true,
-      "serverUrl": "http://localhost:8026/sse",
+      "serverUrl": "http://localhost:8080/sse",
       "headers": {
         "X-App-Key": "mcp_app_live_your_app_key_here"
       }
@@ -394,7 +394,7 @@ Backend servers can be configured dynamically via the Web Dashboard or declarati
 {
   "mcpServers": {
     "homelab-mcg": {
-      "url": "http://localhost:8026/sse",
+      "url": "http://localhost:8080/sse",
       "headers": {
         "X-App-Key": "mcp_app_live_your_app_key_here"
       }
@@ -408,7 +408,7 @@ Backend servers can be configured dynamically via the Web Dashboard or declarati
 {
   "mcpServers": {
     "mcg": {
-      "url": "http://localhost:8026/sse",
+      "url": "http://localhost:8080/sse",
       "headers": {
         "X-App-Key": "mcp_app_live_your_app_key_here"
       }
@@ -423,7 +423,7 @@ To connect directly to a single backend bypassing Meta-Mode, point the client UR
 {
   "mcpServers": {
     "direct-docker": {
-      "url": "http://localhost:8026/docker-mcp",
+      "url": "http://localhost:8080/docker-mcp",
       "headers": {
         "X-App-Key": "mcp_app_live_your_app_key_here"
       }

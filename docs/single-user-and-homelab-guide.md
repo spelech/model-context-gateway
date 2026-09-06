@@ -1,4 +1,4 @@
-# 🏠 Single-User & Home-Lab Setup Guide
+# Single-User & Home-Lab Setup Guide
 
 This guide details how to install, configure, and operate the **Model Context Gateway (MCG)** for single users, home-lab operators, and local developers.
 
@@ -51,7 +51,7 @@ This guide details how to install, configure, and operate the **Model Context Ga
 
 ---
 
-## ⚡ 60-Second Zero-Config Quickstart
+## 60-Second Zero-Config Quickstart
 
 You can start Model Context Gateway with **zero environment variables** and **zero certificate configuration**.
 
@@ -96,7 +96,7 @@ Open `http://localhost:8080/` in your browser. From localhost or your local LAN 
 
 ---
 
-## 🔑 AppKey Scoping & Multi-Client Isolation
+## AppKey Scoping & Multi-Client Isolation
 
 Single users can create multiple individualized AppKeys to control exactly which tools each AI assistant or script can invoke.
 
@@ -113,7 +113,7 @@ Single users can create multiple individualized AppKeys to control exactly which
 
 ---
 
-## 🛠️ Managing AppKeys
+## Managing AppKeys
 
 ### Option A: Interactive Web UI Dashboard
 1. Open `http://localhost:8080/` and navigate to **App Keys**.
@@ -140,7 +140,7 @@ AI coding agents (such as Antigravity) connected to `/admin/sse` can call the `c
 
 ---
 
-## 🔒 Built-in SQLite Secret Storage (Cross-Platform)
+## Built-in SQLite Secret Storage (Cross-Platform)
 
 Model Context Gateway includes a native **AES-256-GCM Envelope Encryption Engine** (`DatabaseUserSecretStore`).
 
@@ -151,7 +151,7 @@ Model Context Gateway includes a native **AES-256-GCM Envelope Encryption Engine
 
 ---
 
-## 💻 AI Client Configuration Snippets
+## AI Client Configuration Snippets
 
 ### 1. Claude Desktop (`claude_desktop_config.json`)
 ```json
@@ -228,7 +228,7 @@ To allow an AI assistant (such as Antigravity) to manage backend servers and con
 
 ---
 
-## 🐳 Homelab Docker MCP Auto-Discovery
+## Homelab Docker MCP Auto-Discovery
 
 When you mount `/var/run/docker.sock:/var/run/docker.sock`, MCG automatically discovers other containers running on your host:
 
