@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-06T06:46:49.7025580Z",
-    "totalRequirements": 198,
-    "positiveCount": 166,
-    "guardrailCount": 32,
-    "totalProofs": 857
+    "generatedAt": "2026-09-06T15:08:01.6944776Z",
+    "totalRequirements": 205,
+    "positiveCount": 170,
+    "guardrailCount": 35,
+    "totalProofs": 877
   },
   "requirements": [
     {
@@ -196,42 +196,42 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 153,
+          "lineNumber": 154,
           "testName": "AdminBypass_AllowsAllCapabilities_EvenWithoutDbPolicies",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 211,
+          "lineNumber": 212,
           "testName": "ServerLevelPolicy_AuthorizesAllCapabilitiesUnderServer",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 283,
+          "lineNumber": 317,
           "testName": "ListToolsAsync_FiltersUnauthorizedTools",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 328,
+          "lineNumber": 362,
           "testName": "ListPromptsAsync_FiltersUnauthorizedPrompts",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 371,
+          "lineNumber": 405,
           "testName": "ListResourcesAsync_FiltersUnauthorizedResources",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 414,
+          "lineNumber": 448,
           "testName": "ListResourceTemplatesAsync_FiltersUnauthorizedTemplates",
           "details": null
         },
@@ -562,7 +562,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 251,
+          "lineNumber": 252,
           "testName": "AppKeyScopes_RestrictTargetAccessPrecisely",
           "details": null
         },
@@ -2396,42 +2396,42 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 176,
+          "lineNumber": 177,
           "testName": "NonAdmin_DefaultsToDeny_WhenNoMatchingPoliciesConfigured",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 197,
+          "lineNumber": 198,
           "testName": "IsUserAuthorizedAsync_FailsClosed_OnNullOrWhitespaceTarget",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 234,
+          "lineNumber": 235,
           "testName": "ExplicitDeny_OverridesGroupAllow",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 579,
+          "lineNumber": 613,
           "testName": "CompleteAsync_ForPrompt_ThrowsUnauthorized_WhenCallerDenied",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 611,
+          "lineNumber": 645,
           "testName": "CompleteAsync_ForResourceTemplate_ThrowsUnauthorized_WhenCallerDenied",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 643,
+          "lineNumber": 677,
           "testName": "CompleteAsync_FailsClosed_OnUnknownOrUnresolvedTargets",
           "details": null
         },
@@ -3020,7 +3020,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 58,
+          "lineNumber": 59,
           "testName": "DockerDiscovery_SkipsContainer_ResolvingToPrivateIp",
           "details": null
         },
@@ -3881,21 +3881,21 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 439,
+          "lineNumber": 473,
           "testName": "CompleteAsync_ForPrompt_ForwardsToBackend_WhenAuthorized",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 497,
+          "lineNumber": 531,
           "testName": "CompleteAsync_ForResourceTemplate_ForwardsToBackend_WhenAuthorized",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 555,
+          "lineNumber": 589,
           "testName": "CompleteAsync_LogsTemplate_ReturnsOnlyAuthorizedServers",
           "details": null
         }
@@ -3918,28 +3918,28 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 45,
+          "lineNumber": 46,
           "testName": "Service_Initializes_With_Valid_Dependencies",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 79,
+          "lineNumber": 80,
           "testName": "ExecuteAsync_SkipsScan_WhenDockerSocketDoesNotExist",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 103,
+          "lineNumber": 104,
           "testName": "ParseDiscoveredServers_ParsesValidDockerContainerLabels",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 137,
+          "lineNumber": 138,
           "testName": "UpsertDiscoveredServers_AddsNewServers_AndDisablesStoppedServers",
           "details": null
         }
@@ -4326,6 +4326,170 @@
       ]
     },
     {
+      "id": "MCP-27",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "McpServer supports Alias property",
+      "proofCount": 4,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpServerTests.cs",
+          "lineNumber": 15,
+          "testName": "McpServer_Supports_Alias_Property",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpServerTests.cs",
+          "lineNumber": 30,
+          "testName": "DatabaseInitializer_EnsureAliasColumn_AddsColumnSuccessfully",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 371,
+          "testName": "CacheTools_Exposes_Slash_Formatted_Name_With_Server_Alias",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 407,
+          "testName": "CacheTools_Exposes_Slash_Formatted_Name_With_Server_Id_When_Alias_Empty",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-28",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "ToolRoutingManager rejects ambiguous bare tool calls when duplicate tool names exist across distinct servers, listing candidates with namespaces.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 455,
+          "testName": "NormalizeTargetToolName_Returns_Ambiguity_Error_Listing_Aliases_For_Duplicates",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-29",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "ServerValidationHelper rejects invalid characters in Alias.",
+      "proofCount": 5,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs",
+          "lineNumber": 72,
+          "testName": "ValidateServer_Rejects_Invalid_Alias_Characters",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs",
+          "lineNumber": 89,
+          "testName": "ValidateServer_Rejects_Alias_Colliding_With_Existing_ServerId",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs",
+          "lineNumber": 104,
+          "testName": "ValidateServer_Rejects_Alias_Colliding_With_Existing_Server_Alias",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs",
+          "lineNumber": 119,
+          "testName": "ValidateServer_Accepts_Valid_Alias_And_Self_Retention",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs",
+          "lineNumber": 141,
+          "testName": "ValidateServer_Rejects_CaseInsensitive_Collisions",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-30",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "IsUserAuthorizedAsync matches granular tool policies across /, :, and __ delimiters.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
+          "lineNumber": 284,
+          "testName": "IsUserAuthorizedAsync_MatchesToolPolicy_AcrossDelimiters",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
+          "lineNumber": 300,
+          "testName": "IsUserAuthorizedAsync_ResolvesAliasesAndServerIds_ForServerPolicies",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 432,
+          "testName": "NormalizeTargetToolName_Resolves_Multiple_Delimiters_And_Aliases",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-31",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "DockerAutoDiscoveryService parses mcp.alias from Docker container labels",
+      "proofCount": 4,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
+          "lineNumber": 188,
+          "testName": "ParseDiscoveredServers_Parses_McpAlias_Label",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
+          "lineNumber": 213,
+          "testName": "ParseDiscoveredServers_Parses_McpNamespace_Fallback_Label",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
+          "lineNumber": 237,
+          "testName": "ParseDiscoveredServers_Ignores_Invalid_Alias_Characters",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
+          "lineNumber": 261,
+          "testName": "UpsertDiscoveredServers_PreservesExistingDbAlias_AndInsertsDiscoveredAlias",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-ADMIN-ENDPOINT-CALL-TOOL",
       "category": "MCP",
       "type": "Positive",
@@ -4529,6 +4693,22 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 577,
           "testName": "ManageProviders_Parity_AllActions",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-PARITY-SERVER-ALIAS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer manage_servers supports server alias for add, update, and list actions with collision validation.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 858,
+          "testName": "AdminMcpServer_ManageServers_Supports_Alias",
           "details": null
         }
       ]
@@ -5073,6 +5253,29 @@
           "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/server-inspector.spec.ts",
           "lineNumber": 1,
           "testName": "should open Server Inspect Modal if servers are present on dashboard",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-SERVERS-ALIAS-MANAGEMENT",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "renders server alias badge alongside server id when configured",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerCard.test.tsx",
+          "lineNumber": 145,
+          "testName": "renders server alias badge alongside server id when configured (UI-SERVERS-ALIAS-MANAGEMENT)",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerModal.test.tsx",
+          "lineNumber": 186,
+          "testName": "renders alias input, validates characters, and submits alias (UI-SERVERS-ALIAS-MANAGEMENT)",
           "details": null
         }
       ]

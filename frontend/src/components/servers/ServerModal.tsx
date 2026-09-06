@@ -1,11 +1,33 @@
 import React, { useState } from 'react';
 import { useServerStore } from '../../stores/useServerStore';
-import { ServerPayload } from '../../shared/types';
+import { McpServer, ServerPayload } from '../../shared/types';
 
-const ServerModalDialog: React.FC = () => {
-  const { editingServer, saveServer, closeAddEditModal } = useServerStore();
+export interface ServerModalProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+  onSave?: (server: ServerPayload) => Promise<void> | void;
+  server?: McpServer | null;
+}
+
+interface ServerModalDialogProps {
+  editingServer?: McpServer | null;
+  onClose?: () => void;
+  onSave?: (server: ServerPayload) => Promise<void> | void;
+}
+
+const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
+  editingServer: propEditingServer,
+  onClose: propOnClose,
+  onSave: propOnSave,
+}) => {
+  const store = useServerStore();
+  const editingServer = propEditingServer !== undefined ? propEditingServer : store.editingServer;
+  const closeAddEditModal = propOnClose || store.closeAddEditModal;
+  const saveServer = propOnSave || store.saveServer;
 
   const [displayName, setDisplayName] = useState(editingServer?.displayName || '');
+  const [alias, setAlias] = useState(editingServer?.alias || '');
+  const [aliasError, setAliasError] = useState('');
   const [type, setType] = useState(editingServer?.type || 'sse');
   const [category, setCategory] = useState(
     editingServer?.categories ? editingServer.categories.join(', ') : (editingServer ? 'default' : 'infrastructure')
@@ -21,8 +43,24 @@ const ServerModalDialog: React.FC = () => {
   const [allowPassThroughAuth, setAllowPassThroughAuth] = useState(editingServer ? editingServer.allowPassThroughAuth : false);
   const [dynamicAuthPrompt, setDynamicAuthPrompt] = useState(editingServer?.dynamicAuthPrompt || "");
 
+  const ALIAS_REGEX = /^[a-zA-Z0-9_-]*$/;
+
+  const handleAliasChange = (val: string) => {
+    setAlias(val);
+    if (val && !ALIAS_REGEX.test(val)) {
+      setAliasError('Alias can only contain letters, numbers, underscores, and hyphens');
+    } else {
+      setAliasError('');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (alias && !ALIAS_REGEX.test(alias)) {
+      setAliasError('Alias can only contain letters, numbers, underscores, and hyphens');
+      return;
+    }
 
     const serverPayload: ServerPayload = {
       displayName,
@@ -38,6 +76,9 @@ const ServerModalDialog: React.FC = () => {
       allowPassThroughAuth,
       dynamicAuthPrompt,
     };
+    if (alias.trim()) {
+      serverPayload.alias = alias.trim();
+    }
     if (editingServer) {
       serverPayload.id = editingServer.id;
     }
@@ -76,6 +117,26 @@ const ServerModalDialog: React.FC = () => {
               onChange={(e) => setDisplayName(e.target.value)}
               required
             />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="server-alias">Alias / Namespace (Optional)</label>
+            <input
+              type="text"
+              id="server-alias"
+              placeholder="e.g. homebox_db"
+              value={alias}
+              onChange={(e) => handleAliasChange(e.target.value)}
+              aria-invalid={!!aliasError}
+            />
+            {aliasError && (
+              <div className="field-error" style={{ color: 'var(--danger-color, #ef4444)', fontSize: '0.8rem', marginTop: '4px' }}>
+                {aliasError}
+              </div>
+            )}
+            <small style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '4px' }}>
+              Routing namespace (e.g. homebox_db). If omitted, the Server ID is used.
+            </small>
           </div>
 
           <div className="form-row">
@@ -262,10 +323,26 @@ const ServerModalDialog: React.FC = () => {
   );
 };
 
-export const ServerModal: React.FC = () => {
-  const { isAddEditOpen, editingServer } = useServerStore();
+export const ServerModal: React.FC<ServerModalProps> = ({
+  isOpen,
+  onClose,
+  onSave,
+  server,
+}) => {
+  const store = useServerStore();
+  const showModal = isOpen !== undefined ? isOpen : store.isAddEditOpen;
+  const editingServer = server !== undefined ? server : store.editingServer;
+  const handleClose = onClose || store.closeAddEditModal;
+  const handleSave = onSave || store.saveServer;
 
-  if (!isAddEditOpen) return null;
+  if (!showModal) return null;
 
-  return <ServerModalDialog key={editingServer?.id || 'new'} />;
+  return (
+    <ServerModalDialog
+      key={editingServer?.id || 'new'}
+      editingServer={editingServer}
+      onClose={handleClose}
+      onSave={handleSave}
+    />
+  );
 };

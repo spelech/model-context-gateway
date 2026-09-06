@@ -153,7 +153,7 @@ class ReleaseVerifier:
     # -------------------------------------------------------------------------
     # 1. Version Synchronization Checks
     # -------------------------------------------------------------------------
-    def verify_versions(self) -> Optional[str]:
+    def verify_versions(self, expected_version: Optional[str] = None) -> Optional[str]:
         self.print_section("1. Version Synchronization & Consistency", "🏷️")
 
         csproj_path = self.repo_root / "ModelContextGateway.csproj"
@@ -177,6 +177,12 @@ class ReleaseVerifier:
             self.record_check("Version", "Csproj SemVer Syntax", False, error=f"Version '{canonical_version}' does not match Semantic Versioning (X.Y.Z)")
             return None
         self.record_check("Version", f"Canonical Version ({canonical_version}) in {csproj_path.name}", True, f"Found <Version>{canonical_version}</Version>")
+
+        if expected_version:
+            if canonical_version == expected_version:
+                self.record_check("Version", f"Target Release Version ({expected_version}) Alignment", True, f"Target version matches canonical {canonical_version}")
+            else:
+                self.record_check("Version", f"Target Release Version ({expected_version}) Alignment", False, error=f"Expected version '{expected_version}', found '{canonical_version}'")
 
         # 1b. Validate AssemblyVersion and FileVersion
         asm_match = re.search(r"<AssemblyVersion>(.*?)</AssemblyVersion>", csproj_content)
@@ -499,11 +505,11 @@ class ReleaseVerifier:
     # -------------------------------------------------------------------------
     # Execution Runner & Report Summary
     # -------------------------------------------------------------------------
-    def run(self, check_versions: bool = True, check_links: bool = True, check_tests: bool = True) -> int:
+    def run(self, check_versions: bool = True, check_links: bool = True, check_tests: bool = True, expected_version: Optional[str] = None) -> int:
         self.print_banner()
 
         if check_versions:
-            self.verify_versions()
+            self.verify_versions(expected_version=expected_version)
 
         if check_links:
             self.verify_markdown_links()
@@ -535,6 +541,7 @@ class ReleaseVerifier:
 
 def main():
     parser = argparse.ArgumentParser(description="Model Context Gateway (MCG) Release & Quality Verification Engine")
+    parser.add_argument("version", nargs="?", default=None, help="Target release version to verify (optional, e.g. 5.10.0)")
     parser.add_argument("--skip-tests", action="store_true", help="Skip backend/frontend test and build execution")
     parser.add_argument("--skip-links", action="store_true", help="Skip markdown link and anchor verification")
     parser.add_argument("--skip-versions", action="store_true", help="Skip version synchronization checks")
@@ -571,7 +578,8 @@ def main():
     exit_code = verifier.run(
         check_versions=check_versions,
         check_links=check_links,
-        check_tests=check_tests
+        check_tests=check_tests,
+        expected_version=args.version
     )
     sys.exit(exit_code)
 

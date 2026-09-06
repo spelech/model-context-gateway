@@ -38,13 +38,13 @@ namespace ModelContextGateway.Core.Routing
                 new
                 {
                     name = "execute_tool",
-                    description = "Execute a specific internal MCP tool by name with arguments. Accepts namespaced tool names ('server__tool' or 'server/tool') or bare tool names ('tool') if unambiguous. Obtain available tools by calling search_tools first.",
+                    description = "Execute a specific internal MCP tool by name with arguments. Accepts namespaced tool names ('server/tool' or 'server__tool') or bare tool names ('tool') if unambiguous. Obtain available tools by calling search_tools first.",
                     inputSchema = new
                     {
                         type = "object",
                         properties = new
                         {
-                            name = new { type = "string", description = "The name of the tool to execute (e.g. 'docker__list_containers', 'docker/list_containers', or bare 'list_containers')." },
+                            name = new { type = "string", description = "The name of the tool to execute (e.g. 'docker/list_containers', 'docker__list_containers', or bare 'list_containers')." },
                             arguments = new { type = "object", description = "The arguments JSON object expected by the target tool." },
                             target_auth_token = new { type = "string", description = "Optional authentication token if the backend tool requires dynamic pass-through authorization." }
                         },
@@ -66,78 +66,144 @@ namespace ModelContextGateway.Core.Routing
 
             var trimmed = targetName.Trim();
 
-            // 1. Already in canonical server__tool format
-            if (trimmed.Contains("__"))
-            {
-                return (trimmed, null);
-            }
+            // 1. Check for namespace delimiters ('/', ':', '__')
+            string? prefix = null;
+            string? tool = null;
 
-            // 2. Delimited by slash or colon (e.g. docker/list_containers, server:tool)
             if (trimmed.Contains('/'))
             {
                 var idx = trimmed.IndexOf('/');
-                return ($"{trimmed.Substring(0, idx)}__{trimmed.Substring(idx + 1)}", null);
+                prefix = trimmed.Substring(0, idx);
+                tool = trimmed.Substring(idx + 1);
             }
-
-            if (trimmed.Contains(':'))
+            else if (trimmed.Contains(':'))
             {
                 var idx = trimmed.IndexOf(':');
-                return ($"{trimmed.Substring(0, idx)}__{trimmed.Substring(idx + 1)}", null);
+                prefix = trimmed.Substring(0, idx);
+                tool = trimmed.Substring(idx + 1);
+            }
+            else if (trimmed.Contains("__"))
+            {
+                var idx = trimmed.IndexOf("__", StringComparison.Ordinal);
+                prefix = trimmed.Substring(0, idx);
+                tool = trimmed.Substring(idx + 2);
             }
 
-            // 3. Bare tool name — search routing table for matching suffix
-            var matchingKeys = _toolRoutingTable.Keys
-                .Where(k => k.EndsWith($"__{trimmed}", StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            if (matchingKeys.Count == 1)
+            if (!string.IsNullOrEmpty(prefix) && !string.IsNullOrEmpty(tool))
             {
-                logger?.LogInformation("Auto-resolved bare tool name '{BareName}' to '{ResolvedName}'", trimmed, matchingKeys[0]);
-                return (matchingKeys[0], null);
-            }
+                var srv = servers.FirstOrDefault(s =>
+                    string.Equals(s.Alias, prefix, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(s.Id, prefix, StringComparison.OrdinalIgnoreCase));
 
-            if (matchingKeys.Count > 1)
-            {
-                var options = string.Join(", ", matchingKeys.Select(k => $"'{k}'"));
-                return (trimmed, $"Ambiguous tool name '{trimmed}'. Matching tools found across multiple servers: {options}. Please call execute_tool with the full namespaced name.");
-            }
-
-            // 4. Fallback search in cached tools if routing table wasn't yet populated
-            lock (_cacheLock)
-            {
-                var cachedMatches = new List<string>();
-                foreach (var item in _cachedTools)
+                var normalized = $"{prefix}__{tool}";
+                if (srv != null)
                 {
-                    string? name = null;
-                    if (item is System.Text.Json.JsonElement je && je.TryGetProperty("name", out var np))
+                    _toolRoutingTable[normalized] = srv.Id;
+                    _toolRoutingTable[$"{srv.Id}__{tool}"] = srv.Id;
+                    if (!string.IsNullOrWhiteSpace(srv.Alias))
                     {
-                        name = np.GetString();
+                        _toolRoutingTable[$"{srv.Alias}__{tool}"] = srv.Id;
                     }
-                    else if (item is IDictionary<string, object> dict && dict.TryGetValue("name", out var no))
-                    {
-                        name = no?.ToString();
-                    }
+                }
 
-                    if (!string.IsNullOrEmpty(name) && name.EndsWith($"__{trimmed}", StringComparison.OrdinalIgnoreCase))
+                return (normalized, null);
+            }
+
+            // 2. Bare tool name — search routing table for matching suffix across all delimiters
+            var matchingServerMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var kvp in _toolRoutingTable)
+            {
+                var key = kvp.Key;
+                var serverId = kvp.Value;
+
+                bool isMatch = false;
+                if (key.EndsWith("/" + trimmed, StringComparison.OrdinalIgnoreCase) ||
+                    key.EndsWith("__" + trimmed, StringComparison.OrdinalIgnoreCase) ||
+                    key.EndsWith(":" + trimmed, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(key, trimmed, StringComparison.OrdinalIgnoreCase))
+                {
+                    isMatch = true;
+                }
+
+                if (isMatch)
+                {
+                    var srv = servers.FirstOrDefault(s => string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase));
+                    var ns = !string.IsNullOrWhiteSpace(srv?.Alias) ? srv.Alias : serverId;
+                    matchingServerMap[serverId] = $"{ns}/{trimmed}";
+                }
+            }
+
+            // 3. Fallback search in cached tools if routing table wasn't yet populated
+            if (matchingServerMap.Count == 0)
+            {
+                lock (_cacheLock)
+                {
+                    foreach (var item in _cachedTools)
                     {
-                        if (!cachedMatches.Contains(name))
+                        string? name = null;
+                        if (item is System.Text.Json.JsonElement je && je.TryGetProperty("name", out var np))
                         {
-                            cachedMatches.Add(name);
+                            name = np.GetString();
+                        }
+                        else if (item is IDictionary<string, object> dict && dict.TryGetValue("name", out var no))
+                        {
+                            name = no?.ToString();
+                        }
+
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            string? cachedPrefix = null;
+                            string? cachedTool = null;
+                            if (name.Contains('/'))
+                            {
+                                var idx = name.IndexOf('/');
+                                cachedPrefix = name.Substring(0, idx);
+                                cachedTool = name.Substring(idx + 1);
+                            }
+                            else if (name.Contains(':'))
+                            {
+                                var idx = name.IndexOf(':');
+                                cachedPrefix = name.Substring(0, idx);
+                                cachedTool = name.Substring(idx + 1);
+                            }
+                            else if (name.Contains("__"))
+                            {
+                                var idx = name.IndexOf("__", StringComparison.Ordinal);
+                                cachedPrefix = name.Substring(0, idx);
+                                cachedTool = name.Substring(idx + 2);
+                            }
+
+                            if (string.Equals(cachedTool, trimmed, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(cachedPrefix))
+                            {
+                                var srv = servers.FirstOrDefault(s =>
+                                    string.Equals(s.Alias, cachedPrefix, StringComparison.OrdinalIgnoreCase) ||
+                                    string.Equals(s.Id, cachedPrefix, StringComparison.OrdinalIgnoreCase));
+
+                                var serverId = srv?.Id ?? cachedPrefix;
+                                var ns = !string.IsNullOrWhiteSpace(srv?.Alias) ? srv.Alias : serverId;
+                                matchingServerMap[serverId] = $"{ns}/{trimmed}";
+                            }
                         }
                     }
                 }
+            }
 
-                if (cachedMatches.Count == 1)
-                {
-                    logger?.LogInformation("Auto-resolved bare tool name '{BareName}' from cache to '{ResolvedName}'", trimmed, cachedMatches[0]);
-                    return (cachedMatches[0], null);
-                }
+            if (matchingServerMap.Count > 1)
+            {
+                var options = string.Join(", ", matchingServerMap.Values.Distinct().OrderBy(x => x).Select(k => $"'{k}'"));
+                return (trimmed, $"Ambiguous tool name '{trimmed}'. Matching tools found across multiple servers: {options}. Please call execute_tool with the full namespaced name.");
+            }
 
-                if (cachedMatches.Count > 1)
-                {
-                    var options = string.Join(", ", cachedMatches.Select(k => $"'{k}'"));
-                    return (trimmed, $"Ambiguous tool name '{trimmed}'. Matching tools found across multiple servers: {options}. Please call execute_tool with the full namespaced name.");
-                }
+            if (matchingServerMap.Count == 1)
+            {
+                var serverId = matchingServerMap.Keys.First();
+                var srv = servers.FirstOrDefault(s => string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase));
+                var ns = !string.IsNullOrWhiteSpace(srv?.Alias) ? srv.Alias : serverId;
+                var resolved = $"{ns}__{trimmed}";
+                _toolRoutingTable[resolved] = serverId;
+                logger?.LogInformation("Auto-resolved bare tool name '{BareName}' to '{ResolvedName}'", trimmed, resolved);
+                return (resolved, null);
             }
 
             return (trimmed, null);

@@ -226,7 +226,10 @@ namespace ModelContextGateway.Core.Routing
                 }
                 targetName = normalizedTargetName;
 
-                var activeServerIds = servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+                var activeServerIds = servers.Where(s => s.Enabled)
+                    .SelectMany(s => string.IsNullOrWhiteSpace(s.Alias) ? new[] { s.Id } : new[] { s.Id, s.Alias })
+                    .Distinct()
+                    .ToList();
                 if (!SecurityValidationHelper.ValidateToolOrPromptName(targetName, activeServerIds))
                 {
                     return new
@@ -312,11 +315,12 @@ namespace ModelContextGateway.Core.Routing
                 var sepIdx = toolName.IndexOf("__", StringComparison.Ordinal);
                 if (sepIdx > 0)
                 {
-                    var candidateServerId = toolName.Substring(0, sepIdx);
-                    if (servers.Any(s => s.Id == candidateServerId && s.Enabled))
+                    var candidatePrefix = toolName.Substring(0, sepIdx);
+                    var matchedServer = servers.FirstOrDefault(s => (string.Equals(s.Id, candidatePrefix, StringComparison.OrdinalIgnoreCase) || string.Equals(s.Alias, candidatePrefix, StringComparison.OrdinalIgnoreCase)) && s.Enabled);
+                    if (matchedServer != null)
                     {
-                        _toolRoutingTable[toolName] = candidateServerId;
-                        logger.LogInformation("Dynamically registered resilient prefix route for tool '{ToolName}' to server '{ServerId}'", toolName, candidateServerId);
+                        _toolRoutingTable[toolName] = matchedServer.Id;
+                        logger.LogInformation("Dynamically registered resilient prefix route for tool '{ToolName}' to server '{ServerId}'", toolName, matchedServer.Id);
                     }
                 }
             }
@@ -326,11 +330,28 @@ namespace ModelContextGateway.Core.Routing
                 logger.LogInformation("Routing tool call '{ToolName}' to server '{ServerId}'", toolName, serverId);
 
                 string routingBody = body;
-                var prefix = serverId + "__";
-                if (toolName.StartsWith(prefix))
+                var rawToolName = toolName;
+                var targetServer = servers.FirstOrDefault(s => string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase));
+                if (toolName.StartsWith(serverId + "__", StringComparison.OrdinalIgnoreCase))
                 {
-                    var realToolName = toolName.Substring(prefix.Length);
-                    routingBody = rewriteRequestJson(body, "name", realToolName);
+                    rawToolName = toolName.Substring(serverId.Length + 2);
+                }
+                else if (targetServer?.Alias != null && toolName.StartsWith(targetServer.Alias + "__", StringComparison.OrdinalIgnoreCase))
+                {
+                    rawToolName = toolName.Substring(targetServer.Alias.Length + 2);
+                }
+                else
+                {
+                    var sepIdx = toolName.IndexOf("__", StringComparison.Ordinal);
+                    if (sepIdx > 0)
+                    {
+                        rawToolName = toolName.Substring(sepIdx + 2);
+                    }
+                }
+
+                if (rawToolName != toolName)
+                {
+                    routingBody = rewriteRequestJson(body, "name", rawToolName);
                 }
 
                 try

@@ -85,8 +85,31 @@ namespace ModelContextGateway.Core.Routing
 
             try
             {
+                var (normalizedToolName, ambiguityErr) = _toolRoutingManager.NormalizeTargetToolName(toolName, _servers, _logger);
+                if (!string.IsNullOrEmpty(ambiguityErr))
+                {
+                    statusCode = 400;
+                    errorMessage = ambiguityErr;
+                    var errResult = new
+                    {
+                        isError = true,
+                        content = new[] {
+                            new {
+                                type = "text",
+                                text = ambiguityErr
+                            }
+                        }
+                    };
+                    responsePayload = JsonSerializer.Serialize(errResult);
+                    return errResult;
+                }
+                toolName = normalizedToolName;
+
                 // Namespace validation
-                var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+                var activeServerIds = _servers.Where(s => s.Enabled)
+                    .SelectMany(s => string.IsNullOrWhiteSpace(s.Alias) ? new[] { s.Id } : new[] { s.Id, s.Alias })
+                    .Distinct()
+                    .ToList();
                 if (!SecurityValidationHelper.ValidateToolOrPromptName(toolName, activeServerIds))
                 {
                     statusCode = 403;

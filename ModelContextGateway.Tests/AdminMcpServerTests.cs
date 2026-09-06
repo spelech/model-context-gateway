@@ -57,7 +57,7 @@ namespace ModelContextGateway.Tests
 
             _rawConnection.Execute(@"
                 CREATE TABLE IF NOT EXISTS Servers (
-                    Id TEXT PRIMARY KEY, DisplayName TEXT, Url TEXT, Enabled INTEGER DEFAULT 1, Hidden INTEGER DEFAULT 0,
+                    Id TEXT PRIMARY KEY, Alias TEXT, DisplayName TEXT, Url TEXT, Enabled INTEGER DEFAULT 1, Hidden INTEGER DEFAULT 0,
                     Type TEXT DEFAULT 'sse', SecretProvider TEXT, SecretItemKey TEXT, SecretMount TEXT, SecretPath TEXT,
                     SecretField TEXT, AuthShape TEXT, CustomHeaderName TEXT, Categories TEXT DEFAULT '[]', ApiKey TEXT,
                     HeadersJson TEXT, AutoDiscovered INTEGER DEFAULT 0
@@ -851,6 +851,73 @@ namespace ModelContextGateway.Tests
             Assert.False(doc.RootElement.TryGetProperty("isError", out var isErr) && isErr.GetBoolean());
             mockSecretRetriever.Verify(r => r.GetSecretAsync("secret/data/backend", "token"), Times.AtLeastOnce);
             Assert.Equal("Bearer vault-token-xyz-123", capturedAuthHeader);
+        }
+
+        private AdminMcpServer CreateTestAdminMcpServer() => _adminMcpServer;
+
+        [Fact]
+        [Requirement("MCP-ADMIN-PARITY-SERVER-ALIAS", "MCP", RequirementType.Positive, "AdminMcpServer manage_servers supports server alias for add, update, and list actions with collision validation.")]
+        public async Task AdminMcpServer_ManageServers_Supports_Alias()
+        {
+            // MCP-ADMIN-PARITY-SERVER-ALIAS
+            var admin = CreateTestAdminMcpServer();
+            var addResult = await admin.ExecuteManageServersAsync(new Dictionary<string, object>
+            {
+                ["action"] = "add",
+                ["id"] = "test-mcp-db",
+                ["alias"] = "test_db",
+                ["displayName"] = "Test DB",
+                ["url"] = "http://localhost:9000/sse"
+            });
+
+            Assert.True(addResult.Success);
+
+            var listResult = await admin.ExecuteManageServersAsync(new Dictionary<string, object>
+            {
+                ["action"] = "list"
+            });
+            var json = JsonSerializer.Serialize(listResult.Data);
+            Assert.Contains("\"alias\":\"test_db\"", json);
+
+            // Verify update action updates alias
+            var updateResult = await admin.ExecuteManageServersAsync(new Dictionary<string, object>
+            {
+                ["action"] = "update",
+                ["id"] = "test-mcp-db",
+                ["alias"] = "test_db_renamed"
+            });
+            Assert.True(updateResult.Success);
+
+            var listUpdated = await admin.ExecuteManageServersAsync(new Dictionary<string, object>
+            {
+                ["action"] = "list"
+            });
+            var updatedJson = JsonSerializer.Serialize(listUpdated.Data);
+            Assert.Contains("\"alias\":\"test_db_renamed\"", updatedJson);
+
+            // Verify collision validation rejects duplicate alias
+            var duplicateResult = await admin.ExecuteManageServersAsync(new Dictionary<string, object>
+            {
+                ["action"] = "add",
+                ["id"] = "test-mcp-db-2",
+                ["alias"] = "test_db_renamed",
+                ["displayName"] = "Test DB 2",
+                ["url"] = "http://localhost:9001/sse"
+            });
+            Assert.False(duplicateResult.Success);
+            Assert.Contains("already in use", duplicateResult.Error);
+
+            // Verify collision validation rejects collision with server ID
+            var idCollisionResult = await admin.ExecuteManageServersAsync(new Dictionary<string, object>
+            {
+                ["action"] = "add",
+                ["id"] = "test-mcp-db-3",
+                ["alias"] = "test-mcp-db",
+                ["displayName"] = "Test DB 3",
+                ["url"] = "http://localhost:9002/sse"
+            });
+            Assert.False(idCollisionResult.Success);
+            Assert.Contains("collides with an existing server ID", idCollisionResult.Error);
         }
     }
 }

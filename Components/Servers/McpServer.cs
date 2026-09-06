@@ -3,6 +3,7 @@ namespace ModelContextGateway.Components.Servers
     public class McpServer
     {
         public string Id { get; set; } = string.Empty;
+        public string? Alias { get; set; }
         public string DisplayName { get; set; } = string.Empty;
         public string Url { get; set; } = string.Empty;
         public bool Enabled { get; set; }

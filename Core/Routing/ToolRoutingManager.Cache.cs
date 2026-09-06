@@ -31,6 +31,55 @@ namespace ModelContextGateway.Core.Routing
             }
         }
 
+        /// <summary>
+        /// Builds the exposed tool definition with primary slash formatting ({namespace}/{tool_name}),
+        /// prepends [{namespace}] to description, and registers dual-key and legacy delimiter routing table entries.
+        /// </summary>
+        public Dictionary<string, object>? BuildExposedToolDefinition(McpServer? server, JsonElement tool)
+        {
+            if (!tool.TryGetProperty("name", out var nameProp))
+            {
+                return null;
+            }
+
+            var rawToolName = nameProp.GetString() ?? string.Empty;
+            var serverId = server?.Id ?? string.Empty;
+            var ns = !string.IsNullOrWhiteSpace(server?.Alias) ? server.Alias : serverId;
+            var exposedName = $"{ns}/{rawToolName}";
+
+            if (!string.IsNullOrEmpty(serverId))
+            {
+                _toolRoutingTable[exposedName] = serverId;
+                _toolRoutingTable[$"{serverId}/{rawToolName}"] = serverId;
+
+                // Register legacy delimiters for resilient O(1) resolution
+                _toolRoutingTable[$"{ns}__{rawToolName}"] = serverId;
+                _toolRoutingTable[$"{ns}:{rawToolName}"] = serverId;
+                _toolRoutingTable[$"{serverId}__{rawToolName}"] = serverId;
+                _toolRoutingTable[$"{serverId}:{rawToolName}"] = serverId;
+            }
+
+            var toolDict = JsonSerializer.Deserialize<Dictionary<string, object>>(tool.GetRawText());
+            if (toolDict != null)
+            {
+                toolDict["name"] = exposedName;
+                if (toolDict.TryGetValue("description", out var desc))
+                {
+                    toolDict["description"] = $"[{ns}] " + desc;
+                }
+
+                if (server != null && (server.AllowPassThroughAuth || !string.IsNullOrEmpty(server.DynamicAuthPrompt)))
+                {
+                    var authPrompt = !string.IsNullOrEmpty(server.DynamicAuthPrompt) ? server.DynamicAuthPrompt : "This tool requires a target authentication token. Call with target_auth_token parameter.";
+                    toolDict["description"] = $"{toolDict["description"]}\n\nAUTH REQUIRED: {authPrompt}";
+                }
+
+                return toolDict;
+            }
+
+            return null;
+        }
+
         public async Task PopulateToolsCacheAsync(string body, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, IEnumerable<McpServer> servers, SessionManager? sessionManager = null)
         {
             var allTools = new List<object>();
@@ -67,34 +116,14 @@ namespace ModelContextGateway.Core.Routing
                 if (item.Tools.ValueKind == JsonValueKind.Array)
                 {
                     var serverTools = new List<object>();
+                    var srv = servers.FirstOrDefault(s => s.Id == item.ServerId) ?? new McpServer { Id = item.ServerId };
                     foreach (var tool in item.Tools.EnumerateArray())
                     {
-                        if (tool.TryGetProperty("name", out var nameProp))
+                        var toolDict = BuildExposedToolDefinition(srv, tool);
+                        if (toolDict != null)
                         {
-                            var rawToolName = nameProp.GetString() ?? string.Empty;
-                            var exposedName = item.ServerId + "__" + rawToolName;
-
-                            _toolRoutingTable[exposedName] = item.ServerId;
-
-                            var toolDict = JsonSerializer.Deserialize<Dictionary<string, object>>(tool.GetRawText());
-                            if (toolDict != null)
-                            {
-                                toolDict["name"] = exposedName;
-                                if (toolDict.TryGetValue("description", out var desc))
-                                {
-                                    toolDict["description"] = $"[{item.ServerId}] " + desc;
-                                }
-
-                                var srv = servers.FirstOrDefault(s => s.Id == item.ServerId);
-                                if (srv != null && (srv.AllowPassThroughAuth || !string.IsNullOrEmpty(srv.DynamicAuthPrompt)))
-                                {
-                                    var authPrompt = !string.IsNullOrEmpty(srv.DynamicAuthPrompt) ? srv.DynamicAuthPrompt : "This tool requires a target authentication token. Call with target_auth_token parameter.";
-                                    toolDict["description"] = $"{toolDict["description"]}\n\nAUTH REQUIRED: {authPrompt}";
-                                }
-
-                                serverTools.Add(toolDict);
-                                allTools.Add(toolDict);
-                            }
+                            serverTools.Add(toolDict);
+                            allTools.Add(toolDict);
                         }
                     }
                     if (sessionManager != null)

@@ -419,7 +419,7 @@ namespace ModelContextGateway.Tests
             tools.Should().NotBeEmpty();
             var tool = tools[0] as Dictionary<string, object>;
             tool.Should().NotBeNull();
-            tool!["name"].Should().Be("backend1__get_weather");
+            tool!["name"].Should().Be("backend1/get_weather");
             tool["description"].Should().Be("[backend1] Get weather info");
         }
 

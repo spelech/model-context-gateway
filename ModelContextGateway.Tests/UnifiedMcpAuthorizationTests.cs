@@ -49,7 +49,8 @@ namespace ModelContextGateway.Tests
             {
                 new McpServer { Id = "ha", DisplayName = "Home Assistant", Type = "http", Url = "http://ha:8123/mcp", Enabled = true },
                 new McpServer { Id = "docker", DisplayName = "Docker", Type = "http", Url = "http://docker:8000/mcp", Enabled = true },
-                new McpServer { Id = "plex", DisplayName = "Plex", Type = "http", Url = "http://plex:32400/mcp", Enabled = true }
+                new McpServer { Id = "plex", DisplayName = "Plex", Type = "http", Url = "http://plex:32400/mcp", Enabled = true },
+                new McpServer { Id = "postgres-mcp-homebox", Alias = "homebox_db", DisplayName = "Homebox DB", Type = "http", Url = "http://postgres-mcp-homebox:8000/mcp", Enabled = true }
             };
         }
 
@@ -280,6 +281,39 @@ namespace ModelContextGateway.Tests
             (await session.IsUserAuthorizedAsync("tools/call", "docker__restart", context)).Should().Be(expectDockerRestart);
         }
 
+        [Theory]
+        [InlineData("ha/turn_on")]
+        [InlineData("ha:turn_on")]
+        [InlineData("ha__turn_on")]
+        [Requirement("MCP-30", "MCP", RequirementType.Positive, "IsUserAuthorizedAsync matches granular tool policies across /, :, and __ delimiters.")]
+        public async Task IsUserAuthorizedAsync_MatchesToolPolicy_AcrossDelimiters(string targetTool)
+        {
+            var context = CreateHttpContext("userA", groups: new List<string> { "Operators" });
+            var session = CreateSession(context);
+
+            SeedPolicy("p1", "tool:ha__turn_on", "Operators", true);
+
+            var isAuth = await session.IsUserAuthorizedAsync("tools/call", targetTool, context);
+            isAuth.Should().BeTrue();
+        }
+
+        [Fact]
+        [Requirement("MCP-30", "MCP", RequirementType.Positive, "IsUserAuthorizedAsync resolves server aliases and IDs interchangeably when evaluating server policies.")]
+        public async Task IsUserAuthorizedAsync_ResolvesAliasesAndServerIds_ForServerPolicies()
+        {
+            var context = CreateHttpContext("userA", groups: new List<string> { "DbAdmins" });
+            var session = CreateSession(context);
+
+            // Policy seeded with full server ID
+            SeedPolicy("p1", "server:postgres-mcp-homebox", "DbAdmins", true);
+
+            // Verified against alias tool invocation across slash, colon, and double underscore
+            (await session.IsUserAuthorizedAsync("tools/call", "homebox_db/execute_sql", context)).Should().BeTrue();
+            (await session.IsUserAuthorizedAsync("tools/call", "homebox_db:execute_sql", context)).Should().BeTrue();
+            (await session.IsUserAuthorizedAsync("tools/call", "homebox_db__execute_sql", context)).Should().BeTrue();
+            (await session.IsUserAuthorizedAsync("tools/call", "postgres-mcp-homebox/execute_sql", context)).Should().BeTrue();
+        }
+
         [Fact]
         [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "tools/list filters exposed backend tools according to caller permissions.")]
         public async Task ListToolsAsync_FiltersUnauthorizedTools()
@@ -321,8 +355,8 @@ namespace ModelContextGateway.Tests
             // Assert
             tools.Should().NotBeNull();
             var toolNames = tools.Select(t => (t as Dictionary<string, object>)?["name"] as string).ToList();
-            toolNames.Should().Contain("ha__turn_on");
-            toolNames.Should().NotContain("ha__turn_off");
+            toolNames.Should().Contain("ha/turn_on");
+            toolNames.Should().NotContain("ha/turn_off");
         }
 
         [Fact]

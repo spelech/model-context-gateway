@@ -143,8 +143,9 @@ namespace ModelContextGateway.Infrastructure.Persistence
         public async Task<IEnumerable<McpServer>> GetServersAsync()
         {
             using var conn = _dbFactory.CreateConnection();
+            DatabaseInitializer.EnsureAliasColumn(conn);
             return await conn.QueryAsync<McpServer>(@"
-                SELECT Id, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider,
+                SELECT Id, Alias, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider,
                        SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape,
                        CustomHeaderName, ApiKey, HeadersJson, AutoDiscovered
                 FROM Servers;");
@@ -165,15 +166,16 @@ namespace ModelContextGateway.Infrastructure.Persistence
         public async Task SaveServerAsync(McpServer server)
         {
             using var conn = _dbFactory.CreateConnection();
+            DatabaseInitializer.EnsureAliasColumn(conn);
             var provider = _dbFactory.ProviderName.ToLower();
 
             if (provider == "sqlite")
             {
                 const string sql = @"
-                    INSERT INTO Servers (Id, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered)
-                    VALUES (@Id, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered)
+                    INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered)
+                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered)
                     ON CONFLICT(Id) DO UPDATE SET
-                        DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
+                        Alias = @Alias, DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
                         SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, SecretMount = @SecretMount,
                         SecretPath = @SecretPath, SecretField = @SecretField, AuthShape = @AuthShape,
                         CustomHeaderName = @CustomHeaderName, Categories = @Categories, ApiKey = @ApiKey,
@@ -185,7 +187,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 const string sql = @"
                     IF EXISTS (SELECT 1 FROM Servers WHERE Id = @Id)
                     BEGIN
-                        UPDATE Servers SET DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
+                        UPDATE Servers SET Alias = @Alias, DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
                             SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, SecretMount = @SecretMount,
                             SecretPath = @SecretPath, SecretField = @SecretField, AuthShape = @AuthShape,
                             CustomHeaderName = @CustomHeaderName, Categories = @Categories, ApiKey = @ApiKey,
@@ -193,18 +195,18 @@ namespace ModelContextGateway.Infrastructure.Persistence
                     END
                     ELSE
                     BEGIN
-                        INSERT INTO Servers (Id, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered)
-                        VALUES (@Id, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered);
+                        INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered)
+                        VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered);
                     END;";
                 await conn.ExecuteAsync(sql, server);
             }
             else if (provider == "mysql")
             {
                 const string sql = @"
-                    INSERT INTO Servers (Id, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered)
-                    VALUES (@Id, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered)
+                    INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered)
+                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered)
                     ON DUPLICATE KEY UPDATE
-                        DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
+                        Alias = @Alias, DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
                         SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, SecretMount = @SecretMount,
                         SecretPath = @SecretPath, SecretField = @SecretField, AuthShape = @AuthShape,
                         CustomHeaderName = @CustomHeaderName, Categories = @Categories, ApiKey = @ApiKey,

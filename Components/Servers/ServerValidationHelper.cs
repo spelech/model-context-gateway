@@ -92,5 +92,33 @@ namespace ModelContextGateway.Components.Servers
 
             return true;
         }
+
+        public static string? ValidateAlias(string? alias, string serverId, IEnumerable<McpServer> existingServers)
+        {
+            if (string.IsNullOrWhiteSpace(alias))
+            {
+                return null;
+            }
+
+            var trimmed = alias.Trim();
+            if (!System.Text.RegularExpressions.Regex.IsMatch(trimmed, "^[a-zA-Z0-9_-]+$"))
+            {
+                return "Server Alias may only contain letters, numbers, underscores, and hyphens.";
+            }
+
+            if (existingServers.Any(s => !string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase) &&
+                                         string.Equals(s.Id, trimmed, StringComparison.OrdinalIgnoreCase)))
+            {
+                return $"Server Alias '{trimmed}' collides with an existing server ID.";
+            }
+
+            if (existingServers.Any(s => !string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase) &&
+                                         string.Equals(s.Alias, trimmed, StringComparison.OrdinalIgnoreCase)))
+            {
+                return $"Server Alias '{trimmed}' is already in use by another server.";
+            }
+
+            return null;
+        }
     }
 }
