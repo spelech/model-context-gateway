@@ -390,7 +390,7 @@ namespace ModelContextGateway.Tests
                     initializeAttempts++;
                     using var doc = JsonDocument.Parse(contentStr);
                     var idRaw = doc.RootElement.TryGetProperty("id", out var idElem) ? idElem.GetRawText() : "1";
-                    
+
                     if (doc.RootElement.TryGetProperty("params", out var pElem) && pElem.TryGetProperty("protocolVersion", out var verElem))
                     {
                         lastReceivedProtocolVersion = verElem.GetString() ?? "";
