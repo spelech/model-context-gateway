@@ -4,7 +4,7 @@ The **Model Context Gateway (MCG)** enables AI coding assistants, IDEs, and auto
 
 ---
 
-## 🔑 Managing App Keys (`App Keys & Security` Tab)
+## Managing App Keys (`App Keys & Security` Tab)
 
 ![App Keys and Security Management View](../assets/security_view.jpg)
 
@@ -25,7 +25,7 @@ AppKeys grant external clients secure, authenticated access to the router withou
 
 ---
 
-## 🎯 AppKey Scope Grammar & Examples
+## AppKey Scope Grammar & Examples
 
 > [!TIP]
 > For the complete formal grammar specification, evaluation order, and least-privilege persona recipes, refer to the [**AppKey Scopes & Authorization Guide**](../appkey-scopes.md). For the underlying database schema and hash storage model (`AppKeys`), see the [**Database Entity-Relationship Diagram**](../database-providers.md#unified-database-entity-relationship-diagram-erd).
@@ -42,13 +42,13 @@ AppKeys grant external clients secure, authenticated access to the router withou
 
 ---
 
-## 🛠️ Dynamic Client Setup Guide
+## Dynamic Client Setup Guide
 
 The **Client Setup Guide** card (available on both the Overview and App Keys & Security views) features an interactive configuration generator:
 
 ```
 [ Target Route: Unified Meta-Mode (/sse?meta=true) ▾ ]
-[ Client Tool: Cursor IDE ▾ ]  [ Host: http://10.0.0.10:8026 ]  [☑ Include X-App-Key ]
+[ Client Tool: Cursor IDE ▾ ]  [ Host: http://localhost:8080 ]  [☑ Include X-App-Key ]
 ```
 
 ---
@@ -62,7 +62,7 @@ To connect Cursor to the unified Meta-Mode gateway:
 {
   "mcpServers": {
     "model-context-gateway": {
-      "url": "http://10.0.0.10:8026/sse",
+      "url": "http://localhost:8080/sse",
       "headers": {
         "X-App-Key": "mcp_app_key_your_generated_secret_key_here"
       }
@@ -91,7 +91,7 @@ Claude Desktop connects using the official MCP inspector bridge or direct SSE tr
       "args": [
         "-y",
         "@modelcontextprotocol/inspector",
-        "http://10.0.0.10:8026/sse"
+        "http://localhost:8080/sse"
       ],
       "env": {
         "X_APP_KEY": "mcp_app_key_your_generated_secret_key_here"
@@ -109,7 +109,7 @@ For CLI coding agents and autonomous workflows:
 
 ```bash
 # Export environment variable
-export MCG_URL="http://10.0.0.10:8026/sse"
+export MCG_URL="http://localhost:8080/sse"
 export MCG_KEY="mcp-adm-your_generated_secret_key_here"
 
 # Connect via Antigravity CLI
@@ -126,7 +126,7 @@ In VS Code with the Cline or Roo Code extension:
 {
   "mcpServers": {
     "model-context-gateway": {
-      "url": "http://10.0.0.10:8026/sse",
+      "url": "http://localhost:8080/sse",
       "headers": {
         "X-App-Key": "mcp_app_key_your_generated_secret_key_here"
       }
@@ -145,7 +145,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 
 const transport = new SSEClientTransport(
-  new URL("http://10.0.0.10:8026/sse"),
+  new URL("http://localhost:8080/sse"),
   {
     requestInit: {
       headers: {
@@ -174,7 +174,7 @@ from mcp.client.sse import sse_client
 
 async def main():
     headers = {"X-App-Key": "mcp_app_key_your_generated_secret_key_here"}
-    async with sse_client("http://10.0.0.10:8026/sse", headers=headers) as (read, write):
+    async with sse_client("http://localhost:8080/sse", headers=headers) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
             tools = await session.list_tools()
@@ -185,7 +185,7 @@ asyncio.run(main())
 
 ---
 
-## 👥 Registered Clients Registry (`RegisteredClientsCard`)
+## Registered Clients Registry (`RegisteredClientsCard`)
 
 ![Registered OAuth Client Modal](../assets/registered_client_modal.jpg)
 
@@ -199,7 +199,7 @@ The **Registered Clients** table in the App Keys & Security view provides real-t
 
 ---
 
-## 🛡️ Interactive OAuth 2.0 Consent Screen
+## Interactive OAuth 2.0 Consent Screen
 
 ![Interactive OAuth Consent Screen](../assets/oauth_consent_screen.jpg)
 

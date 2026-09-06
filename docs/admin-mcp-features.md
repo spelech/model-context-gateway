@@ -9,7 +9,8 @@ This server exposes 10 consolidated tools that cover 100% of the gateway's admin
 ### 1. `manage_servers`
 Manage backend MCP server configurations and connectivity in the router gateway.
 - **Actions**: `list`, `get`, `create`, `update`, `delete`, `toggle`, `reconnect`, `reconnect_all`
-- **Use Cases**: Provisioning new backend servers, updating connection settings (URLs, auth shapes, headers), toggling enabled states, and manually forcing health checks or reconnections.
+- **Key Parameters**: `id`, `name`, `url`, `type` (`sse`, `http`, `stdio`), `alias` (concise namespace alias for tool routing, e.g. `ha`), `category`, `enabled`, `secret_provider`, `secret_key`
+- **Use Cases**: Provisioning new backend servers, updating connection settings (URLs, auth shapes, headers, aliases), toggling enabled states, and manually forcing health checks or reconnections.
 
 ### 2. `manage_appkeys`
 Manage user and application API keys, quotas, and expiration.

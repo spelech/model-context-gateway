@@ -1,12 +1,12 @@
-# 🚀 Model Context Gateway (MCG) Transport Capability & Configuration Guide
+# Model Context Gateway Transport Capability & Configuration Guide
 
-The **Model Context Protocol (MCP) Gateway Router** supports multiple downstream transport mechanisms to communicate with backend tools, services, and local processes, as well as multiple upstream client connectivity models.
+The **Model Context Protocol (MCP) Gateway** supports multiple downstream transport mechanisms to communicate with backend tools, services, and local processes, as well as multiple upstream client connectivity models.
 
 This guide details supported transports, security policies, concurrency architectures, configuration parameters, and troubleshooting procedures.
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 1. [Transport Comparison & Capability Matrix](#1-transport-comparison-capability-matrix)
 2. [Subprocess STDIO Deep-Dive](#2-subprocess-stdio-deep-dive)
@@ -35,7 +35,7 @@ This guide details supported transports, security policies, concurrency architec
 
 ## 1. Transport Comparison & Capability Matrix
 
-The gateway router abstracts transport differences behind the unified [`ITransport`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Infrastructure/Transports/ITransport.cs) interface and [`BackendConnection`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Core/Routing/BackendConnection.cs) wrapper. Backend servers specify their transport type via the `Type` column (`sse`, `http`, `streamable`, `stdio`, or `custom`).
+The gateway router abstracts transport differences behind the unified [`ITransport`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/ITransport.cs) interface and [`BackendConnection`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/BackendConnection.cs) wrapper. Backend servers specify their transport type via the `Type` column (`sse`, `http`, `streamable`, `stdio`, or `custom`).
 
 ```mermaid
 graph TD
@@ -78,11 +78,11 @@ graph TD
 
 ## 2. Subprocess STDIO Deep-Dive
 
-The [`StdioTransport`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Infrastructure/Transports/StdioTransport.cs) provides zero-network-overhead execution for local MCP tools, script interpreters, and binary executables.
+The [`StdioTransport`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs) provides zero-network-overhead execution for local MCP tools, script interpreters, and binary executables.
 
 ### Executable Path & Argument Configuration
 
-When configuring a `stdio` server, the `Url` field contains the executable and its arguments. The router parses this command line using [`StdioTransport.ParseCommandLine`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Infrastructure/Transports/StdioTransport.cs#L115-L165), supporting single quotes, double quotes, and space-separated tokens:
+When configuring a `stdio` server, the `Url` field contains the executable and its arguments. The router parses this command line using [`StdioTransport.ParseCommandLine`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs#L115-L165), supporting single quotes, double quotes, and space-separated tokens:
 
 ```csharp
 // Example command string:
@@ -97,7 +97,7 @@ var arguments = parsed.Skip(1);
 
 ### Strict Process Security Policy
 
-To prevent arbitrary command execution, privilege escalation, and shell injection vulnerabilities, [`ValidateSecurityPolicy`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Infrastructure/Transports/StdioTransport.cs#L167-L191) strictly enforces:
+To prevent arbitrary command execution, privilege escalation, and shell injection vulnerabilities, [`ValidateSecurityPolicy`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs#L167-L191) strictly enforces:
 
 1. **Blocked Shell Interpreters**: Direct invocation of system shells is rejected:
    - `sh`, `bash`, `zsh`, `cmd`, `powershell`, `pwsh`
@@ -118,7 +118,7 @@ When secrets are passed via command-line arguments, they are visible to any unpr
 - OS error logs and system crash dumps
 
 #### Injection Implementation:
-1. Secret retrieval is performed dynamically through [`ResolveTokenAsync`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Infrastructure/Transports/StdioTransport.cs#L47-L98) (supporting HashiCorp Vault KV v2, Windows DPAPI / Registry, Environment Variables, or database-stored keys).
+1. Secret retrieval is performed dynamically through [`ResolveTokenAsync`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs#L47-L98) (supporting HashiCorp Vault KV v2, Windows DPAPI / Registry, Environment Variables, or database-stored keys).
 2. The resolved secret is injected exclusively into the subprocess's isolated environment dictionary:
    ```csharp
    var envKey = !string.IsNullOrWhiteSpace(_server.SecretItemKey) ? _server.SecretItemKey : "API_KEY";
@@ -160,8 +160,8 @@ sequenceDiagram
 Subprocess standard error (`stderr`) is read asynchronously on a dedicated background thread:
 
 - **Log Routing**: Non-empty `stderr` output is captured line-by-line and routed to the gateway logger as `LogLevel.Warning` with prefix `[STDIO Backend {ServerId} Stderr]`.
-- **Secret Redaction**: All logged lines pass through [`SanitizeLogOutput`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Infrastructure/Transports/StdioTransport.cs#L100-L113):
-  - Sanitized via [`PiiSanitizer.SanitizePayload`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Infrastructure/Logging/PiiSanitizer.cs) (redacting Bearer tokens, passwords, and authorization headers).
+- **Secret Redaction**: All logged lines pass through [`SanitizeLogOutput`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs#L100-L113):
+  - Sanitized via [`PiiSanitizer.SanitizePayload`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Logging/PiiSanitizer.cs) (redacting Bearer tokens, passwords, and authorization headers).
   - Explicit string replacement masks `_resolvedSecret` and `_server.ApiKey` with `[REDACTED]`.
 
 ### Stream EOF Draining & Buffer Loss Prevention
@@ -183,7 +183,7 @@ This guarantees that fast-executing one-shot tools or tools that exit immediatel
 
 ### Health Checking: Non-HTTP Process Liveness
 
-`stdio` backends do not expose network ports or HTTP endpoints. [`BackendHealthCheckService.ProbeServerAsync`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Components/Servers/BackendHealthCheckService.cs#L112-L122) validates `stdio` servers via:
+`stdio` backends do not expose network ports or HTTP endpoints. [`BackendHealthCheckService.ProbeServerAsync`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/BackendHealthCheckService.cs#L112-L122) validates `stdio` servers via:
 1. **Command Syntax & Security Validation**: Runs `ServerValidationHelper.IsValidStdioCommand` to ensure the executable exists and meets security policies.
 2. **Process Liveness**: Verifies the process is either running or ready to be spawned on-demand.
 3. **No Phantom Socket Consumption**: Bypasses HTTP socket generation entirely.
@@ -224,16 +224,16 @@ sequenceDiagram
     Gateway-->>ClientA: 200 OK {"id": 1, "result": {...}}
 ```
 
-#### Gateway State Tracking Engine ([`JsonRpcStateManager`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Infrastructure/Transports/JsonRpcStateManager.cs)):
-1. **Extraction**: Reads the client's original ID and preserves its exact primitive data type (`string`, `long`, `double`, or `null`) using [`GetJsonElementValue`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Infrastructure/Transports/SseTransport.cs#L325-L344).
+#### Gateway State Tracking Engine ([`JsonRpcStateManager`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs)):
+1. **Extraction**: Reads the client's original ID and preserves its exact primitive data type (`string`, `long`, `double`, or `null`) using [`GetJsonElementValue`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/SseTransport.cs#L325-L344).
 2. **Upstream Rewriting**: Generates a cryptographically unique 32-character hexadecimal GUID string (`upstreamRequestId = Guid.NewGuid().ToString("N")`) and replaces the `id` field in the outgoing payload.
-3. **Tracking**: Creates a [`PendingRequestTcs`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Infrastructure/Transports/JsonRpcStateManager.cs#L9-L31) storing:
+3. **Tracking**: Creates a [`PendingRequestTcs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs#L9-L31) storing:
    - `OriginalId`: The client's original ID and data type.
    - `UpstreamId`: The unique upstream GUID.
    - `SessionId`: The originating client session.
    - `CancellationToken`: The caller's cancellation token.
    - `Expiry`: The request expiration deadline (`DateTime.UtcNow + RequestTimeout`).
-4. **Response Restoration**: When the downstream backend emits an SSE message or standard response with `upstreamRequestId`, [`TryCompleteRequest`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Infrastructure/Transports/JsonRpcStateManager.cs#L112-L134) removes the tracked entry, sets `response.Id = tracked.OriginalId`, and completes the awaiting `TaskCompletionSource`.
+4. **Response Restoration**: When the downstream backend emits an SSE message or standard response with `upstreamRequestId`, [`TryCompleteRequest`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs#L112-L134) removes the tracked entry, sets `response.Id = tracked.OriginalId`, and completes the awaiting `TaskCompletionSource`.
 
 ### Concurrent Response Isolation Under High Load
 
@@ -250,7 +250,7 @@ The gateway seamlessly handles both stateful and stateless MCP client models:
 - Client establishes a long-lived SSE stream at `/sse`.
 - Gateway assigns a unique `sessionId` and returns an `event: endpoint` pointing to `/message?sessionId={sessionId}`.
 - All subsequent tool calls, cancellations, and notifications are sent via HTTP POST to `/message`.
-- Connection state, warmed tools cache, and active cancellation tokens are retained in [`ClientSession`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Core/Routing/ClientSession.cs).
+- Connection state, warmed tools cache, and active cancellation tokens are retained in [`ClientSession`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession.cs).
 
 #### 2. Stateless Single-Shot Requests (`POST /sse`)
 - Clients (or lightweight HTTP agents) send HTTP POST directly to `/sse` without establishing an SSE stream first.
@@ -271,12 +271,12 @@ Network drops and client aborts are handled without leaving orphaned tasks or me
 
 1. **Client Cancellation (`notifications/cancelled`)**:
    - When a client cancels an ongoing tool call, it sends `notifications/cancelled` with `params.requestId`.
-   - [`ClientSession.CancelRequest`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Core/Routing/ClientSession.cs) looks up the caller's `CancellationTokenSource` and cancels it immediately.
+   - [`ClientSession.CancelRequest`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession.cs) looks up the caller's `CancellationTokenSource` and cancels it immediately.
 2. **Timeout Expiration**:
    - Every request is bounded by `RequestTimeout` (default 15 seconds, configurable per server).
    - If the downstream server fails to respond, `WaitAsync(RequestTimeout)` raises a `TimeoutException`.
 3. **Disconnect Race Cleanup**:
-   - If a backend connection drops unexpectedly (stream EOF or socket error), [`JsonRpcStateManager.MarkDisconnected()`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-55/Infrastructure/Transports/JsonRpcStateManager.cs#L58-L69) cancels all pending `TaskCompletionSource` instances (`tcs.TrySetCanceled()`) and clears the pending requests collection.
+   - If a backend connection drops unexpectedly (stream EOF or socket error), [`JsonRpcStateManager.MarkDisconnected()`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs#L58-L69) cancels all pending `TaskCompletionSource` instances (`tcs.TrySetCanceled()`) and clears the pending requests collection.
    - All `SendRequestAsync` invocations feature `try ... finally { _stateManager.TryRemoveRequest(upstreamRequestId); }` to guarantee no memory leaks occur under any failure branch.
 
 ---
@@ -362,7 +362,7 @@ Backend servers can be configured dynamically via the Web Dashboard or declarati
       "args": [
         "-y",
         "@modelcontextprotocol/client-sse",
-        "http://localhost:8026/sse"
+        "http://localhost:8080/sse"
       ],
       "env": {
         "X_APP_KEY": "mcp_app_live_your_app_key_here"
@@ -377,10 +377,10 @@ Backend servers can be configured dynamically via the Web Dashboard or declarati
 {
   "mcpServers": {
     "mcg": {
-      "url": "http://localhost:8026/sse",
+      "url": "http://localhost:8080/sse",
       "type": "sse",
       "trust": true,
-      "serverUrl": "http://localhost:8026/sse",
+      "serverUrl": "http://localhost:8080/sse",
       "headers": {
         "X-App-Key": "mcp_app_live_your_app_key_here"
       }
@@ -394,7 +394,7 @@ Backend servers can be configured dynamically via the Web Dashboard or declarati
 {
   "mcpServers": {
     "homelab-mcg": {
-      "url": "http://localhost:8026/sse",
+      "url": "http://localhost:8080/sse",
       "headers": {
         "X-App-Key": "mcp_app_live_your_app_key_here"
       }
@@ -408,7 +408,7 @@ Backend servers can be configured dynamically via the Web Dashboard or declarati
 {
   "mcpServers": {
     "mcg": {
-      "url": "http://localhost:8026/sse",
+      "url": "http://localhost:8080/sse",
       "headers": {
         "X-App-Key": "mcp_app_live_your_app_key_here"
       }
@@ -423,7 +423,7 @@ To connect directly to a single backend bypassing Meta-Mode, point the client UR
 {
   "mcpServers": {
     "direct-docker": {
-      "url": "http://localhost:8026/docker-mcp",
+      "url": "http://localhost:8080/docker-mcp",
       "headers": {
         "X-App-Key": "mcp_app_live_your_app_key_here"
       }

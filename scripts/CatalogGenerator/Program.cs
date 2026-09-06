@@ -29,7 +29,7 @@ namespace CatalogGenerator
             if (Directory.Exists(csTestDir))
             {
                 Console.WriteLine($"[INFO] Scanning C# xUnit tests in {csTestDir}...");
-                csParser.ParseDirectory(csTestDir, index);
+                csParser.ParseDirectory(csTestDir, index, rootDir);
             }
 
             // 2. Parse Vitest tests
@@ -38,7 +38,7 @@ namespace CatalogGenerator
             if (Directory.Exists(vitestDir))
             {
                 Console.WriteLine($"[INFO] Scanning Frontend Vitest tests in {vitestDir}...");
-                tsParser.ParseDirectory(vitestDir, index, "Frontend Vitest");
+                tsParser.ParseDirectory(vitestDir, index, "Frontend Vitest", rootDir);
             }
 
             // 3. Parse Playwright tests
@@ -46,7 +46,7 @@ namespace CatalogGenerator
             if (Directory.Exists(playwrightDir))
             {
                 Console.WriteLine($"[INFO] Scanning Playwright E2E tests in {playwrightDir}...");
-                tsParser.ParseDirectory(playwrightDir, index, "Playwright E2E");
+                tsParser.ParseDirectory(playwrightDir, index, "Playwright E2E", rootDir);
             }
 
             var all = index.GetAll().ToList();

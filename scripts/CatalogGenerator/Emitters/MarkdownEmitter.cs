@@ -49,7 +49,7 @@ namespace CatalogGenerator.Emitters
                 sb.AppendLine($"* **Verification Proofs ({req.Proofs.Count}):**");
                 foreach (var proof in req.Proofs)
                 {
-                    sb.AppendLine($"  - [{proof.Suite}] [`{proof.FilePath}#L{proof.LineNumber}`](file:///{proof.FilePath}#L{proof.LineNumber}) (`{proof.TestName}`)");
+                    sb.AppendLine($"  - [{proof.Suite}] [`{proof.FilePath}#L{proof.LineNumber}`](https://github.com/spelech/model-context-gateway/blob/main/{proof.FilePath}#L{proof.LineNumber}) (`{proof.TestName}`)");
                 }
                 sb.AppendLine();
             }
@@ -70,7 +70,7 @@ namespace CatalogGenerator.Emitters
                 sb.AppendLine($"* **Verification Proofs ({req.Proofs.Count}):**");
                 foreach (var proof in req.Proofs)
                 {
-                    sb.AppendLine($"  - [{proof.Suite}] [`{proof.FilePath}#L{proof.LineNumber}`](file:///{proof.FilePath}#L{proof.LineNumber}) (`{proof.TestName}`)");
+                    sb.AppendLine($"  - [{proof.Suite}] [`{proof.FilePath}#L{proof.LineNumber}`](https://github.com/spelech/model-context-gateway/blob/main/{proof.FilePath}#L{proof.LineNumber}) (`{proof.TestName}`)");
                 }
                 sb.AppendLine();
             }
@@ -85,7 +85,7 @@ namespace CatalogGenerator.Emitters
             foreach (var req in all)
             {
                 var p = req.Proofs.FirstOrDefault();
-                var proofStr = p != null ? $"[`{Path.GetFileName(p.FilePath)}:L{p.LineNumber}`](file:///{p.FilePath}#L{p.LineNumber})" : "N/A";
+                var proofStr = p != null ? $"[`{Path.GetFileName(p.FilePath)}:L{p.LineNumber}`](https://github.com/spelech/model-context-gateway/blob/main/{p.FilePath}#L{p.LineNumber})" : "N/A";
                 var suiteStr = p != null ? p.Suite : "N/A";
                 var typeStr = req.Type == RequirementType.Positive ? "Positive" : "**Guardrail**";
                 sb.AppendLine($"| `{req.Id}` | {typeStr} | `{req.Category}` | {req.Description} | {proofStr} | {suiteStr} |");

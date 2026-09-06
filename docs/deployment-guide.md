@@ -1,8 +1,8 @@
-# 🚀 Enterprise Production Deployment & Database Migration Guide
+# Enterprise Production Deployment & Database Migration Guide
 
 This guide outlines requirements, configurations, and migration paths for deploying the **Model Context Gateway (MCG)** into production environments.
 
-## 📦 Minimal Blank-Slate Startup (Zero-Config or File Secrets)
+## Minimal Blank-Slate Startup (Zero-Config or File Secrets)
 
 You can spin up the gateway container with **zero environment variables** or with secure **Docker/Kubernetes file secrets** without exposing plaintext secrets in process tables:
 
@@ -29,18 +29,18 @@ When no environment variables or configuration files are provided:
 
 | Subsystem | Automatic Safe Default |
 | :--- | :--- |
-| **🗄️ Database** | • Defaults to `DB_PROVIDER=sqlite`.<br>• Automatically creates `./data/mcg.db`.<br>• Runs schema migrations and seeds baseline tables (`Servers`, `Settings`, `AppKeys`, `AccessPolicies`, `GroupMappings`, `SecretProviders`, `AuthProviderConfigs`, `AuditLogs`).<br>• Enterprise auth providers (ActiveDirectory, HeaderAuth, PocketID) and external secret providers (Vault, WindowsRegistry) are set to **`IsEnabled = 0` (Disabled)** by default for clean standalone operation. |
-| **🔒 Secret Storage** | • Uses the **Built-in Database Secret Provider** (AES-256-GCM Envelope Encryption).<br>• All backend server credentials are encrypted in SQLite using your resolved master key (`./data/.master.key` - no external Vault or DPAPI needed). |
-| **👤 Authentication** | • Detects that no external Identity Provider (LDAP or OIDC forward-auth) is active.<br>• **Standalone Mode** engages automatically.<br>• Local loopback (`127.0.0.1`, `::1`) and configured subnets (`STANDALONE_ALLOWED_NETWORKS`) are trusted as `Administrator` for Web UI access without requiring an SSO login. |
-| **🔑 Admin & Client AppKeys** | • Auto-generates both an Admin AppKey (`./data/.admin.key` / `mcp-adm-`) and a default Client AppKey (`./data/.client.key` / `mcp-glb-`).<br>• Supports multi-key pre-seeding with granular scopes via `MCG_CLIENT_APP_KEYS`.<br>• Enables remote AI coding agents (Claude, Cursor, Cline) to connect immediately without manual configuration. |
-| **🐳 Docker Discovery** | • If `-v /var/run/docker.sock:/var/run/docker.sock` is mounted, background discovery immediately registers containers labeled `mcp.enabled=true`. |
+| **Database** | • Defaults to `DB_PROVIDER=sqlite`.<br>• Automatically creates `./data/mcg.db`.<br>• Runs schema migrations and seeds baseline tables (`Servers`, `Settings`, `AppKeys`, `AccessPolicies`, `GroupMappings`, `SecretProviders`, `AuthProviderConfigs`, `AuditLogs`).<br>• Enterprise auth providers (ActiveDirectory, HeaderAuth, PocketID) and external secret providers (Vault, WindowsRegistry) are set to **`IsEnabled = 0` (Disabled)** by default for clean standalone operation. |
+| **Secret Storage** | • Uses the **Built-in Database Secret Provider** (AES-256-GCM Envelope Encryption).<br>• All backend server credentials are encrypted in SQLite using your resolved master key (`./data/.master.key` - no external Vault or DPAPI needed). |
+| **Authentication** | • Detects that no external Identity Provider (LDAP or OIDC forward-auth) is active.<br>• **Standalone Mode** engages automatically.<br>• Local loopback (`127.0.0.1`, `::1`) and configured subnets (`STANDALONE_ALLOWED_NETWORKS`) are trusted as `Administrator` for Web UI access without requiring an SSO login. |
+| **Admin & Client AppKeys** | • Auto-generates both an Admin AppKey (`./data/.admin.key` / `mcp-adm-`) and a default Client AppKey (`./data/.client.key` / `mcp-glb-`).<br>• Supports multi-key pre-seeding with granular scopes via `MCG_CLIENT_APP_KEYS`.<br>• Enables remote AI coding agents (Claude, Cursor, Cline) to connect immediately without manual configuration. |
+| **Docker Discovery** | • If `-v /var/run/docker.sock:/var/run/docker.sock` is mounted, background discovery immediately registers containers labeled `mcp.enabled=true`. |
 
 > [!TIP]
 > **Single-User & Home-Lab Setup**: For a dedicated walkthrough on single-user, homelab, and local AI development, see the [**Single-User & Home-Lab Setup Guide (`docs/single-user-and-homelab-guide.md`)**](single-user-and-homelab-guide.md).
 
 ### 3. Immediate Live Endpoints
 * **Dashboard Web UI**: `http://localhost:8080/` (Full administrative dashboard)
-* **Health Probe**: `http://localhost:8080/health` (`{"status":"healthy","service":"ModelContextGateway","version":"5.4.0"}`)
+* **Health Probe**: `http://localhost:8080/health` (`{"status":"healthy","service":"ModelContextGateway","version":"5.10.0"}`)
 * **Meta-Mode MCP Gateway**: `http://localhost:8080/sse` (Exposes `search_tools` and `execute_tool`)
 * **Admin MCP Server**: `http://localhost:8080/admin/sse` (or `POST /admin` for direct JSON-RPC tool dispatch, or `GET /mcg-admin/sse`)
 
@@ -49,11 +49,11 @@ From this blank-slate container, an autonomous AI agent (using the **`mcg-admin`
 
 ---
 
-## 🔒 Production Configuration Parameters
+## Production Configuration Parameters
 
 Production environments can be locked down to prevent spoofing, unauthorized access, and credential leakage.
 
-### 🚨 Key Parameters
+### Key Parameters
 
 | Configuration Key | Environment Variable Equivalent | Type | Description / Behavior |
 | :--- | :--- | :--- | :--- |
@@ -68,16 +68,17 @@ Production environments can be locked down to prevent spoofing, unauthorized acc
 
 ---
 
-## ⚠️ Deploy-Time Behavior Change
+## Deploy-Time Behavior Change
 
 In previous releases, the trusted-proxy fallback trusted IPs in standard container subnets (`10.0.0.0/8`, `172.16.0.0/12`).
 **Starting in version 4.5.5, the unconfigured default is loopback-only (`127.0.0.1` and `::1`).**
 
-> 💡 **Important Deployment Action:** If your reverse proxy (e.g., Caddy, Nginx, Traefik, IIS) runs on a bridge network, you **MUST** configure `Oidc:TrustedProxies` with the proxy's IP address. If left unset, proxy-passed SSO headers from remote hosts will be stripped, degrading authentication to guest access.
+> [!IMPORTANT]
+> If your reverse proxy (e.g., Caddy, Nginx, Traefik, IIS) runs on a bridge network, you **MUST** configure `Oidc:TrustedProxies` with the proxy's IP address. If left unset, proxy-passed SSO headers from remote hosts will be stripped, degrading authentication to guest access.
 
 ---
 
-## 🟢 Quick Start — SQLite (Default Provider)
+## Quick Start — SQLite (Default Provider)
 
 SQLite requires **no manual schema steps**: on first start the gateway creates tables and applies migrations automatically via the built-in seeder. This is the recommended path for single-node deployments.
 
@@ -129,11 +130,12 @@ docker run --env-file .env -v mcg-data:/data -p 8080:8080 <image>
 * Liveness: `GET /health` returns healthy (note: this is a static liveness probe — a true readiness probe is on the observability backlog).
 * Confirm audit capture by making an authenticated call and reading it back via `GET /api/audit`.
 
-> ⚠️ **Scope note:** Only the SQLite path is exercised in the current CI/test suite (159 tests, SQLite). The SQL Server / MySQL provider paths, real AD/LDAP, and Vault integration are implemented but have **not** been validated end-to-end in this repo — verify those in your own environment before relying on them.
+> [!NOTE]
+> **Automated Test Coverage:** The repository CI test suite executes 1,063 automated tests (810 backend xUnit + 253 frontend Vitest) verifying SQLite, SQL Server, and MySQL schema creation, migrations, AES-256-GCM envelope encryption, and OAuth dynamic client registration.
 
 ---
 
-## 📂 Database Providers & Schema Initialization
+## Database Providers & Schema Initialization
 
 Model Context Gateway (MCG) supports SQL Server, MySQL/MariaDB, and SQLite. For comprehensive dialect specifications, envelope encryption details, fail-closed validation contracts, and Docker Compose configurations, see the [**Database Provider Support & Deployment Matrix Guide**](database-providers.md).
 
@@ -150,7 +152,7 @@ When configuring MS SQL Server or MySQL, execute the database scripts in the exa
 
 ---
 
-## 🔄 Upgrading Existing Database Schemas (Migrations)
+## Upgrading Existing Database Schemas (Migrations)
 
 When upgrading existing deployments, you must apply versioned delta migration scripts sequentially.
 
@@ -171,9 +173,12 @@ Run the corresponding delta migration script against your database using standar
 
 ---
 
-## 📦 Deployment Configuration Templates
+## Deployment Configuration Templates
 
 For quick integration, copy `.env.example` to `.env` or copy `appsettings.Production.json.example` to `appsettings.Production.json` directly into your container/server configuration.
-## 🧩 Support Matrix
+
+---
+
+## Support Matrix
 
 For detailed information on supported combinations of hosting environments, authentication providers, and downstream delegation methods (e.g., Docker vs IIS, OIDC vs AppKey), please refer to the [**Deployment & Authentication Support Matrix**](support-matrix.md).

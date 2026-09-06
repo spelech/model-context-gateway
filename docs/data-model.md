@@ -1,4 +1,4 @@
-# 📊 Canonical Data Model & Database ERD
+# Canonical Data Model & Database ERD
 
 This document provides the complete, canonical data model and Entity-Relationship Diagram (ERD) for the **C# Model Context Gateway (MCG) & Semantic Proxy**. It documents all 12 core database entities, relationship cardinalities, column constraints, indexing strategies, multi-dialect support (SQLite SQLCipher, MS SQL Server, MySQL), and data protection models.
 
@@ -6,7 +6,7 @@ For dialect-specific SQL migrations and connection string setups, see [database-
 
 ---
 
-## 🗺️ Entity-Relationship Diagram (Mermaid ERD)
+## Entity-Relationship Diagram (Mermaid ERD)
 
 ```mermaid
 erDiagram
@@ -163,7 +163,7 @@ erDiagram
 
 ---
 
-## 🏛️ Entity Catalog & Schema Specifications
+## Entity Catalog & Schema Specifications
 
 ### 1. `Servers` (Registered MCP Servers)
 Stores backend downstream server registrations, transport parameters, credential shapes, and metadata.
@@ -353,7 +353,7 @@ Stores registered OAuth 2.0 / 2.1 client applications, redirect URIs, grant type
 
 ---
 
-## 🔒 Cryptographic & Envelope Encryption Model
+## Cryptographic & Envelope Encryption Model
 
 ```mermaid
 graph TD
@@ -379,7 +379,7 @@ graph TD
 
 ---
 
-## 🔗 Related Documentation
+## Related Documentation
 
 - [database-providers.md](database-providers.md): Dialect-specific DDL, stored procedure definitions, and connection configuration.
 - [architecture.md](architecture.md): End-to-end system context, component diagrams, and runtime sequence diagrams.

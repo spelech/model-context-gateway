@@ -1,6 +1,6 @@
-# 🛡️ Model Context Gateway (MCG) Admin Guide
+# Model Context Gateway Administration Guide
 
-Welcome to the Model Context Gateway (MCG) Administration Guide. This document details the administrative procedures for managing backend server connections, configuring Role-Based Access Control (RBAC) policies, and managing secret and authentication providers.
+Welcome to the Model Context Gateway (MCG) Administration Guide. This document details administrative procedures for managing backend server connections, configuring Role-Based Access Control (RBAC) policies, and managing secret and authentication providers.
 
 ## Server Connections
 
@@ -9,10 +9,10 @@ Model Context Gateway (MCG) acts as a gateway connecting to multiple backend MCP
 ### Managing Servers
 Servers can be managed via the Admin Dashboard or directly via the Admin MCP Server's tools.
 
-- **Adding a Server**: Specify a Display Name, connection URL, and the transport protocol type (`sse`, `http`, `streamable`, `stdio`, or `custom`).
+- **Adding a Server**: Specify a Display Name, connection URL, transport protocol type (`sse`, `http`, or `stdio`), and optional `alias` (concise namespace prefix for tool routing).
 - **Authentication**: You can attach API keys, define custom headers, or integrate with Secret Providers (like Vault) to securely inject credentials at runtime without exposing them in the configuration.
 - **Enabling/Disabling**: Servers can be temporarily disabled via the `toggle` feature, completely suspending routing to that backend.
-- **Reconnecting**: If a backend server becomes unresponsive, you can trigger a manual reconnection. The Router will probe the server's health and refresh active sessions.
+- **Reconnecting**: If a backend server becomes unresponsive, you can trigger a manual reconnection. The router will probe the server's health and refresh active sessions.
 
 ## Access Control & Policies
 

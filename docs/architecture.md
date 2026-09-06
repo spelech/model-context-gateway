@@ -246,7 +246,7 @@ graph TD
 
 ## 3. Backend Component & Boundary Model
 
-The C# codebase is partitioned into three bounded contexts: [`Components/`](file:///containers/dev/csharp-mcp-router/Components), [`Infrastructure/`](file:///containers/dev/csharp-mcp-router/Infrastructure), and [`Core/`](file:///containers/dev/csharp-mcp-router/Core).
+The C# codebase is partitioned into three bounded contexts: [`Components/`](https://github.com/spelech/model-context-gateway/tree/main/Components), [`Infrastructure/`](https://github.com/spelech/model-context-gateway/tree/main/Infrastructure), and [`Core/`](https://github.com/spelech/model-context-gateway/tree/main/Core).
 
 ```
 ├── Components/
@@ -270,80 +270,80 @@ The C# codebase is partitioned into three bounded contexts: [`Components/`](file
 ### Domain Components (`Components/`)
 
 1. **`Servers`**:
-   - [`McpServer.cs`](file:///containers/dev/csharp-mcp-router/Components/Servers/McpServer.cs): Data model representing upstream MCP servers, endpoints, transport types, categories, headers, and secret associations.
-   - [`ServerEndpoints.cs`](file:///containers/dev/csharp-mcp-router/Components/Servers/ServerEndpoints.cs): Minimal API mapping for CRUD operations, inspections, and health states (`GET /api/servers`, `POST /api/servers`, `DELETE /api/servers/{id}`).
-   - [`ServerValidationHelper.cs`](file:///containers/dev/csharp-mcp-router/Components/Servers/ServerValidationHelper.cs): URL syntax checking, SSRF prevention, and parameter sanitization.
-   - [`DockerAutoDiscoveryService.cs`](file:///containers/dev/csharp-mcp-router/Components/Servers/DockerAutoDiscoveryService.cs): Dynamic label-based container discovery (`mcp.enable=true`, `mcp.name`, `mcp.port`).
-   - [`BackendHealthCheckService.cs`](file:///containers/dev/csharp-mcp-router/Components/Servers/BackendHealthCheckService.cs): Background periodic health prober (15s HTTP GET + 30s JSON-RPC ping).
+   - [`McpServer.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/McpServer.cs): Data model representing upstream MCP servers, endpoints, transport types, categories, headers, and secret associations.
+   - [`ServerEndpoints.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/ServerEndpoints.cs): Minimal API mapping for CRUD operations, inspections, and health states (`GET /api/servers`, `POST /api/servers`, `DELETE /api/servers/{id}`).
+   - [`ServerValidationHelper.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/ServerValidationHelper.cs): URL syntax checking, SSRF prevention, and parameter sanitization.
+   - [`DockerAutoDiscoveryService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/DockerAutoDiscoveryService.cs): Dynamic label-based container discovery (`mcp.enable=true`, `mcp.name`, `mcp.port`).
+   - [`BackendHealthCheckService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/BackendHealthCheckService.cs): Background periodic health prober (15s HTTP GET + 30s JSON-RPC ping).
 
 2. **`Clients`**:
-   - [`ClientEndpoints.cs`](file:///containers/dev/csharp-mcp-router/Components/Clients/ClientEndpoints.cs) & [`ClientsController.cs`](file:///containers/dev/csharp-mcp-router/Components/Clients/ClientsController.cs): Client registration and OAuth client management.
-   - [`CredentialService.cs`](file:///containers/dev/csharp-mcp-router/Components/Clients/CredentialService.cs): Automated client configuration generation (`claude_desktop_config.json`, Cursor config, environment templates).
+   - [`ClientEndpoints.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Clients/ClientEndpoints.cs) & [`ClientsController.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Clients/ClientsController.cs): Client registration and OAuth client management.
+   - [`CredentialService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Clients/CredentialService.cs): Automated client configuration generation (`claude_desktop_config.json`, Cursor config, environment templates).
 
 3. **`AppKeys`**:
-   - [`AppKey.cs`](file:///containers/dev/csharp-mcp-router/Components/AppKeys/AppKey.cs) & [`AppKeyModels.cs`](file:///containers/dev/csharp-mcp-router/Components/AppKeys/AppKeyModels.cs): High-entropy machine keys (`mcp-*-*-*`), key prefixes (`KeyPrefix`), AES-256-GCM encrypted keys, scopes (`ScopesJson`), and attribution (`OwnerSid`).
-   - [`AppKeyEndpoints.cs`](file:///containers/dev/csharp-mcp-router/Components/AppKeys/AppKeyEndpoints.cs) & [`AppKeysController.cs`](file:///containers/dev/csharp-mcp-router/Components/AppKeys/AppKeysController.cs): Endpoints for key minting, revocation, prefix lookups, and validation.
+   - [`AppKey.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/AppKeys/AppKey.cs) & [`AppKeyModels.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/AppKeys/AppKeyModels.cs): High-entropy machine keys (`mcp-*-*-*`), key prefixes (`KeyPrefix`), AES-256-GCM encrypted keys, scopes (`ScopesJson`), and attribution (`OwnerSid`).
+   - [`AppKeyEndpoints.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/AppKeys/AppKeyEndpoints.cs) & [`AppKeysController.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/AppKeys/AppKeysController.cs): Endpoints for key minting, revocation, prefix lookups, and validation.
 
 4. **`Providers`**:
-   - [`ProviderEndpoints.cs`](file:///containers/dev/csharp-mcp-router/Components/Providers/ProviderEndpoints.cs) & [`ProvidersController.cs`](file:///containers/dev/csharp-mcp-router/Components/Providers/ProvidersController.cs): Management of Identity and Secret Provider configurations.
-   - [`ProviderConfigSecurityHelper.cs`](file:///containers/dev/csharp-mcp-router/Components/Providers/ProviderConfigSecurityHelper.cs): Transparent encryption/decryption of provider JSON configuration payloads.
+   - [`ProviderEndpoints.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Providers/ProviderEndpoints.cs) & [`ProvidersController.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Providers/ProvidersController.cs): Management of Identity and Secret Provider configurations.
+   - [`ProviderConfigSecurityHelper.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Providers/ProviderConfigSecurityHelper.cs): Transparent encryption/decryption of provider JSON configuration payloads.
 
 5. **`Authorization`**:
-   - [`PolicyEndpoints.cs`](file:///containers/dev/csharp-mcp-router/Components/Authorization/PolicyEndpoints.cs) & [`PermissionsController.cs`](file:///containers/dev/csharp-mcp-router/Components/Authorization/PermissionsController.cs): Endpoints for RBAC policies and group mappings.
-   - [`SecurityValidationHelper.cs`](file:///containers/dev/csharp-mcp-router/Components/Authorization/SecurityValidationHelper.cs): CIDR subnet evaluation, private IP blocking, SSRF prevention, and Administrator SID verification (`S-1-5-32-544`).
+   - [`PolicyEndpoints.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Authorization/PolicyEndpoints.cs) & [`PermissionsController.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Authorization/PermissionsController.cs): Endpoints for RBAC policies and group mappings.
+   - [`SecurityValidationHelper.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Authorization/SecurityValidationHelper.cs): CIDR subnet evaluation, private IP blocking, SSRF prevention, and Administrator SID verification (`S-1-5-32-544`).
 
 6. **`Capabilities`**:
-   - [`ProxyEndpoints.cs`](file:///containers/dev/csharp-mcp-router/Components/Capabilities/ProxyEndpoints.cs): Core HTTP/SSE entrypoints (`/sse`, `/message`, `/{targetServerId}`).
-   - [`CapabilityEndpoints.cs`](file:///containers/dev/csharp-mcp-router/Components/Capabilities/CapabilityEndpoints.cs): Tool, prompt, resource, and custom file catalog management.
-   - [`CustomToolRegistry.cs`](file:///containers/dev/csharp-mcp-router/Components/Capabilities/NativeTools/CustomToolRegistry.cs): In-process native tools for Plex (`PlexGetLibrarySectionsTool`, `PlexSearchLibraryTool`, `PlexGetSessionsTool`, etc.) and Overseerr (`SeerrSearchMediaTool`, `SeerrRequestMediaTool`, `SeerrGetRequestsTool`, etc.).
+   - [`ProxyEndpoints.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Capabilities/ProxyEndpoints.cs): Core HTTP/SSE entrypoints (`/sse`, `/message`, `/{targetServerId}`).
+   - [`CapabilityEndpoints.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Capabilities/CapabilityEndpoints.cs): Tool, prompt, resource, and custom file catalog management.
+   - [`CustomToolRegistry.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Capabilities/NativeTools/CustomToolRegistry.cs): In-process native tools for Plex (`PlexGetLibrarySectionsTool`, `PlexSearchLibraryTool`, `PlexGetSessionsTool`, etc.) and Overseerr (`SeerrSearchMediaTool`, `SeerrRequestMediaTool`, `SeerrGetRequestsTool`, etc.).
 
 ### Infrastructure Services (`Infrastructure/`)
 
 1. **`Persistence`**:
-   - [`DbConnectionFactory.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Persistence/DbConnectionFactory.cs): Multi-database factory supporting SQLite (WAL), MS SQL Server (`Microsoft.Data.SqlClient`), and MySQL (`MySqlConnector`).
-   - [`Repositories.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Persistence/Repositories.cs): High-performance Dapper repository layer.
-   - [`DatabaseSeederService.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Persistence/DatabaseSeederService.cs): Automatic in-process migrations, schema compatibility validation, and default configuration seeding.
+   - [`DbConnectionFactory.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Persistence/DbConnectionFactory.cs): Multi-database factory supporting SQLite (WAL), MS SQL Server (`Microsoft.Data.SqlClient`), and MySQL (`MySqlConnector`).
+   - [`Repositories.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Persistence/Repositories.cs): High-performance Dapper repository layer.
+   - [`DatabaseSeederService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Persistence/DatabaseSeederService.cs): Automatic in-process migrations, schema compatibility validation, and default configuration seeding.
 
 2. **`Transports`**:
-   - [`ITransport.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Transports/ITransport.cs): Unified abstraction for downstream transport channels.
-   - [`SseTransport.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Transports/SseTransport.cs): Full-duplex persistent Server-Sent Events channel with POST message forwarding.
-   - [`HttpTransport.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Transports/HttpTransport.cs): Stateless half-duplex HTTP POST and chunked streaming transport.
-   - [`StdioTransport.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Transports/StdioTransport.cs): Subprocess STDIO transport communicating via newline-delimited JSON-RPC (NDJSON).
-   - [`JsonRpcStateManager.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Transports/JsonRpcStateManager.cs): Manages pending request completion sources (`PendingRequestTcs`), ID rewriting, cancellation tokens, and connection resets.
+   - [`ITransport.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/ITransport.cs): Unified abstraction for downstream transport channels.
+   - [`SseTransport.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/SseTransport.cs): Full-duplex persistent Server-Sent Events channel with POST message forwarding.
+   - [`HttpTransport.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/HttpTransport.cs): Stateless half-duplex HTTP POST and chunked streaming transport.
+   - [`StdioTransport.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs): Subprocess STDIO transport communicating via newline-delimited JSON-RPC (NDJSON).
+   - [`JsonRpcStateManager.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs): Manages pending request completion sources (`PendingRequestTcs`), ID rewriting, cancellation tokens, and connection resets.
 
 3. **`Identity`**:
-   - [`CompositeIdentityProvider.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Identity/CompositeIdentityProvider.cs): Aggregates Active Directory, OIDC, and AppKey authenticators.
-   - [`ActiveDirectoryIdentityProvider.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Identity/ActiveDirectoryIdentityProvider.cs) & [`LdapActiveDirectoryService.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Identity/LdapActiveDirectoryService.cs): Resolves Windows Kerberos/NTLM caller SIDs via LDAP.
-   - [`OidcIdentityProvider.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Identity/OidcIdentityProvider.cs): Extracts authenticated user contexts from reverse-proxy headers (`Remote-User`, `Remote-Groups`, `Remote-User-Sid`).
+   - [`CompositeIdentityProvider.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Identity/CompositeIdentityProvider.cs): Aggregates Active Directory, OIDC, and AppKey authenticators.
+   - [`ActiveDirectoryIdentityProvider.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Identity/ActiveDirectoryIdentityProvider.cs) & [`LdapActiveDirectoryService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Identity/LdapActiveDirectoryService.cs): Resolves Windows Kerberos/NTLM caller SIDs via LDAP.
+   - [`OidcIdentityProvider.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Identity/OidcIdentityProvider.cs): Extracts authenticated user contexts from reverse-proxy headers (`Remote-User`, `Remote-Groups`, `Remote-User-Sid`).
 
 4. **`Secrets`**:
-   - [`CompositeSecretRetriever.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Secrets/CompositeSecretRetriever.cs): Dispatches to Vault, Windows Registry, or Environment retrievers with a 5-minute sliding in-memory cache.
-   - [`VaultSecretRetriever.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Secrets/VaultSecretRetriever.cs): Fetches secrets from HashiCorp Vault KV v2 using AppRole or Token authentication.
-   - [`WindowsRegistrySecretRetriever.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Secrets/WindowsRegistrySecretRetriever.cs): Fetches Windows DPAPI-protected registry keys (`HKLM` / `HKCU`).
-   - [`EnvironmentSecretRetriever.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Secrets/EnvironmentSecretRetriever.cs): Reads container environment variables.
-   - [`SymmetricEncryptionHelper.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Secrets/SymmetricEncryptionHelper.cs): AES-256-GCM envelope encryption for database fields and config payloads.
+   - [`CompositeSecretRetriever.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/CompositeSecretRetriever.cs): Dispatches to Vault, Windows Registry, or Environment retrievers with a 5-minute sliding in-memory cache.
+   - [`VaultSecretRetriever.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/VaultSecretRetriever.cs): Fetches secrets from HashiCorp Vault KV v2 using AppRole or Token authentication.
+   - [`WindowsRegistrySecretRetriever.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/WindowsRegistrySecretRetriever.cs): Fetches Windows DPAPI-protected registry keys (`HKLM` / `HKCU`).
+   - [`EnvironmentSecretRetriever.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/EnvironmentSecretRetriever.cs): Reads container environment variables.
+   - [`SymmetricEncryptionHelper.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/SymmetricEncryptionHelper.cs): AES-256-GCM envelope encryption for database fields and config payloads.
 
 5. **`Logging`**:
-   - [`AuditLogger.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Logging/AuditLogger.cs): Writes structured invocation and admin audit trails.
-   - [`PiiSanitizer.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Logging/PiiSanitizer.cs): Regex sanitizer stripping Bearer tokens, API keys, passwords, and connection strings.
-   - [`InMemoryLogger.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Logging/InMemoryLogger.cs): Thread-safe ring buffer powering the real-time Test Bench UI console.
+   - [`AuditLogger.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Logging/AuditLogger.cs): Writes structured invocation and admin audit trails.
+   - [`PiiSanitizer.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Logging/PiiSanitizer.cs): Regex sanitizer stripping Bearer tokens, API keys, passwords, and connection strings.
+   - [`InMemoryLogger.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Logging/InMemoryLogger.cs): Thread-safe ring buffer powering the real-time Test Bench UI console.
 
 ### Core Protocol & Routing Engine (`Core/`)
 
 1. **`ClientSession` (Partial Class Architecture)**:
-   - [`ClientSession.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/ClientSession.cs): Main session lifecycle coordinator.
-   - [`ClientSession.Authorization.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/ClientSession/ClientSession.Authorization.cs): Multi-stage RBAC authorization, caller identity resolution, and audit logging.
-   - [`ClientSession.BackendInitializer.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/ClientSession/ClientSession.BackendInitializer.cs): Asynchronous concurrent warming of downstream backend connections and tool schemas.
-   - [`ClientSession.ProxyForwarder.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/ClientSession/ClientSession.ProxyForwarder.cs): Dispatches requests to downstream servers, tracks upstream GUIDs, and demultiplexes responses.
-   - [`ClientSession.JsonRpcRewriter.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/ClientSession/ClientSession.JsonRpcRewriter.cs): Uses `System.Text.Json.Nodes.JsonNode` to un-namespace tool names and rewrite message bodies safely without fragile string manipulation.
-   - [`ClientSession.NotificationBroadcaster.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/ClientSession/ClientSession.NotificationBroadcaster.cs): Fan-out broadcasting of notifications across active client channels.
+   - [`ClientSession.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession.cs): Main session lifecycle coordinator.
+   - [`ClientSession.Authorization.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession/ClientSession.Authorization.cs): Multi-stage RBAC authorization, caller identity resolution, and audit logging.
+   - [`ClientSession.BackendInitializer.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession/ClientSession.BackendInitializer.cs): Asynchronous concurrent warming of downstream backend connections and tool schemas.
+   - [`ClientSession.ProxyForwarder.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession/ClientSession.ProxyForwarder.cs): Dispatches requests to downstream servers, tracks upstream GUIDs, and demultiplexes responses.
+   - [`ClientSession.JsonRpcRewriter.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession/ClientSession.JsonRpcRewriter.cs): Uses `System.Text.Json.Nodes.JsonNode` to un-namespace tool names and rewrite message bodies safely without fragile string manipulation.
+   - [`ClientSession.NotificationBroadcaster.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession/ClientSession.NotificationBroadcaster.cs): Fan-out broadcasting of notifications across active client channels.
 
 2. **`Routing Coordinators`**:
-   - [`SessionManager.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/SessionManager.cs): Thread-safe tracking and cleanup of active client connections.
-   - [`BackendConnection.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/BackendConnection.cs): Manages a single upstream server connection channel, health state, and cached capabilities.
-   - [`SemanticSearchService.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/SemanticSearchService.cs): Hybrid BM25 keyword matching combined with cosine similarity vector scoring.
-   - [`DynamicEmbeddingService.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/DynamicEmbeddingService.cs), [`OnnxEmbeddingService.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/OnnxEmbeddingService.cs), and [`ApiEmbeddingService.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/ApiEmbeddingService.cs): Vector embedding calculation via local CPU ONNX runtime (`all-MiniLM-L6-v2`) or remote OpenAI-compatible APIs.
-   - [`ToolRoutingManager.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/ToolRoutingManager.cs), [`ResourceRoutingManager.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/ResourceRoutingManager.cs), [`PromptRoutingManager.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/PromptRoutingManager.cs): Namespacing, un-namespacing, and routing of individual MCP capabilities.
+   - [`SessionManager.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/SessionManager.cs): Thread-safe tracking and cleanup of active client connections.
+   - [`BackendConnection.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/BackendConnection.cs): Manages a single upstream server connection channel, health state, and cached capabilities.
+   - [`SemanticSearchService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/SemanticSearchService.cs): Hybrid BM25 keyword matching combined with cosine similarity vector scoring.
+   - [`DynamicEmbeddingService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/DynamicEmbeddingService.cs), [`OnnxEmbeddingService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/OnnxEmbeddingService.cs), and [`ApiEmbeddingService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ApiEmbeddingService.cs): Vector embedding calculation via local CPU ONNX runtime (`all-MiniLM-L6-v2`) or remote OpenAI-compatible APIs.
+   - [`ToolRoutingManager.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ToolRoutingManager.cs), [`ResourceRoutingManager.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ResourceRoutingManager.cs), [`PromptRoutingManager.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/PromptRoutingManager.cs): Namespacing, un-namespacing, and routing of individual MCP capabilities.
 
 ### Architectural Dependency Rules
 
@@ -603,10 +603,10 @@ Exposing all tool definitions during the `tools/list` handshake overwhelms LLM c
 1. **Bootstrap Initialization**: When a client connects to `/sse` with Meta-Mode enabled (the default), the router returns only two native gateway bootstrap tools:
    - `search_tools`: Accepts a natural language query (e.g. `"restart plex container"`) and returns relevant ranked tools.
    - `execute_tool`: Executes a namespaced tool (`{serverId}__{toolName}`) with dynamic parameter forwarding.
-2. **Background Cache Pre-Warming**: In the background, [`ClientSession.BackendInitializer.cs`](file:///containers/dev/csharp-mcp-router/Core/Routing/ClientSession/ClientSession.BackendInitializer.cs) concurrently initializes all enabled downstream transports and caches their tool, prompt, and resource schemas.
+2. **Background Cache Pre-Warming**: In the background, [`ClientSession.BackendInitializer.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession/ClientSession.BackendInitializer.cs) concurrently initializes all enabled downstream transports and caches their tool, prompt, and resource schemas.
 3. **Semantic Scoring & Ranking**: When `search_tools` is called:
-   - The query is vectorized using [`DynamicEmbeddingService`](file:///containers/dev/csharp-mcp-router/Core/Routing/DynamicEmbeddingService.cs) (local ONNX `all-MiniLM-L6-v2` or remote API).
-   - [`SemanticSearchService`](file:///containers/dev/csharp-mcp-router/Core/Routing/SemanticSearchService.cs) scores cached tools using a hybrid formula: `Score = (0.4 * KeywordScore) + (0.6 * VectorCosineSimilarity)`.
+   - The query is vectorized using [`DynamicEmbeddingService`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/DynamicEmbeddingService.cs) (local ONNX `all-MiniLM-L6-v2` or remote API).
+   - [`SemanticSearchService`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/SemanticSearchService.cs) scores cached tools using a hybrid formula: `Score = (0.4 * KeywordScore) + (0.6 * VectorCosineSimilarity)`.
    - Results are namespaced as `{serverId}__{toolName}` and returned to the client.
 4. **Execution Dispatch**: When `execute_tool` is invoked:
    - The router un-namespaces the tool name to identify the target server.
@@ -625,10 +625,10 @@ For clients requiring direct interaction with a specific backend:
 
 The router multiplexes client requests across backend connections while ensuring response isolation:
 
-1. **Polymorphic Serialization**: [`JsonRpcMessageConverter.cs`](file:///containers/dev/csharp-mcp-router/Core/Protocol/ProtocolModels.cs) handles bidirectional serialization of `JsonRpcRequest`, `JsonRpcResponse`, `JsonRpcNotification`, and `JsonRpcError`.
-2. **Client ID Preservation**: The client's original ID (whether an integer `1`, string `"req-123"`, or GUID) is captured in [`PendingRequestTcs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Transports/JsonRpcStateManager.cs).
+1. **Polymorphic Serialization**: [`JsonRpcMessageConverter.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Protocol/ProtocolModels.cs) handles bidirectional serialization of `JsonRpcRequest`, `JsonRpcResponse`, `JsonRpcNotification`, and `JsonRpcError`.
+2. **Client ID Preservation**: The client's original ID (whether an integer `1`, string `"req-123"`, or GUID) is captured in [`PendingRequestTcs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs).
 3. **GUID Upstream Rewriting**: To prevent ID collisions when multiple clients send requests with `id: 1` to the same backend connection, the router rewrites the upstream request ID to a unique GUID (`upstreamRequestId = Guid.NewGuid().ToString("N")`).
-4. **Out-of-Order Response Demultiplexing**: When the upstream backend responds, [`JsonRpcStateManager`](file:///containers/dev/csharp-mcp-router/Infrastructure/Transports/JsonRpcStateManager.cs) matches the GUID, restores the client's original ID onto the response object (`response.Id = tracked.OriginalId`), and fulfills the waiting `TaskCompletionSource`.
+4. **Out-of-Order Response Demultiplexing**: When the upstream backend responds, [`JsonRpcStateManager`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs) matches the GUID, restores the client's original ID onto the response object (`response.Id = tracked.OriginalId`), and fulfills the waiting `TaskCompletionSource`.
 
 ### Sequence Diagram: Stateful SSE Session Lifecycle
 
@@ -782,9 +782,9 @@ AppKeys support granular least-privilege scoping:
 
 ### Admin SID Bypass & Database-Backed RBAC Evaluation
 
-1. **Administrator SID Verification**: [`SecurityValidationHelper.IsAdmin`](file:///containers/dev/csharp-mcp-router/Components/Authorization/SecurityValidationHelper.cs) verifies whether the resolved caller principal contains the well-known Windows Built-in Administrators SID (`S-1-5-32-544`), the `full_admin` group role, or any SID configured in `Admin:GroupSid`. Admin principals bypass database RBAC policy checks while their actions remain fully audited.
+1. **Administrator SID Verification**: [`SecurityValidationHelper.IsAdmin`](https://github.com/spelech/model-context-gateway/blob/main/Components/Authorization/SecurityValidationHelper.cs) verifies whether the resolved caller principal contains the well-known Windows Built-in Administrators SID (`S-1-5-32-544`), the `full_admin` group role, or any SID configured in `Admin:GroupSid`. Admin principals bypass database RBAC policy checks while their actions remain fully audited.
 2. **Database Stored Procedure Evaluation (`sp_EvaluateUserAccess`)**:
-   - For non-admin principals, the gateway executes [`sp_EvaluateUserAccess`](file:///containers/dev/csharp-mcp-router/scripts/db/mssql/02_procedures.sql) across MS SQL Server / MySQL, or direct parameterized queries on SQLite.
+   - For non-admin principals, the gateway executes [`sp_EvaluateUserAccess`](https://github.com/spelech/model-context-gateway/blob/main/scripts/db/mssql/02_procedures.sql) across MS SQL Server / MySQL, or direct parameterized queries on SQLite.
    - **Explicit Deny Rule**: If any policy matching the user's groups has `IsAllowed = 0`, access is immediately denied.
    - **Explicit Allow Rule**: Access is permitted only if at least one matching policy has `IsAllowed = 1`.
    - **Fail-Closed Default**: If no matching policies exist, or if a database failure occurs, access is denied (`403 Forbidden`).
@@ -819,7 +819,7 @@ flowchart TD
 
 ### Strategy Pattern (`ITransport`)
 
-All downstream transports implement [`ITransport`](file:///containers/dev/csharp-mcp-router/Infrastructure/Transports/ITransport.cs):
+All downstream transports implement [`ITransport`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/ITransport.cs):
 
 ```csharp
 public interface ITransport : IAsyncDisposable
@@ -836,9 +836,9 @@ public interface ITransport : IAsyncDisposable
 
 ### Subprocess STDIO Architecture & Security Hardening
 
-The [`StdioTransport`](file:///containers/dev/csharp-mcp-router/Infrastructure/Transports/StdioTransport.cs) manages local executables, CLI tools, Python scripts (`uvx`), and Node packages (`npx`):
+The [`StdioTransport`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs) manages local executables, CLI tools, Python scripts (`uvx`), and Node packages (`npx`):
 
-1. **Command Line Tokenization**: [`StdioTransport.ParseCommandLine`](file:///containers/dev/csharp-mcp-router/Infrastructure/Transports/StdioTransport.cs) parses single/double quoted paths and arguments cleanly into an executable and argument array.
+1. **Command Line Tokenization**: [`StdioTransport.ParseCommandLine`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs) parses single/double quoted paths and arguments cleanly into an executable and argument array.
 2. **Strict Process Security Policy**:
    - `UseShellExecute = false` and `CreateNoWindow = true`.
    - Executables are invoked directly without intermediate shells (`sh`, `bash`, `cmd.exe`, `powershell.exe`) to prevent shell injection and command chaining attacks (`&&`, `;`, `|`).
@@ -868,12 +868,12 @@ stateDiagram-v2
 ```
 
 * **Graceful Termination**: The router closes `stdin`, signaling EOF to the subprocess.
-* **Process Tree Killing**: If the subprocess fails to exit within the grace period (5 seconds), [`process.Kill(entireProcessTree: true)`](file:///containers/dev/csharp-mcp-router/Infrastructure/Transports/StdioTransport.cs) terminates the entire process hierarchy, preventing orphaned worker threads.
+* **Process Tree Killing**: If the subprocess fails to exit within the grace period (5 seconds), [`process.Kill(entireProcessTree: true)`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs) terminates the entire process hierarchy, preventing orphaned worker threads.
 
 ### Stderr Log Capture & PII Token Masking
 
 * A background listener continuously drains `StandardError`.
-* Lines are passed through [`PiiSanitizer.SanitizePayload`](file:///containers/dev/csharp-mcp-router/Infrastructure/Logging/PiiSanitizer.cs) to redact tokens before writing to application loggers.
+* Lines are passed through [`PiiSanitizer.SanitizePayload`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Logging/PiiSanitizer.cs) to redact tokens before writing to application loggers.
 
 ### Sequence Diagram: STDIO Subprocess Execution
 
@@ -1090,7 +1090,7 @@ For comprehensive schema definitions, stored procedure listings, and migrations,
 
 ### AES-256-GCM Envelope Encryption Specification
 
-Sensitive database columns (e.g. `AppKeys.EncryptedKey`, `SecretProviders.EncryptedConfigJson`, `AuthProviderConfigs.EncryptedConfigJson`, `Servers.ApiKey`) are protected using **AES-256-GCM authenticated envelope encryption** via [`SymmetricEncryptionHelper`](file:///containers/dev/csharp-mcp-router/Infrastructure/Secrets/SymmetricEncryptionHelper.cs):
+Sensitive database columns (e.g. `AppKeys.EncryptedKey`, `SecretProviders.EncryptedConfigJson`, `AuthProviderConfigs.EncryptedConfigJson`, `Servers.ApiKey`) are protected using **AES-256-GCM authenticated envelope encryption** via [`SymmetricEncryptionHelper`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/SymmetricEncryptionHelper.cs):
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -1111,8 +1111,8 @@ Sensitive database columns (e.g. `AppKeys.EncryptedKey`, `SecretProviders.Encryp
 
 When an administrator updates a Secret Provider in the Settings UI:
 1. The frontend submits the updated credentials to `POST /api/providers/secret`.
-2. [`ProviderConfigSecurityHelper`](file:///containers/dev/csharp-mcp-router/Components/Providers/ProviderConfigSecurityHelper.cs) encrypts the payload with AES-256-GCM and persists it to the database.
-3. The in-memory cache in [`CompositeSecretRetriever`](file:///containers/dev/csharp-mcp-router/Infrastructure/Secrets/CompositeSecretRetriever.cs) is immediately invalidated.
+2. [`ProviderConfigSecurityHelper`](https://github.com/spelech/model-context-gateway/blob/main/Components/Providers/ProviderConfigSecurityHelper.cs) encrypts the payload with AES-256-GCM and persists it to the database.
+3. The in-memory cache in [`CompositeSecretRetriever`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/CompositeSecretRetriever.cs) is immediately invalidated.
 4. Subsequent downstream requests fetch fresh tokens from HashiCorp Vault or the updated provider without requiring a container or service restart.
 
 ### Secret Resolution & Encryption Pipeline Flowchart

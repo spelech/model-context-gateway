@@ -42,7 +42,7 @@ Following the comprehensive Windows host deployment, IIS In-Process ANCM v2 inte
    - Verified Active Directory & Windows Integrated Authentication (Kerberos/NTLM caller SIDs, group token extraction, and builtin administrator SID `S-1-5-32-544` mapping).
    - Automated Windows diagnostic runner `Test-WindowsEnvironment.ps1` completed **18 of 18 checks passing (100%)**.
 4. **Media Tools Decoupling & Docker Auto-Discovery**:
-   - Native Plex & Overseerr tools were extracted from the router codebase into an independent, containerized service [`csharp-media-mcp`](file:///containers/dev/csharp-media-mcp) with its own **28 passing unit & integration tests** (`MediaMcp.Tests`), registered in `/containers/mcp/docker-compose.yaml`.
+   - Native Plex & Overseerr tools were extracted from the router codebase into an independent, containerized service [`csharp-media-mcp`](https://github.com/spelech/csharp-media-mcp) with its own **28 passing unit & integration tests** (`MediaMcp.Tests`), registered in `/containers/mcp/docker-compose.yaml`.
    - Documented dynamic Docker label auto-discovery (`mcp.enabled=true`, `mcp.id`, `mcp.port`, `mcp.displayName`, etc.) in `README.md` and `docs/features-guide.md`.
 5. **Living SRS & Test Verification Catalog**:
    - Automated Roslyn C# and TypeScript AST extraction tool (`scripts/CatalogGenerator`) verifies zero-drift living requirements documentation ([`software-requirements-and-test-catalog.md`](software-requirements-and-test-catalog.md)) mapping **23 Requirements across 102 Test Proofs**.

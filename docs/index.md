@@ -2,10 +2,10 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-v5.0.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v5.10.0-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
-![Tests](https://img.shields.io/badge/tests-672%20passing-2ea44f?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-1%2C063%20passing-2ea44f?style=for-the-badge)
 ![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
@@ -16,13 +16,24 @@
 
 **Model Context Gateway (MCG)** is a high-performance C# ASP.NET Core gateway, OAuth 2.0 provider, and semantic proxy for the [Model Context Protocol (MCP)](https://modelcontextprotocol.io).
 
-It aggregates hundreds of tools from isolated backend servers (Docker, Home Assistant, Plex, Actual Budget, Excel, custom APIs, STDIO subprocesses) and proxies them to AI clients (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) via a single unified connection.
+It aggregates hundreds of tools from isolated backend servers (Docker, Home Assistant, SQL databases, Plex, Actual Budget, Excel, custom APIs, and STDIO subprocesses) and proxies them to AI clients (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) through a single unified connection.
+
+### The Problem & Mental Model: An Airport Hub for AI Tools
+
+Connecting AI clients directly to dozens of disparate backend tools is like managing dozens of point-to-point charter flights: credentials leak, protocol shapes differ, and loading 300+ tool schemas blows out the model's context window with irrelevant tokens.
+
+**Model Context Gateway acts as an international airport hub for your AI tools:**
+
+* **Single Terminal Gate (`/sse`)**: AI assistants connect once to a single, dependable endpoint.
+* **Security Checkpoint**: The gateway enforces RBAC, authenticates Active Directory SIDs or OIDC headers, derives AppKeys, and scrubs PII before requests touch backend infrastructure.
+* **Intelligent Concierge (Meta-Mode)**: Instead of handing an LLM a 500-page directory of every tool on every server, Meta-Mode gives the model an intelligent concierge (`search_tools` and `execute_tool`). The LLM asks in plain English (*"Who can reboot the budget service?"*), and the concierge finds and executes the exact tool on demand.
+* **Flight Dispatch**: The gateway seamlessly routes requests across Docker containers, remote HTTP/SSE services, and local STDIO subprocesses without client-side reconfiguration.
 
 ![Model Context Gateway Dashboard](assets/dashboard.jpg)
 
 ---
 
-## ⚡ Core Architecture Highlights
+## Core Architecture Highlights
 
 ```mermaid
 flowchart LR
@@ -56,17 +67,17 @@ flowchart LR
     Secrets --> StdioSrv
 ```
 
-* **🧠 Meta-Mode Dynamic Tool Filtering**: Exposes only `search_tools` and `execute_tool` on `/sse` by default, eliminating context window bloat in LLMs while dynamically discovering and routing across hundreds of backend tools on demand.
-* **🛡️ Multi-Tenant Auth & Zero-Config Standalone**: Native Active Directory LDAP / Kerberos, OIDC reverse proxy headers (`Remote-User`, `Remote-Groups` from Authentik, Authelia, Keycloak), scoped AppKeys (`mcp-adm-`, `mcp-usr-`, `mcp-srv-`), and trusted local loopback for personal home-labs.
-* **🤖 In-Process Admin MCP Control Plane (`/admin`, `/mcg-admin`)**: Autonomous AI agents can manage providers, servers, RBAC policies, group mappings, vector search, and personal AppKeys via standard MCP tool calls without manual UI operations.
-* **🔍 Dual-Provider Semantic Vector Search**: Local in-process CPU vector embeddings (`all-MiniLM-L6-v2` via `Microsoft.ML.Tokenizers`) or remote OpenAI-compatible API providers stored securely in SQLCipher/AES encrypted databases.
-* **🔐 Enterprise Secrets & Key Lifecycle**: Just-in-time secret retrieval from HashiCorp Vault (KV v2), Windows Registry (DPAPI), or Environment Variables with AES-256-GCM envelope encryption and dynamic master key rotation.
-* **🐳 Docker Label Auto-Discovery**: Mounts `/var/run/docker.sock` to dynamically discover and register containers with `mcp.enabled=true` labels with zero manual registration.
-* **🗄️ Multi-Database Support**: First-class stored procedure suites across SQLite, Microsoft SQL Server, and MySQL via Dapper.
+* **Meta-Mode Dynamic Tool Filtering**: Exposes only `search_tools` and `execute_tool` on `/sse` by default, eliminating LLM context window bloat while dynamically ranking and routing across hundreds of backend tools on demand.
+* **Multi-Tenant Auth & Zero-Config Standalone**: Native Active Directory LDAP / Kerberos, OIDC reverse proxy headers (`Remote-User`, `Remote-Groups` from Authentik, Authelia, Keycloak), scoped AppKeys (`mcp-adm-`, `mcp-usr-`, `mcp-srv-`), and trusted local loopback for personal home-labs.
+* **In-Process Admin MCP Control Plane (`/admin`, `/mcg-admin`)**: Autonomous AI agents can manage providers, servers, RBAC policies, group mappings, vector search, and personal AppKeys via standard MCP tool calls without manual UI clicking.
+* **Dual-Provider Semantic Vector Search**: Local in-process CPU vector embeddings (`all-MiniLM-L6-v2` via `Microsoft.ML.Tokenizers`) or remote OpenAI-compatible API providers stored securely in SQLCipher/AES encrypted databases.
+* **Enterprise Secrets & Key Lifecycle**: Just-in-time secret retrieval from HashiCorp Vault (KV v2), Windows Registry (DPAPI), or Environment Variables with AES-256-GCM envelope encryption and dynamic master key rotation.
+* **Docker Label Auto-Discovery**: Mounts `/var/run/docker.sock` to dynamically discover and register containers with `mcp.enabled=true` labels with zero manual registration.
+* **Multi-Database Support**: First-class stored procedure suites across SQLite, Microsoft SQL Server, and MySQL via Dapper.
 
 ---
 
-## 🧭 Documentation Portal Navigation
+## Documentation Portal Navigation
 
 <div class="grid cards" markdown>
 
@@ -75,6 +86,12 @@ flowchart LR
     ---
 
     Blank-slate Docker, Docker Compose, Windows IIS setup, environment variables, master encryption keys, and zero-config deployment.
+
+-   :material-home: __[Single-User & Home-Lab Setup](single-user-and-homelab-guide.md)__
+
+    ---
+
+    60-second setup, loopback trust, SQLite database, Docker container auto-discovery, and local AI client integration.
 
 -   :material-shield-account: __[Authentication & Identity Architecture](authentication-architecture.md)__
 
@@ -142,11 +159,23 @@ flowchart LR
 
     Living Software Requirements Specification, requirement taxonomy (`AUTH`, `MCP`, `SEC`, `GUARD`), and test verification matrix.
 
+-   :material-alert-circle-outline: __[Troubleshooting & RCA Guide](mcp-routing-and-admin-issues.md)__
+
+    ---
+
+    In-depth root cause analysis and resolution guide covering session lifecycles, cache synchronization, and downstreams.
+
+-   :material-file-document-outline: __[Management Overview & Briefing](management-brief.md)__
+
+    ---
+
+    Executive-level summary of architecture, selling points, enterprise governance, and NotebookLM briefing prompt.
+
 </div>
 
 ---
 
-## ⚡ Quickstart: Zero-Config Startup
+## Quickstart: Zero-Config Startup
 
 Run the gateway container with zero required configuration. On first boot, the gateway automatically generates a 256-bit AES Master Key in `./data/.master.key` and initializes a secure SQLite database:
 
@@ -183,14 +212,14 @@ Run the gateway container with zero required configuration. On first boot, the g
 ### Live Endpoints
 
 * **Web UI Dashboard**: [`http://localhost:8080/`](http://localhost:8080/)
-* **Health Check**: [`http://localhost:8080/health`](http://localhost:8080/health) &rarr; `{"status":"healthy","service":"ModelContextGateway","version":"5.0.0"}`
+* **Health Check**: [`http://localhost:8080/health`](http://localhost:8080/health) &rarr; `{"status":"healthy","service":"ModelContextGateway","version":"5.10.0"}`
 * **Meta-Mode Gateway**: `http://localhost:8080/sse`
 * **Admin MCP Server**: `http://localhost:8080/admin/sse` (or `POST /admin` / `GET /mcg-admin/sse`)
 * **Direct Backend Proxy**: `http://localhost:8080/{targetServerId}`
 
 ---
 
-## 🤖 Connecting AI Clients
+## Connecting AI Clients
 
 ### 1. Claude Desktop (`claude_desktop_config.json`)
 
@@ -237,11 +266,11 @@ Run the gateway container with zero required configuration. On first boot, the g
 
 ---
 
-## 🛠️ Verification & Quality Assurance
+## Verification & Quality Assurance
 
-All features, security guardrails, and authentication flows are enforced by automated test suites:
+All features, security guardrails, and authentication flows are validated across automated test suites:
 
-* **xUnit Backend Suite**: 670+ integration & unit tests ([`ModelContextGateway.Tests`](developer-guide.md#backend-test-suite))
-* **Vitest Frontend Suite**: Component and state store test coverage ([`frontend/src/test`](developer-guide.md#frontend-vitest-suite))
+* **xUnit Backend Suite**: 810 integration & unit tests ([`ModelContextGateway.Tests`](developer-guide.md#backend-test-suite))
+* **Vitest Frontend Suite**: 253 component and state store tests ([`frontend/src/test`](developer-guide.md#frontend-vitest-suite))
 * **Playwright E2E Suite**: End-to-end browser automation ([`frontend/e2e`](developer-guide.md#end-to-end-testing-playwright))
 * **Living Requirements Matrix**: Zero-drift catalog generation via `dotnet run --project scripts/CatalogGenerator -- --verify-only` ([SRS Catalog](software-requirements-and-test-catalog.md))

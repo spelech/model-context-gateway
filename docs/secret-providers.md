@@ -71,7 +71,7 @@ flowchart TD
 ## 🔌 Supported Secret Providers
 
 ### 1. HashiCorp Vault (KV v2)
-**Implementation**: [`VaultSecretRetriever.cs`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-56/Infrastructure/Secrets/VaultSecretRetriever.cs)  
+**Implementation**: [`VaultSecretRetriever.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/VaultSecretRetriever.cs)  
 **Provider Identifiers**: `"HashiCorpVault"` or `"Vault"`
 
 The Vault retriever integrates with HashiCorp Vault's Key-Value Version 2 (`kv-v2`) secret engine.
@@ -110,7 +110,7 @@ The Vault retriever integrates with HashiCorp Vault's Key-Value Version 2 (`kv-v
 ---
 
 ### 2. Windows Registry (DPAPI)
-**Implementation**: [`WindowsRegistrySecretRetriever.cs`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-56/Infrastructure/Secrets/WindowsRegistrySecretRetriever.cs)  
+**Implementation**: [`WindowsRegistrySecretRetriever.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/WindowsRegistrySecretRetriever.cs)  
 **Provider Identifiers**: `"WindowsRegistry"` or `"Registry"`
 
 The Windows Registry retriever reads encrypted or plaintext configuration values directly from the host system's Windows Registry hive.
@@ -131,7 +131,7 @@ The Windows Registry retriever reads encrypted or plaintext configuration values
 ---
 
 ### 3. Environment Variables
-**Implementation**: [`EnvironmentSecretRetriever.cs`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-56/Infrastructure/Secrets/EnvironmentSecretRetriever.cs)  
+**Implementation**: [`EnvironmentSecretRetriever.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/EnvironmentSecretRetriever.cs)  
 **Provider Identifiers**: `"Environment"` or `"Env"`
 
 The Environment retriever allows dynamic interpolation of host or container environment variables at runtime without hardcoding keys into database tables.
@@ -152,7 +152,7 @@ The Environment retriever allows dynamic interpolation of host or container envi
 All secret provider configurations stored in the database (e.g. `SecretProviders.EncryptedConfigJson` and `AuthProviderConfigs.EncryptedConfigJson`) are encrypted at rest using industry-standard authenticated symmetric encryption.
 
 ### AES-256-GCM Envelope Encryption
-**Implementation**: [`SymmetricEncryptionHelper.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Secrets/SymmetricEncryptionHelper.cs)
+**Implementation**: [`SymmetricEncryptionHelper.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/SymmetricEncryptionHelper.cs)
 
 * **Cipher**: `AES-256-GCM` (Galois/Counter Mode).
 * **Nonce**: 96-bit (12-byte) cryptographically secure random nonce generated per payload via `RandomNumberGenerator.GetBytes(12)`.
@@ -167,7 +167,7 @@ All secret provider configurations stored in the database (e.g. `SecretProviders
 
 ### Master Key Resolution Hierarchy & Lifecycle
 
-**Implementation**: [`DbKeyHelper.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Secrets/DbKeyHelper.cs)
+**Implementation**: [`DbKeyHelper.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/DbKeyHelper.cs)
 
 The 256-bit symmetric encryption key is resolved according to the following precedence hierarchy, automatically detecting the origin `KeySource`:
 
@@ -218,7 +218,7 @@ The gateway supports declarative admin key provisioning:
 
 ## ⚡ Dynamic Runtime Reloading
 
-**Implementation**: [`ProvidersController.cs`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-56/Components/Providers/ProvidersController.cs)
+**Implementation**: [`ProvidersController.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Providers/ProvidersController.cs)
 
 To maintain 99.999% uptime for connected AI agents and IDEs, Model Context Gateway (MCG) supports **hot-reloading of secret providers without restarting the application or Docker container**.
 
@@ -259,7 +259,7 @@ sequenceDiagram
 
 ## 🛡️ Secret Redaction & Audit Safety
 
-**Implementation**: [`ProviderConfigSecurityHelper.cs`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-56/Components/Providers/ProviderConfigSecurityHelper.cs)
+**Implementation**: [`ProviderConfigSecurityHelper.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Providers/ProviderConfigSecurityHelper.cs)
 
 To adhere to Zero Trust principles, the Model Context Gateway (MCG) enforces multi-layered redaction and audit protection across all APIs and logs.
 
