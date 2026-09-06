@@ -110,18 +110,18 @@ flowchart TD
 ### Native Windows Subsystems
 
 1. **Active Directory & Integrated Windows Authentication (`WindowsIdentity`)**:
-   - Implemented via [`IWindowsIdentityAccessor.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Identity/IWindowsIdentityAccessor.cs) and [`ActiveDirectoryIdentityProvider.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Identity/ActiveDirectoryIdentityProvider.cs).
+   - Implemented via [`IWindowsIdentityAccessor.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Identity/IWindowsIdentityAccessor.cs) and [`ActiveDirectoryIdentityProvider.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Identity/ActiveDirectoryIdentityProvider.cs).
    - Extracts caller identity, Primary SID, and full Group SID security token lists directly from `WindowsIdentity.Groups` when running under IIS or Kestrel Negotiate authentication.
    - Transparently handles well-known security identifiers such as `S-1-5-32-544` (Builtin Administrators) and domain security groups for role-based authorization without requiring external LDAP binds.
 
 2. **Windows Registry & DPAPI Cryptography (`WindowsRegistrySecretRetriever`)**:
-   - Implemented via [`WindowsRegistrySecretRetriever.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Secrets/WindowsRegistrySecretRetriever.cs).
+   - Implemented via [`WindowsRegistrySecretRetriever.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/WindowsRegistrySecretRetriever.cs).
    - Reads secrets from `HKLM:\SOFTWARE\McpRouter\Secrets`.
    - Supports plaintext `REG_SZ` strings and cryptographically secure `REG_BINARY` blobs protected with the Windows Data Protection API (`System.Security.Cryptography.ProtectedData.Protect` / `Unprotect`) under `DataProtectionScope.LocalMachine`.
    - Allows machine-level secret provisioning that is completely decoupled from configuration files or source code repositories.
 
 3. **Subprocess STDIO Transport Isolation (`StdioTransport`)**:
-   - Implemented via [`StdioTransport.cs`](file:///containers/dev/csharp-mcp-router/Infrastructure/Transports/StdioTransport.cs).
+   - Implemented via [`StdioTransport.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs).
    - Spawns Windows processes (`.exe`, `.cmd`, `.bat`, `node.exe`, `python.exe`, `uvx.exe`, `npx.cmd`) with standard input/output redirection.
    - Enforces **Zero CLI Secret Leakage**: sensitive API tokens and keys resolved from DPAPI, Vault, or environment variables are injected exclusively into `ProcessStartInfo.Environment` rather than command-line arguments.
 
@@ -139,7 +139,7 @@ flowchart TD
 | **SSE Streaming Optimization** | Supported with `responseBufferLimit="0"` | Native (Zero buffering in Kestrel) | Native |
 | **Crash Auto-Recovery** | IIS Application Pool auto-restart & health monitoring | SCM failure actions (`sc.exe failure actions= restart`) | Manual restart or console loop |
 | **Integrated Windows Auth** | Native IIS Negotiate / Kerberos / NTLM module | Kestrel Negotiate or Header-based Auth | Negotiate or Anonymous |
-| **Automation Script** | [`Deploy-IIS.ps1`](file:///containers/dev/csharp-mcp-router/scripts/windows/Deploy-IIS.ps1) | [`Setup-WindowsService.ps1`](file:///containers/dev/csharp-mcp-router/scripts/windows/Setup-WindowsService.ps1) | Direct CLI / Terminal |
+| **Automation Script** | [`Deploy-IIS.ps1`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/Deploy-IIS.ps1) | [`Setup-WindowsService.ps1`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/Setup-WindowsService.ps1) | Direct CLI / Terminal |
 
 ---
 
@@ -220,7 +220,7 @@ In-Process hosting (`hostingModel="inprocess"`) loads the ASP.NET Core applicati
 
 ### Automated Deployment with Deploy-IIS.ps1
 
-The repository includes a comprehensive deployment automation script: [`scripts/windows/Deploy-IIS.ps1`](file:///containers/dev/csharp-mcp-router/scripts/windows/Deploy-IIS.ps1).
+The repository includes a comprehensive deployment automation script: [`scripts/windows/Deploy-IIS.ps1`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/Deploy-IIS.ps1).
 
 #### Parameter Reference
 
@@ -256,7 +256,7 @@ The repository includes a comprehensive deployment automation script: [`scripts/
 
 ### web.config Architectural Deep Dive
 
-The IIS deployment uses an optimized `web.config` file derived from [`scripts/windows/web.config.example`](file:///containers/dev/csharp-mcp-router/scripts/windows/web.config.example):
+The IIS deployment uses an optimized `web.config` file derived from [`scripts/windows/web.config.example`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/web.config.example):
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -383,7 +383,7 @@ When deploying as a dedicated background daemon without IIS, the router can run 
 
 ### Automated Lifecycle with Setup-WindowsService.ps1
 
-The repository provides the lifecycle management script: [`scripts/windows/Setup-WindowsService.ps1`](file:///containers/dev/csharp-mcp-router/scripts/windows/Setup-WindowsService.ps1).
+The repository provides the lifecycle management script: [`scripts/windows/Setup-WindowsService.ps1`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/Setup-WindowsService.ps1).
 
 #### Supported Actions
 

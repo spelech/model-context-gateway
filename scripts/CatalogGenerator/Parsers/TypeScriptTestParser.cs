@@ -10,7 +10,7 @@ namespace CatalogGenerator.Parsers
             RegexOptions.Compiled | RegexOptions.Multiline
         );
 
-        public void ParseDirectory(string directoryPath, CatalogIndex index, string suiteName = "Frontend")
+        public void ParseDirectory(string directoryPath, CatalogIndex index, string suiteName = "Frontend", string? rootDir = null)
         {
             if (!Directory.Exists(directoryPath))
             {
@@ -31,8 +31,12 @@ namespace CatalogGenerator.Parsers
                     continue;
                 }
 
+                var pathForProof = !string.IsNullOrEmpty(rootDir)
+                    ? Path.GetRelativePath(rootDir, file).Replace('\\', '/')
+                    : file.Replace('\\', '/');
+
                 var code = File.ReadAllText(file);
-                ParseSource(file, code, index, suiteName);
+                ParseSource(pathForProof, code, index, suiteName);
             }
         }
 

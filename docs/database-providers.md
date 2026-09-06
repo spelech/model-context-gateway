@@ -306,7 +306,7 @@ DDL scripts are located in `scripts/db/mysql/`:
 > [!CAUTION]
 > **MySQL Parameter Scoping**: In MySQL stored procedures, parameter names that match column names (e.g. `WHERE Username = Username`) resolve to column references, creating tautologies. To prevent variable shadowing and silent query bugs, **all MySQL stored procedure parameters MUST use the `p_` prefix** (e.g., `p_Id`, `p_Name`, `p_Username`, `p_KeyPrefix`, `p_EncryptedKey`, `p_ScopesJson`, `p_OwnerSid`, `p_ExpiresAt`).
 
-In the C# repository layer ([`Repositories.cs`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-53/Infrastructure/Persistence/Repositories.cs)), MySQL procedure calls explicitly bind parameters with this prefix:
+In the C# repository layer ([`Repositories.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Persistence/Repositories.cs)), MySQL procedure calls explicitly bind parameters with this prefix:
 
 ```csharp
 // MySQL Dapper Parameter Invocation in Repositories.cs
@@ -382,7 +382,7 @@ flowchart TD
 ```
 
 ### 1. Key Resolution (`DbKeyHelper.cs`)
-Encryption keys are resolved during bootstrap via [`DbKeyHelper.ResolveDbEncryptionKey(configuration)`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-53/Infrastructure/Secrets/DbKeyHelper.cs):
+Encryption keys are resolved during bootstrap via [`DbKeyHelper.ResolveDbEncryptionKey(configuration)`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/DbKeyHelper.cs):
 1. **Lookup Hierarchy**: Inspects `MCG_MASTER_KEY` first, falling back to `DB_ENCRYPTION_KEY`.
 2. **Fail-Closed Security**: If both keys are missing or blank, startup terminates with a fatal `InvalidOperationException`. Self-generating ephemeral fallback keys is strictly disabled in production to prevent silent data loss upon container restart.
 3. **Thread-Safe Caching**: Key resolution uses double-checked locking to cache the resolved string in memory, minimizing configuration lookups.
@@ -404,7 +404,7 @@ Sensitive provider settings are stored in dedicated encrypted columns:
 
 ## 🛡️ Startup Schema Validation & Fail-Closed Integrity Checks
 
-To prevent runtime data corruption or silent failures caused by misconfigured schemas, the gateway executes a comprehensive validation pass on every startup ([`DatabaseSeederService.ValidateSchemaCompatibility`](file:///containers/dev/csharp-mcp-router/Infrastructure/Persistence/DatabaseSeederService.cs)):
+To prevent runtime data corruption or silent failures caused by misconfigured schemas, the gateway executes a comprehensive validation pass on every startup ([`DatabaseSeederService.ValidateSchemaCompatibility`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Persistence/DatabaseSeederService.cs)):
 
 ```mermaid
 sequenceDiagram

@@ -8,7 +8,7 @@ namespace CatalogGenerator.Parsers
 {
     public class RoslynCSharpParser
     {
-        public void ParseDirectory(string directoryPath, CatalogIndex index)
+        public void ParseDirectory(string directoryPath, CatalogIndex index, string? rootDir = null)
         {
             if (!Directory.Exists(directoryPath))
             {
@@ -28,8 +28,12 @@ namespace CatalogGenerator.Parsers
                     continue;
                 }
 
+                var pathForProof = !string.IsNullOrEmpty(rootDir)
+                    ? Path.GetRelativePath(rootDir, file).Replace('\\', '/')
+                    : normalized;
+
                 var code = File.ReadAllText(file);
-                ParseSource(file, code, index);
+                ParseSource(pathForProof, code, index);
             }
         }
 
