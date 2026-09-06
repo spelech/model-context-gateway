@@ -257,7 +257,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "AppKeys API returns sanitized key metadata without leaking plaintext tokens.")]
+        [Requirement("SEC-APPKEY-SANITIZE-METADATA-GET", "SEC", RequirementType.Positive, "AppKeys API returns sanitized key metadata without leaking plaintext tokens.")]
         public async Task GetAppKeys_ReturnsSanitizedKeys_ForAdminAndFiltered()
         {
             await _rawConnection.ExecuteAsync(@"
@@ -310,7 +310,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Rejects AppKey creation with BadRequest when name is missing.")]
+        [Requirement("GUARD-APPKEY-MISSING-NAME", "GUARD", RequirementType.Negative, "Rejects AppKey creation with BadRequest when name is missing.")]
         public async Task CreateAppKey_ReturnsBadRequest_WhenNameMissing()
         {
             var controller = CreateController("alice", "User");
@@ -322,7 +322,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Enforces user AppKey limit and returns BadRequest when quota is exceeded.")]
+        [Requirement("GUARD-APPKEY-USER-QUOTA", "GUARD", RequirementType.Negative, "Enforces user AppKey limit and returns BadRequest when quota is exceeded.")]
         public async Task CreateAppKey_EnforcesUserLimit_ForNonAdmin()
         {
             // Set UserMaxKeys to 1
@@ -367,7 +367,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Returns NotFound when revoking non-existent AppKey ID.")]
+        [Requirement("GUARD-APPKEY-REVOKE-NOTFOUND", "GUARD", RequirementType.Negative, "Returns NotFound when revoking non-existent AppKey ID.")]
         public async Task RevokeAppKey_ReturnsNotFound_WhenIdDoesNotExist()
         {
             var controller = CreateController("alice", "Admin");
@@ -376,7 +376,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Returns Forbid when non-owner/non-admin attempts to revoke an AppKey.")]
+        [Requirement("GUARD-APPKEY-REVOKE-FORBID", "GUARD", RequirementType.Negative, "Returns Forbid when non-owner/non-admin attempts to revoke an AppKey.")]
         public async Task RevokeAppKey_ReturnsForbid_WhenUserNotOwnerOrAdmin()
         {
             await _rawConnection.ExecuteAsync(@"
@@ -401,7 +401,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "Administrator can create, update, and delete custom user quota overrides.")]
+        [Requirement("AUTH-APPKEY-ADMIN-QUOTA", "AUTH", RequirementType.Positive, "Administrator can create, update, and delete custom user quota overrides.")]
         public async Task QuotaEndpoints_Admin_CanManageCustomUserQuotas()
         {
             var controller = CreateController("admin", "Admin");
@@ -431,7 +431,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Returns BadRequest on invalid quota override input parameters.")]
+        [Requirement("GUARD-APPKEY-QUOTA-INVALID-PARAM", "GUARD", RequirementType.Negative, "Returns BadRequest on invalid quota override input parameters.")]
         public async Task QuotaEndpoints_Validation_ReturnsBadRequest_OnInvalidInputs()
         {
             var controller = CreateController("admin", "Admin");

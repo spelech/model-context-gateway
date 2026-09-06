@@ -26,6 +26,8 @@ namespace ModelContextGateway.Tests.TestHelpers
         public Func<HttpRequestMessage, bool>? ShouldReturnUnauthorized { get; set; }
 
         public List<object> Tools { get; } = new();
+        public List<object> Resources { get; } = new();
+        public List<object> Prompts { get; } = new();
         public Func<string, JsonElement, object>? ToolCallHandler { get; set; }
         public object? DefaultToolCallResult { get; set; }
         public object? ToolCallError { get; set; }
@@ -64,6 +66,26 @@ namespace ModelContextGateway.Tests.TestHelpers
                     type = "object",
                     properties = new Dictionary<string, object>()
                 }
+            });
+        }
+
+        public void AddResource(string uri, string name, string? description = null, string? mimeType = null)
+        {
+            Resources.Add(new
+            {
+                uri,
+                name,
+                description,
+                mimeType
+            });
+        }
+
+        public void AddPrompt(string name, string? description = null)
+        {
+            Prompts.Add(new
+            {
+                name,
+                description
             });
         }
 
@@ -114,19 +136,34 @@ namespace ModelContextGateway.Tests.TestHelpers
                 };
             }
 
+            if (id == null)
+            {
+                // Notifications per JSON-RPC 2.0 §4 / MCP Streamable HTTP spec: no response body, HTTP 202 Accepted
+                return new HttpResponseMessage(HttpStatusCode.Accepted)
+                {
+                    Content = new StringContent(string.Empty, Encoding.UTF8, "application/json")
+                };
+            }
+
             switch (method)
             {
                 case "initialize":
-                    return HandleInitialize(id);
+                    return HandleInitialize(id, root);
 
                 case "notifications/initialized":
-                    return new HttpResponseMessage(HttpStatusCode.OK)
+                    return new HttpResponseMessage(HttpStatusCode.Accepted)
                     {
-                        Content = new StringContent("{}", Encoding.UTF8, "application/json")
+                        Content = new StringContent(string.Empty, Encoding.UTF8, "application/json")
                     };
 
                 case "tools/list":
                     return HandleToolsList(id);
+
+                case "resources/list":
+                    return HandleResourcesList(id);
+
+                case "prompts/list":
+                    return HandlePromptsList(id);
 
                 case "tools/call":
                     if (ReturnUnauthorizedOnToolsCall)
@@ -148,11 +185,21 @@ namespace ModelContextGateway.Tests.TestHelpers
             };
         }
 
-        private HttpResponseMessage HandleInitialize(object? id)
+        private HttpResponseMessage HandleInitialize(object? id, JsonElement root)
         {
+            string protocolVer = ProtocolVersion;
+            if (root.TryGetProperty("params", out var pElem) && pElem.TryGetProperty("protocolVersion", out var pvElem))
+            {
+                var reqVer = pvElem.GetString();
+                if (!string.IsNullOrWhiteSpace(reqVer))
+                {
+                    protocolVer = ModelContextGateway.Core.GatewayMetadata.NegotiateProtocolVersion(reqVer);
+                }
+            }
+
             var result = new
             {
-                protocolVersion = ProtocolVersion,
+                protocolVersion = protocolVer,
                 capabilities = new
                 {
                     tools = new { listChanged = false },
@@ -173,6 +220,24 @@ namespace ModelContextGateway.Tests.TestHelpers
             var result = new
             {
                 tools = Tools
+            };
+            return CreateJsonRpcSuccess(id, result);
+        }
+
+        private HttpResponseMessage HandleResourcesList(object? id)
+        {
+            var result = new
+            {
+                resources = Resources
+            };
+            return CreateJsonRpcSuccess(id, result);
+        }
+
+        private HttpResponseMessage HandlePromptsList(object? id)
+        {
+            var result = new
+            {
+                prompts = Prompts
             };
             return CreateJsonRpcSuccess(id, result);
         }

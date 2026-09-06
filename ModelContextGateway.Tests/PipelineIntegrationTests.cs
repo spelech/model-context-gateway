@@ -83,7 +83,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Full end-to-end JSON-RPC protocol suite executes across SSE pipeline.")]
+        [Requirement("API-PIPELINE-POST-SSE-PROTOCOL", "MCP", RequirementType.Positive, "Full end-to-end JSON-RPC protocol suite executes across SSE pipeline.")]
         public async Task Pipeline_POST_Sse_JSONRPC_Full_Protocol_Suite()
         {
             var client = CreateAuthenticatedClient();
@@ -140,7 +140,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Full end-to-end JSON-RPC session message suite executes over HTTP POST.")]
+        [Requirement("API-PIPELINE-POST-MESSAGE-PROTOCOL", "MCP", RequirementType.Positive, "Full end-to-end JSON-RPC session message suite executes over HTTP POST.")]
         public async Task Pipeline_POST_Message_FullProtocolSession_Suite()
         {
             var client = CreateAuthenticatedClient();
@@ -168,7 +168,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "Dashboard management API suite executes for authorized administrators.")]
+        [Requirement("AUTH-PIPELINE-ADMIN-DASHBOARD", "AUTH", RequirementType.Positive, "Dashboard management API suite executes for authorized administrators.")]
         public async Task Pipeline_Dashboard_Management_Suite()
         {
             var client = CreateAuthenticatedClient();
@@ -274,7 +274,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Backend server CRUD pipeline endpoints persist and manage downstream servers.")]
+        [Requirement("API-PIPELINE-SERVER-CRUD", "MCP", RequirementType.Positive, "Backend server CRUD pipeline endpoints persist and manage downstream servers.")]
         public async Task Pipeline_Server_CRUD_Endpoints()
         {
             var client = CreateAuthenticatedClient();
@@ -302,7 +302,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "Permissions policy and group mapping CRUD endpoints manage RBAC rules.")]
+        [Requirement("AUTH-PIPELINE-PERM-CRUD", "AUTH", RequirementType.Positive, "Permissions policy and group mapping CRUD endpoints manage RBAC rules.")]
         public async Task Pipeline_Permissions_Policy_And_Mapping_CRUD()
         {
             var client = CreateAuthenticatedClient();
@@ -328,7 +328,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "GET /api/version returns version information with 200 OK.")]
+        [Requirement("API-PIPELINE-GET-VERSION", "MCP", RequirementType.Positive, "GET /api/version returns version information with 200 OK.")]
         public async Task Pipeline_GET_Version_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -337,7 +337,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "GET /api/servers returns backend servers list with 200 OK.")]
+        [Requirement("API-PIPELINE-GET-SERVERS", "MCP", RequirementType.Positive, "GET /api/servers returns backend servers list with 200 OK.")]
         public async Task Pipeline_GET_Servers_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -346,7 +346,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "GET /api/clients returns active client sessions with 200 OK.")]
+        [Requirement("AUTH-PIPELINE-GET-CLIENTS", "AUTH", RequirementType.Positive, "GET /api/clients returns active client sessions with 200 OK.")]
         public async Task Pipeline_GET_Clients_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -355,7 +355,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "GET /api/permissions/policies returns access policies with 200 OK.")]
+        [Requirement("AUTH-PIPELINE-GET-POLICIES", "AUTH", RequirementType.Positive, "GET /api/permissions/policies returns access policies with 200 OK.")]
         public async Task Pipeline_GET_Permissions_Policies_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -391,7 +391,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "GET /api/audit returns audit log records with 200 OK.")]
+        [Requirement("API-PIPELINE-GET-AUDIT", "SEC", RequirementType.Positive, "GET /api/audit returns audit log records with 200 OK.")]
         public async Task Pipeline_GET_Audit_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -418,7 +418,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "GET /api/logs returns system log records with 200 OK.")]
+        [Requirement("API-PIPELINE-GET-LOGS", "SEC", RequirementType.Positive, "GET /api/logs returns system log records with 200 OK.")]
         public async Task Pipeline_GET_Logs_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -427,7 +427,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "GET /api/stats returns server statistics with 200 OK.")]
+        [Requirement("API-PIPELINE-GET-STATS", "MCP", RequirementType.Positive, "GET /api/stats returns server statistics with 200 OK.")]
         public async Task Pipeline_GET_Stats_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -436,7 +436,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "GET /health returns gateway health status with 200 OK.")]
+        [Requirement("API-PIPELINE-GET-HEALTH", "MCP", RequirementType.Positive, "GET /health returns gateway health status with 200 OK.")]
         public async Task Pipeline_GET_Health_Returns200()
         {
             var client = CreateAuthenticatedClient();

@@ -19,7 +19,7 @@ namespace ModelContextGateway.Tests
         [InlineData("basic", "secret123", "Authorization", "Basic secret123")]
         [InlineData("raw", "secret123", "Authorization", "secret123")]
         [InlineData("x-api-key", "secret123", "X-API-Key", "secret123")]
-        [Requirement("TRANS-01", "TRANS", RequirementType.Positive, "SseTransport formats standard authorization shapes (bearer, basic, raw, x-api-key) into HTTP headers.")]
+        [Requirement("TRANS-AUTH-SHAPES-STANDARD-HEADERS", "TRANS", RequirementType.Positive, "SseTransport formats standard authorization shapes (bearer, basic, raw, x-api-key) into HTTP headers.")]
         public async Task SseTransport_ApplyAuthAndCustomHeaders_Formats_Standard_Headers(string authShape, string token, string expectedHeaderKey, string expectedHeaderValue)
         {
             var server = new McpServer
@@ -43,7 +43,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("TRANS-01", "TRANS", RequirementType.Positive, "SseTransport applies custom header names for proprietary target backend authentication.")]
+        [Requirement("TRANS-AUTH-SHAPES-CUSTOM-HEADER", "TRANS", RequirementType.Positive, "SseTransport applies custom header names for proprietary target backend authentication.")]
         public async Task SseTransport_ApplyAuthAndCustomHeaders_Formats_CustomHeader()
         {
             var server = new McpServer
@@ -65,7 +65,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("TRANS-01", "TRANS", RequirementType.Positive, "SseTransport appends authentication tokens as URL query parameters when query auth shape is configured.")]
+        [Requirement("TRANS-AUTH-SHAPES-QUERY-PARAM", "TRANS", RequirementType.Positive, "SseTransport appends authentication tokens as URL query parameters when query auth shape is configured.")]
         public async Task SseTransport_ApplyAuthAndCustomHeaders_Appends_QueryParameter()
         {
             var server = new McpServer
@@ -88,7 +88,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("TRANS-01", "TRANS", RequirementType.Positive, "HttpTransport formats custom header authentication for target servers.")]
+        [Requirement("TRANS-HTTP-AUTH-CUSTOM-HEADER", "TRANS", RequirementType.Positive, "HttpTransport formats custom header authentication for target servers.")]
         public async Task HttpTransport_ApplyAuthAndCustomHeaders_Formats_CustomHeader()
         {
             var server = new McpServer
@@ -110,7 +110,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("TRANS-01", "TRANS", RequirementType.Positive, "SseTransport parses and applies extra request headers from HeadersJson configuration.")]
+        [Requirement("TRANS-AUTH-SHAPES-HEADERS-JSON", "TRANS", RequirementType.Positive, "SseTransport parses and applies extra request headers from HeadersJson configuration.")]
         public async Task SseTransport_ApplyAuthAndCustomHeaders_Parses_HeadersJson()
         {
             var server = new McpServer
@@ -132,7 +132,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-02", "SEC", RequirementType.Positive, "SseTransport resolves dynamic secrets from Vault using custom mounts, paths, and secret fields.")]
+        [Requirement("SEC-VAULT-CUSTOM-MOUNT-PATH", "SEC", RequirementType.Positive, "SseTransport resolves dynamic secrets from Vault using custom mounts, paths, and secret fields.")]
         public async Task SseTransport_ResolveTokenAsync_Uses_Custom_Path_Field_And_Mount()
         {
             var server = new McpServer
@@ -158,7 +158,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-02", "SEC", RequirementType.Positive, "HttpTransport falls back to URL and SecretItemKey when specific secret paths are unconfigured.")]
+        [Requirement("SEC-HTTP-SECRET-URL-FALLBACK", "SEC", RequirementType.Positive, "HttpTransport falls back to URL and SecretItemKey when specific secret paths are unconfigured.")]
         public async Task HttpTransport_ResolveTokenAsync_Defaults_To_Url_And_ApiKey_When_Not_Configured()
         {
             var server = new McpServer

@@ -16,6 +16,7 @@ namespace ModelContextGateway.Infrastructure.Transports
         private readonly ISecretRetriever? _secretRetriever;
         private readonly CancellationTokenSource _cts = new();
         private string _sessionId = string.Empty;
+        private bool _disposed = false;
 
         public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null, System.Security.Principal.WindowsIdentity? callerWindowsIdentity = null, string? forwardedUser = null)
         {
@@ -210,6 +211,11 @@ namespace ModelContextGateway.Infrastructure.Transports
 
         public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
         {
+            if (_disposed)
+            {
+                return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Not connected" } };
+            }
+
             _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(bodyJson));
             var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
@@ -393,8 +399,9 @@ namespace ModelContextGateway.Infrastructure.Transports
 
         public void Dispose()
         {
-            _cts.Cancel();
-            _cts.Dispose();
+            _disposed = true;
+            try { _cts.Cancel(); } catch { }
+            try { _cts.Dispose(); } catch { }
         }
     }
 }

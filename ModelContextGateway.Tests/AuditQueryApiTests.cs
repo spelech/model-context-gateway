@@ -58,7 +58,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "Audit queries support filtering by user, server, and pagination while recording query access in audit log.")]
+        [Requirement("SEC-AUDIT-QUERY-FILTERED-ROWS", "SEC", RequirementType.Positive, "Audit queries support filtering by user, server, and pagination while recording query access in audit log.")]
         public async Task AuditQuery_ReturnsFilteredRows_AndLogsAuditAction()
         {
             await _connection.ExecuteAsync(@"
@@ -81,7 +81,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "PermissionsController records audit action when access policy is saved.")]
+        [Requirement("SEC-AUDIT-POLICY-SAVE-ACTION", "SEC", RequirementType.Positive, "PermissionsController records audit action when access policy is saved.")]
         public async Task SavePolicy_WritesAuditAction_OnSuccess()
         {
             var mockAuditLogger = new Mock<IAuditLogger>();
@@ -115,7 +115,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "PermissionsController records audit action when group mapping is saved.")]
+        [Requirement("SEC-AUDIT-MAPPING-SAVE-ACTION", "SEC", RequirementType.Positive, "PermissionsController records audit action when group mapping is saved.")]
         public async Task SaveMapping_WritesAuditAction_OnSuccess()
         {
             var mockAuditLogger = new Mock<IAuditLogger>();
@@ -148,7 +148,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "AuditLogger persists administrative actions directly into AdminAuditLogs database table.")]
+        [Requirement("SEC-AUDIT-LOGGER-ADMIN-PERSIST", "SEC", RequirementType.Positive, "AuditLogger persists administrative actions directly into AdminAuditLogs database table.")]
         public async Task LogAdminActionAsync_WritesRowToAdminAuditLogs()
         {
             // First ensure table exists in SQLite

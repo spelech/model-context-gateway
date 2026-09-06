@@ -47,7 +47,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls.
         /// </summary>
         [Fact]
-        [Requirement("TRANS-03", "STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls", Type = RequirementType.Positive, Category = "TRANS")]
+        [Requirement("TRANS-STDIO-SPAWN-TOOL-CALL", "STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls", Type = RequirementType.Positive, Category = "TRANS")]
         public async Task StdioTransport_ShouldInitializeAndCallToolSuccessfully()
         {
             var scriptPath = GetMockScriptPath();
@@ -168,7 +168,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that STDIO transport streams subprocess stderr asynchronously to logs.
         /// </summary>
         [Fact]
-        [Requirement("TRANS-03", "STDIO transport streams subprocess stderr asynchronously to structured router diagnostic logs", Type = RequirementType.Positive, Category = "TRANS")]
+        [Requirement("TRANS-STDIO-STREAM-STDERR-LOGS", "STDIO transport streams subprocess stderr asynchronously to structured router diagnostic logs", Type = RequirementType.Positive, Category = "TRANS")]
         public async Task StdioTransport_ShouldRouteStderrToLogs()
         {
             var scriptPath = GetMockScriptPath();
@@ -240,7 +240,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that STDIO transport terminates subprocess tree cleanly upon disposal or cancellation.
         /// </summary>
         [Fact]
-        [Requirement("TRANS-03", "STDIO transport terminates subprocess tree cleanly upon disposal or cancellation", Type = RequirementType.Positive, Category = "TRANS")]
+        [Requirement("TRANS-STDIO-TERMINATE-CLEANLY", "STDIO transport terminates subprocess tree cleanly upon disposal or cancellation", Type = RequirementType.Positive, Category = "TRANS")]
         public async Task StdioTransport_ShouldSupportCancellationAndProcessTreeTermination()
         {
             var scriptPath = GetMockScriptPath();
@@ -325,7 +325,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that STDIO command-line tokenizer preserves quoted arguments and space escaping.
         /// </summary>
         [Fact]
-        [Requirement("TRANS-03", "STDIO command-line tokenizer preserves quoted arguments and space escaping", Type = RequirementType.Positive, Category = "TRANS")]
+        [Requirement("TRANS-STDIO-TOKENIZE-PRESERVE-QUOTES", "STDIO command-line tokenizer preserves quoted arguments and space escaping", Type = RequirementType.Positive, Category = "TRANS")]
         public void StdioTransport_ParseCommandLine_Handles_Quotes_And_Spaces()
         {
             var cmd = "node \"/path to/script.js\" --arg='val' plain_arg";
@@ -470,7 +470,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly.
         /// </summary>
         [Fact]
-        [Requirement("TRANS-03", "STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly", Type = RequirementType.Positive, Category = "TRANS")]
+        [Requirement("TRANS-STDIO-DRAIN-BUFFER-EOF", "STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly", Type = RequirementType.Positive, Category = "TRANS")]
         public async Task StdioTransport_ShouldDrainReaderStreamsToEOF_WhenProcessExitsImmediately()
         {
             var scriptPath = GetMockScriptPath();

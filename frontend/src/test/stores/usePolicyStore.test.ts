@@ -19,7 +19,7 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
   };
 
   /**
-   * @requirement AUTH-01
+   * @requirement AUTH-STORE-POLICY-INIT
    * @category AUTH
    * @type Positive
    * @description initializes with empty policies and mappings
@@ -36,7 +36,7 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
 
   describe('policies management', () => {
     /**
-     * @requirement AUTH-01
+     * @requirement AUTH-STORE-POLICY-FETCH
      * @category AUTH
      * @type Positive
      * @description fetches access policies and updates store
@@ -51,7 +51,7 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
     });
 
     /**
-     * @requirement AUTH-01
+     * @requirement AUTH-STORE-POLICY-CREATE
      * @category AUTH
      * @type Positive
      * @description creates/saves a policy (ALLOW rule) and closes modal
@@ -154,7 +154,7 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
 
   describe('mappings management', () => {
     /**
-     * @requirement AUTH-01
+     * @requirement AUTH-STORE-MAPPING-FETCH
      * @category AUTH
      * @type Positive
      * @description fetches group mappings and updates store
@@ -169,7 +169,7 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
     });
 
     /**
-     * @requirement AUTH-01
+     * @requirement AUTH-STORE-MAPPING-SAVE
      * @category AUTH
      * @type Positive
      * @description saves a group mapping and closes mapping modal
@@ -312,7 +312,7 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
 
   describe('modals state', () => {
     /**
-     * @requirement AUTH-01
+     * @requirement AUTH-STORE-POLICY-MODAL-TOGGLE
      * @category AUTH
      * @type Positive
      * @description handles policy modal open and close
@@ -328,7 +328,7 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
     });
 
     /**
-     * @requirement AUTH-01
+     * @requirement AUTH-STORE-MAPPING-MODAL-TOGGLE
      * @category AUTH
      * @type Positive
      * @description handles mapping modal open and close

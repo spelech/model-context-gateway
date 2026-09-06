@@ -218,7 +218,7 @@ namespace ModelContextGateway.Tests
         /// Ensures non-admin callers cannot create AppKeys with unconfigured categories.
         /// </summary>
         [Fact]
-        [Requirement("GUARD-01", "Non-admin callers cannot create AppKeys with unconfigured categories", Type = RequirementType.Negative, Category = "GUARD")]
+        [Requirement("GUARD-APPKEY-UNKNOWN-CATEGORY", "Non-admin callers cannot create AppKeys with unconfigured categories", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task AppKeysController_CreateAppKey_UnknownCategory_NonAdmin_FailsWithBadRequest()
         {
             var controller = CreateAppKeysController("user1", "User");
@@ -237,7 +237,7 @@ namespace ModelContextGateway.Tests
         /// Ensures AppKey creation with empty or whitespace category fails closed with BadRequest.
         /// </summary>
         [Fact]
-        [Requirement("GUARD-01", "AppKey creation with empty or whitespace category must fail closed with BadRequest", Type = RequirementType.Negative, Category = "GUARD")]
+        [Requirement("GUARD-APPKEY-EMPTY-CATEGORY", "AppKey creation with empty or whitespace category must fail closed with BadRequest", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task AppKeysController_CreateAppKey_EmptyCategory_FailsWithBadRequest()
         {
             var controller = CreateAppKeysController("admin1", "Admin");
@@ -256,7 +256,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that admin callers can create forward-looking AppKeys for unconfigured categories.
         /// </summary>
         [Fact]
-        [Requirement("AUTH-01", "Admin callers can create forward-looking AppKeys for unconfigured categories", Type = RequirementType.Positive, Category = "AUTH")]
+        [Requirement("AUTH-APPKEY-ADMIN-FUTURE-CATEGORY", "Admin callers can create forward-looking AppKeys for unconfigured categories", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task AppKeysController_CreateAppKey_UnknownCategory_Admin_Succeeds()
         {
             var controller = CreateAppKeysController("admin1", "Admin");
@@ -302,7 +302,7 @@ namespace ModelContextGateway.Tests
         /// Ensures client creation with empty category scope fails closed with BadRequest.
         /// </summary>
         [Fact]
-        [Requirement("GUARD-01", "Client creation with empty category scope must fail closed with BadRequest", Type = RequirementType.Negative, Category = "GUARD")]
+        [Requirement("GUARD-CLIENT-EMPTY-CATEGORY", "Client creation with empty category scope must fail closed with BadRequest", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest()
         {
             var controller = CreateClientsController("admin1", "Admin");
@@ -426,7 +426,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that router meta-mode execute_tool validates and enforces category scopes on target tool calls.
         /// </summary>
         [Fact]
-        [Requirement("MCP-01", "Router meta-mode execute_tool validates and enforces category scopes on target tool calls", Type = RequirementType.Positive, Category = "MCP")]
+        [Requirement("MCP-EXEC-TOOL-ENFORCE-CATEGORY-SCOPES", "Router meta-mode execute_tool validates and enforces category scopes on target tool calls", Type = RequirementType.Positive, Category = "MCP")]
         public async Task ClientSession_ExecuteTool_EnforcesCategoryScopeOnInnerTarget()
         {
             var servers = new List<McpServer>

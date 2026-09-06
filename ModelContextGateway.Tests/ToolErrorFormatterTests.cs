@@ -5,7 +5,7 @@ namespace ModelContextGateway.Tests
     public class ToolErrorFormatterTests
     {
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "ToolErrorFormatter attaches actionable suggestions and remediation resource URIs to JSON-RPC error payloads.")]
+        [Requirement("MCP-ERROR-FORMAT-JSONRPC-REMEDIATION", "MCP", RequirementType.Positive, "ToolErrorFormatter attaches actionable suggestions and remediation resource URIs to JSON-RPC error payloads.")]
         public void TransformError_FormatsJsonRpcErrorWithRemediation()
         {
             var err = new JsonRpcError
@@ -25,7 +25,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "ToolErrorFormatter converts unhandled exceptions to standardized JSON-RPC error format with suggestions.")]
+        [Requirement("MCP-ERROR-FORMAT-UNHANDLED-EXCEPTION", "MCP", RequirementType.Positive, "ToolErrorFormatter converts unhandled exceptions to standardized JSON-RPC error format with suggestions.")]
         public void TransformException_FormatsExceptionWithRemediation()
         {
             var ex = new Exception("Connection refused by target socket");
@@ -45,7 +45,7 @@ namespace ModelContextGateway.Tests
         [InlineData("Connection refused by server", "connection")]
         [InlineData("Invalid argument passed", "argument")]
         [InlineData("Unknown exception occurred", "unexpected")]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "ToolErrorFormatter categorizes error messages and produces domain-specific remediation guidance.")]
+        [Requirement("MCP-ERROR-ACTIONABLE-SUGGESTION-CATEGORIES", "MCP", RequirementType.Positive, "ToolErrorFormatter categorizes error messages and produces domain-specific remediation guidance.")]
         public void GetActionableSuggestion_ReturnsExpectedCategory(string errorMsg, string category)
         {
             var suggestion = ToolErrorFormatter.GetActionableSuggestion(errorMsg, "test_tool", "server1");

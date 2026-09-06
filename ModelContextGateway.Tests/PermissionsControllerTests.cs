@@ -46,7 +46,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "PermissionsController returns access policies list with 200 OK.")]
+        [Requirement("AUTH-PERM-POLICY-LIST", "AUTH", RequirementType.Positive, "PermissionsController returns access policies list with 200 OK.")]
         public async Task GetPolicies_ReturnsOk()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -56,7 +56,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "PermissionsController rejects policy saves missing targetId with BadRequest.")]
+        [Requirement("GUARD-POLICY-MISSING-TARGET", "GUARD", RequirementType.Negative, "PermissionsController rejects policy saves missing targetId with BadRequest.")]
         public async Task SavePolicy_ReturnsBadRequest_WhenTargetIdMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -67,7 +67,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "PermissionsController rejects policy saves missing requiredGroup with BadRequest.")]
+        [Requirement("GUARD-POLICY-MISSING-GROUP", "GUARD", RequirementType.Negative, "PermissionsController rejects policy saves missing requiredGroup with BadRequest.")]
         public async Task SavePolicy_ReturnsBadRequest_WhenRequiredGroupMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -78,7 +78,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "DB", RequirementType.Positive, "PermissionsController persists access policy to SQLite database repository.")]
+        [Requirement("DB-POLICY-SAVE-SQLITE", "DB", RequirementType.Positive, "PermissionsController persists access policy to SQLite database repository.")]
         public async Task SavePolicy_SavesSuccessfully_OnSqlite()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -89,7 +89,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "DB", RequirementType.Positive, "PermissionsController persists access policy to MySQL database repository.")]
+        [Requirement("DB-POLICY-SAVE-MYSQL", "DB", RequirementType.Positive, "PermissionsController persists access policy to MySQL database repository.")]
         public async Task SavePolicy_SavesSuccessfully_OnMySql()
         {
             var mockFactory = new Mock<IDbConnectionFactory>();
@@ -112,7 +112,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "PermissionsController removes access policies.")]
+        [Requirement("AUTH-PERM-POLICY-REMOVE", "AUTH", RequirementType.Positive, "PermissionsController removes access policies.")]
         public async Task DeletePolicy_DeletesSuccessfully()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -122,7 +122,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "PermissionsController fails closed with 500 when database delete fails.")]
+        [Requirement("GUARD-POLICY-DELETE-DB-ERROR", "GUARD", RequirementType.Negative, "PermissionsController fails closed with 500 when database delete fails.")]
         public async Task DeletePolicy_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -135,7 +135,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "PermissionsController returns group mappings list with 200 OK.")]
+        [Requirement("AUTH-PERM-GET-MAPPINGS", "AUTH", RequirementType.Positive, "PermissionsController returns group mappings list with 200 OK.")]
         public async Task GetMappings_ReturnsOk()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -145,7 +145,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "PermissionsController returns 500 on database error during mapping retrieval.")]
+        [Requirement("GUARD-MAPPING-GET-DB-ERROR", "GUARD", RequirementType.Negative, "PermissionsController returns 500 on database error during mapping retrieval.")]
         public async Task GetMappings_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -158,7 +158,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "PermissionsController rejects mapping save missing external ID with BadRequest.")]
+        [Requirement("GUARD-MAPPING-MISSING-EXT-ID", "GUARD", RequirementType.Negative, "PermissionsController rejects mapping save missing external ID with BadRequest.")]
         public async Task SaveMapping_ReturnsBadRequest_WhenExternalIdMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -169,7 +169,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "PermissionsController rejects mapping save missing internal group with BadRequest.")]
+        [Requirement("GUARD-MAPPING-MISSING-GROUP", "GUARD", RequirementType.Negative, "PermissionsController rejects mapping save missing internal group with BadRequest.")]
         public async Task SaveMapping_ReturnsBadRequest_WhenInternalGroupMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -180,7 +180,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "DB", RequirementType.Positive, "PermissionsController persists group mappings to SQLite database.")]
+        [Requirement("DB-MAPPING-SAVE-SQLITE", "DB", RequirementType.Positive, "PermissionsController persists group mappings to SQLite database.")]
         public async Task SaveMapping_SavesSuccessfully_OnSqlite()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -191,7 +191,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "PermissionsController returns 500 when saving mapping encounters DB error.")]
+        [Requirement("GUARD-MAPPING-SAVE-DB-ERROR", "GUARD", RequirementType.Negative, "PermissionsController returns 500 when saving mapping encounters DB error.")]
         public async Task SaveMapping_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();

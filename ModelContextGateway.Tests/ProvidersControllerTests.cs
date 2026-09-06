@@ -88,7 +88,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "ProvidersController rejects saving secret provider without providerName with BadRequest.")]
+        [Requirement("GUARD-PROVIDER-MISSING-SECRET-NAME", "GUARD", RequirementType.Negative, "ProvidersController rejects saving secret provider without providerName with BadRequest.")]
         public async Task SaveSecretProvider_ReturnsBadRequest_WhenProviderNameMissing()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -170,7 +170,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "ProvidersController rejects saving auth provider without providerName with BadRequest.")]
+        [Requirement("GUARD-PROVIDER-MISSING-AUTH-NAME", "GUARD", RequirementType.Negative, "ProvidersController rejects saving auth provider without providerName with BadRequest.")]
         public async Task SaveAuthProvider_ReturnsBadRequest_WhenProviderNameMissing()
         {
             var mockAudit = new Mock<IAuditLogger>();

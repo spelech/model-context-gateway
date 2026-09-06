@@ -65,7 +65,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "ResourceRoutingManager throws KeyNotFoundException when reading an unregistered resource URI.")]
+        [Requirement("GUARD-ROUTING-UNREGISTERED-RESOURCE", "GUARD", RequirementType.Negative, "ResourceRoutingManager throws KeyNotFoundException when reading an unregistered resource URI.")]
         public async Task ReadResourceAsync_ThrowsKeyNotFound_WhenResourceNotRegistered()
         {
             var manager = new ResourceRoutingManager();

@@ -11,7 +11,7 @@ namespace ModelContextGateway.Tests
     public class AdminPolicyHybridAuthTests
     {
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin)")]
+        [Requirement("AUTH-ADMIN-POLICY-ALLOW-GROUPNAME", "AUTH", RequirementType.Positive, "AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin)")]
         public async Task AdminPolicy_Allows_Principal_With_AdminGroupName()
         {
             var services = new ServiceCollection();
@@ -45,7 +45,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "AdminPolicy allows principal with configured Admin SID")]
+        [Requirement("AUTH-ADMIN-POLICY-ALLOW-SID", "AUTH", RequirementType.Positive, "AdminPolicy allows principal with configured Admin SID")]
         public async Task AdminPolicy_Allows_Principal_With_AdminSid()
         {
             var services = new ServiceCollection();
@@ -79,7 +79,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "AdminPolicy allows principal with configured Admin Groups array")]
+        [Requirement("AUTH-ADMIN-POLICY-ALLOW-GROUPS-ARRAY", "AUTH", RequirementType.Positive, "AdminPolicy allows principal with configured Admin Groups array")]
         public async Task AdminPolicy_Allows_Principal_With_ConfiguredAdminGroups()
         {
             var services = new ServiceCollection();
@@ -114,7 +114,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy rejects principal with unconfigured regular role without Admin SID or Admin Group")]
+        [Requirement("AUTH-ADMIN-POLICY-REJECT-REGULAR", "AUTH", RequirementType.Negative, "AdminPolicy rejects principal with unconfigured regular role without Admin SID or Admin Group")]
         public async Task AdminPolicy_Denies_StandardRole_WithoutAdminSidOrGroup()
         {
             var services = new ServiceCollection();

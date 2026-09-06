@@ -28,7 +28,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "DB", RequirementType.Positive, "DatabaseSeederService initializes default router settings, provider configs, and schema.")]
+        [Requirement("DB-SEEDER-INIT-SETTINGS-PROVIDERS", "DB", RequirementType.Positive, "DatabaseSeederService initializes default router settings, provider configs, and schema.")]
         public void Seeder_Initializes_Default_Settings_And_Providers()
         {
             var (conn, factory) = CreateDbFactory();

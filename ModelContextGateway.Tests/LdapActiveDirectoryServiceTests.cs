@@ -13,7 +13,7 @@ namespace ModelContextGateway.Tests
         [InlineData("user\\name", "user\\5cname")]
         [InlineData("user\0null", "user\\00null")]
         [InlineData("", "")]
-        [Requirement("GUARD-02", "GUARD", RequirementType.Positive, "EscapeLdapFilter sanitizes and escapes special LDAP filter characters to prevent LDAP injection.")]
+        [Requirement("GUARD-LDAP-FILTER-ESCAPE", "GUARD", RequirementType.Positive, "EscapeLdapFilter sanitizes and escapes special LDAP filter characters to prevent LDAP injection.")]
         public void EscapeLdapFilter_EscapesSpecialCharacters(string input, string expected)
         {
             var result = LdapActiveDirectoryService.EscapeLdapFilter(input);
@@ -130,7 +130,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "LdapActiveDirectoryService fails closed with SecurityException when LDAP connection throws an exception.")]
+        [Requirement("GUARD-LDAP-FAIL-CLOSED", "AUTH", RequirementType.Negative, "LdapActiveDirectoryService fails closed with SecurityException when LDAP connection throws an exception.")]
         public async Task ResolveUserSidsAsync_ThrowsSecurityException_OnConnectionFailure()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>

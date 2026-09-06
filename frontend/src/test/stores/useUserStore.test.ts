@@ -6,7 +6,7 @@ import { mockApiResponse } from '../setup';
 
 describe('useUserStore', () => {
   /**
-   * @requirement AUTH-01
+   * @requirement UI-USER-STORE-INIT
    * @category AUTH
    * @type Positive
    * @description should initialize with default values
@@ -21,7 +21,7 @@ describe('useUserStore', () => {
 
   describe('loadUser', () => {
     /**
-     * @requirement AUTH-01
+     * @requirement UI-USER-STORE-LOAD-PROFILE
      * @category AUTH
      * @type Positive
      * @description successfully loads user profile from /api/me
@@ -48,7 +48,7 @@ describe('useUserStore', () => {
     });
 
     /**
-     * @requirement AUTH-01
+     * @requirement UI-USER-STORE-ERROR-FALLBACK
      * @category AUTH
      * @type Positive
      * @description handles error response gracefully and sets unauthenticated user state
@@ -67,7 +67,7 @@ describe('useUserStore', () => {
     });
 
     /**
-     * @requirement AUTH-01
+     * @requirement UI-USER-STORE-NETWORK-FAILURE
      * @category AUTH
      * @type Positive
      * @description handles network failure gracefully
@@ -87,7 +87,7 @@ describe('useUserStore', () => {
     });
 
     /**
-     * @requirement AUTH-01
+     * @requirement UI-USER-STORE-ROLE-EXTRACTION
      * @category AUTH
      * @type Positive
      * @description correctly handles non-admin user role extraction
@@ -111,7 +111,7 @@ describe('useUserStore', () => {
 
   describe('loadVersion', () => {
     /**
-     * @requirement AUTH-01
+     * @requirement UI-USER-STORE-HEALTH-VERSION
      * @category AUTH
      * @type Positive
      * @description successfully updates version and service from /health endpoint
@@ -126,7 +126,7 @@ describe('useUserStore', () => {
     });
 
     /**
-     * @requirement AUTH-01
+     * @requirement UI-USER-STORE-VERSION-FALLBACK
      * @category AUTH
      * @type Positive
      * @description keeps existing fallback version on error

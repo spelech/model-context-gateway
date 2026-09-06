@@ -10,7 +10,7 @@ namespace ModelContextGateway.Tests
         [InlineData("sqlite")]
         [InlineData("mysql")]
         [InlineData("mssql")]
-        [Requirement("DB-01", "DB", RequirementType.Positive, "DbConnectionFactory instantiates valid IDbConnection instances across sqlite, mysql, and mssql dialects.")]
+        [Requirement("DB-PROVIDER-INSTANTIATION-DIALECTS", "DB", RequirementType.Positive, "DbConnectionFactory instantiates valid IDbConnection instances across sqlite, mysql, and mssql dialects.")]
         public void DbConnectionFactory_Instantiates_SupportedProviders(string provider)
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -27,7 +27,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "DbConnectionFactory fails closed and throws InvalidOperationException when configured with unsupported database provider.")]
+        [Requirement("GUARD-UNSUPPORTED-DB-PROVIDER", "GUARD", RequirementType.Negative, "DbConnectionFactory fails closed and throws InvalidOperationException when configured with unsupported database provider.")]
         public void DbConnectionFactory_Throws_OnUnsupportedProvider()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -40,7 +40,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "DB", RequirementType.Positive, "JsonListTypeHandler serializes and deserializes string collections to JSON text across database providers.")]
+        [Requirement("DB-TYPEHANDLER-JSON-LIST-SERIALIZATION", "DB", RequirementType.Positive, "JsonListTypeHandler serializes and deserializes string collections to JSON text across database providers.")]
         public async Task JsonListTypeHandler_SerializesAndDeserializes_StringLists()
         {
             var conn = new SqliteConnection("Data Source=:memory:;Mode=Memory;Cache=Shared");

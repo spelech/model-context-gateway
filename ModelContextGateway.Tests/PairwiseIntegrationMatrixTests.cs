@@ -466,7 +466,7 @@ namespace ModelContextGateway.Tests
         /// Ensures null or whitespace capability targets fail closed immediately.
         /// </summary>
         [Theory]
-        [Requirement("GUARD-01", "Null or empty capability targets must immediately fail closed and return unauthorized", Type = RequirementType.Negative, Category = "GUARD")]
+        [Requirement("GUARD-AUTH-NULL-TARGET", "Null or empty capability targets must immediately fail closed and return unauthorized", Type = RequirementType.Negative, Category = "GUARD")]
         [InlineData(null)]
         [InlineData("")]
         [InlineData(" ")]
@@ -488,7 +488,7 @@ namespace ModelContextGateway.Tests
         /// Ensures corrupted AppKey scopes JSON fails closed safely and rejects execution.
         /// </summary>
         [Fact]
-        [Requirement("GUARD-01", "Corrupted AppKey scopes JSON must fail closed and reject execution", Type = RequirementType.Negative, Category = "GUARD")]
+        [Requirement("GUARD-APPKEY-MALFORMED-SCOPES", "Corrupted AppKey scopes JSON must fail closed and reject execution", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task Pairwise_CorruptedAppKeyScopesJson_FailsClosed_ReturnsFalse()
         {
             // Arrange - AppKey with unparseable corrupt JSON string in items
@@ -565,7 +565,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that router meta-mode execute_tool strictly enforces target tool authorization policies.
         /// </summary>
         [Theory]
-        [Requirement("MCP-01", "Meta-mode execute_tool strictly enforces target tool authorization policies", Type = RequirementType.Positive, Category = "MCP")]
+        [Requirement("MCP-EXEC-TOOL-ENFORCE-AUTH-POLICIES", "Meta-mode execute_tool strictly enforces target tool authorization policies", Type = RequirementType.Positive, Category = "MCP")]
         [InlineData("ha__turn_on", true)]
         [InlineData("docker__restart", false)]
         public async Task Pairwise_MetaMode_ExecuteTool_EnforcesTargetAuthorization(string targetToolName, bool expectedAuthorized)

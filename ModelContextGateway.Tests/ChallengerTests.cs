@@ -189,7 +189,7 @@ namespace ModelContextGateway.Tests
     public class ChallengerTests
     {
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "RewriteRequestJson accurately parses JSON batches, comments, and trailing commas using System.Text.Json JsonNode.")]
+        [Requirement("MCP-JSON-REWRITE-BATCH-COMMENTS-COMMAS", "MCP", RequirementType.Positive, "RewriteRequestJson accurately parses JSON batches, comments, and trailing commas using System.Text.Json JsonNode.")]
         public void JsonNode_Rewrite_HandlesBatchCommentsAndCommas()
         {
             var loggerMock = new Mock<ILogger>();
@@ -274,7 +274,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("TRANS-01", "TRANS", RequirementType.Positive, "SendRequestAsync times out cleanly and removes pending completion handlers without leaking memory.")]
+        [Requirement("TRANS-TIMEOUT-PENDING-CLEANUP", "TRANS", RequirementType.Positive, "SendRequestAsync times out cleanly and removes pending completion handlers without leaking memory.")]
         public async Task SendRequestAsync_TimesOutCleanly_AndDoesNotLeak()
         {
             // Verify that SendRequestAsync times out cleanly (throws TimeoutException)
@@ -334,7 +334,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "JsonRpcMessageConverter prioritizes result/error properties over method property in polymorphic response parsing.")]
+        [Requirement("MCP-JSONRPC-CONVERTER-PRIORITIZE-RESPONSE", "MCP", RequirementType.Positive, "JsonRpcMessageConverter prioritizes result/error properties over method property in polymorphic response parsing.")]
         public async Task SendRequestAsync_Succeeds_When_Response_Has_Method_Property()
         {
             // Verify that SendRequestAsync succeeds (does not hang) if the response contains a 'method' property,
@@ -417,7 +417,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("TRANS-01", "TRANS", RequirementType.Positive, "SSE backend notifications are forwarded to client sessions with all payload fields intact.")]
+        [Requirement("TRANS-SSE-NOTIF-FORWARD-FIELDS-INTACT", "TRANS", RequirementType.Positive, "SSE backend notifications are forwarded to client sessions with all payload fields intact.")]
         public async Task SseBackend_Notification_IsForwardedToClient_WithAllFieldsIntact()
         {
             // Arrange
@@ -492,7 +492,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("TRANS-02", "TRANS", RequirementType.Positive, "BackendConnection multiplexes 100+ concurrent asynchronous polymorphic RPC requests without deadlocking.")]
+        [Requirement("TRANS-BACKEND-MULTIPLEX-CONCURRENT-RPC", "TRANS", RequirementType.Positive, "BackendConnection multiplexes 100+ concurrent asynchronous polymorphic RPC requests without deadlocking.")]
         public async Task AsynchronousRouting_HighVolumeAndPolymorphic_DoesNotHang()
         {
             var server = new McpServer
@@ -570,7 +570,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "JsonNode request rewrite handles adversarial mixed arrays, block comments, and malformed JSON.")]
+        [Requirement("MCP-JSON-REWRITE-ADVERSARIAL-EDGE-CASES", "MCP", RequirementType.Positive, "JsonNode request rewrite handles adversarial mixed arrays, block comments, and malformed JSON.")]
         public void JsonNode_Rewrite_HandlesAdversarialEdgeCases()
         {
             var loggerMock = new Mock<ILogger>();
@@ -682,7 +682,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "JsonRpcMessageConverter deserializes edge-case minimal/null JSON-RPC variants without stack overflows.")]
+        [Requirement("MCP-JSONRPC-CONVERTER-MINIMAL-VARIANTS", "MCP", RequirementType.Positive, "JsonRpcMessageConverter deserializes edge-case minimal/null JSON-RPC variants without stack overflows.")]
         public void PlainJsonRpcMessages_DoNotCauseStackOverflow_PolymorphicVariants()
         {
             var options = new JsonSerializerOptions

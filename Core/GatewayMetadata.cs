@@ -57,6 +57,74 @@ namespace ModelContextGateway.Core
         }
 
         /// <summary>
+        /// Negotiates the highest compatible protocol version. If requestedVersion matches a supported
+        /// version (case-insensitively), it returns the canonical matching string. If unrecognized or omitted,
+        /// it falls back to the primary supported ProtocolVersion per MCP specification.
+        /// </summary>
+        public static string NegotiateProtocolVersion(string? requestedVersion)
+        {
+            if (string.IsNullOrWhiteSpace(requestedVersion))
+            {
+                return ProtocolVersion;
+            }
+            var trimmed = requestedVersion.Trim();
+            var match = SupportedProtocolVersions.FirstOrDefault(v => string.Equals(v, trimmed, StringComparison.OrdinalIgnoreCase));
+            return match ?? ProtocolVersion;
+        }
+
+        /// <summary>
+        /// Extracts the client's requested protocol version from an initialize JSON-RPC payload,
+        /// falling back to ProtocolVersion if omitted or malformed.
+        /// </summary>
+        public static string ExtractRequestedProtocolVersion(string? jsonRpcBody)
+        {
+            if (string.IsNullOrWhiteSpace(jsonRpcBody))
+            {
+                return ProtocolVersion;
+            }
+            try
+            {
+                using var doc = JsonDocument.Parse(jsonRpcBody);
+                if (doc.RootElement.TryGetProperty("params", out var pElem))
+                {
+                    return ExtractRequestedProtocolVersion(pElem);
+                }
+                else if (doc.RootElement.TryGetProperty("protocolVersion", out _))
+                {
+                    return ExtractRequestedProtocolVersion(doc.RootElement);
+                }
+            }
+            catch
+            {
+            }
+            return ProtocolVersion;
+        }
+
+        /// <summary>
+        /// Extracts the client's requested protocol version from an initialize params JsonElement,
+        /// falling back to ProtocolVersion if omitted or malformed.
+        /// </summary>
+        public static string ExtractRequestedProtocolVersion(JsonElement paramsElement)
+        {
+            try
+            {
+                if (paramsElement.ValueKind == JsonValueKind.Object &&
+                    paramsElement.TryGetProperty("protocolVersion", out var pvElem))
+                {
+                    var ver = pvElem.GetString();
+                    if (!string.IsNullOrWhiteSpace(ver))
+                    {
+                        return NegotiateProtocolVersion(ver);
+                    }
+                }
+            }
+            catch
+            {
+            }
+            return ProtocolVersion;
+        }
+
+        /// <summary>
         /// Canonical semantic version dynamically resolved from the executing assembly.
         /// </summary>
         public static string Version => Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "5.6.0";

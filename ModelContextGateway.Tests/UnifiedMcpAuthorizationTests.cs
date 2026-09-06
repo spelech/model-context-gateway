@@ -160,7 +160,7 @@ namespace ModelContextGateway.Tests
         [InlineData("completion/complete", "mcp://ha/sensor/{id}")]
         [InlineData("resources/read", "logs://ha/today")]
         [InlineData("resources/read", "router://metrics")]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "Administrator identities bypass granular capability policies and have full access to all MCP methods.")]
+        [Requirement("AUTH-ADMIN-FULL-ACCESS", "AUTH", RequirementType.Positive, "Administrator identities bypass granular capability policies and have full access to all MCP methods.")]
         public async Task AdminBypass_AllowsAllCapabilities_EvenWithoutDbPolicies(string method, string targetId)
         {
             // Arrange - Caller has Admin SID (S-1-5-32-544)
@@ -181,7 +181,7 @@ namespace ModelContextGateway.Tests
         [InlineData("resources/templates/list", "mcp://ha/sensor/{id}")]
         [InlineData("completion/complete", "ha__summarize")]
         [InlineData("completion/complete", "mcp://ha/sensor/{id}")]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Non-admin identities default to denied fail-closed when no matching policies exist.")]
+        [Requirement("GUARD-RBAC-DEFAULT-DENY", "GUARD", RequirementType.Negative, "Non-admin identities default to denied fail-closed when no matching policies exist.")]
         public async Task NonAdmin_DefaultsToDeny_WhenNoMatchingPoliciesConfigured(string method, string targetId)
         {
             // Arrange - Non-admin user with no policies in DB
@@ -199,7 +199,7 @@ namespace ModelContextGateway.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("   ")]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "IsUserAuthorizedAsync fails closed on null, empty, or whitespace target identifiers.")]
+        [Requirement("GUARD-RBAC-NULL-TARGET", "GUARD", RequirementType.Negative, "IsUserAuthorizedAsync fails closed on null, empty, or whitespace target identifiers.")]
         public async Task IsUserAuthorizedAsync_FailsClosed_OnNullOrWhitespaceTarget(string? targetId)
         {
             var context = CreateHttpContext("adminUser", sids: new List<string> { "S-1-5-32-544" });
@@ -210,7 +210,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "Server-level access policies authorize all child tools, prompts, and resources under that server.")]
+        [Requirement("AUTH-SERVER-LEVEL-POLICY", "AUTH", RequirementType.Positive, "Server-level access policies authorize all child tools, prompts, and resources under that server.")]
         public async Task ServerLevelPolicy_AuthorizesAllCapabilitiesUnderServer()
         {
             // Arrange - Allow all capabilities under server 'ha' for 'SmartHomeOperators'
@@ -233,7 +233,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Explicit policy deny rules override group allows.")]
+        [Requirement("GUARD-RBAC-EXPLICIT-DENY", "GUARD", RequirementType.Negative, "Explicit policy deny rules override group allows.")]
         public async Task ExplicitDeny_OverridesGroupAllow()
         {
             // Arrange
@@ -315,7 +315,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "tools/list filters exposed backend tools according to caller permissions.")]
+        [Requirement("AUTH-RBAC-TOOL-FILTER", "AUTH", RequirementType.Positive, "tools/list filters exposed backend tools according to caller permissions.")]
         public async Task ListToolsAsync_FiltersUnauthorizedTools()
         {
             // Arrange
@@ -360,7 +360,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "prompts/list filters exposed prompts according to caller permissions.")]
+        [Requirement("AUTH-RBAC-PROMPT-FILTER", "AUTH", RequirementType.Positive, "prompts/list filters exposed prompts according to caller permissions.")]
         public async Task ListPromptsAsync_FiltersUnauthorizedPrompts()
         {
             // Arrange
@@ -403,7 +403,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "resources/list filters exposed resources according to caller permissions.")]
+        [Requirement("AUTH-RBAC-RESOURCE-FILTER", "AUTH", RequirementType.Positive, "resources/list filters exposed resources according to caller permissions.")]
         public async Task ListResourcesAsync_FiltersUnauthorizedResources()
         {
             // Arrange
@@ -446,7 +446,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "resources/templates/list filters exposed resource templates according to caller permissions.")]
+        [Requirement("AUTH-RBAC-TEMPLATE-FILTER", "AUTH", RequirementType.Positive, "resources/templates/list filters exposed resource templates according to caller permissions.")]
         public async Task ListResourceTemplatesAsync_FiltersUnauthorizedTemplates()
         {
             // Arrange
@@ -611,7 +611,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "completion/complete throws UnauthorizedAccessException when caller lacks prompt permissions.")]
+        [Requirement("GUARD-RBAC-COMPLETION-PROMPT", "GUARD", RequirementType.Negative, "completion/complete throws UnauthorizedAccessException when caller lacks prompt permissions.")]
         public async Task CompleteAsync_ForPrompt_ThrowsUnauthorized_WhenCallerDenied()
         {
             // Arrange - Non-admin user with no policy for ha__prompt1
@@ -643,7 +643,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "completion/complete throws UnauthorizedAccessException when caller lacks resource template permissions.")]
+        [Requirement("GUARD-RBAC-COMPLETION-TEMPLATE", "GUARD", RequirementType.Negative, "completion/complete throws UnauthorizedAccessException when caller lacks resource template permissions.")]
         public async Task CompleteAsync_ForResourceTemplate_ThrowsUnauthorized_WhenCallerDenied()
         {
             // Arrange
@@ -679,7 +679,7 @@ namespace ModelContextGateway.Tests
         [InlineData("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"completion/complete\",\"params\":{\"ref\":{\"type\":\"ref/unknown\"}}}")]
         [InlineData("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"completion/complete\",\"params\":{\"ref\":{\"type\":\"ref/prompt\",\"name\":\"nonexistentServer__prompt1\"}}}")]
         [InlineData("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"completion/complete\",\"params\":{\"ref\":{\"type\":\"ref/resource\",\"uriTemplate\":\"mcp://nonexistentServer/path/{id}\"}}}")]
-        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "completion/complete fails closed on unknown or unresolved completion references.")]
+        [Requirement("GUARD-RBAC-COMPLETION-UNRESOLVED", "GUARD", RequirementType.Negative, "completion/complete fails closed on unknown or unresolved completion references.")]
         public async Task CompleteAsync_FailsClosed_OnUnknownOrUnresolvedTargets(string payload)
         {
             // Arrange

@@ -51,7 +51,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "DB", RequirementType.Positive, "DatabaseSeeder initializes default router tables, settings, and seed servers.")]
+        [Requirement("DB-SEEDER-ROUTER-DEFAULT-DATA", "DB", RequirementType.Positive, "DatabaseSeeder initializes default router tables, settings, and seed servers.")]
         public void DatabaseSeeder_SeedsDefaultData_Successfully()
         {
             using var freshConn = new SqliteConnection("Data Source=FreshSeederDb;Mode=Memory;Cache=Shared");
