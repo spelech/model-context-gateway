@@ -454,6 +454,13 @@ namespace ModelContextGateway.Infrastructure.Transports
                         obj["id"] = upstreamRequestId;
                         modifiedBody = node.ToJsonString();
                     }
+                    else if (obj.ContainsKey("method") && !method.StartsWith("notifications/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        isNotification = false;
+                        originalId = null;
+                        obj["id"] = upstreamRequestId;
+                        modifiedBody = node.ToJsonString();
+                    }
                     else
                     {
                         isNotification = true;

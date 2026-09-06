@@ -281,5 +281,91 @@ namespace ModelContextGateway.Tests
             var resultJson = System.Text.Json.JsonSerializer.Serialize(result);
             Assert.Contains("ha__ha_search", resultJson);
         }
+
+        [Fact]
+        [Requirement("MCP-26", "MCP", RequirementType.Positive, "ToolRoutingManager normalizes tool name delimiters (slash and colon) to canonical double-underscore format.")]
+        public void NormalizeTargetToolName_NormalizesSlashAndColonDelimiters()
+        {
+            var manager = new ToolRoutingManager();
+            var servers = new List<McpServer> { new McpServer { Id = "docker", Enabled = true } };
+
+            var (slashNormalized, slashErr) = manager.NormalizeTargetToolName("docker/list_containers", servers);
+            Assert.Null(slashErr);
+            Assert.Equal("docker__list_containers", slashNormalized);
+
+            var (colonNormalized, colonErr) = manager.NormalizeTargetToolName("docker:list_containers", servers);
+            Assert.Null(colonErr);
+            Assert.Equal("docker__list_containers", colonNormalized);
+        }
+
+        [Fact]
+        [Requirement("MCP-26", "MCP", RequirementType.Positive, "ToolRoutingManager auto-resolves unambiguous bare tool names to their fully namespaced routes.")]
+        public void NormalizeTargetToolName_ResolvesBareToolName_WhenUnambiguous()
+        {
+            var manager = new ToolRoutingManager();
+            manager.ToolRoutingTable["local-llm-server-manager__get_gpu_vram"] = "local-llm-server-manager";
+            var servers = new List<McpServer> { new McpServer { Id = "local-llm-server-manager", Enabled = true } };
+
+            var (normalized, error) = manager.NormalizeTargetToolName("get_gpu_vram", servers);
+            Assert.Null(error);
+            Assert.Equal("local-llm-server-manager__get_gpu_vram", normalized);
+        }
+
+        [Fact]
+        [Requirement("MCP-26", "MCP", RequirementType.Positive, "ToolRoutingManager returns an ambiguity error when a bare tool name exists on multiple backend servers.")]
+        public void NormalizeTargetToolName_ReturnsAmbiguityError_WhenToolExistsAcrossMultipleServers()
+        {
+            var manager = new ToolRoutingManager();
+            manager.ToolRoutingTable["db1__query"] = "db1";
+            manager.ToolRoutingTable["db2__query"] = "db2";
+            var servers = new List<McpServer>
+            {
+                new McpServer { Id = "db1", Enabled = true },
+                new McpServer { Id = "db2", Enabled = true }
+            };
+
+            var (_, error) = manager.NormalizeTargetToolName("query", servers);
+            Assert.NotNull(error);
+            Assert.Contains("Ambiguous tool name 'query'", error);
+            Assert.Contains("db1__query", error);
+            Assert.Contains("db2__query", error);
+        }
+
+        [Fact]
+        [Requirement("MCP-26", "MCP", RequirementType.Positive, "search_tools returns a valid JSON array string when no tools match.")]
+        public async Task SearchTools_ReturnsValidJsonArray_WhenNoToolsMatch()
+        {
+            var manager = new ToolRoutingManager();
+            var (conn, dbFactory) = CreateDbFactory();
+            var connections = new ConcurrentDictionary<string, BackendConnection>();
+            var servers = new List<McpServer>
+            {
+                new McpServer { Id = "docker", Enabled = true }
+            };
+            var mockEmbedding = new Mock<IEmbeddingService>();
+
+            var body = "{\"params\":{\"arguments\":{\"query\":\"nonexistent_tool_xyz\"}}}";
+            var result = await manager.CallToolAsync(
+                "search_tools",
+                body,
+                dbFactory,
+                connections,
+                servers,
+                NullLogger.Instance,
+                new HttpClient(),
+                mockEmbedding.Object,
+                () => Task.CompletedTask,
+                (b, k, v) => b
+            );
+
+            Assert.NotNull(result);
+            var resultJson = System.Text.Json.JsonSerializer.Serialize(result);
+            using var doc = System.Text.Json.JsonDocument.Parse(resultJson);
+            var text = doc.RootElement.GetProperty("content")[0].GetProperty("text").GetString();
+            Assert.NotNull(text);
+            var list = System.Text.Json.JsonSerializer.Deserialize<List<object>>(text);
+            Assert.NotNull(list);
+            Assert.Empty(list);
+        }
     }
 }

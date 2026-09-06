@@ -139,6 +139,8 @@ namespace ModelContextGateway.Core.Routing
                             var targetName = targetNameProp.GetString();
                             if (!string.IsNullOrEmpty(targetName))
                             {
+                                var (normalizedTargetName, _) = _toolRoutingManager.NormalizeTargetToolName(targetName, _servers, _logger);
+                                targetName = normalizedTargetName;
                                 var isTargetAuth = await IsUserAuthorizedAsync("tools/call", targetName, httpContext);
                                 if (!isTargetAuth)
                                 {

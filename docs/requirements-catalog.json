@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-06T06:10:17.6721232Z",
-    "totalRequirements": 197,
-    "positiveCount": 165,
+    "generatedAt": "2026-09-06T06:46:49.7025580Z",
+    "totalRequirements": 198,
+    "positiveCount": 166,
     "guardrailCount": 32,
-    "totalProofs": 853
+    "totalProofs": 857
   },
   "requirements": [
     {
@@ -4284,6 +4284,43 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
           "lineNumber": 230,
           "testName": "CallToolAsync_SearchTools_FallsBackToGlobalSessionManagerCache_WhenLocalCacheEmpty",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-26",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "ToolRoutingManager normalizes tool name delimiters (slash and colon) to canonical double-underscore format.",
+      "proofCount": 4,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 285,
+          "testName": "NormalizeTargetToolName_NormalizesSlashAndColonDelimiters",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 301,
+          "testName": "NormalizeTargetToolName_ResolvesBareToolName_WhenUnambiguous",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 314,
+          "testName": "NormalizeTargetToolName_ReturnsAmbiguityError_WhenToolExistsAcrossMultipleServers",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 334,
+          "testName": "SearchTools_ReturnsValidJsonArray_WhenNoToolsMatch",
           "details": null
         }
       ]
