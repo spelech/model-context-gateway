@@ -129,8 +129,11 @@ namespace ModelContextGateway.Core.Routing
             }
 
             var contextToUse = httpContext ?? _clientResponse?.HttpContext;
-            // Extract serverId across all URI and namespaced formats
+            // Extract serverId across all URI and namespaced formats, and generate equivalent target names for delimiter/alias parity
             string serverId;
+            string? extractedPrefix = null;
+            string? extractedSuffix = null;
+
             if (targetId.StartsWith("mcp://", StringComparison.OrdinalIgnoreCase))
             {
                 if (Uri.TryCreate(targetId, UriKind.Absolute, out var parsedUri))
@@ -141,6 +144,7 @@ namespace ModelContextGateway.Core.Routing
                 {
                     serverId = targetId.Substring("mcp://".Length).Split('/')[0];
                 }
+                extractedPrefix = serverId;
             }
             else if (targetId.StartsWith("logs://", StringComparison.OrdinalIgnoreCase))
             {
@@ -152,38 +156,87 @@ namespace ModelContextGateway.Core.Routing
                 {
                     serverId = targetId.Substring("logs://".Length).Split('/')[0];
                 }
+                extractedPrefix = serverId;
             }
             else if (targetId.StartsWith("router://", StringComparison.OrdinalIgnoreCase))
             {
                 serverId = "router";
+                extractedPrefix = "router";
             }
             else if (targetId.StartsWith("server:", StringComparison.OrdinalIgnoreCase))
             {
-                serverId = targetId.Substring("server:".Length);
+                var rawServer = targetId.Substring("server:".Length);
+                serverId = rawServer;
+                extractedPrefix = rawServer;
             }
             else if (targetId.Contains("__"))
             {
-                serverId = targetId.Split("__", 2)[0];
+                var parts = targetId.Split(new[] { "__" }, 2, StringSplitOptions.None);
+                extractedPrefix = parts[0];
+                extractedSuffix = parts[1];
+                serverId = extractedPrefix;
             }
             else if (targetId.Contains('/'))
             {
-                serverId = targetId.Split('/', 2)[0];
+                var parts = targetId.Split(new[] { '/' }, 2, StringSplitOptions.None);
+                extractedPrefix = parts[0];
+                extractedSuffix = parts[1];
+                serverId = extractedPrefix;
             }
             else if (targetId.Contains(':'))
             {
-                serverId = targetId.Split(':', 2)[0];
+                var parts = targetId.Split(new[] { ':' }, 2, StringSplitOptions.None);
+                extractedPrefix = parts[0];
+                extractedSuffix = parts[1];
+                serverId = extractedPrefix;
             }
             else if (targetId.StartsWith("plex_", StringComparison.OrdinalIgnoreCase))
             {
                 serverId = "plex";
+                extractedPrefix = "plex";
+                extractedSuffix = targetId.Substring("plex_".Length);
             }
             else if (targetId.StartsWith("seerr_", StringComparison.OrdinalIgnoreCase))
             {
                 serverId = "seerr";
+                extractedPrefix = "seerr";
+                extractedSuffix = targetId.Substring("seerr_".Length);
             }
             else
             {
                 serverId = targetId;
+                extractedPrefix = targetId;
+            }
+
+            // Resolve alias or serverId against registered servers
+            var matchingServer = _servers.FirstOrDefault(s =>
+                string.Equals(s.Id, extractedPrefix, StringComparison.OrdinalIgnoreCase) ||
+                (!string.IsNullOrWhiteSpace(s.Alias) && string.Equals(s.Alias, extractedPrefix, StringComparison.OrdinalIgnoreCase)));
+
+            string canonicalServerId = matchingServer != null ? matchingServer.Id : serverId;
+            string? serverAlias = !string.IsNullOrWhiteSpace(matchingServer?.Alias) ? matchingServer.Alias : null;
+            serverId = canonicalServerId;
+
+            // Generate equivalent target representations across delimiters (/, :, __) and alias/serverId namespaces
+            var equivalentTargetNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { targetId };
+            if (!string.IsNullOrEmpty(extractedSuffix))
+            {
+                var namespaces = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { canonicalServerId };
+                if (!string.IsNullOrEmpty(serverAlias))
+                {
+                    namespaces.Add(serverAlias);
+                }
+                if (!string.IsNullOrEmpty(extractedPrefix))
+                {
+                    namespaces.Add(extractedPrefix);
+                }
+
+                foreach (var ns in namespaces)
+                {
+                    equivalentTargetNames.Add($"{ns}/{extractedSuffix}");
+                    equivalentTargetNames.Add($"{ns}__{extractedSuffix}");
+                    equivalentTargetNames.Add($"{ns}:{extractedSuffix}");
+                }
             }
 
             // If authenticated via AppKey, check key-level scopes first
@@ -214,18 +267,31 @@ namespace ModelContextGateway.Core.Routing
                                 }
                                 if (cleanScope == $"server:{serverId}".ToLowerInvariant() ||
                                     cleanScope == $"server:{targetId}".ToLowerInvariant() ||
-                                    cleanScope == serverId.ToLowerInvariant())
+                                    cleanScope == serverId.ToLowerInvariant() ||
+                                    (!string.IsNullOrEmpty(serverAlias) && (cleanScope == $"server:{serverAlias}".ToLowerInvariant() || cleanScope == serverAlias.ToLowerInvariant())) ||
+                                    (!string.IsNullOrEmpty(extractedPrefix) && (cleanScope == $"server:{extractedPrefix}".ToLowerInvariant() || cleanScope == extractedPrefix.ToLowerInvariant())))
                                 {
                                     scopeAllowed = true;
                                     break;
                                 }
-                                if (cleanScope == targetId.ToLowerInvariant() ||
-                                    cleanScope == $"tool:{targetId}".ToLowerInvariant() ||
-                                    cleanScope == $"prompt:{targetId}".ToLowerInvariant() ||
-                                    cleanScope == $"resource:{targetId}".ToLowerInvariant() ||
-                                    cleanScope == $"resource_template:{targetId}".ToLowerInvariant() ||
-                                    cleanScope == $"template:{targetId}".ToLowerInvariant() ||
-                                    cleanScope == $"completion:{targetId}".ToLowerInvariant())
+
+                                bool toolOrPromptMatch = false;
+                                foreach (var eq in equivalentTargetNames)
+                                {
+                                    var eqLower = eq.ToLowerInvariant();
+                                    if (cleanScope == eqLower ||
+                                        cleanScope == $"tool:{eqLower}" ||
+                                        cleanScope == $"prompt:{eqLower}" ||
+                                        cleanScope == $"resource:{eqLower}" ||
+                                        cleanScope == $"resource_template:{eqLower}" ||
+                                        cleanScope == $"template:{eqLower}" ||
+                                        cleanScope == $"completion:{eqLower}")
+                                    {
+                                        toolOrPromptMatch = true;
+                                        break;
+                                    }
+                                }
+                                if (toolOrPromptMatch)
                                 {
                                     scopeAllowed = true;
                                     break;
@@ -295,17 +361,28 @@ namespace ModelContextGateway.Core.Routing
 
                 using var conn = dbFactory.CreateConnection();
 
-                var targetKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                var targetKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var eq in equivalentTargetNames)
                 {
-                    targetId,
-                    $"tool:{targetId}",
-                    $"prompt:{targetId}",
-                    $"resource:{targetId}",
-                    $"resource_template:{targetId}",
-                    $"template:{targetId}",
-                    $"completion:{targetId}",
-                    $"server:{serverId}"
-                };
+                    targetKeys.Add(eq);
+                    targetKeys.Add($"tool:{eq}");
+                    targetKeys.Add($"prompt:{eq}");
+                    targetKeys.Add($"resource:{eq}");
+                    targetKeys.Add($"resource_template:{eq}");
+                    targetKeys.Add($"template:{eq}");
+                    targetKeys.Add($"completion:{eq}");
+                }
+
+                targetKeys.Add($"server:{canonicalServerId}");
+                if (!string.IsNullOrEmpty(serverAlias))
+                {
+                    targetKeys.Add($"server:{serverAlias}");
+                }
+                if (!string.IsNullOrEmpty(extractedPrefix))
+                {
+                    targetKeys.Add($"server:{extractedPrefix}");
+                }
 
                 var serverCategoriesForRbac = await GetServerCategoriesAsync(serverId, contextToUse);
                 foreach (var cat in serverCategoriesForRbac)
@@ -370,26 +447,35 @@ namespace ModelContextGateway.Core.Routing
                 }
                 else
                 {
-                    // Call stored procedure with mapped groups!
+                    // Call stored procedure with mapped groups across equivalent target names!
                     var groupNamesCsv = string.Join(",", allUserGroups);
-                    object parameters = dbFactory.ProviderName == "mysql"
-                        ? new
+                    var candidateTargets = equivalentTargetNames.ToList();
+                    int isAllowed = 0;
+                    foreach (var candidateTarget in candidateTargets)
+                    {
+                        object parameters = dbFactory.ProviderName == "mysql"
+                            ? new
+                            {
+                                p_GroupNames = groupNamesCsv,
+                                p_ItemName = candidateTarget,
+                                p_RequestMethod = requestMethod
+                            }
+                            : new
+                            {
+                                GroupNames = groupNamesCsv,
+                                ItemName = candidateTarget,
+                                RequestMethod = requestMethod
+                            };
+                        isAllowed = await conn.ExecuteScalarAsync<int>(
+                            "sp_EvaluateUserAccess",
+                            parameters,
+                            commandType: System.Data.CommandType.StoredProcedure
+                        );
+                        if (isAllowed == 1)
                         {
-                            p_GroupNames = groupNamesCsv,
-                            p_ItemName = targetId,
-                            p_RequestMethod = requestMethod
+                            break;
                         }
-                        : new
-                        {
-                            GroupNames = groupNamesCsv,
-                            ItemName = targetId,
-                            RequestMethod = requestMethod
-                        };
-                    int isAllowed = await conn.ExecuteScalarAsync<int>(
-                        "sp_EvaluateUserAccess",
-                        parameters,
-                        commandType: System.Data.CommandType.StoredProcedure
-                    );
+                    }
                     return isAllowed == 1;
                 }
             }
