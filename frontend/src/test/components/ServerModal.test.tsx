@@ -182,4 +182,43 @@ describe('ServerModal component', () => {
       dynamicAuthPrompt: ""
     });
   });
+
+  /**
+   * @requirement UI-SERVERS-ALIAS-MANAGEMENT
+   * @category MCP
+   * @type Positive
+   * @description renders alias input, validates characters, and submits alias
+   */
+  it('renders alias input, validates characters, and submits alias (UI-SERVERS-ALIAS-MANAGEMENT)', async () => {
+    const saveSpy = vi.fn().mockResolvedValue(undefined);
+    useServerStore.setState({ isAddEditOpen: true, editingServer: null, saveServer: saveSpy });
+    render(<ServerModal />);
+
+    const aliasInput = screen.getByLabelText(/alias/i);
+    expect(aliasInput).toBeInTheDocument();
+    expect(screen.getByText(/routing namespace/i)).toBeInTheDocument();
+
+    // Invalid alias characters
+    fireEvent.change(aliasInput, { target: { value: 'invalid alias!@#' } });
+    expect(screen.getByText(/letters, numbers, underscores, and hyphens/i)).toBeInTheDocument();
+
+    // Valid alias
+    fireEvent.change(aliasInput, { target: { value: 'homebox_db' } });
+    expect(screen.queryByText(/letters, numbers, underscores, and hyphens/i)).toBeNull();
+
+    fireEvent.change(screen.getByLabelText('Display Name'), { target: { value: 'Homebox Server' } });
+    fireEvent.change(screen.getByLabelText('Connection URL'), { target: { value: 'http://homebox:7745/sse' } });
+
+    const submitBtn = screen.getByRole('button', { name: /save server/i });
+    await act(async () => {
+      fireEvent.click(submitBtn);
+    });
+
+    expect(saveSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        displayName: 'Homebox Server',
+        alias: 'homebox_db',
+      })
+    );
+  });
 });

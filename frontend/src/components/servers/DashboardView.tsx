@@ -37,9 +37,10 @@ export const DashboardView: React.FC = () => {
     const q = searchQuery.toLowerCase();
     const nameMatch = (s.displayName || '').toLowerCase().includes(q);
     const idMatch = (s.id || '').toLowerCase().includes(q);
+    const aliasMatch = (s.alias || '').toLowerCase().includes(q);
     const urlMatch = (s.url || '').toLowerCase().includes(q);
     const catMatch = (s.categories || []).some((c) => (c || '').toLowerCase().includes(q));
-    return nameMatch || idMatch || urlMatch || catMatch;
+    return nameMatch || idMatch || aliasMatch || urlMatch || catMatch;
   });
 
   filtered.sort((a, b) => {

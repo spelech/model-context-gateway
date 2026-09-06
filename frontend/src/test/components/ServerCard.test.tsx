@@ -141,4 +141,22 @@ describe('ServerCard Component', () => {
     render(<ServerCard server={disabledServer} />);
     expect(screen.getByText('Disabled')).toBeInTheDocument();
   });
+
+  /**
+   * @requirement UI-SERVERS-ALIAS-MANAGEMENT
+   * @category MCP
+   * @type Positive
+   * @description renders server alias badge alongside server id when configured
+   */
+  it('renders server alias badge alongside server id when configured (UI-SERVERS-ALIAS-MANAGEMENT)', () => {
+    const serverWithAlias: McpServer = {
+      ...baseServer,
+      id: 'docker-id',
+      alias: 'docker_namespace',
+    };
+
+    render(<ServerCard server={serverWithAlias} />);
+    expect(screen.getByText('docker-id')).toBeInTheDocument();
+    expect(screen.getByText('docker_namespace')).toBeInTheDocument();
+  });
 });

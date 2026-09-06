@@ -1,5 +1,6 @@
 export interface McpServer {
   id: string;
+  alias?: string;
   displayName: string;
   url: string;
   enabled: boolean;
@@ -22,6 +23,7 @@ export interface McpServer {
 
 export interface ServerPayload {
   id?: string;
+  alias?: string;
   displayName: string;
   type: string;
   categories: string[];

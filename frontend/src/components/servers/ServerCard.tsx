@@ -77,6 +77,23 @@ export const ServerCard: React.FC<ServerCardProps> = ({ server }) => {
       <div className="server-info">
         <div className="server-name-row">
           <span className={nameClass}>{server.displayName}</span>
+          <span className="server-badge server-id-badge" title={`Server ID: ${server.id}`}>
+            {server.id}
+          </span>
+          {server.alias && (
+            <span
+              className="server-badge badge-alias"
+              title={`Alias: ${server.alias}`}
+              style={{
+                background: 'rgba(168, 85, 247, 0.15)',
+                color: '#c084fc',
+                border: '1px solid rgba(168, 85, 247, 0.3)',
+              }}
+            >
+              <i className="fa-solid fa-tag" style={{ marginRight: '4px', fontSize: '0.75rem' }}></i>
+              {server.alias}
+            </span>
+          )}
           <span className="server-badge">{(server.type || 'SSE').toUpperCase()}</span>
           {categoryBadge}
           {server.hasApiKey && (
