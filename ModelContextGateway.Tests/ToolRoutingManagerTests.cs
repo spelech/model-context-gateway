@@ -367,5 +367,66 @@ namespace ModelContextGateway.Tests
             Assert.NotNull(list);
             Assert.Empty(list);
         }
+
+        [Fact]
+        [Requirement("MCP-27", "MCP", RequirementType.Positive, "ToolRoutingManager exposes tools using {namespace}/{tool_name} format by default with [{namespace}] description prefix and dual-key routing.")]
+        public async Task CacheTools_Exposes_Slash_Formatted_Name_With_Server_Alias()
+        {
+            // MCP-27: Primary exposed name uses namespace/tool format where namespace is Alias ?? Id
+            var manager = new ToolRoutingManager();
+            var server = new McpServer
+            {
+                Id = "postgres-mcp-homebox",
+                Alias = "homebox_db",
+                DisplayName = "Homebox Database"
+            };
+
+            // Construct mock tools payload
+            var toolsJson = @"[{""name"": ""execute_sql"", ""description"": ""Run SQL query"", ""inputSchema"": {}}]";
+            using var doc = System.Text.Json.JsonDocument.Parse(toolsJson);
+
+            // Call internal tool registration helper or PopulateCache
+            var exposed = manager.BuildExposedToolDefinition(server, doc.RootElement[0]);
+            Assert.NotNull(exposed);
+            Assert.Equal("homebox_db/execute_sql", exposed["name"]);
+            Assert.Equal("[homebox_db] Run SQL query", exposed["description"]);
+
+            // Verify dual-key routing entries
+            Assert.Equal("postgres-mcp-homebox", manager.ToolRoutingTable["homebox_db/execute_sql"]);
+            Assert.Equal("postgres-mcp-homebox", manager.ToolRoutingTable["postgres-mcp-homebox/execute_sql"]);
+
+            // Verify legacy delimiter entries
+            Assert.Equal("postgres-mcp-homebox", manager.ToolRoutingTable["homebox_db__execute_sql"]);
+            Assert.Equal("postgres-mcp-homebox", manager.ToolRoutingTable["homebox_db:execute_sql"]);
+            Assert.Equal("postgres-mcp-homebox", manager.ToolRoutingTable["postgres-mcp-homebox__execute_sql"]);
+            Assert.Equal("postgres-mcp-homebox", manager.ToolRoutingTable["postgres-mcp-homebox:execute_sql"]);
+
+            await Task.CompletedTask;
+        }
+
+        [Fact]
+        [Requirement("MCP-27", "MCP", RequirementType.Positive, "ToolRoutingManager falls back to server ID as namespace when alias is null or whitespace.")]
+        public void CacheTools_Exposes_Slash_Formatted_Name_With_Server_Id_When_Alias_Empty()
+        {
+            var manager = new ToolRoutingManager();
+            var server = new McpServer
+            {
+                Id = "docker",
+                Alias = "   ",
+                DisplayName = "Docker Engine"
+            };
+
+            var toolsJson = @"[{""name"": ""list_containers"", ""description"": ""List running containers"", ""inputSchema"": {}}]";
+            using var doc = System.Text.Json.JsonDocument.Parse(toolsJson);
+
+            var exposed = manager.BuildExposedToolDefinition(server, doc.RootElement[0]);
+            Assert.NotNull(exposed);
+            Assert.Equal("docker/list_containers", exposed["name"]);
+            Assert.Equal("[docker] List running containers", exposed["description"]);
+
+            Assert.Equal("docker", manager.ToolRoutingTable["docker/list_containers"]);
+            Assert.Equal("docker", manager.ToolRoutingTable["docker__list_containers"]);
+            Assert.Equal("docker", manager.ToolRoutingTable["docker:list_containers"]);
+        }
     }
 }

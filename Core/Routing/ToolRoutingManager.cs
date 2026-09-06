@@ -38,13 +38,13 @@ namespace ModelContextGateway.Core.Routing
                 new
                 {
                     name = "execute_tool",
-                    description = "Execute a specific internal MCP tool by name with arguments. Accepts namespaced tool names ('server__tool' or 'server/tool') or bare tool names ('tool') if unambiguous. Obtain available tools by calling search_tools first.",
+                    description = "Execute a specific internal MCP tool by name with arguments. Accepts namespaced tool names ('server/tool' or 'server__tool') or bare tool names ('tool') if unambiguous. Obtain available tools by calling search_tools first.",
                     inputSchema = new
                     {
                         type = "object",
                         properties = new
                         {
-                            name = new { type = "string", description = "The name of the tool to execute (e.g. 'docker__list_containers', 'docker/list_containers', or bare 'list_containers')." },
+                            name = new { type = "string", description = "The name of the tool to execute (e.g. 'docker/list_containers', 'docker__list_containers', or bare 'list_containers')." },
                             arguments = new { type = "object", description = "The arguments JSON object expected by the target tool." },
                             target_auth_token = new { type = "string", description = "Optional authentication token if the backend tool requires dynamic pass-through authorization." }
                         },
