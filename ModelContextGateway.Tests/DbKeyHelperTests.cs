@@ -332,7 +332,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "DB", RequirementType.Negative, "ResolveDbEncryptionKey wraps file persistence errors in InvalidOperationException")]
+        [Requirement("SEC-DB-ENCRYPTION-KEY-AUTOGEN-FAIL", "DB", RequirementType.Negative, "ResolveDbEncryptionKey wraps file persistence errors in InvalidOperationException")]
         public void ResolveDbEncryptionKey_ThrowsInvalidOperationException_WhenAutoGenerationFails()
         {
             DbKeyHelper.ResetCache();

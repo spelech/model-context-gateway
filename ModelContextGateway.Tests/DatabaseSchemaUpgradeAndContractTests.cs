@@ -27,7 +27,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that SQLite upgrade migration from legacy schema preserves data, encrypts configs, and passes schema validation.
         /// </summary>
         [Fact]
-        [Requirement("DB-01", "SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data", Type = RequirementType.Positive, Category = "DB")]
+        [Requirement("DB-SQLITE-LEGACY-UPGRADE-MIGRATION", "SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data", Type = RequirementType.Positive, Category = "DB")]
         public async Task Sqlite_UpgradeMigration_FromLegacySchema_PreservesDataAndPassesValidation()
         {
             var (conn, factory) = CreateDbFactory();

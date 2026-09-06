@@ -78,7 +78,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "ClientSession exposes meta-mode tools search_tools and execute_tool in meta mode.")]
+        [Requirement("MCP-SESSION-METAMODE-TOOLS", "MCP", RequirementType.Positive, "ClientSession exposes meta-mode tools search_tools and execute_tool in meta mode.")]
         public async Task ListToolsAsync_WhenInMetaMode_ExposesSearchAndExecuteTools()
         {
             var (_, dbFactory) = CreateDbFactory();
@@ -97,7 +97,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "ClientSession lists built-in resources including router://status.")]
+        [Requirement("MCP-SESSION-BUILTIN-RESOURCES", "MCP", RequirementType.Positive, "ClientSession lists built-in resources including router://status.")]
         public async Task ListResourcesAsync_ReturnsBuiltinRouterStatusResource()
         {
             var (_, dbFactory) = CreateDbFactory();
@@ -113,7 +113,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "ClientSession lists built-in diagnostic and routing prompts.")]
+        [Requirement("MCP-SESSION-BUILTIN-PROMPTS", "MCP", RequirementType.Positive, "ClientSession lists built-in diagnostic and routing prompts.")]
         public async Task ListPromptsAsync_ReturnsBuiltinDiagnosticPrompts()
         {
             var (_, dbFactory) = CreateDbFactory();
@@ -130,7 +130,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "ClientSession calls built-in search_tools and returns structured search results.")]
+        [Requirement("MCP-SESSION-CALL-SEARCH-TOOLS", "MCP", RequirementType.Positive, "ClientSession calls built-in search_tools and returns structured search results.")]
         public async Task CallToolAsync_SearchTools_ExecutesSuccessfullyWithStructuredContent()
         {
             var (_, dbFactory) = CreateDbFactory();
@@ -151,7 +151,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "ClientSession reads router://status resource and returns online gateway metadata.")]
+        [Requirement("MCP-SESSION-READ-ROUTER-STATUS", "MCP", RequirementType.Positive, "ClientSession reads router://status resource and returns online gateway metadata.")]
         public async Task ReadResourceAsync_RouterStatus_ReturnsOnlineStatusPayload()
         {
             var (_, dbFactory) = CreateDbFactory();
@@ -174,7 +174,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "ClientSession gets router__diagnose_failure prompt and returns diagnostic prompt instructions.")]
+        [Requirement("MCP-SESSION-GET-PROMPT-DIAGNOSE", "MCP", RequirementType.Positive, "ClientSession gets router__diagnose_failure prompt and returns diagnostic prompt instructions.")]
         public async Task GetPromptAsync_DiagnoseFailure_ReturnsDiagnosticInstructions()
         {
             var (_, dbFactory) = CreateDbFactory();
@@ -196,7 +196,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "ClientSession registers and triggers request cancellation for active cancellation tokens.")]
+        [Requirement("MCP-SESSION-REQUEST-CANCELLATION", "MCP", RequirementType.Positive, "ClientSession registers and triggers request cancellation for active cancellation tokens.")]
         public void RegisterRequestCancellation_And_CancelRequest_CancelsActiveToken()
         {
             var (_, dbFactory) = CreateDbFactory();
@@ -212,7 +212,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "ClientSession returns false when handling client response for unregistered request ID.")]
+        [Requirement("MCP-SESSION-UNREGISTERED-RESPONSE", "MCP", RequirementType.Positive, "ClientSession returns false when handling client response for unregistered request ID.")]
         public void TryHandleClientResponse_ReturnsFalse_WhenNoPendingRequest()
         {
             var (_, dbFactory) = CreateDbFactory();

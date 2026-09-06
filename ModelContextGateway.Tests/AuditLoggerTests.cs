@@ -58,7 +58,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "AuditLogger writes tool invocation audit records with actor attribution and duration to AuditLogs table.")]
+        [Requirement("SEC-AUDIT-LOG-INVOCATION-RECORD", "SEC", RequirementType.Positive, "AuditLogger writes tool invocation audit records with actor attribution and duration to AuditLogs table.")]
         public async Task LogInvocationAsync_WritesEntryToDatabase()
         {
             var auditLogger = new AuditLogger(_dbFactory);
@@ -73,7 +73,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "AuditLogger records administrative configuration changes and security events to AdminAuditLogs table.")]
+        [Requirement("SEC-AUDIT-LOG-ADMIN-ACTION-RECORD", "SEC", RequirementType.Positive, "AuditLogger records administrative configuration changes and security events to AdminAuditLogs table.")]
         public async Task LogAdminActionAsync_WritesEntryToDatabase()
         {
             var auditLogger = new AuditLogger(_dbFactory);

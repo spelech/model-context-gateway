@@ -11,7 +11,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that SSE transport resolves plaintext API key when secret provider is None.
         /// </summary>
         [Fact]
-        [Requirement("TRANS-01", "SSE transport resolves static plaintext API keys when provider is None", Type = RequirementType.Positive, Category = "TRANS")]
+        [Requirement("TRANS-SSE-RESOLVE-STATIC-APIKEY", "SSE transport resolves static plaintext API keys when provider is None", Type = RequirementType.Positive, Category = "TRANS")]
         public async Task ResolveTokenAsync_ReturnsApiKey_WhenProviderNone()
         {
             var server = new McpServer
@@ -74,7 +74,7 @@ namespace ModelContextGateway.Tests
         /// Ensures SSE transport handles exceptions when waiting for SSE endpoint URL gracefully by logging them.
         /// </summary>
         [Fact]
-        [Requirement("TRANS-01", "TRANS", RequirementType.Positive, "SSE transport logs exceptions gracefully when waiting for endpoint URL without throwing unhandled exceptions.")]
+        [Requirement("TRANS-SSE-LOG-ENDPOINT-WAIT-EXCEPTION", "TRANS", RequirementType.Positive, "SSE transport logs exceptions gracefully when waiting for endpoint URL without throwing unhandled exceptions.")]
         public async Task SendRequestAsync_HandlesEndpointWaitTimeoutGracefully()
         {
             var server = new McpServer

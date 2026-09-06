@@ -9,7 +9,7 @@ namespace ModelContextGateway.Tests
     public class MockDownstreamMcpServerTests
     {
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "MockDownstreamMcpServer handles initialize, initialized, tools/list, and tools/call JSON-RPC 2.0 protocol cycles.")]
+        [Requirement("MCP-MOCK-JSONRPC-FLOW", "MCP", RequirementType.Positive, "MockDownstreamMcpServer handles initialize, initialized, tools/list, and tools/call JSON-RPC 2.0 protocol cycles.")]
         public async Task MockDownstreamMcpServer_HandlesStandardJsonRpcFlow()
         {
             var server = new MockDownstreamMcpServer();
@@ -60,7 +60,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-14", "AUTH", RequirementType.Positive, "MockDownstreamMcpServer simulates 401 Unauthorized status code for authentication testing.")]
+        [Requirement("AUTH-MOCK-SIMULATE-UNAUTHORIZED", "AUTH", RequirementType.Positive, "MockDownstreamMcpServer simulates 401 Unauthorized status code for authentication testing.")]
         public async Task MockDownstreamMcpServer_Simulates401Unauthorized()
         {
             var server = new MockDownstreamMcpServer

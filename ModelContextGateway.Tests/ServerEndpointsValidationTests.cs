@@ -14,7 +14,7 @@ namespace ModelContextGateway.Tests
         [InlineData("node; rm -rf /", false)]
         [InlineData("python3 | cat", false)]
         [InlineData("cat `whoami`", false)]
-        [Requirement("TRANS-01", "TRANS", RequirementType.Positive, "ServerValidationHelper validates stdio commands against unsafe shell operators, piping, and command injection.")]
+        [Requirement("GUARD-VALIDATION-STDIO-SHELL-OPERATORS", "GUARD", RequirementType.Negative, "ServerValidationHelper validates stdio commands against unsafe shell operators, piping, and command injection.")]
         public void IsValidStdioCommand_ValidatesExecutableAndDisallowsUnsafeCommands(string command, bool expectedValid)
         {
             var valid = ServerValidationHelper.IsValidStdioCommand(command, out var err);
@@ -36,7 +36,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("TRANS-01", "TRANS", RequirementType.Positive, "ServerValidationHelper accepts valid HTTP/HTTPS endpoints allowed by IP security rules.")]
+        [Requirement("TRANS-VALIDATION-HTTP-ALLOWED-IPS", "TRANS", RequirementType.Positive, "ServerValidationHelper accepts valid HTTP/HTTPS endpoints allowed by IP security rules.")]
         public void IsValidServerUrl_Accepts_Valid_Http_Urls()
         {
             var config = new ConfigurationBuilder()

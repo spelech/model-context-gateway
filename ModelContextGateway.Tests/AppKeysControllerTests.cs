@@ -257,7 +257,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "AppKeys API returns sanitized key metadata without leaking plaintext tokens.")]
+        [Requirement("SEC-APPKEY-SANITIZE-METADATA-GET", "SEC", RequirementType.Positive, "AppKeys API returns sanitized key metadata without leaking plaintext tokens.")]
         public async Task GetAppKeys_ReturnsSanitizedKeys_ForAdminAndFiltered()
         {
             await _rawConnection.ExecuteAsync(@"

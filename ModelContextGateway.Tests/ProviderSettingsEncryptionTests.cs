@@ -128,7 +128,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "ProvidersController GET endpoints mask sensitive tokens and passwords as asterisks.")]
+        [Requirement("SEC-PROVIDER-MASK-SECRETS-GET", "SEC", RequirementType.Positive, "ProvidersController GET endpoints mask sensitive tokens and passwords as asterisks.")]
         public async Task ProvidersController_GetEndpoints_RedactSensitiveSecrets()
         {
             var secretDto = new SecretProviderDto
@@ -183,7 +183,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "ProvidersController redacts sensitive secrets in administrative audit logs.")]
+        [Requirement("SEC-PROVIDER-REDACT-AUDIT-PAYLOADS", "SEC", RequirementType.Positive, "ProvidersController redacts sensitive secrets in administrative audit logs.")]
         public async Task ProvidersController_SaveEndpoints_RedactAuditLogPayloads()
         {
             var loggedActions = new List<(string Action, string Target, string Details, bool Success)>();
@@ -386,7 +386,7 @@ namespace ModelContextGateway.Tests
             sids.Should().BeEmpty();
         }
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Negative, "Router must not overwrite corrupt encrypted database fields if an update occurs without user reset.")]
+        [Requirement("SEC-PROVIDER-GUARD-CORRUPT-ENCRYPTED-FIELD", "SEC", RequirementType.Negative, "Router must not overwrite corrupt encrypted database fields if an update occurs without user reset.")]
         public async Task SaveSecretProvider_WhenDecryptionFailed_DoesNotOverwriteCorruptPayload()
         {
             // 1. Save valid config

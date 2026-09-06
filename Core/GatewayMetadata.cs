@@ -86,7 +86,27 @@ namespace ModelContextGateway.Core
             try
             {
                 using var doc = JsonDocument.Parse(jsonRpcBody);
-                if (doc.RootElement.TryGetProperty("params", out var pElem) && pElem.TryGetProperty("protocolVersion", out var pvElem))
+                if (doc.RootElement.TryGetProperty("params", out var pElem))
+                {
+                    return ExtractRequestedProtocolVersion(pElem);
+                }
+            }
+            catch
+            {
+            }
+            return ProtocolVersion;
+        }
+
+        /// <summary>
+        /// Extracts the client's requested protocol version from an initialize params JsonElement,
+        /// falling back to ProtocolVersion if omitted or malformed.
+        /// </summary>
+        public static string ExtractRequestedProtocolVersion(JsonElement paramsElement)
+        {
+            try
+            {
+                if (paramsElement.ValueKind == JsonValueKind.Object &&
+                    paramsElement.TryGetProperty("protocolVersion", out var pvElem))
                 {
                     var ver = pvElem.GetString();
                     if (!string.IsNullOrWhiteSpace(ver))

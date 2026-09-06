@@ -40,7 +40,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "DB", RequirementType.Positive, "Retrieves configured MCP server fleet from the database repository.")]
+        [Requirement("API-GET-SERVERS-FLEET-REPOSITORY", "API", RequirementType.Positive, "Retrieves configured MCP server fleet from the database repository.")]
         public async Task GetServers_Returns_Server_List()
         {
             var (conn, _) = CreateDbFactory();
@@ -53,7 +53,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Supports full CRUD lifecycle (create, read, update, delete) for downstream MCP server definitions.")]
+        [Requirement("API-SERVER-CRUD-LIFECYCLE", "API", RequirementType.Positive, "Supports full CRUD lifecycle (create, read, update, delete) for downstream MCP server definitions.")]
         public async Task Post_Put_Delete_Server_Lifecycle_Works()
         {
             var (conn, _) = CreateDbFactory();

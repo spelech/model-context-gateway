@@ -9,7 +9,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that HTTP transport resolves plaintext API key when secret provider is None.
         /// </summary>
         [Fact]
-        [Requirement("TRANS-02", "HTTP stateless transport resolves static API keys when secret provider is None", Type = RequirementType.Positive, Category = "TRANS")]
+        [Requirement("TRANS-HTTP-RESOLVE-STATIC-APIKEY", "HTTP stateless transport resolves static API keys when secret provider is None", Type = RequirementType.Positive, Category = "TRANS")]
         public async Task ResolveTokenAsync_ReturnsApiKey_WhenProviderNone()
         {
             var server = new McpServer
@@ -29,7 +29,7 @@ namespace ModelContextGateway.Tests
         /// Ensures HTTP transport fails closed with SecurityException when secret retriever fails.
         /// </summary>
         [Fact]
-        [Requirement("GUARD-02", "HTTP stateless transport fails closed with SecurityException when secret resolution fails", Type = RequirementType.Negative, Category = "GUARD")]
+        [Requirement("GUARD-HTTP-SECRET-RETRIEVAL-FAIL-CLOSED", "HTTP stateless transport fails closed with SecurityException when secret resolution fails", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails()
         {
             var server = new McpServer
@@ -52,7 +52,7 @@ namespace ModelContextGateway.Tests
         /// Ensures HTTP transport fails closed when no secret retriever is registered.
         /// </summary>
         [Fact]
-        [Requirement("GUARD-02", "HTTP stateless transport fails closed with InvalidOperationException when no secret retriever is configured", Type = RequirementType.Negative, Category = "GUARD")]
+        [Requirement("GUARD-HTTP-NO-SECRET-RETRIEVER", "HTTP stateless transport fails closed with InvalidOperationException when no secret retriever is configured", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered()
         {
             var server = new McpServer

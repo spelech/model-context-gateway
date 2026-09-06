@@ -426,7 +426,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that router meta-mode execute_tool validates and enforces category scopes on target tool calls.
         /// </summary>
         [Fact]
-        [Requirement("MCP-01", "Router meta-mode execute_tool validates and enforces category scopes on target tool calls", Type = RequirementType.Positive, Category = "MCP")]
+        [Requirement("MCP-EXEC-TOOL-ENFORCE-CATEGORY-SCOPES", "Router meta-mode execute_tool validates and enforces category scopes on target tool calls", Type = RequirementType.Positive, Category = "MCP")]
         public async Task ClientSession_ExecuteTool_EnforcesCategoryScopeOnInnerTarget()
         {
             var servers = new List<McpServer>

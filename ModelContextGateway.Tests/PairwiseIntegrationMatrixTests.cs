@@ -565,7 +565,7 @@ namespace ModelContextGateway.Tests
         /// Verifies that router meta-mode execute_tool strictly enforces target tool authorization policies.
         /// </summary>
         [Theory]
-        [Requirement("MCP-01", "Meta-mode execute_tool strictly enforces target tool authorization policies", Type = RequirementType.Positive, Category = "MCP")]
+        [Requirement("MCP-EXEC-TOOL-ENFORCE-AUTH-POLICIES", "Meta-mode execute_tool strictly enforces target tool authorization policies", Type = RequirementType.Positive, Category = "MCP")]
         [InlineData("ha__turn_on", true)]
         [InlineData("docker__restart", false)]
         public async Task Pairwise_MetaMode_ExecuteTool_EnforcesTargetAuthorization(string targetToolName, bool expectedAuthorized)

@@ -8,7 +8,7 @@ namespace ModelContextGateway.Tests
     public class DbConnectionFactoryTests
     {
         [Fact]
-        [Requirement("DB-01", "DB", RequirementType.Positive, "DbConnectionFactory initializes SQLite database connection with SQLCipher encryption.")]
+        [Requirement("DB-FACTORY-SQLITE-DEFAULT", "DB", RequirementType.Positive, "DbConnectionFactory initializes SQLite database connection with SQLCipher encryption.")]
         public void Factory_Creates_Sqlite_Connection_By_Default()
         {
             var inMemoryConfig = new Dictionary<string, string?>
@@ -26,7 +26,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "DB", RequirementType.Positive, "DbConnectionFactory initializes MySQL database connection using MySqlConnector.")]
+        [Requirement("DB-FACTORY-MYSQL-CONFIGURED", "DB", RequirementType.Positive, "DbConnectionFactory initializes MySQL database connection using MySqlConnector.")]
         public void Factory_Creates_MySql_Connection_When_Configured()
         {
             var inMemoryConfig = new Dictionary<string, string?>
@@ -44,7 +44,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "DB", RequirementType.Positive, "DbConnectionFactory initializes MS SQL Server database connection using Microsoft.Data.SqlClient.")]
+        [Requirement("DB-FACTORY-MSSQL-CONFIGURED", "DB", RequirementType.Positive, "DbConnectionFactory initializes MS SQL Server database connection using Microsoft.Data.SqlClient.")]
         public void Factory_Creates_MsSql_Connection_When_Configured()
         {
             var inMemoryConfig = new Dictionary<string, string?>

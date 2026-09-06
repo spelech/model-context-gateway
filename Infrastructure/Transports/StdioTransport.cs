@@ -394,7 +394,7 @@ namespace ModelContextGateway.Infrastructure.Transports
 
         public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
         {
-            if (_process == null || _process.HasExited)
+            if (_disposed || _process == null || _process.HasExited)
             {
                 return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Process not running" } };
             }

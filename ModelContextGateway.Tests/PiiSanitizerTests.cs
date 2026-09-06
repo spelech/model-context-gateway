@@ -3,7 +3,7 @@ namespace ModelContextGateway.Tests
     public class PiiSanitizerTests
     {
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "PiiSanitizer redacts Bearer authentication tokens from payload strings.")]
+        [Requirement("SEC-PII-BEARER-TOKEN", "SEC", RequirementType.Positive, "PiiSanitizer redacts Bearer authentication tokens from payload strings.")]
         public void SanitizePayload_Redacts_Bearer_Tokens()
         {
             string raw = "{\"headers\": {\"Authorization\": \"Bearer secret_token_xyz_123\"}}";
@@ -14,7 +14,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "PiiSanitizer redacts apiKey, password, and secret properties in JSON payloads.")]
+        [Requirement("SEC-PII-JSON-APIKEY-PASSWORD", "SEC", RequirementType.Positive, "PiiSanitizer redacts apiKey, password, and secret properties in JSON payloads.")]
         public void SanitizePayload_Redacts_Api_Keys_And_Passwords()
         {
             string raw = "{\"apiKey\":\"my_secret_key\",\"password\":\"super_secret\"}";
@@ -27,7 +27,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "PiiSanitizer redacts database connection string passwords.")]
+        [Requirement("SEC-PII-CONNECTION-STRING-PASSWORD", "SEC", RequirementType.Positive, "PiiSanitizer redacts database connection string passwords.")]
         public void SanitizePayload_Redacts_ConnectionString_Passwords()
         {
             string raw = "Data Source=mcp_router.db;Password=MySecretPassword123;Version=3;";
@@ -38,7 +38,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "LogBuffer sanitizes PII and credentials prior to buffering in memory.")]
+        [Requirement("SEC-PII-LOGBUFFER-IN-MEMORY", "SEC", RequirementType.Positive, "LogBuffer sanitizes PII and credentials prior to buffering in memory.")]
         public void LogBuffer_Add_Sanitizes_PII_Payloads()
         {
             LogBuffer.Clear();
@@ -51,7 +51,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "PiiSanitizer redacts Basic auth credentials, session cookies, query access tokens, and URL userinfo credentials.")]
+        [Requirement("SEC-PII-BASIC-COOKIE-QUERY-USERINFO", "SEC", RequirementType.Positive, "PiiSanitizer redacts Basic auth credentials, session cookies, query access tokens, and URL userinfo credentials.")]
         public void PiiSanitizer_Redacts_Basic_ApiKey_Cookie_QueryToken_UrlUserInfo()
         {
             string rawToken = "Basic dXNlcjpwYXNz";

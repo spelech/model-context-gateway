@@ -137,19 +137,9 @@ namespace ModelContextGateway.Core.Routing
         /// </summary>
         public Task<object> HandleInitializeAsync(JsonElement? paramsElement)
         {
-            string negotiatedVersion = DefaultProtocolVersion;
-
-            if (paramsElement.HasValue && paramsElement.Value.ValueKind == JsonValueKind.Object)
-            {
-                if (paramsElement.Value.TryGetProperty("protocolVersion", out var versionProp))
-                {
-                    var requestedVersion = versionProp.GetString();
-                    if (!string.IsNullOrWhiteSpace(requestedVersion))
-                    {
-                        negotiatedVersion = requestedVersion;
-                    }
-                }
-            }
+            string negotiatedVersion = paramsElement.HasValue
+                ? GatewayMetadata.ExtractRequestedProtocolVersion(paramsElement.Value)
+                : GatewayMetadata.ProtocolVersion;
 
             var result = (object)new
             {

@@ -10,7 +10,7 @@ describe('IdentityAuthTab Component', () => {
   });
 
   /**
-   * @requirement AUTH-01
+   * @requirement UI-AUTH-TAB-AD-TOGGLE
    * @category AUTH
    * @type PositiveFeature
    * @description Renders Active Directory disabled initially, toggles on and exposes fields.
@@ -44,7 +44,7 @@ describe('IdentityAuthTab Component', () => {
   });
 
   /**
-   * @requirement AUTH-01
+   * @requirement UI-AUTH-TAB-LDAP-TEST
    * @category AUTH
    * @type PositiveFeature
    * @description Fills LDAP parameters and executes test connection.

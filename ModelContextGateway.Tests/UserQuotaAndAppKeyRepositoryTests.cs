@@ -83,7 +83,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "IUserQuotaRepository persists user quota overrides and retrieves them correctly", Type = RequirementType.Positive, Category = "DB")]
+        [Requirement("DB-QUOTA-REPO-SET-GET", "IUserQuotaRepository persists user quota overrides and retrieves them correctly", Type = RequirementType.Positive, Category = "DB")]
         public async Task UserQuotaRepository_SetAndGet_ReturnsPersistedQuota()
         {
             await _repo.SetUserQuotaAsync("alice", 12);
@@ -96,7 +96,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "IUserQuotaRepository GetAllUserQuotasAsync retrieves all quotas ordered by username", Type = RequirementType.Positive, Category = "DB")]
+        [Requirement("DB-QUOTA-REPO-GET-ALL", "IUserQuotaRepository GetAllUserQuotasAsync retrieves all quotas ordered by username", Type = RequirementType.Positive, Category = "DB")]
         public async Task UserQuotaRepository_GetAll_ReturnsAllUserQuotas()
         {
             await _repo.SetUserQuotaAsync("charlie", 8);
@@ -115,7 +115,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "IUserQuotaRepository SetUserQuotaAsync updates existing quota on conflict", Type = RequirementType.Positive, Category = "DB")]
+        [Requirement("DB-QUOTA-REPO-UPDATE-CONFLICT", "IUserQuotaRepository SetUserQuotaAsync updates existing quota on conflict", Type = RequirementType.Positive, Category = "DB")]
         public async Task UserQuotaRepository_Update_UpdatesExistingQuota()
         {
             await _repo.SetUserQuotaAsync("david", 5);
@@ -130,7 +130,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "IUserQuotaRepository DeleteUserQuotaAsync removes user quota record", Type = RequirementType.Positive, Category = "DB")]
+        [Requirement("DB-QUOTA-REPO-DELETE", "IUserQuotaRepository DeleteUserQuotaAsync removes user quota record", Type = RequirementType.Positive, Category = "DB")]
         public async Task UserQuotaRepository_Delete_RemovesQuota()
         {
             await _repo.SetUserQuotaAsync("eve", 10);
@@ -144,7 +144,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-02", "IAppKeyRepository persists KeyType and filters keys by personal vs system", Type = RequirementType.Positive, Category = "AUTH")]
+        [Requirement("AUTH-APPKEY-KEYTYPE-PERSISTENCE-FILTER", "IAppKeyRepository persists KeyType and filters keys by personal vs system", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task AppKeyRepository_SaveAndGet_PersistsKeyTypeAndFilters()
         {
             var personalKey = new AppKey
@@ -197,7 +197,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DB-01", "IUserQuotaRepository is registered in dependency injection and resolvable", Type = RequirementType.Positive, Category = "DB")]
+        [Requirement("DB-QUOTA-REPO-DI-REGISTRATION", "IUserQuotaRepository is registered in dependency injection and resolvable", Type = RequirementType.Positive, Category = "DB")]
         public void DependencyInjection_RegistersIUserQuotaRepository()
         {
             var builder = WebApplication.CreateBuilder(new string[] { });

@@ -14,7 +14,7 @@ describe('PolicyModal component', () => {
   };
 
   /**
-   * @requirement AUTH-01
+   * @requirement UI-POLICY-MODAL-VISIBILITY
    * @category AUTH
    * @type Positive
    * @description renders nothing when isPolicyModalOpen is false
@@ -26,7 +26,7 @@ describe('PolicyModal component', () => {
   });
 
   /**
-   * @requirement AUTH-01
+   * @requirement UI-POLICY-MODAL-CREATE-DEFAULTS
    * @category AUTH
    * @type Positive
    * @description renders create policy form with default inputs
@@ -42,7 +42,7 @@ describe('PolicyModal component', () => {
   });
 
   /**
-   * @requirement AUTH-01
+   * @requirement UI-POLICY-MODAL-EDIT-PREFILL
    * @category AUTH
    * @type Positive
    * @description renders edit policy form pre-filled with policy data
@@ -85,7 +85,7 @@ describe('PolicyModal component', () => {
   });
 
   /**
-   * @requirement AUTH-01
+   * @requirement UI-POLICY-MODAL-CANCEL-DISMISS
    * @category AUTH
    * @type Positive
    * @description closes modal on cancel click

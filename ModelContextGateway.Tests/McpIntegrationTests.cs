@@ -126,7 +126,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "Audit logger attributes per-request actor credentials accurately across stateless calls.")]
+        [Requirement("SEC-AUDIT-PER-REQUEST-ACTOR-ATTRIBUTION", "SEC", RequirementType.Positive, "Audit logger attributes per-request actor credentials accurately across stateless calls.")]
         public async Task AuditLogger_RecordsPerRequestActor_NotHandshakeActor()
         {
             string? loggedUsername = null;
@@ -257,7 +257,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Polymorphic JSON-RPC message deserializer accurately instantiates request, response, and notification subclasses.")]
+        [Requirement("MCP-JSONRPC-POLYMORPHIC-DESERIALIZATION", "MCP", RequirementType.Positive, "Polymorphic JSON-RPC message deserializer accurately instantiates request, response, and notification subclasses.")]
         public void PolymorphicDeserialization_Correctly_Deserializes_JsonRpcMessage_Subclasses()
         {
             // Request JSON
@@ -285,7 +285,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Deserializing plain JsonRpcMessage does not cause recursive converter invocation or stack overflow.")]
+        [Requirement("MCP-JSONRPC-DESERIALIZE-PLAIN-NO-OVERFLOW", "MCP", RequirementType.Positive, "Deserializing plain JsonRpcMessage does not cause recursive converter invocation or stack overflow.")]
         public void Deserializing_Plain_JsonRpcMessage_Does_Not_Cause_StackOverflow()
         {
             var plainJson = "{\"jsonrpc\":\"2.0\"}";
@@ -301,7 +301,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Serializing plain JsonRpcMessage does not cause recursive converter invocation or stack overflow.")]
+        [Requirement("MCP-JSONRPC-SERIALIZE-PLAIN-NO-OVERFLOW", "MCP", RequirementType.Positive, "Serializing plain JsonRpcMessage does not cause recursive converter invocation or stack overflow.")]
         public void Serializing_Plain_JsonRpcMessage_Does_Not_Cause_StackOverflow()
         {
             var msg = new JsonRpcMessage { JsonRpc = "2.0" };
@@ -315,7 +315,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Initializes downstream MCP backends with detailed diagnostic logging.")]
+        [Requirement("MCP-DOWNSTREAM-INIT-DIAGNOSTICS", "MCP", RequirementType.Positive, "Initializes downstream MCP backends with detailed diagnostic logging.")]
         public async Task TestInitializationDiagnostics()
         {
             var server = new McpServer { Id = "backend1", DisplayName = "Backend 1", Url = "http://backend1/mcp", Type = "http", SecretProvider = "None", Enabled = true };
@@ -878,7 +878,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Translates backend error codes, handles cancellation tokens, and executes sampling requests.")]
+        [Requirement("MCP-SESSION-ERROR-TRANSFORM-CANCEL-SAMPLING", "MCP", RequirementType.Positive, "Translates backend error codes, handles cancellation tokens, and executes sampling requests.")]
         public async Task ErrorTransformation_Cancellation_And_Sampling_Works_Correctly()
         {
             // Arrange
@@ -1067,7 +1067,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "CustomFilesDirectoryHelper initializes and creates required directories on startup.")]
+        [Requirement("MCP-FILES-DIR-HELPER-INIT", "MCP", RequirementType.Positive, "CustomFilesDirectoryHelper initializes and creates required directories on startup.")]
         public void CustomFilesDirectoryHelper_CreatesDirectoriesCorrectly()
         {
             string baseDir = Directory.GetCurrentDirectory();
@@ -1082,7 +1082,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "SessionManager caches and isolates connections per downstream backend server.")]
+        [Requirement("MCP-SESSION-MANAGER-PER-SERVER-CACHE", "MCP", RequirementType.Positive, "SessionManager caches and isolates connections per downstream backend server.")]
         public void SessionManager_PerServerCache_WorksCorrectly()
         {
             var logger = new Microsoft.Extensions.Logging.Abstractions.NullLogger<SessionManager>();
@@ -1117,7 +1117,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-05", "SEC", RequirementType.Positive, "Mcp-Session-Id header generates opaque UUIDs without leaking bearer tokens.")]
+        [Requirement("SEC-SESSIONID-OPAQUE-NOT-BEARER", "SEC", RequirementType.Positive, "Mcp-Session-Id header generates opaque UUIDs without leaking bearer tokens.")]
         public void Mcp_SessionId_IsOpaque_NotBearerToken()
         {
             var token = "secret-bearer-token-1234567890";
