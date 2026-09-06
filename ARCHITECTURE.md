@@ -6,16 +6,16 @@ This document summarizes the internal architecture, security boundaries, design 
 
 ---
 
-## Architectural Mental Model: The Airport Hub
+## System Overview
 
 Connecting AI clients directly to dozens of independent microservices creates severe operational debt: credentials leak onto developer laptops, connection conventions diverge, and loading hundreds of tool schemas overwhelms the LLM's context window.
 
-Model Context Gateway solves this by functioning like an **international airport hub**:
+Model Context Gateway provides a centralized, governed gateway between upstream AI clients and downstream tools:
 
-* **Terminal Ingress**: Upstream AI clients (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) connect once to a single front-door endpoint (`/sse`).
-* **Security Checkpoint**: The gateway authenticates the client (Active Directory Windows SIDs, OIDC reverse proxy headers, or scoped AppKeys), applies least-privilege RBAC, and strips sensitive PII before requests touch backend services.
-* **The Concierge (Meta-Mode)**: Instead of handing the model a 500-page directory containing hundreds of tool schemas, Meta-Mode gives the model an on-demand concierge: `search_tools` and `execute_tool`. The model describes what it wants, and the gateway ranks and serves the exact tool needed.
-* **Flight Dispatch**: The gateway dispatches requests to downstream MCP servers across diverse transports—Docker containers (auto-discovered via socket), remote HTTP/SSE servers, or local STDIO subprocesses—without client-side complexity.
+* **Unified Ingress**: Upstream AI clients (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) connect once to a single front-door endpoint (`/sse`).
+* **Context-Optimized Discovery (Meta-Mode)**: Rather than exposing hundreds of tool schemas upfront, Meta-Mode provides on-demand semantic tool discovery via `search_tools` and `execute_tool`, preserving token budget.
+* **Enterprise Security & Policy Enforcement**: The gateway authenticates callers (Active Directory Windows SIDs, OIDC reverse-proxy headers, or scoped AppKeys), applies database-backed RBAC, and strips sensitive PII before requests touch backend services.
+* **Multi-Transport Routing Engine**: Seamlessly dispatches requests to downstream MCP servers across diverse transports—Docker containers (auto-discovered via socket), remote HTTP/SSE servers, or local STDIO subprocesses.
 
 ---
 
