@@ -91,6 +91,42 @@ namespace ModelContextGateway.Core.Routing
                             _cachedTools.Clear();
                             _cachedTools.AddRange(globalCached);
                             _isCachePopulated = true;
+
+                            // CRITICAL FIX: Also populate the routing table from cached tool names
+                            foreach (var item in globalCached)
+                            {
+                                string? fullName = null;
+                                if (item is IDictionary<string, object> dict && dict.TryGetValue("name", out var nObj))
+                                {
+                                    fullName = nObj?.ToString();
+                                }
+                                else if (item is JsonElement je && je.TryGetProperty("name", out var pProp))
+                                {
+                                    fullName = pProp.GetString();
+                                }
+                                else if (item != null)
+                                {
+                                    try
+                                    {
+                                        using var itemDoc = JsonDocument.Parse(JsonSerializer.Serialize(item));
+                                        if (itemDoc.RootElement.TryGetProperty("name", out var nameEl))
+                                        {
+                                            fullName = nameEl.GetString();
+                                        }
+                                    }
+                                    catch { }
+                                }
+
+                                if (!string.IsNullOrEmpty(fullName))
+                                {
+                                    var splitIdx = fullName.IndexOf("__", StringComparison.Ordinal);
+                                    if (splitIdx > 0)
+                                    {
+                                        var srvId = fullName.Substring(0, splitIdx);
+                                        _toolRoutingTable[fullName] = srvId;
+                                    }
+                                }
+                            }
                         }
                         tools.AddRange(globalCached);
                     }
@@ -249,6 +285,20 @@ namespace ModelContextGateway.Core.Routing
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "Failed to refresh tools cache during CallToolAsync for '{ToolName}'", toolName);
+                }
+            }
+
+            if (!_toolRoutingTable.ContainsKey(toolName))
+            {
+                var sepIdx = toolName.IndexOf("__", StringComparison.Ordinal);
+                if (sepIdx > 0)
+                {
+                    var candidateServerId = toolName.Substring(0, sepIdx);
+                    if (servers.Any(s => s.Id == candidateServerId && s.Enabled))
+                    {
+                        _toolRoutingTable[toolName] = candidateServerId;
+                        logger.LogInformation("Dynamically registered resilient prefix route for tool '{ToolName}' to server '{ServerId}'", toolName, candidateServerId);
+                    }
                 }
             }
 

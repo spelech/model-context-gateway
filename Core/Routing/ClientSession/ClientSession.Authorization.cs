@@ -15,62 +15,110 @@ namespace ModelContextGateway.Core.Routing
         /// <returns>A task returning the resolved <see cref="UserIdentityContext"/>.</returns>
         public async Task<UserIdentityContext> ResolveUserIdentityAsync(HttpContext? httpContext = null)
         {
-            var contextToUse = httpContext ?? _clientResponse?.HttpContext;
-
-            if (contextToUse != null && contextToUse.Items.TryGetValue("ResolvedUserIdentity", out var cachedIdentityObj) && cachedIdentityObj is UserIdentityContext cachedIdentity)
+            HttpContext? contextToUse = null;
+            try
             {
-                return cachedIdentity;
+                contextToUse = httpContext ?? _clientResponse?.HttpContext;
+            }
+            catch (ObjectDisposedException)
+            {
+                return new UserIdentityContext("system", "System", new List<string>());
+            }
+
+            if (contextToUse == null)
+            {
+                return new UserIdentityContext("anonymous", "None", new List<string>());
+            }
+
+            try
+            {
+                if (contextToUse.Items.TryGetValue("ResolvedUserIdentity", out var cachedIdentityObj) && cachedIdentityObj is UserIdentityContext cachedIdentity)
+                {
+                    return cachedIdentity;
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                return new UserIdentityContext("system", "System", new List<string>());
             }
 
             UserIdentityContext identity;
 
-            if (contextToUse?.User?.Identity?.IsAuthenticated == true)
+            try
             {
-                var username = contextToUse.User.Identity.Name ?? "anonymous";
-                var sids = contextToUse.User.Claims
-                    .Where(c => c.Type == "Sid" || c.Type == "GroupSid" || c.Type == System.Security.Claims.ClaimTypes.GroupSid || c.Type == System.Security.Claims.ClaimTypes.PrimaryGroupSid)
-                    .Select(c => c.Value)
-                    .Distinct()
-                    .ToList();
-                var groupNames = contextToUse.User.Claims
-                    .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role || c.Type == "Group" || c.Type == "group" || c.Type == "roles" || c.Type == "groups")
-                    .Select(c => c.Value)
-                    .Distinct()
-                    .ToList();
-
-                identity = new UserIdentityContext(username, contextToUse.User.Identity.AuthenticationType ?? "Claims", GroupNames: groupNames, Sid: "", Sids: sids);
-            }
-            else if (contextToUse?.RequestServices != null)
-            {
-                try
+                if (contextToUse.User?.Identity?.IsAuthenticated == true)
                 {
-                    var compositeProvider = contextToUse.RequestServices.GetService<CompositeIdentityProvider>();
-                    if (compositeProvider != null)
+                    var username = contextToUse.User.Identity.Name ?? "anonymous";
+                    var sids = contextToUse.User.Claims
+                        .Where(c => c.Type == "Sid" || c.Type == "GroupSid" || c.Type == System.Security.Claims.ClaimTypes.GroupSid || c.Type == System.Security.Claims.ClaimTypes.PrimaryGroupSid)
+                        .Select(c => c.Value)
+                        .Distinct()
+                        .ToList();
+                    var groupNames = contextToUse.User.Claims
+                        .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role || c.Type == "Group" || c.Type == "group" || c.Type == "roles" || c.Type == "groups")
+                        .Select(c => c.Value)
+                        .Distinct()
+                        .ToList();
+
+                    identity = new UserIdentityContext(username, contextToUse.User.Identity.AuthenticationType ?? "Claims", GroupNames: groupNames, Sid: "", Sids: sids);
+                }
+                else
+                {
+                    IServiceProvider? services = null;
+                    try
                     {
-                        identity = await compositeProvider.ResolveIdentityAsync(contextToUse);
+                        services = contextToUse.RequestServices ?? _rootServices;
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        services = _rootServices;
+                    }
+
+                    if (services != null)
+                    {
+                        try
+                        {
+                            var compositeProvider = services.GetService<CompositeIdentityProvider>();
+                            if (compositeProvider != null)
+                            {
+                                identity = await compositeProvider.ResolveIdentityAsync(contextToUse);
+                            }
+                            else
+                            {
+                                identity = new UserIdentityContext("anonymous", "None", new List<string>());
+                            }
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            identity = new UserIdentityContext("system", "System", new List<string>());
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to resolve user identity via CompositeIdentityProvider");
+                            identity = new UserIdentityContext("anonymous", "None", new List<string>());
+                        }
                     }
                     else
                     {
                         identity = new UserIdentityContext("anonymous", "None", new List<string>());
                     }
                 }
-                catch (Exception ex)
+
+                try
                 {
-                    _logger.LogWarning(ex, "Failed to resolve user identity via CompositeIdentityProvider");
-                    identity = new UserIdentityContext("anonymous", "None", new List<string>());
+                    contextToUse.Items["ResolvedUserIdentity"] = identity;
                 }
-            }
-            else
-            {
-                identity = new UserIdentityContext("anonymous", "None", new List<string>());
-            }
+                catch (ObjectDisposedException)
+                {
+                    // Context disposed while caching identity
+                }
 
-            if (contextToUse != null)
-            {
-                contextToUse.Items["ResolvedUserIdentity"] = identity;
+                return identity;
             }
-
-            return identity;
+            catch (ObjectDisposedException)
+            {
+                return new UserIdentityContext("system", "System", new List<string>());
+            }
         }
 
         public async Task<bool> IsUserAuthorizedAsync(string requestMethod, string targetId, HttpContext? httpContext = null)
@@ -351,7 +399,15 @@ namespace ModelContextGateway.Core.Routing
                 return new List<string>();
             }
 
-            var services = httpContext?.RequestServices ?? _clientResponse?.HttpContext?.RequestServices ?? _rootServices;
+            IServiceProvider? services;
+            try
+            {
+                services = httpContext?.RequestServices ?? _clientResponse?.HttpContext?.RequestServices ?? _rootServices;
+            }
+            catch (ObjectDisposedException)
+            {
+                services = _rootServices;
+            }
             var dbFactory = services?.GetService<IDbConnectionFactory>();
 
             if (dbFactory != null)
@@ -434,7 +490,15 @@ namespace ModelContextGateway.Core.Routing
             string? errorMessage,
             HttpContext? httpContext = null)
         {
-            var services = httpContext?.RequestServices ?? _clientResponse?.HttpContext?.RequestServices;
+            IServiceProvider? services;
+            try
+            {
+                services = httpContext?.RequestServices ?? _clientResponse?.HttpContext?.RequestServices ?? _rootServices;
+            }
+            catch (ObjectDisposedException)
+            {
+                services = _rootServices;
+            }
             var config = services?.GetService<IConfiguration>();
             var failClosedRaw = config?["Audit:FailClosed"];
             bool failClosed = !bool.TryParse(failClosedRaw, out var parsedFailClosed) || parsedFailClosed;
