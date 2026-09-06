@@ -1,10 +1,14 @@
 using System.Data;
+using System.Net;
+using System.Text;
 using System.Text.Json;
 using Dapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace ModelContextGateway.Tests
@@ -698,6 +702,155 @@ namespace ModelContextGateway.Tests
             Assert.True(doc.RootElement.TryGetProperty("supportedVersions", out var versions));
             Assert.Contains("2026-07-28", versions.EnumerateArray().Select(v => v.GetString()));
             Assert.True(doc.RootElement.GetProperty("capabilities").TryGetProperty("subscriptions", out _));
+        }
+
+        private class TestTrackingClientSession : ClientSession
+        {
+            public List<string> InitializedBackendIds { get; } = new();
+
+            public TestTrackingClientSession(
+                string sessionId,
+                HttpResponse clientResponse,
+                List<McpServer> servers,
+                HttpClient httpClient,
+                IEmbeddingService embeddingService,
+                SessionManager? sessionManager,
+                ILogger logger,
+                IServiceProvider? rootServices = null)
+                : base(sessionId, clientResponse, servers, httpClient, embeddingService, sessionManager, logger, rootServices)
+            {
+            }
+
+            public override void StartInitializationForBackend(string serverId)
+            {
+                InitializedBackendIds.Add(serverId);
+            }
+        }
+
+        [Fact]
+        [Requirement("MCP-ADMIN-RECONNECT-ALL-PROPAGATION", "MCP", RequirementType.Positive, "AdminMcpServer manage_servers reconnect_all triggers StartInitializationForBackend across active sessions.")]
+        public async Task ManageServers_ReconnectAll_TriggersSessionBackendInitialization()
+        {
+            var srv = new McpServer
+            {
+                Id = "reconnect-srv-1",
+                DisplayName = "Reconnect Server 1",
+                Url = "http://localhost:5999",
+                Type = "http",
+                Enabled = true
+            };
+            await _dbRepo.SaveServerAsync(srv);
+
+            var httpContext = new DefaultHttpContext();
+            var trackingSession = new TestTrackingClientSession(
+                "session-reconnect-all",
+                httpContext.Response,
+                new List<McpServer> { srv },
+                new HttpClient(),
+                _dynamicEmbeddingService,
+                _sessionManager,
+                NullLogger.Instance
+            );
+            _sessionManager.RegisterSession("session-reconnect-all", trackingSession);
+
+            var args = JsonDocument.Parse("{\"action\":\"reconnect_all\"}").RootElement;
+            var result = await _adminMcpServer.CallToolAsync("manage_servers", args, "admin_user");
+
+            var json = JsonSerializer.Serialize(result);
+            using var doc = JsonDocument.Parse(json);
+            Assert.False(doc.RootElement.TryGetProperty("isError", out var isErr) && isErr.GetBoolean());
+            Assert.Contains("reconnect-srv-1", trackingSession.InitializedBackendIds);
+        }
+
+        [Fact]
+        [Requirement("MCP-ADMIN-TEST-TOOL-CALL-SECRET-RESOLUTION", "SEC", RequirementType.Positive, "AdminMcpServer test_tool_call resolves server secrets via injected ISecretRetriever.")]
+        public async Task TestToolCall_ResolvesSecretsViaInjectedSecretRetriever()
+        {
+            var server = new McpServer
+            {
+                Id = "secret-backend-srv",
+                DisplayName = "Secret Backend Server",
+                Url = "http://mock-secret-backend:8080/mcp",
+                Type = "http",
+                Enabled = true,
+                SecretProvider = "Vault",
+                SecretPath = "secret/data/backend",
+                SecretField = "token"
+            };
+            await _dbRepo.SaveServerAsync(server);
+
+            var mockSecretRetriever = new Mock<ISecretRetriever>();
+            mockSecretRetriever.Setup(r => r.ProviderName).Returns("Vault");
+            mockSecretRetriever
+                .Setup(r => r.GetSecretAsync("secret/data/backend", "token"))
+                .ReturnsAsync("vault-token-xyz-123");
+
+            string? capturedAuthHeader = null;
+            var mockHandler = new MockHttpMessageHandler
+            {
+                Handler = async (req) =>
+                {
+                    capturedAuthHeader = req.Headers.Authorization?.ToString();
+                    var body = req.Content != null ? await req.Content.ReadAsStringAsync() : "";
+                    if (body.Contains("\"initialize\""))
+                    {
+                        return new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                "{\"jsonrpc\":\"2.0\",\"id\":\"test-init\",\"result\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"serverInfo\":{\"name\":\"mock-secret-backend\",\"version\":\"1.0\"}}}",
+                                Encoding.UTF8, "application/json")
+                        };
+                    }
+                    if (body.Contains("\"tools/call\""))
+                    {
+                        return new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                "{\"jsonrpc\":\"2.0\",\"id\":\"admin-test-call-id\",\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"Secret execution succeeded\"}]}}",
+                                Encoding.UTF8, "application/json")
+                        };
+                    }
+                    return new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("{\"jsonrpc\":\"2.0\"}", Encoding.UTF8, "application/json")
+                    };
+                }
+            };
+
+            var testHttpClient = new HttpClient(mockHandler);
+            var serverWithSecrets = new AdminMcpServer(
+                _dbRepo,
+                _dbRepo,
+                _dbRepo,
+                _dbRepo,
+                _dbRepo,
+                _dbFactory,
+                _mockAuditLogger.Object,
+                _credentialService,
+                _healthCheckService,
+                _dynamicEmbeddingService,
+                _sessionManager,
+                ldapService: null,
+                httpClient: testHttpClient,
+                configuration: _config,
+                logger: NullLogger<AdminMcpServer>.Instance,
+                masterKeyManager: null,
+                secretRetriever: mockSecretRetriever.Object
+            );
+
+            var testArgs = JsonDocument.Parse(@"{
+                ""serverId"": ""secret-backend-srv"",
+                ""toolName"": ""test_secret_tool"",
+                ""arguments"": { ""input"": ""ping"" }
+            }").RootElement;
+
+            var res = await serverWithSecrets.CallToolAsync("test_tool_call", testArgs, "admin_user");
+            var json = JsonSerializer.Serialize(res);
+            using var doc = JsonDocument.Parse(json);
+
+            Assert.False(doc.RootElement.TryGetProperty("isError", out var isErr) && isErr.GetBoolean());
+            mockSecretRetriever.Verify(r => r.GetSecretAsync("secret/data/backend", "token"), Times.AtLeastOnce);
+            Assert.Equal("Bearer vault-token-xyz-123", capturedAuthHeader);
         }
     }
 }

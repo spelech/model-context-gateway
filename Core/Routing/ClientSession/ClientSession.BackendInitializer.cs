@@ -230,7 +230,7 @@ namespace ModelContextGateway.Core.Routing
             }
         }
 
-        public void StartInitializationForBackend(string serverId)
+        public virtual void StartInitializationForBackend(string serverId)
         {
             var server = _servers.FirstOrDefault(s => s.Id == serverId);
             if (server != null && server.Enabled && server.Type != "custom")

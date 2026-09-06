@@ -28,6 +28,7 @@ namespace ModelContextGateway.Core.Routing
         private readonly IConfiguration? _configuration;
         private readonly ILogger<AdminMcpServer>? _logger;
         private readonly IMasterKeyManager? _masterKeyManager;
+        private readonly ISecretRetriever? _secretRetriever;
 
         private const string DefaultProtocolVersion = "2026-07-28";
         private const string LegacyProtocolVersion = "2024-11-05";
@@ -48,7 +49,8 @@ namespace ModelContextGateway.Core.Routing
             HttpClient? httpClient = null,
             IConfiguration? configuration = null,
             ILogger<AdminMcpServer>? logger = null,
-            IMasterKeyManager? masterKeyManager = null)
+            IMasterKeyManager? masterKeyManager = null,
+            ISecretRetriever? secretRetriever = null)
         {
             _serverRepository = serverRepository;
             _appKeyRepository = appKeyRepository;
@@ -66,6 +68,7 @@ namespace ModelContextGateway.Core.Routing
             _configuration = configuration;
             _logger = logger;
             _masterKeyManager = masterKeyManager;
+            _secretRetriever = secretRetriever;
         }
 
         /// <summary>
@@ -459,6 +462,18 @@ namespace ModelContextGateway.Core.Routing
                 case "reconnect_all":
                     {
                         await _healthCheckService.ProbeAllServersAsync();
+
+                        var allServers = (await _serverRepository.GetServersAsync())
+                            .Where(s => s.Enabled && s.Type != "custom");
+                        var activeSessions = _sessionManager.GetActiveSessions();
+                        foreach (var srv in allServers)
+                        {
+                            foreach (var session in activeSessions)
+                            {
+                                session.StartInitializationForBackend(srv.Id);
+                            }
+                        }
+
                         return new { success = true, message = "Reconnection triggered for all servers." };
                     }
 
@@ -1391,7 +1406,7 @@ namespace ModelContextGateway.Core.Routing
                 throw new KeyNotFoundException($"Server '{serverId}' not found.");
             }
 
-            using var conn = new BackendConnection(server, _httpClient, _logger ?? (ILogger)NullLogger.Instance, null);
+            using var conn = new BackendConnection(server, _httpClient, _logger ?? (ILogger)NullLogger.Instance, _secretRetriever);
             if (server.Type != "http" && server.Type != "streamable")
             {
                 using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));

@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ModelContextGateway.Components.Capabilities
@@ -20,6 +21,10 @@ namespace ModelContextGateway.Components.Capabilities
         public HttpResponse Response { get; }
         public string CallerUsername { get; }
         private readonly SemaphoreSlim _writeLock = new(1, 1);
+        private static readonly JsonSerializerOptions _adminSerializerOptions = new()
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
 
         public AdminSseSession(string sessionId, HttpResponse response, string callerUsername)
         {
@@ -30,7 +35,7 @@ namespace ModelContextGateway.Components.Capabilities
 
         public async Task WriteMessageAsync(object payload)
         {
-            var json = JsonSerializer.Serialize(payload);
+            var json = JsonSerializer.Serialize(payload, _adminSerializerOptions);
             await _writeLock.WaitAsync();
             try
             {
@@ -50,6 +55,10 @@ namespace ModelContextGateway.Components.Capabilities
     public static class AdminEndpoints
     {
         private static readonly ConcurrentDictionary<string, AdminSseSession> _adminSessions = new();
+        private static readonly JsonSerializerOptions _adminSerializerOptions = new()
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
 
         public static void RegisterSession(AdminSseSession session)
         {
@@ -125,7 +134,7 @@ namespace ModelContextGateway.Components.Capabilities
             // 1. Direct Streamable HTTP JSON-RPC POST handling
             if (httpContext.Request.Method == "POST" && !string.IsNullOrEmpty(method))
             {
-                if (isNotification)
+                if (isNotification || method.StartsWith("notifications/", StringComparison.OrdinalIgnoreCase))
                 {
                     httpContext.Response.StatusCode = 202;
                     return;
@@ -145,7 +154,7 @@ namespace ModelContextGateway.Components.Capabilities
 
                     var result = await adminMcpServer.ProcessRequestAsync(jsonRpcReq, callerUsername);
                     httpContext.Response.Headers.ContentType = "application/json";
-                    await httpContext.Response.WriteAsJsonAsync(result);
+                    await httpContext.Response.WriteAsJsonAsync(result, _adminSerializerOptions);
                     return;
                 }
                 catch (Exception ex)
@@ -157,7 +166,7 @@ namespace ModelContextGateway.Components.Capabilities
                         jsonrpc = "2.0",
                         id = id,
                         error = new { code = -32603, message = "An unexpected error occurred." }
-                    });
+                    }, _adminSerializerOptions);
                     return;
                 }
             }
@@ -173,7 +182,11 @@ namespace ModelContextGateway.Components.Capabilities
                 scheme = httpContext.Request.Scheme;
             }
 
-            var host = httpContext.Request.Host.Value;
+            var host = httpContext.Request.Headers["X-Forwarded-Host"].ToString();
+            if (string.IsNullOrEmpty(host))
+            {
+                host = httpContext.Request.Host.Value;
+            }
             var endpointPrefix = httpContext.Request.Path.Value?.StartsWith("/mcg-admin", StringComparison.OrdinalIgnoreCase) == true ? "/mcg-admin" : "/admin";
             var absoluteUrl = $"{scheme}://{host}{endpointPrefix}/message?sessionId={sessionId}";
 
@@ -255,7 +268,7 @@ namespace ModelContextGateway.Components.Capabilities
 
             try
             {
-                if (isNotification || method?.StartsWith("notifications/") == true)
+                if (isNotification || method?.StartsWith("notifications/", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     return Results.Accepted();
                 }
@@ -266,6 +279,11 @@ namespace ModelContextGateway.Components.Capabilities
                 var jsonRpcReq = !string.IsNullOrWhiteSpace(rawBody)
                     ? JsonSerializer.Deserialize<JsonRpcRequest>(rawBody)
                     : null;
+
+                if (jsonRpcReq?.Method?.StartsWith("notifications/", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    return Results.Accepted();
+                }
 
                 jsonRpcReq ??= new JsonRpcRequest
                 {
