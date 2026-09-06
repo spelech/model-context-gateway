@@ -10,9 +10,10 @@ namespace ModelContextGateway.Infrastructure.Persistence
         public async Task SaveServerAsync(IDbConnection conn, McpServer server)
         {
             await conn.ExecuteAsync(@"
-                INSERT INTO `Servers` (`Id`, `DisplayName`, `Url`, `Enabled`, `Hidden`, `Type`, `SecretProvider`, `SecretItemKey`, `SecretMount`, `SecretPath`, `SecretField`, `AuthShape`, `CustomHeaderName`, `Categories`, `ApiKey`, `HeadersJson`)
-                VALUES (@Id, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson)
+                INSERT INTO `Servers` (`Id`, `Alias`, `DisplayName`, `Url`, `Enabled`, `Hidden`, `Type`, `SecretProvider`, `SecretItemKey`, `SecretMount`, `SecretPath`, `SecretField`, `AuthShape`, `CustomHeaderName`, `Categories`, `ApiKey`, `HeadersJson`)
+                VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson)
                 ON DUPLICATE KEY UPDATE
+                    `Alias` = @Alias,
                     `DisplayName` = @DisplayName,
                     `Url` = @Url,
                     `Enabled` = @Enabled,

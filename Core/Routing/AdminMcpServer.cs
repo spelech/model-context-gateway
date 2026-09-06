@@ -7,11 +7,72 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace ModelContextGateway.Core.Routing
 {
     /// <summary>
+    /// Result wrapper for direct in-process admin tool execution.
+    /// </summary>
+    public record AdminToolExecutionResult(bool Success, object? Data, string? Error = null);
+
+    /// <summary>
     /// In-process virtual Admin MCP Server providing 10 consolidated entity tools
     /// covering 100% of the router gateway administration and diagnostics flows.
     /// </summary>
     public class AdminMcpServer
     {
+        /// <summary>
+        /// Directly executes the manage_servers tool action for in-process callers and test harnesses.
+        /// </summary>
+        public async Task<AdminToolExecutionResult> ExecuteManageServersAsync(Dictionary<string, object> args, string callerUsername = "admin")
+        {
+            return await ExecuteManageServersCoreAsync(args, callerUsername);
+        }
+
+        /// <summary>
+        /// Directly executes the manage_servers tool action for in-process callers and test harnesses.
+        /// </summary>
+        public async Task<AdminToolExecutionResult> ExecuteManageServersAsync(IDictionary<string, object> args, string callerUsername = "admin")
+        {
+            return await ExecuteManageServersCoreAsync(args, callerUsername);
+        }
+
+        /// <summary>
+        /// Directly executes the manage_servers tool action for in-process callers and test harnesses.
+        /// </summary>
+        public async Task<AdminToolExecutionResult> ExecuteManageServersAsync(JsonElement args, string callerUsername = "admin")
+        {
+            return await ExecuteManageServersCoreAsync(args, callerUsername);
+        }
+
+        /// <summary>
+        /// Directly executes the manage_servers tool action for in-process callers and test harnesses.
+        /// </summary>
+        public async Task<AdminToolExecutionResult> ExecuteManageServersAsync(object args, string callerUsername = "admin")
+        {
+            return await ExecuteManageServersCoreAsync(args, callerUsername);
+        }
+
+        private async Task<AdminToolExecutionResult> ExecuteManageServersCoreAsync(object args, string callerUsername = "admin")
+        {
+            try
+            {
+                JsonElement element;
+                if (args is JsonElement je)
+                {
+                    element = je;
+                }
+                else
+                {
+                    var json = JsonSerializer.Serialize(args);
+                    using var doc = JsonDocument.Parse(json);
+                    element = doc.RootElement.Clone();
+                }
+
+                var data = await HandleManageServersAsync(element, callerUsername);
+                return new AdminToolExecutionResult(true, data);
+            }
+            catch (Exception ex)
+            {
+                return new AdminToolExecutionResult(false, null, ex.Message);
+            }
+        }
         private readonly IServerRepository _serverRepository;
         private readonly IAppKeyRepository _appKeyRepository;
         private readonly ISecretProviderRepository _secretProviderRepository;
@@ -315,6 +376,7 @@ namespace ModelContextGateway.Core.Routing
                             return new
                             {
                                 s.Id,
+                                alias = s.Alias,
                                 s.DisplayName,
                                 s.Url,
                                 s.Enabled,
@@ -346,6 +408,7 @@ namespace ModelContextGateway.Core.Routing
                         return new
                         {
                             server.Id,
+                            alias = server.Alias,
                             server.DisplayName,
                             server.Url,
                             server.Enabled,
@@ -364,12 +427,22 @@ namespace ModelContextGateway.Core.Routing
                     }
 
                 case "create":
+                case "add":
                     {
                         var server = ParseServerFromArgs(args);
                         if (string.IsNullOrWhiteSpace(server.Id))
                         {
                             server.Id = Guid.NewGuid().ToString("N")[..8];
                         }
+
+                        var existingServers = await _serverRepository.GetServersAsync();
+                        var aliasErr = ServerValidationHelper.ValidateAlias(server.Alias, server.Id, existingServers);
+                        if (aliasErr != null)
+                        {
+                            throw new ArgumentException(aliasErr);
+                        }
+
+                        server.Alias = string.IsNullOrWhiteSpace(server.Alias) ? null : server.Alias.Trim();
 
                         ValidateServerConfig(server);
 
@@ -389,6 +462,16 @@ namespace ModelContextGateway.Core.Routing
                         }
 
                         UpdateServerFromArgs(existing, args);
+
+                        var existingServers = await _serverRepository.GetServersAsync();
+                        var aliasErr = ServerValidationHelper.ValidateAlias(existing.Alias, existing.Id, existingServers);
+                        if (aliasErr != null)
+                        {
+                            throw new ArgumentException(aliasErr);
+                        }
+
+                        existing.Alias = string.IsNullOrWhiteSpace(existing.Alias) ? null : existing.Alias.Trim();
+
                         ValidateServerConfig(existing);
 
                         await _serverRepository.SaveServerAsync(existing);
@@ -1515,6 +1598,11 @@ namespace ModelContextGateway.Core.Routing
                 server.Id = idProp.GetString()!;
             }
 
+            if (args.TryGetProperty("alias", out var aliasProp))
+            {
+                server.Alias = aliasProp.GetString();
+            }
+
             if (args.TryGetProperty("displayName", out var dnProp) && !string.IsNullOrWhiteSpace(dnProp.GetString()))
             {
                 server.DisplayName = dnProp.GetString()!;
@@ -1597,7 +1685,16 @@ namespace ModelContextGateway.Core.Routing
                     server.Categories = deserialized.Categories;
                     server.ApiKey = deserialized.ApiKey;
                     server.HeadersJson = deserialized.HeadersJson;
+                    if (deserialized.Alias != null)
+                    {
+                        server.Alias = deserialized.Alias;
+                    }
                 }
+            }
+
+            if (args.TryGetProperty("alias", out var aliasProp))
+            {
+                server.Alias = aliasProp.GetString();
             }
 
             if (args.TryGetProperty("displayName", out var dnProp) && !string.IsNullOrWhiteSpace(dnProp.GetString()))
@@ -1730,8 +1827,9 @@ namespace ModelContextGateway.Core.Routing
                         type = "object",
                         properties = new
                         {
-                            action = new { type = "string", @enum = new[] { "list", "get", "create", "update", "delete", "toggle", "reconnect", "reconnect_all" }, description = "Action to execute" },
+                            action = new { type = "string", @enum = new[] { "list", "get", "create", "add", "update", "delete", "toggle", "reconnect", "reconnect_all" }, description = "Action to execute" },
                             id = new { type = "string", description = "Server identifier" },
+                            alias = new { type = "string", description = "Optional custom routing namespace/alias for the server (e.g. 'homebox_db')." },
                             displayName = new { type = "string", description = "Server display name" },
                             url = new { type = "string", description = "Server endpoint URL or command" },
                             type = new { type = "string", @enum = new[] { "sse", "http", "streamable", "stdio", "custom" }, description = "Transport protocol type" },
