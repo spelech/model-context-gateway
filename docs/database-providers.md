@@ -1,10 +1,10 @@
-# 🗄️ Database Provider Support & Deployment Matrix
+# Database Provider Support & Deployment Matrix
 
 This document details the architectural specification, schema contracts, encryption model, and deployment configurations for database engines supported by the **Model Context Protocol (MCP) Router Gateway**.
 
 ---
 
-## 📊 Database Engine Support Matrix
+## Database Engine Support Matrix
 
 Model Context Gateway (MCG) employs **Dapper** with specialized dialect handlers and native ADO.NET providers to deliver high-throughput, low-latency persistence across embedded, enterprise on-premises, and cloud environments.
 
@@ -23,7 +23,7 @@ Model Context Gateway (MCG) employs **Dapper** with specialized dialect handlers
 
 ---
 
-## 🗺️ Unified Database Entity-Relationship Diagram (ERD)
+## Unified Database Entity-Relationship Diagram (ERD)
 
 The following diagram models the complete schema architecture, primary keys (`PK`), unique keys (`UK`), foreign key constraints (`FK`), data types, and relational cardinality across all 12 core tables in Model Context Gateway (MCG) persistence tier. A dedicated standalone specification is available at [**Canonical Data Model & Database ERD**](data-model.md):
 
@@ -195,7 +195,7 @@ erDiagram
 
 ---
 
-## 🔍 Dialect Specifications & Schema Contracts
+## Dialect Specifications & Schema Contracts
 
 ### 1. SQLite Engine Dialect
 
@@ -358,7 +358,7 @@ DELIMITER ;
 
 ---
 
-## 🔐 Database Encryption & Secrets Architecture
+## Database Encryption & Secrets Architecture
 
 Model Context Gateway (MCG) implements authenticated envelope encryption for all sensitive secrets, tokens, and third-party configuration payloads persisted in the database.
 
@@ -402,7 +402,7 @@ Sensitive provider settings are stored in dedicated encrypted columns:
 
 ---
 
-## 🛡️ Startup Schema Validation & Fail-Closed Integrity Checks
+## Startup Schema Validation & Fail-Closed Integrity Checks
 
 To prevent runtime data corruption or silent failures caused by misconfigured schemas, the gateway executes a comprehensive validation pass on every startup ([`DatabaseSeederService.ValidateSchemaCompatibility`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Persistence/DatabaseSeederService.cs)):
 
@@ -454,7 +454,7 @@ If any column, stored procedure, data type, or parameter convention is missing o
 
 ---
 
-## 🚀 Deployment & Configuration Matrix
+## Deployment & Configuration Matrix
 
 ### 1. SQLite Deployment (Default / Embedded)
 
@@ -647,7 +647,7 @@ volumes:
 
 ---
 
-## 🔗 Related Documentation & References
+## Related Documentation & References
 
 * [Production Deployment & Database Migration Guide](deployment-guide.md)
 * [System Architecture & Dependency Injection](architecture.md)
