@@ -175,8 +175,10 @@ namespace ModelContextGateway.Tests
         public async Task PreWarmAsync_Executes_Without_Throwing()
         {
             var (provider, conn) = CreateServiceProvider();
+            bool preWarmCallReceived = false;
             var handler = new MockHttpMessageHandler(req =>
             {
+                preWarmCallReceived = true;
                 var json = "{\"data\":[{\"embedding\":[0.1, 0.2]}]}";
                 return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json) };
             });
@@ -188,6 +190,10 @@ namespace ModelContextGateway.Tests
             service.SaveSettings(settings);
 
             await service.PreWarmAsync();
+
+            Assert.True(preWarmCallReceived);
+            Assert.True(service.IsReady);
+            Assert.Equal("Ready", service.Status);
         }
 
         [Fact]
