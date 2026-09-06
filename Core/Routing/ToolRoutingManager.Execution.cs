@@ -156,13 +156,14 @@ namespace ModelContextGateway.Core.Routing
                 }
 
                 var results = await SemanticSearchService.SearchToolsSemanticAsync(query, tools, embeddingService, logger);
+                var serialized = JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true });
                 return new
                 {
                     resultType = "complete",
                     content = new[] {
                         new {
                             type = "text",
-                            text = JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true })
+                            text = serialized
                         }
                     }
                 };
@@ -208,6 +209,23 @@ namespace ModelContextGateway.Core.Routing
                     };
                 }
 
+                var (normalizedTargetName, ambiguityError) = NormalizeTargetToolName(targetName, servers, logger);
+                if (!string.IsNullOrEmpty(ambiguityError))
+                {
+                    return new
+                    {
+                        resultType = "complete",
+                        isError = true,
+                        content = new[] {
+                            new {
+                                type = "text",
+                                text = ambiguityError
+                            }
+                        }
+                    };
+                }
+                targetName = normalizedTargetName;
+
                 var activeServerIds = servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
                 if (!SecurityValidationHelper.ValidateToolOrPromptName(targetName, activeServerIds))
                 {
@@ -218,7 +236,7 @@ namespace ModelContextGateway.Core.Routing
                         content = new[] {
                             new {
                                 type = "text",
-                                text = $"Security Error: Invalid or spoofed namespaced identifier in execute_tool: '{targetName}'."
+                                text = $"Security Error: Invalid or unknown namespaced identifier in execute_tool: '{targetName}'. Available servers: {string.Join(", ", activeServerIds)}."
                             }
                         }
                     };
@@ -227,6 +245,7 @@ namespace ModelContextGateway.Core.Routing
                 var targetPayload = new
                 {
                     jsonrpc = "2.0",
+                    id = Guid.NewGuid().ToString("N"),
                     method = "tools/call",
                     @params = new
                     {

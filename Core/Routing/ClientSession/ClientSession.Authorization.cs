@@ -165,6 +165,14 @@ namespace ModelContextGateway.Core.Routing
             {
                 serverId = targetId.Split("__", 2)[0];
             }
+            else if (targetId.Contains('/'))
+            {
+                serverId = targetId.Split('/', 2)[0];
+            }
+            else if (targetId.Contains(':'))
+            {
+                serverId = targetId.Split(':', 2)[0];
+            }
             else if (targetId.StartsWith("plex_", StringComparison.OrdinalIgnoreCase))
             {
                 serverId = "plex";
