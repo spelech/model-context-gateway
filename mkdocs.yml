@@ -46,8 +46,13 @@ theme:
     - content.code.annotate
     - content.tabs.link
 
+exclude_docs: |
+  superpowers/**
+
 plugins:
   - search
+  - callouts
+
 
 markdown_extensions:
   - admonition
@@ -81,6 +86,7 @@ nav:
   - Home: index.md
   - Getting Started:
       - Features Overview: features-guide.md
+      - Single-User & Home-Lab Setup: single-user-and-homelab-guide.md
       - Docker & Container Deployment: deployment-guide.md
       - Windows & IIS Deployment: windows-deployment-and-validation-guide.md
       - Support Matrix: support-matrix.md
@@ -98,6 +104,7 @@ nav:
       - Admin MCP Automation Guide: admin-mcp-automation-guide.md
       - Admin MCP Features: admin-mcp-features.md
       - Operations Runbook: runbook.md
+      - Troubleshooting & RCA: mcp-routing-and-admin-issues.md
   - Security & Authentication:
       - Authentication Architecture: authentication-architecture.md
       - MCP Server Auth Cookbook: mcp-server-auth-cookbook.md
@@ -127,4 +134,5 @@ nav:
       - Code Coverage Report: coverage-report.md
       - Evaluation Guide: evaluation-guide.md
   - About:
+      - Management Briefing: management-brief.md
       - Project Pitch Deck: pitch-deck.md
