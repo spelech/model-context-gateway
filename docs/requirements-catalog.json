@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-06T03:20:34.0199445Z",
+    "generatedAt": "2026-09-06T06:10:17.6721232Z",
     "totalRequirements": 197,
     "positiveCount": 165,
     "guardrailCount": 32,
-    "totalProofs": 852
+    "totalProofs": 853
   },
   "requirements": [
     {
@@ -4194,13 +4194,20 @@
       "category": "MCP",
       "type": "Negative",
       "description": "AdminMcpServer ProcessRequestAsync handles server/discover request returning supported versions and subscriptions capability.",
-      "proofCount": 3,
+      "proofCount": 4,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 686,
           "testName": "ProcessRequestAsync_Handles_Server_Discover",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs",
+          "lineNumber": 371,
+          "testName": "DownstreamBackend_ProtocolVersionMismatch_NegotiatesOlderVersionSuccessfully",
           "details": null
         },
         {

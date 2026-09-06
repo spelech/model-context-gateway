@@ -214,14 +214,43 @@ namespace ModelContextGateway.Core.Routing
                         await WriteMessageAsync(doc.RootElement.Clone());
                     });
 
-                    // Send initialize request to this backend
+                    // Send initialize request to this backend with protocol version negotiation & fallback
                     using (var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
                     {
                         var initReq = string.IsNullOrEmpty(_lastInitializeRequest)
                             ? GatewayMetadata.BuildInitializeRequest()
                             : _lastInitializeRequest;
                         var resp = await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
-                        if (resp.Error != null)
+                        if (resp.Error != null && resp.Error.Code == -32601)
+                        {
+                            // Modern v2.0 (July 2026) MCP server where initialize handshake is omitted
+                            _logger.LogInformation("Backend server {ServerId} does not implement 'initialize' (-32601). Proceeding in stateless v2.0 mode.", server.Id);
+                        }
+                        else if (resp.Error != null && IsProtocolVersionMismatch(resp.Error))
+                        {
+                            var candidateVersions = ResolveCandidateVersions(resp.Error);
+                            bool negotiated = false;
+
+                            foreach (var fallbackVer in candidateVersions)
+                            {
+                                _logger.LogInformation("Attempting protocol negotiation fallback to '{ProtocolVersion}' for backend {ServerId}...", fallbackVer, server.Id);
+                                var fallbackReq = CreateInitializeRequestWithVersion(initReq, fallbackVer);
+                                var retryResp = await conn.SendRequestAsync("initialize", fallbackReq).WaitAsync(ctsInit.Token);
+                                if (retryResp.Error == null)
+                                {
+                                    _logger.LogInformation("Successfully negotiated protocol version '{ProtocolVersion}' with backend {ServerId}.", fallbackVer, server.Id);
+                                    resp = retryResp;
+                                    negotiated = true;
+                                    break;
+                                }
+                            }
+
+                            if (!negotiated && resp.Error != null)
+                            {
+                                throw new Exception($"Initialize failed after protocol version negotiation: {resp.Error.Message}");
+                            }
+                        }
+                        else if (resp.Error != null)
                         {
                             throw new Exception($"Initialize failed: {resp.Error.Message}");
                         }
@@ -275,6 +304,106 @@ namespace ModelContextGateway.Core.Routing
                     oldConn.Dispose();
                 }
                 _ = Task.Run(async () => await ConnectAndInitializeBackendAsync(server));
+            }
+        }
+
+        private static bool IsProtocolVersionMismatch(JsonRpcError error)
+        {
+            if (error.Code == -32022)
+            {
+                return true;
+            }
+            var msg = error.Message ?? string.Empty;
+            return msg.Contains("protocol version", StringComparison.OrdinalIgnoreCase) ||
+                   msg.Contains("unsupported protocol", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static List<string> ResolveCandidateVersions(JsonRpcError error)
+        {
+            var candidates = new List<string>();
+
+            if (error.Data.HasValue && error.Data.Value.ValueKind == JsonValueKind.Object)
+            {
+                if (error.Data.Value.TryGetProperty("supported", out var supportedElem) && supportedElem.ValueKind == JsonValueKind.Array)
+                {
+                    var serverSupported = new List<string>();
+                    foreach (var item in supportedElem.EnumerateArray())
+                    {
+                        if (item.ValueKind == JsonValueKind.String)
+                        {
+                            var s = item.GetString();
+                            if (!string.IsNullOrWhiteSpace(s))
+                            {
+                                serverSupported.Add(s.Trim());
+                            }
+                        }
+                    }
+
+                    // Dynamically sort descending by ISO date string (latest/highest version first)
+                    candidates.AddRange(serverSupported.OrderByDescending(v => v));
+                }
+            }
+
+            // Universal fallback baseline if no supported versions were provided by the server
+            if (candidates.Count == 0)
+            {
+                candidates.Add(GatewayMetadata.LegacyProtocolVersion);
+            }
+
+            return candidates;
+        }
+
+        private static string CreateInitializeRequestWithVersion(string baseRequest, string targetVersion)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(baseRequest);
+                var root = doc.RootElement;
+                var id = root.TryGetProperty("id", out var idElem) ? idElem.ToString() : "auto-init";
+
+                string clientName = "ModelContextGatewayAuto";
+                string clientVersion = GatewayMetadata.Version;
+                JsonElement capabilities = default;
+
+                if (root.TryGetProperty("params", out var paramsElem) && paramsElem.ValueKind == JsonValueKind.Object)
+                {
+                    if (paramsElem.TryGetProperty("capabilities", out var capsElem))
+                    {
+                        capabilities = capsElem.Clone();
+                    }
+                    if (paramsElem.TryGetProperty("clientInfo", out var clientElem) && clientElem.ValueKind == JsonValueKind.Object)
+                    {
+                        if (clientElem.TryGetProperty("name", out var nameElem))
+                        {
+                            clientName = nameElem.GetString() ?? clientName;
+                        }
+                        if (clientElem.TryGetProperty("version", out var verElem))
+                        {
+                            clientVersion = verElem.GetString() ?? clientVersion;
+                        }
+                    }
+                }
+
+                return JsonSerializer.Serialize(new
+                {
+                    jsonrpc = "2.0",
+                    method = "initialize",
+                    id,
+                    @params = new
+                    {
+                        protocolVersion = targetVersion,
+                        capabilities = capabilities.ValueKind != JsonValueKind.Undefined ? (object)capabilities : new { },
+                        clientInfo = new
+                        {
+                            name = clientName,
+                            version = clientVersion
+                        }
+                    }
+                });
+            }
+            catch
+            {
+                return GatewayMetadata.BuildInitializeRequest(protocolVersion: targetVersion);
             }
         }
     }
