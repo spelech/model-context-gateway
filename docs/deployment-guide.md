@@ -40,7 +40,7 @@ When no environment variables or configuration files are provided:
 
 ### 3. Immediate Live Endpoints
 * **Dashboard Web UI**: `http://localhost:8080/` (Full administrative dashboard)
-* **Health Probe**: `http://localhost:8080/health` (`{"status":"healthy","service":"ModelContextGateway","version":"5.10.0"}`)
+* **Health Probe**: `http://localhost:8080/health` (`{"status":"healthy","service":"ModelContextGateway","version":"5.11.0"}`)
 * **Meta-Mode MCP Gateway**: `http://localhost:8080/sse` (Exposes `search_tools` and `execute_tool`)
 * **Admin MCP Server**: `http://localhost:8080/admin/sse` (or `POST /admin` for direct JSON-RPC tool dispatch, or `GET /mcg-admin/sse`)
 
