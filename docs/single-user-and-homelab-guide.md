@@ -38,7 +38,7 @@ This guide details how to install, configure, and operate the **Model Context Ga
           │  5. Flexible Multi-Key Provisioning               │
           │     • Web UI (+ Generate Key)                     │
           │     • MCG_CLIENT_APP_KEYS environment variable     │
-          │     • Admin MCP tool: create_app_key              │
+          │     • Admin MCP tool: manage_appkeys              │
           │     • Auto-seeded .admin.key and .client.key      │
           └────────────────────────┬──────────────────────────┘
                                    │
@@ -51,9 +51,9 @@ This guide details how to install, configure, and operate the **Model Context Ga
 
 ---
 
-## 60-Second Zero-Config Quickstart
+## 60-Second Quickstart
 
-You can start Model Context Gateway with **zero environment variables** and **zero certificate configuration**.
+Start Model Context Gateway with default settings:
 
 ### 1. Launch with Docker Compose
 Create a `docker-compose.yml` file:
@@ -78,76 +78,77 @@ Run:
 docker compose up -d
 ```
 
-### 2. Retrieve Your Auto-Generated Keys
-On first startup, MCG automatically creates the SQLite database and persists your keys into `./data/`:
+### 2. Retrieve Your Keys
+On first startup, MCG creates the SQLite database and writes initial keys to `./data/`:
 
 ```bash
-# General tool calling key for AI clients (Cursor, Claude, Cline, etc.)
+# General tool calling key for AI clients (Cursor, Claude, Cline)
 cat ./data/.client.key
 # -> mcp-glb-R4t8W1yU-9pM2nQ6sD8fH3jK5
 
-# Admin key for gateway management and AI Agent configuration (/admin/sse)
+# Admin key for gateway administration and AI agent configuration (/admin)
 cat ./data/.admin.key
 # -> mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9
 ```
 
 ### 3. Open the Web Dashboard
-Open `http://localhost:8080/` in your browser. From localhost or your local LAN subnet, you have immediate full administrator access without any login prompts.
+Open `http://localhost:8080/` in your browser. From localhost or your local LAN subnet, you have immediate administrator access without login prompts.
 
 ---
 
-## AppKey Scoping & Multi-Client Isolation
+## AppKey Scoping & Permissions
 
-Single users can create multiple individualized AppKeys to control exactly which tools each AI assistant or script can invoke.
+You can create multiple AppKeys to control which tools each AI assistant or script can run.
 
-### Scope Types & Granularity
+### Scope Syntax & Rules
 
-| Scope Type | Example Syntax | Behavior | Ideal Client |
+| Scope Type | Example Syntax | Description | Best For |
 | :--- | :--- | :--- | :--- |
 | **Global Access** | `all` or `*` | Full access to all backend servers and tools | Claude Desktop, Antigravity |
-| **Server Scoped** | `server:docker`, `server:postgres` | Restricts access exclusively to tools from that specific backend server | Cursor, VS Code / Cline |
-| **Category Scoped** | `category:devops`, `category:media` | Restricts access to all servers tagged with that category | Domain-specific assistants |
-| **Tool Scoped** | `tool:docker__list_containers` | Restricts access to a single specific tool | Automated webhooks or scripts |
-| **Capability Scoped**| `resources:read`, `prompts:read` | Read-only context lookup without tool execution | Research and docs assistants |
-| **System Admin** | `admin` | Full gateway management via Admin MCP server (`/admin/sse`) | Autonomous admin subagents |
+| **Server Scoped** | `server:docker`, `server:postgres` | Restricts access to one backend server | Cursor, VS Code / Cline |
+| **Category Scoped** | `category:devops`, `category:media` | Restricts access to servers with that category | Specialized AI assistants |
+| **Tool Scoped** | `tool:docker__list_containers` | Restricts access to a single specific tool | Scripts and webhooks |
+| **Capability Scoped**| `resources:read`, `prompts:read` | Read-only context lookup without tool execution | Documentation assistants |
+| **System Admin** | `admin` | Full gateway management via Admin MCP server (`/admin`) | Admin AI assistants |
 
 ---
 
 ## Managing AppKeys
 
-### Option A: Interactive Web UI Dashboard
-1. Open `http://localhost:8080/` and navigate to **App Keys**.
+### Option A: Web Dashboard
+1. Open `http://localhost:8080/` and click **App Keys & Security**.
 2. Click **+ Generate App Key**.
-3. Choose a descriptive name (e.g. `Cursor (Docker Tools Only)`), select your desired scope (e.g. `server:docker`), and click **Create Key**.
-4. Switch to the **Client Setup Guide** tab to view pre-filled configuration snippets for all major AI clients with your new key.
+3. Enter a name (for example: `Cursor - Docker Only`), select a scope (such as `server:docker`), and click **Generate Key**.
+4. The dashboard displays the secret key once. Copy it to your client settings.
 
-### Option B: Declarative via `.env` / Docker Compose
-Pre-seed your keys upfront during container launch using `MCG_CLIENT_APP_KEYS`:
+### Option B: Docker Compose Environment Variable
+Pre-seed keys on startup using `MCG_CLIENT_APP_KEYS`:
 
 ```ini
-MCG_CLIENT_APP_KEYS=mcp-glb-claudeFull123:ClaudeDesktop:all,mcp-srv-cursorDocker456:Cursor:server:docker,mcp-grp-openWebUI789:OpenWebUI:category:media;category:homecontrol
+MCG_CLIENT_APP_KEYS=mcp-glb-claudeFull123:ClaudeDesktop:all,mcp-srv-cursorDocker456:Cursor:server:docker,mcp-grp-openWebUI789:OpenWebUI:category:media
 ```
 
-### Option C: Autonomous AI Agent Management
-AI coding agents (such as Antigravity) connected to `/admin/sse` can call the `create_app_key` tool dynamically:
+### Option C: AI Agent Tool Call
+AI coding assistants connected to `/admin` can call the `manage_appkeys` tool directly:
 
 ```json
 {
-  "name": "Cline Scratchpad Key",
+  "action": "create",
+  "name": "Cline Key",
   "scopes": ["server:filesystem", "server:git"]
 }
 ```
 
 ---
 
-## Built-in SQLite Secret Storage (Cross-Platform)
+## Built-in SQLite Secret Storage
 
-Model Context Gateway includes a native **AES-256-GCM Envelope Encryption Engine** (`DatabaseUserSecretStore`).
+Model Context Gateway includes built-in credential encryption using AES-256-GCM.
 
-* **Zero External Dependencies**: You do not need HashiCorp Vault, Windows DPAPI/Registry, or cloud secret managers.
-* **Encrypted At Rest**: Every API key, bearer token, password, or downstream header entered in the Web UI or Admin MCP is automatically encrypted before being written to `./data/mcg.db`.
-* **Just-In-Time Downstream Injection**: When an AI client invokes a tool, MCG decrypts the server's credential in-memory and injects the header (e.g., `Authorization: Bearer <key>`) downstream.
-* **Auto-Generated Master Key**: The 256-bit encryption key is automatically generated and safely stored in `./data/.master.key` (with `0600` permissions).
+* **Zero External Dependencies**: You do not need Vault or external secret managers for personal use.
+* **Encrypted at Rest**: Every API key or password entered in the dashboard is encrypted before being written to `./data/mcg.db`.
+* **Just-In-Time Header Injection**: When an AI client runs a tool, MCG decrypts the server credential in memory and sends it to the backend server.
+* **Auto-Generated Master Key**: The 256-bit encryption key is stored safely in `./data/.master.key` (with `0600` permissions).
 
 ---
 
@@ -159,9 +160,9 @@ Model Context Gateway includes a native **AES-256-GCM Envelope Encryption Engine
   "mcpServers": {
     "mcg": {
       "command": "npx",
-      "args": ["-y", "mcp-proxy", "http://localhost:8080/sse"],
+      "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8080/sse"],
       "env": {
-        "MCP_PROXY_HEADER_AUTHORIZATION": "Bearer mcp-glb-R4t8W1yU-9pM2nQ6sD8fH3jK5"
+        "Authorization": "Bearer mcp-glb-R4t8W1yU-9pM2nQ6sD8fH3jK5"
       }
     }
   }
