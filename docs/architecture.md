@@ -115,41 +115,20 @@ Model Context Gateway (MCG) supports:
 
 The router architecture is partitioned into seven layers:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                 LAYER 1: INGRESS & EDGE SECURITY                                │
-│   Reverse Proxy (Caddy/Nginx) ──► McpSpecMiddleware ──► McpAuthorizationSpecMiddleware     │
-└────────────────────────────────────────────────┬────────────────────────────────────────────────┘
-                                                 │
-┌────────────────────────────────────────────────▼────────────────────────────────────────────────┐
-│                           LAYER 2: AUTHENTICATION & IDENTITY MAPPING                            │
-│   CompositeIdentityProvider ──► ActiveDirectory (LDAP SIDs) ──► OIDC Headers ──► AppKey Auth   │
-└────────────────────────────────────────────────┬────────────────────────────────────────────────┘
-                                                 │
-┌────────────────────────────────────────────────▼────────────────────────────────────────────────┐
-│                     LAYER 3: PROTOCOL, SESSION & MULTIPLEXING ENGINE                            │
-│   ProxyEndpoints ──► SessionManager ──► ClientSession ──► JsonRpcStateManager & ID Rewriter    │
-└────────────────────────────────────────────────┬────────────────────────────────────────────────┘
-                                                 │
-┌────────────────────────────────────────────────▼────────────────────────────────────────────────┐
-│                        LAYER 4: SEMANTIC INTELLIGENCE & META-MODE                               │
-│   DynamicEmbeddingService ──► OnnxEmbeddingService (all-MiniLM-L6-v2) ──► SemanticSearchService│
-└────────────────────────────────────────────────┬────────────────────────────────────────────────┘
-                                                 │
-┌────────────────────────────────────────────────▼────────────────────────────────────────────────┐
-│                          LAYER 5: AUTHORIZATION & RBAC DECISION ENGINE                          │
-│   AppKey Scope Filter ──► Admin SID Bypass ──► Database RBAC (sp_EvaluateUserAccess)            │
-└────────────────────────────────────────────────┬────────────────────────────────────────────────┘
-                                                 │
-┌────────────────────────────────────────────────▼────────────────────────────────────────────────┐
-│                         LAYER 6: PERSISTENCE & SECRET RESOLUTION                                │
-│   DbConnectionFactory (SQLite/MSSQL/MySQL) ──► CompositeSecretRetriever ──► AES-256-GCM Crypto  │
-└────────────────────────────────────────────────┬────────────────────────────────────────────────┘
-                                                 │
-┌────────────────────────────────────────────────▼────────────────────────────────────────────────┐
-│                        LAYER 7: DOWNSTREAM MCP SERVER FLEET & TRANSPORTS                        │
-│   SseTransport (Duplex) ──► HttpTransport (Stateless) ──► StdioTransport (Subprocess NDJSON)    │
-└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    L1["<b>LAYER 1: INGRESS & EDGE SECURITY</b><br>Reverse Proxy (Caddy/Nginx) ➔ McpSpecMiddleware ➔ McpAuthorizationSpecMiddleware"]
+    L2["<b>LAYER 2: AUTHENTICATION & IDENTITY MAPPING</b><br>CompositeIdentityProvider ➔ ActiveDirectory (LDAP SIDs) ➔ OIDC Headers ➔ AppKey Auth"]
+    L3["<b>LAYER 3: PROTOCOL, SESSION & MULTIPLEXING ENGINE</b><br>ProxyEndpoints ➔ SessionManager ➔ ClientSession ➔ JsonRpcStateManager & ID Rewriter"]
+    L4["<b>LAYER 4: SEMANTIC INTELLIGENCE & META-MODE</b><br>DynamicEmbeddingService ➔ OnnxEmbeddingService (all-MiniLM-L6-v2) ➔ SemanticSearchService"]
+    L5["<b>LAYER 5: AUTHORIZATION & RBAC DECISION ENGINE</b><br>AppKey Scope Filter ➔ Admin SID Bypass ➔ Database RBAC (sp_EvaluateUserAccess)"]
+    L6["<b>LAYER 6: PERSISTENCE & SECRET RESOLUTION</b><br>DbConnectionFactory (SQLite/MSSQL/MySQL) ➔ CompositeSecretRetriever ➔ AES-256-GCM Crypto"]
+    L7["<b>LAYER 7: DOWNSTREAM MCP SERVER FLEET & TRANSPORTS</b><br>SseTransport (Duplex) ➔ HttpTransport (Stateless) ➔ StdioTransport (Subprocess NDJSON)"]
+
+    L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> L7
+
+    classDef layer fill:#161b22,stroke:#00c853,stroke-width:1.5px,color:#fff;
+    class L1,L2,L3,L4,L5,L6,L7 layer;
 ```
 
 ### System Context & Architecture Diagram
@@ -735,36 +714,29 @@ sequenceDiagram
 
 Requests pass through four security stages:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ STAGE 1: APPKEY SCOPE BOUNDARY (Fast-Path Key Filtering)                    │
-│   Does the caller's AppKey allow the requested target?                      │
-│   Grammar: `*`, `all`, `server:{id}`, `category:{cat}`, `tool:{id}`,        │
-│            `prompt:{id}`, `resource:{id}`                                   │
-└──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │ Pass
-┌──────────────────────────────────────▼──────────────────────────────────────┐
-│ STAGE 2: IDENTITY RESOLUTION & GROUP MAPPING                                │
-│   Resolve caller username, Active Directory SIDs, and OIDC headers.         │
-│   Translate external SIDs / groups to internal roles via `GroupMappings`.    │
-└──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │
-┌──────────────────────────────────────▼──────────────────────────────────────┐
-│ STAGE 3: ADMINISTRATOR SID BYPASS CHECK                                     │
-│   Does the caller possess the Admin SID (`S-1-5-32-544` / `full_admin`)?    │
-└──────────────────────────────────────┬──────────────────────────────────────┘
-                   │ No                                   │ Yes (Admin Bypass)
-┌──────────────────▼───────────────────┐        ┌─────────▼───────────────────┐
-│ STAGE 4: DATABASE-BACKED RBAC        │        │ AUTHORIZED (200 OK)         │
-│   - Explicit Deny overrides Allow    │        │ Invocation Audit Logged     │
-│   - Category & Server inheritance    │        └─────────────────────────────┘
-│   - Fail-Closed Default (DENY)       │
-└──────────────────┬───────────────────┘
-                   │ Allowed
-┌──────────────────▼───────────────────┐
-│ AUTHORIZED (200 OK)                  │
-│ Invocation Audit Logged              │
-└──────────────────────────────────────┘
+```mermaid
+flowchart TD
+    Stage1["<b>STAGE 1: APPKEY SCOPE BOUNDARY</b><br><i>Fast-Path Key Filtering (*, server:{id}, category:{cat}, tool:{id})</i>"]
+    Stage2["<b>STAGE 2: IDENTITY RESOLUTION & GROUP MAPPING</b><br><i>Resolve username, Active Directory SIDs & translate via GroupMappings</i>"]
+    Stage3{"<b>STAGE 3: ADMIN SID BYPASS?</b><br><i>(S-1-5-32-544 / full_admin)</i>"}
+    Stage4["<b>STAGE 4: DATABASE-BACKED RBAC</b><br><i>Explicit Deny overrides Allow<br>Category & Server inheritance<br>Fail-Closed Default</i>"]
+    AuthSuccess["<b>AUTHORIZED (200 OK)</b><br><i>Invocation Audit Logged</i>"]
+    AuthDenied["<b>ACCESS DENIED (403)</b><br><i>Security Violation Audit Logged</i>"]
+
+    Stage1 -- "Pass" --> Stage2
+    Stage1 -- "Scope Mismatch" --> AuthDenied
+    Stage2 --> Stage3
+    Stage3 -- "Yes (Admin Bypass)" --> AuthSuccess
+    Stage3 -- "No" --> Stage4
+    Stage4 -- "Allowed" --> AuthSuccess
+    Stage4 -- "Denied / Missing Policy" --> AuthDenied
+
+    classDef pass fill:#0f2e1b,stroke:#00c853,stroke-width:2px,color:#fff;
+    classDef fail fill:#3a0f12,stroke:#f85149,stroke-width:2px,color:#fff;
+    classDef stage fill:#161b22,stroke:#30363d,stroke-width:1px,color:#e6edf3;
+    class Stage1,Stage2,Stage3,Stage4 stage;
+    class AuthSuccess pass;
+    class AuthDenied fail;
 ```
 
 ### Scope Grammar & Resolution

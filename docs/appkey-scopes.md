@@ -33,36 +33,29 @@ External callers authenticate through two methods:
 
 The gateway enforces four concentric security boundaries:
 
-```
-+-----------------------------------------------------------------------------------+
-| 1. AppKey Scope Boundary (Fast-Path Key Filtering)                                |
-|    Does the caller's AppKey allow the target server, category, or tool?           |
-+-----------------------------------------------------------------------------------+
-                                         │ Allowed
-                                         ▼
-+-----------------------------------------------------------------------------------+
-| 2. Identity Resolution & Group Mapping                                            |
-|    Resolve username, external SIDs, and map them to internal groups               |
-+-----------------------------------------------------------------------------------+
-                                         │
-                                         ▼
-+-----------------------------------------------------------------------------------+
-| 3. Administrative Bypass Check                                                    |
-|    Does the resolved principal possess the Admin SID (S-1-5-32-544 / Admin:GroupSid)?|
-+-----------------------------------------------------------------------------------+
-                    │ No                                  │ Yes (Admin Bypass)
-                    ▼                                     ▼
-+---------------------------------------------------+  +----------------------------+
-| 4. RBAC Policy Evaluation (Fail-Closed)           |  | Authorized (200 OK)        |
-|    - Explicit Deny overrides Allow                |  | Invocation Audit Logged    |
-|    - Target/Group matching across categories      |  +----------------------------+
-|    - Default: DENY                                |
-+---------------------------------------------------+
-                    │ Allowed
-                    ▼
-          +-------------------+
-          | Authorized (200)  |
-          +-------------------+
+```mermaid
+flowchart TD
+    B1["<b>1. AppKey Scope Boundary</b><br><i>Fast-Path Key Filtering (*, server:{id}, category:{cat})</i>"]
+    B2["<b>2. Identity Resolution & Group Mapping</b><br><i>Resolve username, external SIDs & internal groups</i>"]
+    B3{"<b>3. Admin Bypass Check</b><br><i>Caller has Admin SID (S-1-5-32-544 / full_admin)?</i>"}
+    B4["<b>4. RBAC Policy Evaluation (Fail-Closed)</b><br><i>Explicit Deny overrides Allow<br>Target/Group matching across categories<br>Default: DENY</i>"]
+    AuthSuccess["<b>Authorized (200 OK)</b><br><i>Invocation Audit Logged</i>"]
+    AuthDenied["<b>Access Denied (403)</b><br><i>Security Violation Audit Logged</i>"]
+
+    B1 -- "Allowed" --> B2
+    B1 -- "Scope Mismatch" --> AuthDenied
+    B2 --> B3
+    B3 -- "Yes (Admin Bypass)" --> AuthSuccess
+    B3 -- "No" --> B4
+    B4 -- "Allowed" --> AuthSuccess
+    B4 -- "Denied / Missing Policy" --> AuthDenied
+
+    classDef pass fill:#0f2e1b,stroke:#00c853,stroke-width:2px,color:#fff;
+    classDef fail fill:#3a0f12,stroke:#f85149,stroke-width:2px,color:#fff;
+    classDef step fill:#161b22,stroke:#30363d,stroke-width:1px,color:#e6edf3;
+    class B1,B2,B3,B4 step;
+    class AuthSuccess pass;
+    class AuthDenied fail;
 ```
 
 ---
@@ -195,12 +188,22 @@ $$\text{Token Format} = \underbrace{\texttt{mcp}}_{\text{Scheme}}-\underbrace{\t
 
 ### 2. Cryptographic Storage & One-Time Display
 
-```
-[Plaintext Key Generated] ────► SHA-256 Hash ────► EncryptedKey (64 hex characters stored in DB)
-           │
-           ├───────────────► Return to Client ONCE (JSON response)
-           ▼
-[Plaintext Discarded from Memory]
+```mermaid
+flowchart LR
+    Gen["Plaintext Key Generated"]
+    Hash["SHA-256 Hash Digest"]
+    DB[("EncryptedKey<br><i>(64 hex characters in DB)</i>")]
+    Client["Client Response<br><i>(Returned ONCE)</i>"]
+    Discard["Plaintext Discarded<br><i>from Memory</i>"]
+
+    Gen --> Hash --> DB
+    Gen --> Client
+    Gen --> Discard
+
+    classDef nodeStyle fill:#161b22,stroke:#ff5f1f,stroke-width:1.5px,color:#fff;
+    classDef dbStyle fill:#0f2e1b,stroke:#00c853,stroke-width:1.5px,color:#fff;
+    class Gen,Hash,Client,Discard nodeStyle;
+    class DB dbStyle;
 ```
 
 - **One-Way SHA-256 Hash**: The database stores only the SHA-256 hash digest of the key in the `EncryptedKey` column.

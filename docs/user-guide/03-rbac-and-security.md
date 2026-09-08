@@ -8,44 +8,32 @@ The **Model Context Gateway (MCG)** enforces Role-Based Access Control (RBAC). I
 
 The gateway evaluates every tool invocation, virtual resource request, and prompt evaluation through a four-stage pipeline:
 
-```
-                           4-STAGE AUTHORIZATION PIPELINE
-                           
-                           +----------------------------+
-                           |  Incoming MCP Invocation   |
-                           | (Principal, Groups, Scope) |
-                           +----------------------------+
-                                         |
-                                         v
-                      +--------------------------------------+
-                      |  Stage 1: Explicit Deny Evaluation   |
-                      |  Is any principal group in Denied?   |
-                      +--------------------------------------+
-                                  |              |
-                              YES |              | NO
-                                  v              v
-                           [ 403 Forbidden ]  +--------------------------------------+
-                                              |  Stage 2: Explicit Allow Evaluation  |
-                                              |  Is any principal group in Allowed?  |
-                                              +--------------------------------------+
-                                                          |              |
-                                                      YES |              | NO
-                                                          v              v
-                                           +-----------------------------------+
-                                           | Stage 3: AppKey Scope Evaluation  |
-                                           | Does AppKey scope grant access?   |
-                                           +-----------------------------------+
-                                                          |              |
-                                                      YES |              | NO
-                                                          v              v
-                                                   [ Authorized ]  +-----------------------------------+
-                                                                   | Stage 4: Default Policy Fallback  |
-                                                                   | Is DefaultAllow enabled on server?|
-                                                                   +-----------------------------------+
-                                                                               |              |
-                                                                           YES |              | NO
-                                                                               v              v
-                                                                        [ Authorized ] [ 403 Forbidden ]
+```mermaid
+flowchart TD
+    Req["<b>Incoming MCP Invocation</b><br><i>(Principal, Groups, Scope)</i>"]
+    S1{"<b>Stage 1: Explicit Deny</b><br><i>Is any principal group in Denied?</i>"}
+    S2{"<b>Stage 2: Explicit Allow</b><br><i>Is any principal group in Allowed?</i>"}
+    S3{"<b>Stage 3: AppKey Scope</b><br><i>Does AppKey scope grant access?</i>"}
+    S4{"<b>Stage 4: Default Fallback</b><br><i>Is DefaultAllow enabled on server?</i>"}
+    Denied["<b>403 Forbidden</b><br><i>Access Denied</i>"]
+    Authorized["<b>Authorized</b><br><i>Request Proxied (200 OK)</i>"]
+
+    Req --> S1
+    S1 -- "YES" --> Denied
+    S1 -- "NO" --> S2
+    S2 -- "YES" --> S3
+    S2 -- "NO" --> S4
+    S3 -- "YES" --> Authorized
+    S3 -- "NO" --> S4
+    S4 -- "YES" --> Authorized
+    S4 -- "NO" --> Denied
+
+    classDef pass fill:#0f2e1b,stroke:#00c853,stroke-width:2px,color:#fff;
+    classDef fail fill:#3a0f12,stroke:#f85149,stroke-width:2px,color:#fff;
+    classDef stage fill:#161b22,stroke:#30363d,stroke-width:1px,color:#e6edf3;
+    class Req,S1,S2,S3,S4 stage;
+    class Authorized pass;
+    class Denied fail;
 ```
 
 ### Stage 1: Explicit Deny Rules (Highest Precedence)

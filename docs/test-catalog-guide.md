@@ -10,29 +10,30 @@ The `ModelContextGateway` repository employs an automated, living requirements-t
 
 The **Catalog Generator** (`scripts/CatalogGenerator`) statically analyzes the codebase using Roslyn (.NET Compiler Platform) and TypeScript AST/regex scanning to extract all requirement definitions and test proofs across backend xUnit tests, frontend Vitest component tests, and Playwright end-to-end (E2E) suites.
 
-```
-+-------------------------------------------------------------------------------+
-|                             Test Suites Source                                |
-+-------------------------------------------------------------------------------+
-|  - ModelContextGateway.Tests/*.cs (Roslyn C# SyntaxTree [Requirement] Attribute)|
-|  - frontend/src/test/**/*.tsx   (TypeScript / Vitest JSDoc @requirement)      |
-|  - frontend/e2e/**/*.ts         (Playwright E2E JSDoc @requirement)           |
-+-------------------------------------------------------------------------------+
-                                        |
-                                        v
-+-------------------------------------------------------------------------------+
-|                      Catalog Generator Engine (.NET 10)                       |
-|                          (scripts/CatalogGenerator)                           |
-+-------------------------------------------------------------------------------+
-                                        |
-                   +--------------------+--------------------+
-                   |                                         |
-                   v                                         v
-+------------------------------------+    +------------------------------------+
-|  docs/software-requirements-and-   |    |    docs/requirements-catalog.json  |
-|       test-catalog.md              |    |                                    |
-|   (Human & Agent-Readable SRS)     |    |   (Machine-Readable Matrix Model)  |
-+------------------------------------+    +------------------------------------+
+```mermaid
+flowchart TD
+    subgraph Sources ["<b>Test Suites & Proof Sources</b>"]
+        CS["<code>ModelContextGateway.Tests/*.cs</code><br><i>Roslyn C# SyntaxTree [Requirement] Attribute</i>"]
+        VT["<code>frontend/src/test/**/*.tsx</code><br><i>TypeScript / Vitest JSDoc @requirement</i>"]
+        PW["<code>frontend/e2e/**/*.ts</code><br><i>Playwright E2E JSDoc @requirement</i>"]
+    end
+
+    Engine["<b>Catalog Generator Engine (.NET 10)</b><br><i>(scripts/CatalogGenerator)</i>"]
+
+    subgraph Artifacts ["<b>Generated Living Documentation</b>"]
+        SRS["<b>docs/software-requirements-and-test-catalog.md</b><br><i>(Human & Agent-Readable SRS)</i>"]
+        JSON["<b>docs/requirements-catalog.json</b><br><i>(Machine-Readable Matrix Model)</i>"]
+    end
+
+    Sources ==> Engine
+    Engine ==> Artifacts
+
+    classDef srcStyle fill:#161b22,stroke:#ff5f1f,stroke-width:1.5px,color:#fff;
+    classDef engStyle fill:#0f2e1b,stroke:#00c853,stroke-width:2px,color:#fff;
+    classDef artStyle fill:#161b22,stroke:#00c853,stroke-width:1.5px,color:#fff;
+    class CS,VT,PW srcStyle;
+    class Engine engStyle;
+    class SRS,JSON artStyle;
 ```
 
 ### Generated Artifacts
