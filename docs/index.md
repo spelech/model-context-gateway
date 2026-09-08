@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-v5.10.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v5.11.0-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-1%2C063%20passing-2ea44f?style=for-the-badge)
@@ -14,26 +14,30 @@
 
 ---
 
-**Model Context Gateway (MCG)** is a high-performance C# ASP.NET Core gateway, OAuth 2.0 provider, and semantic proxy for the [Model Context Protocol (MCP)](https://modelcontextprotocol.io).
+**Model Context Gateway (MCG)** connects your AI assistants (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) to all your tools and data sources through a single secure connection.
 
-It aggregates hundreds of tools from isolated backend servers (Docker, Home Assistant, SQL databases, Plex, Actual Budget, Excel, custom APIs, and STDIO subprocesses) and proxies them to AI clients (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) through a single unified connection.
+### What is Model Context Gateway?
 
-### The Problem & Solution
+The **Model Context Protocol (MCP)** lets AI assistants use external tools and data sources.
 
-Connecting AI clients directly to dozens of disparate backend tools creates significant operational overhead: credentials leak across developer environments, protocol configurations diverge, and loading hundreds of tool schemas saturates the model's context window with irrelevant tokens.
+When you connect an AI assistant directly to many individual tools, you face common problems:
+* **Memory Waste**: Loading hundreds of tool schemas fills the AI context memory before your conversation begins.
+* **Higher Costs and Latency**: Large prompts increase inference costs and response times.
+* **Security Risks**: API keys and passwords sit in plain text across local configuration files.
+* **Configuration Overhead**: You must configure each tool separately in every AI application.
 
-**Model Context Gateway provides a unified, governed front-door for all your AI tools:**
+**Model Context Gateway solves these problems:**
 
-* **Single Connection Endpoint (`/sse`)**: AI assistants connect once to a dependable gateway rather than juggling dozens of point-to-point connections.
-* **Context Optimization (Meta-Mode)**: Instead of injecting a massive catalog of tool schemas into the model's prompt, Meta-Mode exposes lightweight discovery tools (`search_tools` and `execute_tool`). The LLM finds and executes the exact tool it needs on demand.
-* **Centralized Governance & Security**: Enforces role-based access control (RBAC), authenticates Active Directory SIDs or OIDC headers, derives scoped AppKeys, and redacts PII before requests touch backend infrastructure.
-* **Universal Transport Routing**: Seamlessly routes requests across Docker containers, remote HTTP/SSE services, and local STDIO subprocesses without client-side reconfiguration.
+* **One Connection Endpoint (`/sse`)**: Connect your AI assistant to a single gateway URL. MCG routes requests to the correct tool.
+* **Context Optimization (Meta-Mode)**: By default, the gateway exposes only two tools: `search_tools` and `execute_tool`. The AI searches for tools when needed and executes them on demand. This saves context memory and reduces token costs.
+* **Central Security**: MCG keeps credentials secure on the server with AES-256 encryption. The gateway checks user permissions before tools run.
+* **Universal Tool Support**: Route requests across Docker containers, remote HTTP/SSE services, and local scripts (Node.js, Python) without reconfiguring clients.
 
 ![Model Context Gateway Dashboard](assets/dashboard.jpg)
 
 ---
 
-## Core Architecture Highlights
+## Core Architecture
 
 ```mermaid
 flowchart LR
@@ -67,43 +71,43 @@ flowchart LR
     Secrets --> StdioSrv
 ```
 
-* **Meta-Mode Dynamic Tool Filtering**: Exposes only `search_tools` and `execute_tool` on `/sse` by default, eliminating LLM context window bloat while dynamically ranking and routing across hundreds of backend tools on demand.
-* **Multi-Tenant Auth & Zero-Config Standalone**: Native Active Directory LDAP / Kerberos, OIDC reverse proxy headers (`Remote-User`, `Remote-Groups` from Authentik, Authelia, Keycloak), scoped AppKeys (`mcp-adm-`, `mcp-usr-`, `mcp-srv-`), and trusted local loopback for personal home-labs.
-* **In-Process Admin MCP Control Plane (`/admin`, `/mcg-admin`)**: Autonomous AI agents can manage providers, servers, RBAC policies, group mappings, vector search, and personal AppKeys via standard MCP tool calls without manual UI clicking.
-* **Dual-Provider Semantic Vector Search**: Local in-process CPU vector embeddings (`all-MiniLM-L6-v2` via `Microsoft.ML.Tokenizers`) or remote OpenAI-compatible API providers stored securely in SQLCipher/AES encrypted databases.
-* **Enterprise Secrets & Key Lifecycle**: Just-in-time secret retrieval from HashiCorp Vault (KV v2), Windows Registry (DPAPI), or Environment Variables with AES-256-GCM envelope encryption and dynamic master key rotation.
-* **Docker Label Auto-Discovery**: Mounts `/var/run/docker.sock` to dynamically discover and register containers with `mcp.enabled=true` labels with zero manual registration.
-* **Multi-Database Support**: First-class stored procedure suites across SQLite, Microsoft SQL Server, and MySQL via Dapper.
+* **Meta-Mode Dynamic Tool Filtering**: Exposes only `search_tools` and `execute_tool` on `/sse` by default, saving context memory while searching tools on demand.
+* **Authentication and Standalone Trust**: Native support for Active Directory SIDs, OIDC reverse proxy headers, scoped AppKeys (`mcp-adm-`, `mcp-usr-`), and trusted local loopback for personal home labs.
+* **Admin MCP Control Plane (`/admin`, `/mcg-admin`)**: Autonomous AI agents can manage servers, RBAC policies, group mappings, and settings through 10 standard MCP tools.
+* **Semantic Vector Search**: Built-in CPU vector embeddings (`all-MiniLM-L6-v2`) or remote OpenAI-compatible API providers rank tools accurately.
+* **Enterprise Secret Storage**: Retrieve credentials dynamically from HashiCorp Vault (KV v2), Windows Registry (DPAPI), or Environment Variables.
+* **Docker Container Auto-Discovery**: Mounts `/var/run/docker.sock` to discover and register containers with `mcp.enabled=true` labels automatically.
+* **Multi-Database Support**: Complete database support for SQLite (WAL), Microsoft SQL Server, and MySQL.
 
 ---
 
-## Documentation Portal Navigation
+## Documentation Directory
 
 <div class="grid cards" markdown>
 
--   :material-rocket-launch: __[Deployment & Getting Started](deployment-guide.md)__
+-   :material-rocket-launch: __[Container Deployment Guide](deployment-guide.md)__
 
     ---
 
-    Blank-slate Docker, Docker Compose, Windows IIS setup, environment variables, master encryption keys, and zero-config deployment.
+    Production Docker, Docker Compose, environment settings, and database configurations.
 
 -   :material-home: __[Single-User & Home-Lab Setup](single-user-and-homelab-guide.md)__
 
     ---
 
-    60-second setup, loopback trust, SQLite database, Docker container auto-discovery, and local AI client integration.
+    Fast setup for personal use, home labs, SQLite database, and local AI clients.
 
--   :material-shield-account: __[Authentication & Identity Architecture](authentication-architecture.md)__
-
-    ---
-
-    Active Directory SIDs, OIDC reverse proxy SSO, standalone loopback trust, AppKey scopes, and token exchange flows.
-
--   :material-cog-transfer: __[Enterprise Administration Guide](admin-guide.md)__
+-   :material-shield-account: __[Authentication Architecture](authentication-architecture.md)__
 
     ---
 
-    Operational administration, provider configuration, group mappings, master key rotation, and system management.
+    Active Directory SIDs, OIDC reverse proxy SSO, standalone trust, and AppKey scopes.
+
+-   :material-cog-transfer: __[Administrator Guide](admin-guide.md)__
+
+    ---
+
+    Server management, the 10 Admin MCP tools, RBAC policies, and provider setup.
 
 -   :material-robot: __[Admin MCP Automation Guide](admin-mcp-automation-guide.md)__
 
@@ -111,7 +115,7 @@ flowchart LR
 
     Autonomous agent administration via the `mcg-admin` skill, control plane tools, and programmatic provisioning.
 
--   :material-book-open-page-variant: __[Official User Guide Suite](user-guide/README.md)__
+-   :material-book-open-page-variant: __[Official User Guide](user-guide.md)__
 
     ---
 
@@ -212,7 +216,7 @@ Run the gateway container with zero required configuration. On first boot, the g
 ### Live Endpoints
 
 * **Web UI Dashboard**: [`http://localhost:8080/`](http://localhost:8080/)
-* **Health Check**: [`http://localhost:8080/health`](http://localhost:8080/health) &rarr; `{"status":"healthy","service":"ModelContextGateway","version":"5.10.0"}`
+* **Health Check**: [`http://localhost:8080/health`](http://localhost:8080/health) &rarr; `{"status":"healthy","service":"ModelContextGateway","version":"5.11.0"}`
 * **Meta-Mode Gateway**: `http://localhost:8080/sse`
 * **Admin MCP Server**: `http://localhost:8080/admin/sse` (or `POST /admin` / `GET /mcg-admin/sse`)
 * **Direct Backend Proxy**: `http://localhost:8080/{targetServerId}`

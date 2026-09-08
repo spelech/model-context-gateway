@@ -1,42 +1,44 @@
 # Model Context Gateway (MCG) Architecture
 
-This document summarizes the internal architecture, security boundaries, design requirements, and execution flows of the **Model Context Gateway (MCG)**.
+This document summarizes the internal architecture, security boundaries, and execution flows of **Model Context Gateway (MCG)**.
 
-> **Definitive Specification**: For exhaustive architectural specifications, Mermaid sequence diagrams, component models, ERDs, and cryptographic pipelines, see the [**Complete Enterprise Architecture Guide (`docs/architecture.md`)**](docs/architecture.md).
+> **Full Specification**: For complete architectural specifications, Mermaid sequence diagrams, component models, ERDs, and cryptographic pipelines, see the [**Complete Architecture Guide (`docs/architecture.md`)**](docs/architecture.md).
 
 ---
 
 ## System Overview
 
-Connecting AI clients directly to dozens of independent microservices creates severe operational debt: credentials leak onto developer laptops, connection conventions diverge, and loading hundreds of tool schemas overwhelms the LLM's context window.
+When you connect an AI assistant directly to many separate tools, common problems occur:
+* Tool definitions fill the AI context memory before your prompt begins.
+* Plaintext credentials can leak from local configuration files.
+* You must configure each tool separately in every AI client.
 
-Model Context Gateway provides a centralized, governed gateway between upstream AI clients and downstream tools:
+Model Context Gateway provides a central, secure gateway between AI clients and backend tools:
 
-* **Unified Ingress**: Upstream AI clients (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) connect once to a single front-door endpoint (`/sse`).
-* **Context-Optimized Discovery (Meta-Mode)**: Rather than exposing hundreds of tool schemas upfront, Meta-Mode provides on-demand semantic tool discovery via `search_tools` and `execute_tool`, preserving token budget.
-* **Enterprise Security & Policy Enforcement**: The gateway authenticates callers (Active Directory Windows SIDs, OIDC reverse-proxy headers, or scoped AppKeys), applies database-backed RBAC, and strips sensitive PII before requests touch backend services.
-* **Multi-Transport Routing Engine**: Seamlessly dispatches requests to downstream MCP servers across diverse transports—Docker containers (auto-discovered via socket), remote HTTP/SSE servers, or local STDIO subprocesses.
+* **Unified Ingress**: AI clients (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) connect once to `/sse`.
+* **Meta-Mode Tool Discovery**: Instead of loading hundreds of tool schemas at startup, Meta-Mode provides on-demand tool discovery via `search_tools` and `execute_tool`. This saves context memory and token costs.
+* **Security & Access Control**: The gateway authenticates users (Active Directory Windows SIDs, OIDC headers, or AppKeys), checks permissions with database-backed RBAC, and redacts sensitive credentials from logs.
+* **Universal Routing**: The gateway routes requests to Docker containers (auto-discovered via socket), remote HTTP/SSE servers, and local STDIO scripts.
 
 ---
 
-## Architectural Design Requirements
+## Architectural Requirements
 
-### 1. Performance & Latency Requirements
-- **Sub-Millisecond Routing Decisions**: The gateway inspects and annotates request metadata from spec headers (`Mcp-Method` and `Mcp-Name` compliant with the MCP 2026-07-28 Spec) without buffering large request bodies. Routing is path and body-aware with fast-path triaging.
-- **Concurrent Request Handling**: Highly thread-safe design. The router manages simultaneous SSE client channels, background health probes, and on-demand semantic search requests using thread-safe state wrappers (`ConcurrentDictionary` and thread-safe locks).
-- **Background Startup Warming**: Embedding models, backend connection channels, and configuration caches are preloaded asynchronously during server initialization (`ClientSession.BackendInitializer.cs`) to eliminate cold-start latency spikes.
+### 1. Performance & Latency
+- **Fast Routing Decisions**: The gateway inspects MCP headers (`Mcp-Method` and `Mcp-Name`) without buffering large request bodies.
+- **Concurrent Connections**: The gateway handles multiple simultaneous client sessions and background health probes using thread-safe state wrappers (`ConcurrentDictionary`).
+- **Background Warming**: Embedding models, backend connections, and configuration caches preload asynchronously during startup to eliminate cold-start delays.
 
-### 2. Security & Identity Requirements
-- **Dual Authenticated Identities**: Supports enterprise Windows/Kerberos environments via Active Directory SIDs (`LdapActiveDirectoryService.cs`) alongside modern containerized reverse-proxy identities via OIDC headers (`Remote-User`, `Remote-Groups`).
-- **Granular AppKey Authorization**: Machine callers and autonomous agents authenticate via high-entropy AppKeys (`mcp-*-*-*`) with scope enforcement (`*`, `server:*`, `category:*`, `tool:*`).
-- **Strict Role-Based Access Control (RBAC)**: Target servers and backend tools verify caller groups using database-backed stored procedures (`sp_EvaluateUserAccess`).
-- **Compliant Error Handling & Challenge Headers**: In accordance with the MCP authorization specification, the gateway emits strict `WWW-Authenticate` challenge headers during `401 Unauthorized` and `403 Forbidden` states.
-- **Mandatory PII Data Redaction**: Any bearer tokens, credentials, API keys, or database passwords parsed in standard JSON-RPC communication are filtered and redacted (`PiiSanitizer.cs`) before being logged or stored.
+### 2. Security & Identity
+- **Dual Identity Support**: Supports enterprise Active Directory SIDs alongside modern OIDC reverse-proxy headers (`Remote-User`, `Remote-Groups`).
+- **AppKey Authorization**: Supports machine callers and agents using high-entropy keys (`mcp-adm-`, `mcp-usr-`) with granular scope rules (`*`, `server:*`, `category:*`, `tool:*`).
+- **Role-Based Access Control (RBAC)**: Checks caller permissions against database access policies before tools run.
+- **Automatic PII Redaction**: Redacts API keys, tokens, and passwords from logs and responses.
 
-### 3. Reliability & Resilience Requirements
-- **Pluggable & Extensible Design**: Downstream transports (`ITransport`), identity providers (`IIdentityProvider`), secret managers (`ISecretRetriever`), and database providers (`IDbConnectionFactory`) follow clean strategy patterns.
-- **Robust In-Flight Concurrency**: Uses `JsonRpcStateManager` with unique upstream GUID request rewriting and `PendingRequestTcs` to guarantee that out-of-order responses from multiplexed upstream servers are cleanly routed back to the exact requesting thread with their original client ID preserved.
-- **Safe Resource Cleanup**: Active SSE client sessions handle connection terminations cleanly and capture cancellation tokens gracefully (`notifications/cancelled`).
+### 3. Reliability & Resilience
+- **Strategy Pattern Architecture**: Uses modular interfaces for transports (`ITransport`), identity providers (`IIdentityProvider`), secret managers (`ISecretRetriever`), and database providers (`IDbConnectionFactory`).
+- **Request State Management**: Uses `JsonRpcStateManager` with unique request identifiers to match responses with original requests across concurrent connections.
+- **Clean Session Cleanup**: Handles connection drops cleanly and cancels pending tasks using standard cancellation tokens.
 
 ---
 
