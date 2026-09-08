@@ -8,25 +8,30 @@ This guide provides instructions for developers, DevOps engineers, and AI coding
 
 When **Model Context Gateway** starts in a clean environment without an existing database, it creates a safe default configuration:
 
-```
-+---------------------------------------------------------------------------------------+
-|                                Model Context Gateway (MCG)                            |
-+---------------------------------------------------------------------------------------+
-|  Out-of-the-Box Safe Defaults:                                                        |
-|  - Database: SQLite (./data/mcg.db auto-created & migrated)                           |
-|  - Encryption: AES-256-GCM using MCG_MASTER_KEY                                       |
-|  - Network Trust: Loopback only (127.0.0.1, ::1) via Admin:StandaloneAllowedNetworks  |
-|  - Admin Key: mcp-adm-prod-bootstrap-token-99 (Owner: admin, Scopes: ["all"])        |
-|  - Admin Endpoint: http://<host>:8080/admin/sse (JSON-RPC 2.0)                        |
-+---------------------------------------------------------------------------------------+
-                                           |
-                                           v
-+---------------------------------------------------------------------------------------+
-|                                Autonomous Automation                                  |
-|  - AI Agent Skill: .agents/skills/mcg-admin/SKILL.md                                  |
-|  - Non-Interactive Scripts: cURL (Bash), PowerShell (Windows), Python                 |
-|  - 10 Consolidated MCP Tools covering 100% of Gateway Admin Operations                |
-+---------------------------------------------------------------------------------------+
+```mermaid
+flowchart TD
+    subgraph Defaults ["<b>Model Context Gateway (MCG) — Safe Defaults</b>"]
+        direction TB
+        D1["<b>Database:</b> SQLite (<code>./data/mcg.db</code> auto-created & migrated)"]
+        D2["<b>Encryption:</b> AES-256-GCM using <code>MCG_MASTER_KEY</code>"]
+        D3["<b>Network Trust:</b> Loopback only (127.0.0.1, ::1) via <code>Admin:StandaloneAllowedNetworks</code>"]
+        D4["<b>Admin Key:</b> Scoped to <code>all</code> / <code>admin</code>"]
+        D5["<b>Admin Endpoint:</b> <code>http://&lt;host&gt;:8080/admin/sse</code> (JSON-RPC 2.0)"]
+    end
+
+    subgraph Automation ["<b>Autonomous Administration & Control</b>"]
+        direction TB
+        A1["<b>AI Agent Skill:</b> <code>.agents/skills/mcg-admin/SKILL.md</code>"]
+        A2["<b>Non-Interactive Scripts:</b> cURL (Bash), PowerShell (Windows), Python"]
+        A3["<b>10 Consolidated MCP Tools:</b> 100% Gateway Operational Control"]
+    end
+
+    Defaults ==> Automation
+
+    classDef defStyle fill:#161b22,stroke:#00c853,stroke-width:1.5px,color:#fff;
+    classDef autoStyle fill:#0f2e1b,stroke:#00c853,stroke-width:2px,color:#fff;
+    class D1,D2,D3,D4,D5 defStyle;
+    class A1,A2,A3 autoStyle;
 ```
 
 ### Safe Defaults Reference Matrix

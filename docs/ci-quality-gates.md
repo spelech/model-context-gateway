@@ -8,41 +8,30 @@ This document describes the continuous integration (CI), security scanning, auto
 
 All pull requests targeting `main` and all commits pushed to `main` must pass a series of automated quality gates before integration and production container publishing.
 
-```
-+--------------------------------------------------------------------------------+
-|                             Pull Request / Push                               |
-+--------------------------------------------------------------------------------+
-                                       |
-       +-------------------------------+-------------------------------+
-       |                               |                               |
-       v                               v                               v
-+--------------+               +---------------+               +---------------+
-|   Backend    |               |   Frontend    |               | Docker Check  |
-|  .NET 10.0   |               | Node 22 LTS   |               | Docker syntax |
-| Build & Test |               | Lint/Build/UI |               | Dry-run build |
-+--------------+               +---------------+               +---------------+
-       |                               |                               |
-       +-------------------------------+-------------------------------+
-                                       |
-                                       v
-                       +-------------------------------+
-                       |    Integration Smoke Test     |
-                       |  Live SQLite Kestrel Boot     |
-                       |  Health Probe & MCP Discovery |
-                       +-------------------------------+
-                                       |
-                                       v
-                       +-------------------------------+
-                       |       Security Scanning       |
-                       |  CodeQL SAST (C# & JS/TS)     |
-                       |  PR Dependency Review         |
-                       +-------------------------------+
-                                       |
-                                       v
-                       +-------------------------------+
-                       | Gated Image Publish (on main) |
-                       |    ghcr.io Container Registry  |
-                       +-------------------------------+
+```mermaid
+flowchart TD
+    Trigger["<b>Pull Request / Push to main</b>"]
+    
+    subgraph ParallelGates ["<b>Stage 1: Parallel Quality Verification</b>"]
+        Backend["<b>Backend Build & Test</b><br><i>.NET 10.0 (Format, Unit, Coverage)</i>"]
+        Frontend["<b>Frontend Quality</b><br><i>Node 22 LTS (Lint, Build, Vitest, Playwright)</i>"]
+        DockerCheck["<b>Docker Build Check</b><br><i>Multi-Stage Container Build</i>"]
+        RelGate["<b>Release Gate</b><br><i>Version Sync & Link Audit</i>"]
+    end
+
+    Smoke["<b>Stage 2: Integration Smoke Test</b><br><i>Live SQLite Kestrel Boot & MCP Discovery</i>"]
+    Security["<b>Stage 3: Security & CodeQL</b><br><i>CodeQL SAST (C# & JS/TS) + Dependency Review</i>"]
+    Publish["<b>Stage 4: Automated Container Release</b><br><i>ghcr.io (latest, :tag, :latest-full, :tag-full)</i>"]
+
+    Trigger ==> ParallelGates
+    ParallelGates ==> Smoke
+    Smoke ==> Security
+    Security ==> Publish
+
+    classDef stage fill:#161b22,stroke:#00c853,stroke-width:1.5px,color:#fff;
+    classDef publish fill:#0f2e1b,stroke:#00c853,stroke-width:2px,color:#fff;
+    class Backend,Frontend,DockerCheck,RelGate,Smoke,Security stage;
+    class Publish publish;
 ```
 
 ---

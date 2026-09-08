@@ -8,27 +8,49 @@ C# ASP.NET Core gateway router, semantic proxy, and authorization control plane 
 
 Connecting LLMs, IDE coding assistants (Cursor, VS Code, Windsurf), and autonomous agent frameworks (Antigravity, Claude Desktop, OpenClaw) to internal services introduces operational, architectural, and security bottlenecks:
 
-```
-                                 THE FRAGMENTATION PROBLEM
-                                 
-   +-------------------+     +-------------------+     +-------------------+
-   |    Cursor IDE     |     |  Claude Desktop   |     | Antigravity Agent |
-   +-------------------+     +-------------------+     +-------------------+
-          |     |                  |     |                  |     |
-          |     +------------------+     +------------------+     |
-          v                        v                        v     v
-    [ Raw Stdio ]            [ Raw HTTP ]             [ Raw SSE ]
-          |                        |                        |
-          v                        v                        v
-  +---------------+        +---------------+        +---------------+
-  | Docker Daemon |        | HomeAssistant |        | Actual Budget |
-  | (Root Socket) |        | (Long Token)  |        | (Plain Passwd)|
-  +---------------+        +---------------+        +---------------+
-  
-  ⚠️ Context Window Bloat (100+ tools consume 35k-50k tokens per prompt)
-  ⚠️ Zero RBAC (All clients receive full root/admin permissions)
-  ⚠️ Secret Leakage (Plaintext tokens in config files & ps aux process lists)
-  ⚠️ Multi-Client Duplication (Every client spawns independent subprocesses)
+```mermaid
+flowchart TD
+    subgraph Clients ["Direct, Unmanaged Clients"]
+        Cursor["Cursor IDE"]
+        Claude["Claude Desktop"]
+        AGY["Antigravity Agent"]
+    end
+
+    subgraph Transports ["Fragmented, Unsecured Transports"]
+        Stdio["Raw Stdio Subprocess"]
+        Http["Raw HTTP Endpoint"]
+        Sse["Raw SSE Stream"]
+    end
+
+    subgraph Backends ["Exposed Backend Infrastructure"]
+        Docker["Docker Daemon<br><i>(Root Socket)</i>"]
+        HA["Home Assistant<br><i>(Long-Lived Token)</i>"]
+        Budget["Actual Budget<br><i>(Plaintext Password)</i>"]
+    end
+
+    subgraph Risks ["⚠️ Enterprise Operational Risks"]
+        R1["<b>Context Window Bloat:</b> 100+ tools consume 35k-50k tokens per prompt"]
+        R2["<b>Zero RBAC:</b> Every client receives full root / admin permissions"]
+        R3["<b>Secret Leakage:</b> Plaintext tokens in local files & ps aux process lists"]
+        R4["<b>Process Duplication:</b> Every client spawns independent local subprocesses"]
+    end
+
+    Cursor -.-> Stdio & Http
+    Claude -.-> Http & Sse
+    AGY -.-> Stdio & Sse
+
+    Stdio --> Docker
+    Http --> HA
+    Sse --> Budget
+
+    classDef client fill:#161b22,stroke:#ff5f1f,stroke-width:1px,color:#fff;
+    classDef transport fill:#0d1117,stroke:#30363d,stroke-width:1px,color:#8b949e;
+    classDef backend fill:#1f1315,stroke:#f85149,stroke-width:1px,color:#ff7b72;
+    classDef risk fill:#2c1517,stroke:#f85149,stroke-width:1.5px,color:#ffa198;
+    class Cursor,Claude,AGY client;
+    class Stdio,Http,Sse transport;
+    class Docker,HA,Budget backend;
+    class R1,R2,R3,R4 risk;
 ```
 
 ### 1. Context Window Bloat & Tool Confusion
@@ -57,32 +79,56 @@ Clients manage mixes of local subprocesses (`stdio`), Server-Sent Events streams
 
 The **Model Context Gateway (MCG)** provides a single, hardened proxy between client applications and backend MCP services.
 
-```
-                              UNIFIED CONTROL PLANE
-                              
-   +-------------------+     +-------------------+     +-------------------+
-   |    Cursor IDE     |     |  Claude Desktop   |     | Antigravity Agent |
-   +-------------------+     +-------------------+     +-------------------+
-             \                       |                       /
-              \                      |                      /
-               v                     v                     v
-   +-----------------------------------------------------------------------+
-   |                  MODEL CONTEXT GATEWAY (ASP.NET Core)                 |
-   |                                                                       |
-   |  [ 4-Stage RBAC & AppKeys ]           [ AES-256-GCM Secret Resolvers ]|
-   |  [ In-Process ONNX Embeddings ]       [ Zero-Leakage STDIO Isolation ]|
-   |  [ PII-Sanitized Audit Trail ]        [ Multi-DB: SQLite/MSSQL/MySQL ]|
-   |  -------------------------------------------------------------------  |
-   |            Meta-Mode Gateway: 2 Tools (`search_tools`, `execute_tool`) |
-   +-----------------------------------------------------------------------+
-             /                       |                       \
-            v                        v                        v
-     [ SSE Stream ]           [ HTTP JSON-RPC ]         [ Sandboxed STDIO ]
-            |                        |                        |
-            v                        v                        v
-    +---------------+        +---------------+        +---------------+
-    | Docker Server |        | HomeAssistant |        | Local FS / Git|
-    +---------------+        +---------------+        +---------------+
+```mermaid
+flowchart TD
+    subgraph Clients ["Client Ecosystem"]
+        Cursor["Cursor IDE"]
+        Claude["Claude Desktop"]
+        AGY["Antigravity Agent"]
+    end
+
+    subgraph Gateway ["MODEL CONTEXT GATEWAY (ASP.NET Core)"]
+        direction TB
+        subgraph CoreCapabilities ["Enterprise Control Plane Capabilities"]
+            RBAC["4-Stage RBAC & AppKeys"]
+            Secrets["AES-256-GCM Secret Resolvers"]
+            Embeddings["In-Process ONNX Embeddings"]
+            StdioSec["Zero-Leakage STDIO Isolation"]
+            Audit["PII-Sanitized Audit Trail"]
+            DB["Multi-DB (SQLite / MSSQL / MySQL)"]
+        end
+        Meta["<b>Meta-Mode Gateway:</b> Exposes only 2 bootstrap tools (<code>search_tools</code>, <code>execute_tool</code>)"]
+        CoreCapabilities --> Meta
+    end
+
+    subgraph Transports ["Managed Secure Transports"]
+        SSE["SSE Stream"]
+        HTTP["HTTP JSON-RPC"]
+        STDIO["Sandboxed STDIO"]
+    end
+
+    subgraph Fleet ["Downstream MCP Server Fleet"]
+        Docker["Docker Daemon"]
+        HA["Home Assistant"]
+        FS["Local FS / Git"]
+    end
+
+    Cursor & Claude & AGY ==> Gateway
+    Meta ==> SSE & HTTP & STDIO
+    SSE --> Docker
+    HTTP --> HA
+    STDIO --> FS
+
+    classDef client fill:#161b22,stroke:#ff5f1f,stroke-width:1.5px,color:#fff;
+    classDef gw fill:#0f2e1b,stroke:#00c853,stroke-width:2px,color:#fff;
+    classDef cap fill:#161b22,stroke:#30363d,stroke-width:1px,color:#e6edf3;
+    classDef trans fill:#0d1117,stroke:#30363d,stroke-width:1px,color:#8b949e;
+    classDef fleet fill:#161b22,stroke:#00c853,stroke-width:1px,color:#e6edf3;
+    class Cursor,Claude,AGY client;
+    class Meta gw;
+    class RBAC,Secrets,Embeddings,StdioSec,Audit,DB cap;
+    class SSE,HTTP,STDIO trans;
+    class Docker,HA,FS fleet;
 ```
 
 ---

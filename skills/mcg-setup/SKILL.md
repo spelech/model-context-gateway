@@ -15,38 +15,39 @@ This skill provides an autonomous 6-phase decision and bootstrapping engine to i
 
 ## When to Use
 
-```
-                         [Start Setup]
-                                │
-                ┌──────────────┴──────────────┐
-                ▼                             ▼
-       [Docker / Containers]          [Windows Server IIS]
-                │                             │
-        Phase 1 & 2: Probe            Phase 1 & 2: Probe
-                │                             │
-                └──────────────┬──────────────┘
-                                ▼
-               Phase 3: Configuration Paradigm
-                ┌──────────────┴──────────────┐
-                ▼                             ▼
-       [Environment Variables]       [Web UI & Database]
-       (Static / 12-Factor)          (Dynamic Hot-Reload)
-                │                             │
-                └──────────────┬──────────────┘
-                                ▼
-               Phase 4: Identity & Network Mode
-                ┌──────────────┴──────────────┐
-                ▼                             ▼
-       [Personal / Standalone]        [Enterprise AD / OIDC]
-       (Loopback / LAN CIDR)          (SSO / Forward-Auth)
-                │                             │
-                └──────────────┬──────────────┘
-                                ▼
-               Phase 5: Generate Artifacts
-               (256-bit Key, Compose / IIS)
-                                ▼
-               Phase 6: Health & Client Setup
-               (Claude, Cursor, Cline, Windsurf)
+```mermaid
+flowchart TD
+    Start["<b>[Start Setup]</b>"]
+    
+    subgraph EnvSelection ["Phase 1 & 2: Environment Probing"]
+        Docker["<b>Docker / Containers</b><br>Linux / WSL / Compose"]
+        IIS["<b>Windows Server IIS</b><br>Native In-Process ANCM v2"]
+    end
+
+    subgraph ConfigParadigm ["Phase 3: Configuration Paradigm"]
+        EnvConfig["<b>Environment Variables</b><br>(Static / 12-Factor)"]
+        UIConfig["<b>Web UI & Database</b><br>(Dynamic Hot-Reload)"]
+    end
+
+    subgraph IdentityMode ["Phase 4: Identity & Network Mode"]
+        Standalone["<b>Personal / Standalone</b><br>(Loopback / LAN CIDR)"]
+        Enterprise["<b>Enterprise AD / OIDC</b><br>(SSO / Forward-Auth)"]
+    end
+
+    Artifacts["<b>Phase 5: Generate Artifacts</b><br><i>(256-bit Key, Compose / web.config)</i>"]
+    Health["<b>Phase 6: Health & Client Setup</b><br><i>(Claude, Cursor, Cline, Windsurf)</i>"]
+
+    Start --> Docker & IIS
+    Docker & IIS --> EnvConfig & UIConfig
+    EnvConfig & UIConfig --> Standalone & Enterprise
+    Standalone & Enterprise --> Artifacts --> Health
+
+    classDef startStyle fill:#161b22,stroke:#ff5f1f,stroke-width:2px,color:#fff;
+    classDef optStyle fill:#161b22,stroke:#30363d,stroke-width:1px,color:#e6edf3;
+    classDef endStyle fill:#0f2e1b,stroke:#00c853,stroke-width:2px,color:#fff;
+    class Start startStyle;
+    class Docker,IIS,EnvConfig,UIConfig,Standalone,Enterprise optStyle;
+    class Artifacts,Health endStyle;
 ```
 
 ### Trigger Conditions & Use Cases

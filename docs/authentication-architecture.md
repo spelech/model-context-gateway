@@ -60,18 +60,28 @@ graph TD
 
 When you configure **no external authentication provider** (no Active Directory LDAP or OIDC SSO), the gateway runs in **Standalone / Personal Mode**:
 
-```
-                       [ Incoming Request in Standalone Mode ]
-                                         │
-                   ┌─────────────────────┴─────────────────────┐
-                   ▼                                           ▼
-       [ Client IP in StandaloneAllowedNetworks? ]   [ Valid Admin AppKey Presented? ]
-       (default: 127.0.0.1, ::1;                     (scopes: ["admin"], ["all"])
-        custom LAN CIDRs or "0.0.0.0/0")                       │
-                   │                                           │
-                  YES ──► Grant Local Admin Access            YES ──► Grant Admin Access
-                   │                                           │
-                   NO ─────────────────────────────────────────NO ──► 403 Forbidden
+```mermaid
+flowchart TD
+    Req["<b>Incoming Request in Standalone Mode</b>"]
+    IPCheck{"Client IP in<br><code>StandaloneAllowedNetworks</code>?<br><i>(default: 127.0.0.1, ::1)</i>"}
+    KeyCheck{"Valid Admin AppKey<br>Presented?<br><i>(scopes: 'admin' or 'all')</i>"}
+    GrantLocal["<b>Grant Local Admin Access</b><br><i>(200 OK)</i>"]
+    GrantAdmin["<b>Grant Admin Access</b><br><i>(200 OK)</i>"]
+    Deny["<b>Access Denied</b><br><i>(403 Forbidden)</i>"]
+
+    Req --> IPCheck
+    Req --> KeyCheck
+    IPCheck -- "YES" --> GrantLocal
+    KeyCheck -- "YES" --> GrantAdmin
+    IPCheck -- "NO" --> Deny
+    KeyCheck -- "NO" --> Deny
+
+    classDef pass fill:#0f2e1b,stroke:#00c853,stroke-width:2px,color:#fff;
+    classDef fail fill:#3a0f12,stroke:#f85149,stroke-width:2px,color:#fff;
+    classDef check fill:#161b22,stroke:#30363d,stroke-width:1px,color:#e6edf3;
+    class Req,IPCheck,KeyCheck check;
+    class GrantLocal,GrantAdmin pass;
+    class Deny fail;
 ```
 
 ### Configuration (`Admin:StandaloneAllowedNetworks`)

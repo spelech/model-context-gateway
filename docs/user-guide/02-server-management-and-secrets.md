@@ -74,25 +74,25 @@ Click the **`+ Add Server`** button in the dashboard toolbar to open the registr
 
 The gateway supports four secret resolution options to avoid plaintext credentials in database records:
 
-```
-                  SECRET RESOLUTION ARCHITECTURE
-                  
-                      +-------------------+
-                      | McpServer Record  |
-                      | (Encrypted in DB) |
-                      +-------------------+
-                                |
-                                v
-               [ SecretProvider Strategy Resolver ]
-                                |
-        +-----------------------+-----------------------+
-        |                       |                       |
-        v                       v                       v
-+---------------+       +---------------+       +---------------+
-|  Environment  |       |   HashiCorp   |       |    Windows    |
-|   Variables   |       |  Vault KV v2  |       |   Registry    |
-|  (Host / OS)  |       |  (JIT Token)  |       |  (DPAPI Blob) |
-+---------------+       +---------------+       +---------------+
+```mermaid
+flowchart TD
+    Record["<b>McpServer Record</b><br><i>(Encrypted in DB with AES-256-GCM)</i>"]
+    Resolver["<b>SecretProvider Strategy Resolver</b><br><i>Dynamic runtime provider dispatch</i>"]
+    Env["<b>Environment Variables</b><br><i>Host / Container OS Variables</i>"]
+    Vault["<b>HashiCorp Vault KV v2</b><br><i>AppRole / Token JIT Lease</i>"]
+    WinReg["<b>Windows Registry</b><br><i>DPAPI Machine Encryption</i>"]
+
+    Record --> Resolver
+    Resolver --> Env
+    Resolver --> Vault
+    Resolver --> WinReg
+
+    classDef record fill:#161b22,stroke:#ff5f1f,stroke-width:1.5px,color:#fff;
+    classDef resolver fill:#0f2e1b,stroke:#00c853,stroke-width:2px,color:#fff;
+    classDef provider fill:#161b22,stroke:#30363d,stroke-width:1px,color:#e6edf3;
+    class Record record;
+    class Resolver resolver;
+    class Env,Vault,WinReg provider;
 ```
 
 ### 1. Direct Static Key (`None`)

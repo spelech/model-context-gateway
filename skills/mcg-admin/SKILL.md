@@ -27,50 +27,23 @@ When `Model Context Gateway (MCG)` starts in a new environment, it initializes w
 
 ## Workflow: 7-Phase Autonomous Administration
 
-```
-                   [Connect to /admin/sse]
-                    (Bearer Admin AppKey)
-                              │
-                              ▼
-                 Phase 1: Gateway Diagnostics
-                 (manage_system: diagnostics)
-                              │
-                              ▼
-                Phase 2: Secret Provider Setup
-                 (manage_providers: save_secret)
-                  ├── HashiCorp Vault KV v2 (test_vault)
-                  └── Built-in AES-256-GCM Master Key
-                              │
-                              ▼
-                Phase 3: Auth Provider Setup
-                 (manage_providers: save_auth)
-                  ├── Authentik / Authelia / Forward-Auth
-                  ├── Keycloak / OIDC Headers
-                  ├── Microsoft Entra ID (Azure AD)
-                  ├── Active Directory LDAPS (test_ldap)
-                  └── Standalone Mode (Local Keys)
-                              │
-                              ▼
-                Phase 4: RBAC & Group Mappings
-                  ├── manage_group_mappings (SSO -> Internal)
-                  └── manage_policies (Allow / Deny Rules)
-                              │
-                              ▼
-                Phase 5: Embeddings & Search
-                 (manage_settings: update)
-                  ├── OpenAI / Azure OpenAI / Ollama
-                  └── FastEmbed / ONNX Local Embeddings
-                              │
-                              ▼
-                Phase 6: Backend Servers & Clients
-                  ├── manage_servers (Add / Reconnect)
-                  ├── manage_appkeys (Create Client Keys)
-                  └── manage_clients (Dynamic OAuth)
-                              │
-                              ▼
-                Phase 7: End-to-End Verification
-                  ├── test_tool_call (Dispatch tool)
-                  └── manage_system (query_audit / get_logs)
+```mermaid
+flowchart TD
+    Connect["<b>Connect to /admin/sse</b><br><i>(Bearer Admin AppKey)</i>"]
+    P1["<b>Phase 1: Gateway Diagnostics</b><br><code>manage_system: diagnostics</code>"]
+    P2["<b>Phase 2: Secret Provider Setup</b><br><code>manage_providers: save_secret</code><br>Vault KV v2 & Built-in AES-256-GCM"]
+    P3["<b>Phase 3: Auth Provider Setup</b><br><code>manage_providers: save_auth</code><br>Authentik, Keycloak, Entra ID, AD LDAPS, Standalone"]
+    P4["<b>Phase 4: RBAC & Group Mappings</b><br><code>manage_group_mappings</code> & <code>manage_policies</code>"]
+    P5["<b>Phase 5: Embeddings & Search</b><br><code>manage_settings: update</code><br>FastEmbed/ONNX Local & OpenAI/Ollama"]
+    P6["<b>Phase 6: Backend Servers & Clients</b><br><code>manage_servers</code>, <code>manage_appkeys</code>, <code>manage_clients</code>"]
+    P7["<b>Phase 7: End-to-End Verification</b><br><code>test_tool_call</code> & <code>manage_system: query_audit</code>"]
+
+    Connect --> P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7
+
+    classDef initStyle fill:#161b22,stroke:#ff5f1f,stroke-width:2px,color:#fff;
+    classDef phaseStyle fill:#0f2e1b,stroke:#00c853,stroke-width:1.5px,color:#fff;
+    class Connect initStyle;
+    class P1,P2,P3,P4,P5,P6,P7 phaseStyle;
 ```
 
 ---

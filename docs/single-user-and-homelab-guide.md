@@ -2,51 +2,36 @@
 
 This guide details how to install, configure, and operate the **Model Context Gateway (MCG)** for single users, home-lab operators, and local developers.
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│               Single-User / Homelab Setup Architecture                 │
-└────────────────────────────────────────────────────────────────────────┘
-                                   │
-              ┌────────────────────┴────────────────────┐
-              ▼                                         ▼
-   [Local Web UI / Admin]                     [Multiple AI Clients]
-   • Trusted LAN / Loopback Subnets           • Claude Desktop -> Scope: "all"
-   • Zero-Auth Standalone Admin               • Cursor -> Scope: "server:docker"
-   • Port 8080                                • Open WebUI -> Scope: "category:media"
-   • + Generate Key Modal                     • Antigravity -> Scope: "all,admin"
-              │                                         │
-              └────────────────────┬────────────────────┘
-                                   ▼
-          ┌───────────────────────────────────────────────────┐
-          │        Model Context Gateway (MCG Container)      │
-          │                                                   │
-          │  1. Zero-Config Safe Defaults                     │
-          │     • Standalone AppKeys: ENABLED (Default)       │
-          │     • Built-in DB Secrets (AES-GCM): ENABLED      │
-          │     • Active Directory / LDAP: DISABLED (Default) │
-          │     • Vault / Windows Registry: DISABLED (Default)│
-          │  2. Zero-Cert OpenIddict Bootstrapping            │
-          │     (Auto-generates PFX or dev certs in Standalone)│
-          │  3. AppKey Authentication Handler                 │
-          │     (Validates mcp-adm-*, mcp-glb-*, mcp-usr-*,   │
-          │      mcp-srv-*, mcp-grp-*)                        │
-          │  4. Granular Scope Enforcement                    │
-          │     • Global: "all", "*"                          │
-          │     • Server: "server:docker", "server:postgres"  │
-          │     • Category: "category:media", "group:devops"  │
-          │     • Tool: "tool:docker__list_containers"        │
-          │  5. Flexible Multi-Key Provisioning               │
-          │     • Web UI (+ Generate Key)                     │
-          │     • MCG_CLIENT_APP_KEYS environment variable     │
-          │     • Admin MCP tool: manage_appkeys              │
-          │     • Auto-seeded .admin.key and .client.key      │
-          └────────────────────────┬──────────────────────────┘
-                                   │
-              ┌────────────────────┴────────────────────┐
-              ▼                                         ▼
-   [Docker Socket MCP Discovery]              [Local / Remote MCP Servers]
-   • Labeled: mcp.enabled=true                • Python / FastMCP, Node, Postgres,
-   • Auto-registers container tools             Home Assistant, Filesystem, Git
+```mermaid
+flowchart TD
+    subgraph Ingress ["<b>Ingress & Client Layer</b>"]
+        UI["<b>Local Web UI / Admin</b><br>• Trusted LAN / Loopback Subnets<br>• Zero-Auth Standalone Admin<br>• Port 8080 | + Generate Key Modal"]
+        Clients["<b>Multiple AI Clients</b><br>• Claude Desktop (Scope: 'all')<br>• Cursor (Scope: 'server:docker')<br>• Open WebUI (Scope: 'category:media')<br>• Antigravity (Scope: 'all,admin')"]
+    end
+
+    subgraph Core ["<b>Model Context Gateway (MCG Container)</b>"]
+        direction TB
+        C1["<b>Zero-Config Safe Defaults:</b> Standalone AppKeys & AES-GCM Encryption enabled"]
+        C2["<b>Zero-Cert Bootstrapping:</b> Auto-generates OpenIddict signing credentials"]
+        C3["<b>AppKey Auth & Scopes:</b> Validates compact keys with granular scope boundaries"]
+        C4["<b>Multi-Key Provisioning:</b> Web UI, MCG_CLIENT_APP_KEYS, or manage_appkeys"]
+        C1 --> C2 --> C3 --> C4
+    end
+
+    subgraph Backends ["<b>Downstream Capability Fleet</b>"]
+        DockerSock["<b>Docker Socket Discovery</b><br>• Labeled: <code>mcp.enabled=true</code><br>• Auto-registers container tools"]
+        Servers["<b>Local / Remote MCP Servers</b><br>• Python, FastMCP, Node, Postgres<br>• Home Assistant, Filesystem, Git"]
+    end
+
+    UI & Clients ==> Core
+    Core ==> DockerSock & Servers
+
+    classDef ingStyle fill:#161b22,stroke:#ff5f1f,stroke-width:1.5px,color:#fff;
+    classDef coreStyle fill:#0f2e1b,stroke:#00c853,stroke-width:2px,color:#fff;
+    classDef backStyle fill:#161b22,stroke:#30363d,stroke-width:1px,color:#e6edf3;
+    class UI,Clients ingStyle;
+    class C1,C2,C3,C4 coreStyle;
+    class DockerSock,Servers backStyle;
 ```
 
 ---
