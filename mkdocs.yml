@@ -49,6 +49,9 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - javascripts/mermaid-panzoom.js
+
 exclude_docs: |
   superpowers/**
   user-guide/README.md
