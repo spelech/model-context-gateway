@@ -15,20 +15,20 @@ theme:
   palette:
     # Slate dark mode (default)
     - scheme: slate
-      primary: deep orange
-      accent: amber
+      primary: black
+      accent: green
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
     # Light mode
     - scheme: default
-      primary: deep orange
-      accent: amber
+      primary: black
+      accent: deep orange
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
   font:
-    text: Inter
+    text: Outfit
     code: JetBrains Mono
   features:
     - navigation.instant
@@ -45,6 +45,9 @@ theme:
     - content.code.copy
     - content.code.annotate
     - content.tabs.link
+
+extra_css:
+  - stylesheets/extra.css
 
 exclude_docs: |
   superpowers/**

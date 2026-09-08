@@ -1,16 +1,14 @@
 # Model Context Gateway (MCG)
 
-<div align="center">
-
-![Version](https://img.shields.io/badge/version-v5.11.0-orange?style=for-the-badge)
-![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
-![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
-![Tests](https://img.shields.io/badge/tests-1%2C063%20passing-2ea44f?style=for-the-badge)
-![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
-
-</div>
+<p align="center" class="badge-row">
+  <img src="https://img.shields.io/badge/version-v5.11.0-orange?style=for-the-badge" alt="Version" />
+  <img src="https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&amp;logo=dotnet&amp;logoColor=white" alt=".NET 10.0" />
+  <img src="https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge" alt="MCP Spec" />
+  <img src="https://img.shields.io/badge/tests-1%2C063%20passing-2ea44f?style=for-the-badge" alt="Tests" />
+  <img src="https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&amp;logo=docker&amp;logoColor=white" alt="Docker Ready" />
+  <img src="https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&amp;logo=react&amp;logoColor=black" alt="React 19" />
+  <img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge" alt="License" />
+</p>
 
 ---
 
@@ -21,6 +19,7 @@
 The **Model Context Protocol (MCP)** lets AI assistants use external tools and data sources.
 
 When you connect an AI assistant directly to many individual tools, you face common problems:
+
 * **Memory Waste**: Loading hundreds of tool schemas fills the AI context memory before your conversation begins.
 * **Higher Costs and Latency**: Large prompts increase inference costs and response times.
 * **Security Risks**: API keys and passwords sit in plain text across local configuration files.
