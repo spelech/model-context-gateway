@@ -2,27 +2,27 @@
 
 ### *"If Your Backend MCP Server Requires X ➔ Here Is Exact Setup Y"*
 
-This guide provides a practical, scenario-driven decision matrix and copy-paste recipes for connecting any backend Model Context Protocol (MCP) server to **Model Context Gateway (MCG)**, regardless of how that backend requires authentication.
+This guide provides practical recipes to connect backend Model Context Protocol (MCP) servers to **Model Context Gateway (MCG)**. It covers common authentication patterns and setup steps.
 
 ---
 
 ## ⚡ Quick-Lookup Decision Matrix
 
-Find the authentication mechanism your downstream MCP server requires in the left column to get the exact configuration settings needed in the router:
+Find the authentication type that your downstream server requires in the table below. The table shows the required gateway settings:
 
 | If Your MCP Server Requires... | Transport Type | Secret Provider | Auth Shape | Key Router Configuration Fields |
 | :--- | :--- | :--- | :--- | :--- |
 | **1. No Auth / Public / Local** | `sse` / `http` | `None` | `bearer` *(ignored)* | Leave `ApiKey` and `SecretPath` blank. |
-| **2. Standard Bearer Token** (`Authorization: Bearer <token>`) | `sse` / `http` | `None`, `Environment`, or `Vault` | `bearer` | Enter token in `ApiKey` OR set `SecretProvider: Environment` with env var name OR `Vault`. |
-| **3. Custom HTTP Header** (e.g. `X-API-Key`, `X-Plex-Token`) | `sse` / `http` | `None`, `Environment`, or `Vault` | `custom-header` or `x-api-key` | Set `AuthShape: custom-header`, `SecretField: <Header-Name>`, and provide the token. |
-| **4. HTTP Basic Auth** (`Authorization: Basic <base64>`) | `sse` / `http` | `None`, `Environment`, or `Vault` | `basic` | Enter `username:password` string as the secret; router auto-formats Base64. |
-| **5. URL Query Parameter** (`http://host/sse?token=<key>`) | `sse` / `http` | `None`, `Environment`, or `Vault` | `query` | Set `AuthShape: query`, `SecretField: <param_name>` (defaults to `token`). |
-| **6. Local CLI Binary / Subprocess (`stdio`)** | `stdio` | `None`, `Environment`, or `Vault` | *(Auto-handled)* | Command & arguments. Secrets injected exclusively into process `EnvironmentVariables` (Zero CLI leak). |
+| **2. Standard Bearer Token** (`Authorization: Bearer <token>`) | `sse` / `http` | `None`, `Environment`, or `Vault` | `bearer` | Enter token in `ApiKey`, or set `SecretProvider: Environment` with the variable name, or use `Vault`. |
+| **3. Custom HTTP Header** (e.g. `X-API-Key`, `X-Plex-Token`) | `sse` / `http` | `None`, `Environment`, or `Vault` | `custom-header` or `x-api-key` | Set `AuthShape: custom-header`, `SecretField: <Header-Name>`, and enter the token. |
+| **4. HTTP Basic Auth** (`Authorization: Basic <base64>`) | `sse` / `http` | `None`, `Environment`, or `Vault` | `basic` | Enter the `username:password` string. The gateway formats the Base64 header automatically. |
+| **5. URL Query Parameter** (`http://host/sse?token=<key>`) | `sse` / `http` | `None`, `Environment`, or `Vault` | `query` | Set `AuthShape: query` and `SecretField: <param_name>` (defaults to `token`). |
+| **6. Local CLI Binary / Subprocess (`stdio`)** | `stdio` | `None`, `Environment`, or `Vault` | *(Auto-handled)* | Command and arguments. The gateway injects secrets into process environment variables. |
 | **7. HashiCorp Vault Secrets** (Enterprise Key Rotation) | `sse`, `http`, `stdio` | `Vault` | *(Matches backend)* | `SecretProvider: Vault`, `Vault Mount: secret`, `Path: <path>`, `Field: <key>`. |
 | **8. Windows DPAPI Registry Secrets** (Windows Server / IIS) | `sse`, `http`, `stdio` | `WindowsRegistry` | *(Matches backend)* | `SecretProvider: WindowsRegistry`, `Registry Path: SOFTWARE\McpRouter\Secrets`, `Key Name: <Key>`. |
-| **9. Per-User Personal Access Tokens (BYOK)** | `sse` / `http` | `UserProvided` | *(Matches backend)* | `SecretProvider: UserProvided`. Users store personal tokens in **My MCP Servers** tab. |
-| **10. Pass-Through Dynamic JWTs** | `sse` / `http` | `AllowPassThroughAuth` | *(Matches backend)* | Enable `AllowPassThroughAuth: true`. Client sends JWT in `X-Target-Auth` header. |
-| **11. Identity-Forwarding Gateway** (Downstream RLS) | `sse` / `http` | *(Any)* | *(Matches backend)* | Router passes service account token + `X-Forwarded-User: <username>` header for Row-Level Security. |
+| **9. Per-User Personal Access Tokens (BYOK)** | `sse` / `http` | `UserProvided` | *(Matches backend)* | `SecretProvider: UserProvided`. Users save personal tokens in the **My MCP Servers** tab. |
+| **10. Pass-Through Dynamic JWTs** | `sse` / `http` | `AllowPassThroughAuth` | *(Matches backend)* | Set `AllowPassThroughAuth: true`. The client passes the token in the `X-Target-Auth` header. |
+| **11. Identity-Forwarding Gateway** (Downstream RLS) | `sse` / `http` | *(Any)* | *(Matches backend)* | The gateway sends a service account token and passes `X-Forwarded-User: <username>` for Row-Level Security. |
 
 ---
 
@@ -32,16 +32,16 @@ Find the authentication mechanism your downstream MCP server requires in the lef
 
 ### Recipe 1: No Authentication (Local Sidecars, Public Services)
 
-* **Common Use Cases**: Local test servers, unauthenticated Docker container sidecars, read-only internal MCP tools.
-* **How It Works**: The router connects directly without injecting authorization headers.
+* **Common Use Cases**: Local test servers, unauthenticated Docker container sidecars, and internal read-only MCP tools.
+* **How It Works**: The gateway connects directly without sending authorization headers.
 
 #### Web UI Configuration:
 1. Click **`+ Add Server`**.
-2. **Server ID**: `mock-tools`
-3. **Transport Type**: `SSE Stream` or `HTTP JSON-RPC`
-4. **URL**: `http://mock-service:8080/sse`
-5. **Secret Provider**: `None`
-6. **API Key**: *(Leave empty)*
+2. Set **Server ID** to `mock-tools`.
+3. Set **Transport Type** to `SSE Stream` or `HTTP JSON-RPC`.
+4. Set **URL** to `http://mock-service:8080/sse`.
+5. Set **Secret Provider** to `None`.
+6. Leave **API Key** empty.
 7. Click **Save Server**.
 
 #### Admin MCP Tool JSON (`manage_servers`):
@@ -62,17 +62,18 @@ Find the authentication mechanism your downstream MCP server requires in the lef
 
 ### Recipe 2: Static Bearer Token (`Authorization: Bearer <token>`)
 
-* **Common Use Cases**: **Home Assistant** (Long-Lived Access Token), **OpenAI/LiteLLM MCP**, **Docker Socket Proxy**, standard SaaS APIs.
-* **How It Works**: Router formats the resolved secret as `Authorization: Bearer <secret>` on downstream requests.
+* **Common Use Cases**: Home Assistant (Long-Lived Access Tokens), OpenAI/LiteLLM MCP, Docker Socket Proxy, and SaaS APIs.
+* **How It Works**: The gateway formats the resolved secret as `Authorization: Bearer <secret>` on outbound requests.
+* **Bearer Token Explained**: A bearer token is a secret security key. Any client that sends this token receives access.
 
 #### Option A: Direct Static Token in DB (AES-256-GCM Encrypted)
 * **Secret Provider**: `None`
 * **API Key / Token**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
 * **Auth Shape**: `bearer`
 
-#### Option B: Environment Variable (Recommended for Docker / 12-Factor)
-* In your host/compose environment: `HOMEASSISTANT_TOKEN=eyJhbGci...`
-* In Router Server Modal:
+#### Option B: Environment Variable (Recommended for Docker)
+* Set this variable in your host or container environment: `HOMEASSISTANT_TOKEN=eyJhbGci...`
+* In the server modal:
   * **Secret Provider**: `Environment`
   * **Secret Field / Env Var**: `HOMEASSISTANT_TOKEN`
   * **Auth Shape**: `bearer`
@@ -97,8 +98,8 @@ Find the authentication mechanism your downstream MCP server requires in the lef
 
 ### Recipe 3: Custom HTTP Header Auth (`X-API-Key`, `X-Plex-Token`, etc.)
 
-* **Common Use Cases**: **Plex** (`X-Plex-Token`), **Radarr/Sonarr** (`X-Api-Key`), **Anthropic** (`x-api-key`), custom enterprise microservices.
-* **How It Works**: Router extracts the secret and injects it into the exact custom header name specified in `SecretField`.
+* **Common Use Cases**: Plex (`X-Plex-Token`), Radarr/Sonarr (`X-Api-Key`), Anthropic (`x-api-key`), and custom microservices.
+* **How It Works**: The gateway extracts the secret and inserts it into the specified header name.
 
 #### Example 3A: Plex Media Server (`X-Plex-Token`)
 * **Transport**: `SSE Stream`
@@ -133,8 +134,8 @@ Find the authentication mechanism your downstream MCP server requires in the lef
 
 ### Recipe 4: HTTP Basic Authentication (`Authorization: Basic ...`)
 
-* **Common Use Cases**: Legacy internal APIs, password-protected proxies, services requiring `username:password` or `apiKey:` format.
-* **How It Works**: Enter the `username:password` string as the secret; the router automatically Base64-encodes it and sends `Authorization: Basic <base64>`.
+* **Common Use Cases**: Legacy internal APIs and services requiring username and password credentials.
+* **How It Works**: Enter `username:password` as the secret. The gateway Base64-encodes the value and sends `Authorization: Basic <base64>`.
 
 #### Web UI Configuration:
 * **Secret Provider**: `None` (or `Environment: SERVICE_BASIC_AUTH`)
@@ -160,14 +161,14 @@ Find the authentication mechanism your downstream MCP server requires in the lef
 
 ### Recipe 5: URL Query Parameter Authentication (`?token=<key>`)
 
-* **Common Use Cases**: Webhook-style MCP backends, legacy streaming servers that reject custom HTTP headers during SSE handshake.
-* **How It Works**: Router appends `?<param_name>=<secret>` to the request URL.
+* **Common Use Cases**: Webhook-style MCP backends and streaming servers that reject custom HTTP headers during connection handshake.
+* **How It Works**: The gateway appends `?<param_name>=<secret>` to the request URL.
 
 #### Web UI Configuration:
 * **Endpoint URL**: `http://streaming-service:9000/sse`
 * **Secret Provider**: `Environment` (e.g. `STREAM_API_KEY`)
 * **Auth Shape**: `query`
-* **Secret Field**: `token` *(or custom query parameter name like `apiKey`)*
+* **Secret Field**: `token` *(or a custom query parameter name like `apiKey`)*
 
 #### Resulting Outbound Request:
 `GET http://streaming-service:9000/sse?token=ResolvedSecretKey123`
@@ -176,8 +177,8 @@ Find the authentication mechanism your downstream MCP server requires in the lef
 
 ### Recipe 6: Local Subprocess / STDIO Process Environment (`stdio`)
 
-* **Common Use Cases**: Running official MCP CLI tools (`@modelcontextprotocol/server-filesystem`, `@modelcontextprotocol/server-github`, `uvx`, Python scripts).
-* **How It Works (Zero CLI Leakage)**: The router spawns the subprocess and injects the resolved secret directly into the process environment dictionary (`ProcessStartInfo.Environment["API_KEY"]`). Secrets **never** appear in command-line arguments or OS process monitors (`ps aux`).
+* **Common Use Cases**: Official MCP CLI tools (`@modelcontextprotocol/server-filesystem`, `@modelcontextprotocol/server-github`, `uvx`, Python scripts).
+* **How It Works (Zero CLI Leakage)**: The gateway spawns the subprocess. It injects the resolved secret directly into process environment variables (`ProcessStartInfo.Environment["API_KEY"]`). Secrets never appear in command-line arguments or process inspection tools (`ps aux`).
 
 #### Web UI Configuration:
 * **Transport Type**: `STDIO CLI`
@@ -201,14 +202,14 @@ Find the authentication mechanism your downstream MCP server requires in the lef
 ```
 
 > [!TIP]
-> When running in Docker, use the **`ghcr.io/spelech/model-context-gateway:latest-full`** container image, which comes pre-installed with Node.js 22, Python 3.12, `uv`, and `bun` for running `stdio` tools out of the box.
+> When running in Docker, use the **`ghcr.io/spelech/model-context-gateway:latest-full`** container image. It includes Node.js 22, Python 3.12, `uv`, and `bun` to run `stdio` tools out of the box.
 
 ---
 
 ### Recipe 7: Enterprise Credential Rotation with HashiCorp Vault (KV v2)
 
-* **Common Use Cases**: Enterprise production deployments requiring automated token rotation, zero secrets stored in gateway databases, and central audit compliance.
-* **How It Works**: Router authenticates to Vault via **AppRole** (`roleId`/`secretId`) or direct token, reads the versioned secret from `secret/data/<path>`, caches it in memory for 10 minutes with automatic JIT renewal, and injects it into downstream requests.
+* **Common Use Cases**: Production environments requiring automated token rotation, zero secrets stored in database files, and central audit logging.
+* **How It Works**: The gateway authenticates to Vault with **AppRole** (`roleId`/`secretId`) or a token. It reads the secret from `secret/data/<path>`, caches it in memory for 10 minutes, and injects it into downstream calls.
 
 #### Step 1: Configure Vault in Router Settings
 In **`Settings`** -> **`Secret Providers`** -> **HashiCorp Vault**:
@@ -250,8 +251,8 @@ In **`Settings`** -> **`Secret Providers`** -> **HashiCorp Vault**:
 
 ### Recipe 8: Enterprise Windows DPAPI Registry Secrets (Windows Server / IIS)
 
-* **Common Use Cases**: Windows Server and IIS on-premise deployments using Active Directory machine trust and DPAPI hardware-bound encryption.
-* **How It Works**: Secrets stored in `HKLM\SOFTWARE\McpRouter\Secrets` encrypted via Windows DPAPI are decrypted in-process by the router service account.
+* **Common Use Cases**: Windows Server and IIS on-premises deployments using Active Directory machine trust and DPAPI hardware encryption.
+* **How It Works**: Secrets stored in `HKLM\SOFTWARE\McpRouter\Secrets` with Windows DPAPI encryption are decrypted in memory by the gateway service account.
 
 #### Web UI Configuration:
 * **Secret Provider**: `WindowsRegistry`
@@ -263,12 +264,12 @@ In **`Settings`** -> **`Secret Providers`** -> **HashiCorp Vault**:
 
 ### Recipe 9: Multi-Tenant / Bring-Your-Own-Key (BYOK / `UserProvided`)
 
-* **Common Use Cases**: Multi-user shared gateway where users connect to services using their own personal access tokens (e.g. personal GitHub PAT, individual Actual Budget tokens, personal Notion keys).
+* **Common Use Cases**: Shared gateway deployments where users connect with their personal tokens (such as personal GitHub PATs or Notion API keys).
 * **How It Works**: 
-  1. Admin registers the server with `SecretProvider: UserProvided`.
+  1. The administrator registers the server with `SecretProvider: UserProvided`.
   2. Users open the **`My MCP Servers`** tab in the dashboard.
   3. Users enter their personal API token.
-  4. When that user invokes tools, the router dynamically decrypts and injects their specific token.
+  4. The gateway decrypts and injects the user's personal token when they run tool calls.
 
 #### Admin Server Registration:
 * **Secret Provider**: `UserProvided`
@@ -278,22 +279,23 @@ In **`Settings`** -> **`Secret Providers`** -> **HashiCorp Vault**:
 
 ### Recipe 10: Dynamic OAuth 2.0 / OIDC Token Exchange & Pass-Through JWTs
 
-* **Common Use Cases**: Downstream microservices requiring short-lived user JWTs minted by an identity provider (Keycloak, Authentik, Okta, Microsoft Entra ID).
+* **Common Use Cases**: Downstream microservices that require short-lived user JWTs from an identity provider (Keycloak, Authentik, Okta, Microsoft Entra ID).
+* **OAuth 2.0 Explained**: OAuth 2.0 allows applications to access services on behalf of users without sharing credentials.
 * **How It Works**:
-  * **Pass-Through Mode**: Set `AllowPassThroughAuth: true`. The calling client retrieves the JWT and passes it in the `X-Target-Auth` header. The router translates `X-Target-Auth` into the backend's expected `AuthShape` (e.g., standard `Authorization: Bearer <jwt>`).
-  * **Interactive OAuth Consent**: Third-party apps register via Dynamic Client Registration and trigger `/connect/authorize`, where users approve access on the `/consent` screen.
+  * **Pass-Through Mode**: Set `AllowPassThroughAuth: true`. The client sends the JWT in the `X-Target-Auth` header. The gateway maps `X-Target-Auth` into the backend auth format (such as `Authorization: Bearer <jwt>`).
+  * **Interactive OAuth Consent**: Third-party applications register through Dynamic Client Registration (RFC 7591) and call `/connect/authorize`. Users approve access on the `/consent` screen.
 
 ---
 
 ### Recipe 11: Trusted Gateway Pattern (Identity-Forwarding for Row-Level Security)
 
-* **Common Use Cases**: Backend MCP servers that maintain their own internal authorization models and need to know the human/user principal executing the tool call.
-* **How It Works**: The router authenticates to the backend using a shared Service Account token, and automatically injects standard identity propagation headers:
+* **Common Use Cases**: Backend MCP servers that enforce internal authorization and require the user principal for Row-Level Security (RLS).
+* **How It Works**: The gateway authenticates to the backend using a shared Service Account token. It adds standard identity propagation headers to each request:
   * `X-Forwarded-User: <username>` (e.g. `admin` or `DOMAIN\spelech`)
   * `X-Forwarded-Groups: <groups>` (e.g. `full_admin, engineering`)
   * `X-Mcp-Session-Id: <session_id>`
 
-The backend MCP server trusts the router's IP/network and applies Row-Level Security (RLS) based on the forwarded user identity.
+The backend server trusts the gateway IP and applies Row-Level Security based on the forwarded identity.
 
 ---
 
@@ -316,7 +318,7 @@ The backend MCP server trusts the router's IP/network and applies Row-Level Secu
 
 ## 📚 Related Documentation
 
-* 🔐 [**Enterprise Secret Providers Guide**](secret-providers.md) — Deep-dive into Vault, DPAPI, and AES-256-GCM.
-* 🚦 [**Authentication Support Matrix**](auth-flows/auth-support-matrix.md) — Technical end-to-end transport and delegation matrix.
+* 🔐 [**Enterprise Secret Providers Guide**](secret-providers.md) — Guides for Vault, DPAPI, and AES-256-GCM.
+* 🚦 [**Authentication Support Matrix**](auth-flows/auth-support-matrix.md) — Technical transport and delegation matrix.
 * 🛡️ [**RBAC & Security Policies Guide**](user-guide/03-rbac-and-security.md) — 4-Stage authorization pipeline and group access controls.
-* 🤖 [**Admin MCP Automation Guide**](admin-mcp-automation-guide.md) — Autonomous server provisioning via AI agent skills.
+* 🤖 [**Admin MCP Automation Guide**](admin-mcp-automation-guide.md) — Automated server provisioning with AI agent skills.

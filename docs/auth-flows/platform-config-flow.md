@@ -1,6 +1,11 @@
 # Platform Configuration & User Setup Flow
 
-This document illustrates how Model Context Gateway (MCG) is configured to authenticate incoming users (clients, IDEs, or human admins), and how `AppKeys` fit into the ecosystem.
+This document explains how to configure user authentication in Model Context Gateway (MCG). It covers identity providers, reverse proxies, and AppKeys.
+
+### Core Concepts for Beginners
+- **AppKey (Bearer Token)**: A persistent secret string that IDEs and scripts send to authenticate with the gateway.
+- **Reverse Proxy**: A server that verifies user identity and forwards requests with identity headers.
+- **Scope**: A permission tag that controls which tools and endpoints a key can access.
 
 ```mermaid
 flowchart TD
@@ -27,8 +32,9 @@ flowchart TD
 ```
 
 ### Explanation of AppKeys
-AppKeys (or AppTokens) are persistent API keys used by external clients (like an IDE or an automated script) to authenticate against Model Context Gateway (MCG).
 
-- **Prefix & Hash**: AppKeys consist of a public prefix (used for database lookup) and a secret portion (hashed via SHA-256 in the database). Format: `mcp-{scopeSlug}-{selector}-{secret}`.
-- **Scopes**: Dictate permissions. A scope of `admin` or `*` grants the AppKey administrative privileges over the router configuration.
-- **OwnerSid**: This is the "weird straggler" that provides group capability. An AppKey can be bound to a specific group's Security Identifier (SID). If an IDE connects using this AppKey, the router will associate the session with the group represented by the `OwnerSid`, allowing multiple users in a team to share a single service account AppKey while maintaining appropriate backend access control.
+AppKeys are bearer tokens that external clients (such as IDEs or scripts) use to authenticate with the gateway.
+
+- **Prefix & Hash**: AppKeys contain a public prefix and a secret part. The database indexes the prefix for lookup and stores only the SHA-256 hash of the secret. Token format: `mcp-{scopeSlug}-{selector}-{secret}`.
+- **Scopes**: Scopes define key permissions. For example, `admin` or `*` grants administrative control over the gateway.
+- **OwnerSid**: Binds the AppKey to a user account or group Security Identifier (SID). When an IDE connects with this key, the gateway applies the permissions of the assigned `OwnerSid`. Teams can use shared service account keys while maintaining role-based access control.

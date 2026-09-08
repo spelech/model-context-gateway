@@ -1,12 +1,12 @@
 # Admin MCP Automation & Provider Configuration Guide
 
-This guide provides developers, DevOps engineers, and autonomous AI coding agents with the architectural blueprint, safe defaults, and automation playbooks to configure and provision **Model Context Gateway (MCG)** from a blank slate.
+This guide provides instructions for developers, DevOps engineers, and AI coding agents. It explains how to configure and provision **Model Context Gateway (MCG)** from a clean setup.
 
 ---
 
 ## 🚀 1. Architecture & Safe Defaults
 
-When **Model Context Gateway** boots in a fresh environment without existing configuration databases, it automatically provisions a safe, zero-dependency baseline:
+When **Model Context Gateway** starts in a clean environment without an existing database, it creates a safe default configuration:
 
 ```
 +---------------------------------------------------------------------------------------+
@@ -33,21 +33,24 @@ When **Model Context Gateway** boots in a fresh environment without existing con
 
 | Parameter | Default Value | Description |
 | :--- | :--- | :--- |
-| **`DB_PROVIDER`** | `sqlite` | Default storage provider. Automatically creates `./data/mcg.db`. |
-| **Master Encryption Key** | `./data/.master.key` (Auto-Generated) or `MCG_MASTER_KEY` / `MCG_MASTER_KEY_FILE` | Master key used to encrypt all provider credentials and API tokens at rest (AES-256-GCM). |
-| **`Admin:StandaloneAllowedNetworks`** | `127.0.0.1, ::1` | CIDR allowlist for admin endpoints when no external IDP is configured. |
-| **Default Admin Key** | Seeded Base62 token (`mcp-adm-...`) | Seeded in DB on first boot to allow instant administrative connection. |
-| **`CORS_ALLOWED_ORIGINS`** | `http://localhost:3000, http://localhost:8080` | Allowed web dashboard CORS origins. |
+| **`DB_PROVIDER`** | `sqlite` | Default storage provider. Creates `./data/mcg.db` automatically. |
+| **Master Encryption Key** | `./data/.master.key` (Auto-Generated) or `MCG_MASTER_KEY` / `MCG_MASTER_KEY_FILE` | Encrypts stored provider credentials and API tokens at rest with AES-256-GCM. |
+| **`Admin:StandaloneAllowedNetworks`** | `127.0.0.1, ::1` | CIDR allowlist for admin endpoints when no external identity provider is configured. |
+| **Default Admin Key** | Seeded Base62 token (`mcp-adm-...`) | Created in the database on first boot. Allows immediate administrative connection. |
+| **`CORS_ALLOWED_ORIGINS`** | `http://localhost:3000, http://localhost:8080` | Allowed web browser origins for dashboard requests. |
 
 ---
 
 ## 🔑 2. Connecting to the Admin MCP Server
 
-The Admin MCP Server listens on `/admin/sse` or `/mcg-admin/sse` (and accepts messages on `/admin/message`).
+The Admin MCP Server listens on `/admin/sse` or `/mcg-admin/sse`. It receives messages on `/admin/message`.
+
+### Bearer Tokens Explained
+A bearer token is a secret security key. Send the token in the `Authorization: Bearer <token>` header to authenticate your requests.
 
 ### AI Agent Configuration (Claude, Cursor, Cline, Windsurf, Antigravity)
 
-Add the following to your AI client configuration file:
+Add this block to your AI client configuration file:
 
 ```json
 {
@@ -64,7 +67,7 @@ Add the following to your AI client configuration file:
 
 ### JSON-RPC 2.0 Direct HTTP Dispatch
 
-You can send tool execution requests directly via standard HTTP `POST` to `/admin`:
+You can send tool execution requests directly with an HTTP `POST` request to `/admin`:
 
 ```bash
 curl -X POST http://localhost:8080/admin \
@@ -87,12 +90,12 @@ curl -X POST http://localhost:8080/admin \
 
 ## 🛠️ 3. Provider Configuration Cookbooks
 
-All provider configurations are managed dynamically via the **`manage_providers`** tool.
+Configure all identity and secret providers dynamically using the **`manage_providers`** tool.
 
 ### 3.1 Authentication Providers (`save_auth` & `test_ldap`)
 
 #### A. Authentik / Authelia / Forward-Auth Reverse Proxy
-Used when running behind Nginx, Traefik, Caddy, or an ingress controller that terminates authentication:
+Use this setup when the gateway runs behind a reverse proxy (such as Nginx, Traefik, or Caddy) that verifies user identity:
 
 ```json
 {
@@ -143,9 +146,10 @@ Used when running behind Nginx, Traefik, Caddy, or an ingress controller that te
 
 #### D. Active Directory / LDAP (LDAPS Port 636)
 > [!IMPORTANT]
-> Plaintext LDAP over port 389 is rejected for security. Always configure LDAPS on port 636 or set `useSsl=true`.
+> The gateway rejects plaintext LDAP on port 389 for security. Always configure LDAPS on port 636 or set `useSsl=true`.
 
 1. **Test LDAP Connection & Bind**:
+Send this tool call to test credentials:
 ```json
 {
   "name": "manage_providers",
@@ -161,6 +165,7 @@ Used when running behind Nginx, Traefik, Caddy, or an ingress controller that te
 ```
 
 2. **Save Active Directory Provider**:
+Send this tool call to save the provider:
 ```json
 {
   "name": "manage_providers",
@@ -179,10 +184,11 @@ Used when running behind Nginx, Traefik, Caddy, or an ingress controller that te
 ### 3.2 Secret Providers (`save_secret` & `test_vault`)
 
 #### A. Built-in AES-256-GCM Master Key (Default)
-By default, all secrets (API keys, custom headers, tokens) associated with backend MCP servers are automatically encrypted at rest in the database using the 256-bit `MCG_MASTER_KEY`.
+The gateway encrypts all backend credentials at rest in the database using the 256-bit `MCG_MASTER_KEY`.
 
 #### B. HashiCorp Vault KV v2 (AppRole Authentication)
 1. **Test Vault Connection**:
+Send this tool call to test Vault credentials:
 ```json
 {
   "name": "manage_providers",
@@ -197,6 +203,7 @@ By default, all secrets (API keys, custom headers, tokens) associated with backe
 ```
 
 2. **Save Vault Secret Provider**:
+Send this tool call to save the Vault configuration:
 ```json
 {
   "name": "manage_providers",
@@ -247,7 +254,7 @@ Control access to specific backend servers or tools:
 
 ## 🔍 5. Semantic Search & Embedding Providers
 
-Configure semantic tool discovery via **`manage_settings`**:
+Configure semantic tool discovery using **`manage_settings`**:
 
 ### OpenAI Embeddings
 ```json
@@ -281,6 +288,8 @@ Configure semantic tool discovery via **`manage_settings`**:
 ## 🖥️ 6. Backend Servers & Client AppKeys
 
 ### 6.1 Register Backend Server (`manage_servers`)
+Register a new downstream MCP server:
+
 ```json
 {
   "name": "manage_servers",
@@ -297,6 +306,8 @@ Configure semantic tool discovery via **`manage_settings`**:
 ```
 
 ### 6.2 Issue Developer AppKey (`manage_appkeys`)
+Issue an AppKey for a user or agent:
+
 ```json
 {
   "name": "manage_appkeys",
@@ -315,7 +326,8 @@ Configure semantic tool discovery via **`manage_settings`**:
 ## 🧪 7. Live Tool Verification & Diagnostics
 
 ### 7.1 Test Backend Tool Dispatch (`test_tool_call`)
-Directly verify backend tool execution through the gateway:
+Run a tool call directly through the gateway to verify downstream connectivity:
+
 ```json
 {
   "name": "test_tool_call",
@@ -330,6 +342,8 @@ Directly verify backend tool execution through the gateway:
 ```
 
 ### 7.2 View Audit Logs (`manage_system`)
+Query recent administrative and execution audit records:
+
 ```json
 {
   "name": "manage_system",
@@ -346,13 +360,13 @@ Directly verify backend tool execution through the gateway:
 
 | Tool Name | Action | Key Parameters | Purpose |
 | :--- | :--- | :--- | :--- |
-| **`manage_servers`** | `list`, `get`, `create`, `update`, `delete`, `toggle`, `reconnect`, `reconnect_all` | `id`, `displayName`, `url`, `type`, `enabled`, `secretProvider` | Backend MCP server lifecycle. |
-| **`manage_appkeys`** | `list`, `get_limits`, `create`, `revoke` | `name`, `username`, `scopes`, `expiresInDays`, `id` | Client API key provisioning. |
-| **`manage_clients`** | `list`, `register`, `delete` | `displayName`, `scopes`, `expiresInDays`, `id` | Dynamic OAuth2 client management. |
-| **`manage_policies`** | `list`, `save`, `delete` | `targetId`, `requiredGroup`, `isAllowed`, `id` | RBAC target access rules. |
-| **`manage_group_mappings`** | `list`, `save`, `delete` | `externalId`, `internalGroup`, `id` | SSO group & SID role mappings. |
-| **`manage_providers`** | `list`, `save_secret`, `test_vault`, `save_auth`, `test_ldap` | `providerName`, `displayName`, `configJson`, `isEnabled`, `address`, `server` | Identity & secret providers with live test probes. |
-| **`manage_settings`** | `get`, `update` | `dashboardTitle`, `embeddingProvider`, `embeddingApiUrl`, `globalMaxKeys` | System branding & embeddings. |
-| **`manage_custom_files`** | `list`, `get`, `save`, `delete` | `type`, `name`, `content` | Virtual MCP prompts & resources. |
-| **`manage_system`** | `diagnostics`, `get_logs`, `clear_logs`, `query_audit` | `limit`, `user`, `server`, `since`, `take`, `skip` | Gateway observability & audit. |
-| **`test_tool_call`** | *(default)* | `serverId`, `toolName`, `arguments` | Live tool test execution. |
+| **`manage_servers`** | `list`, `get`, `create`, `update`, `delete`, `toggle`, `reconnect`, `reconnect_all` | `id`, `displayName`, `url`, `type`, `enabled`, `secretProvider` | Manages downstream MCP server lifecycles. |
+| **`manage_appkeys`** | `list`, `get_limits`, `create`, `revoke` | `name`, `username`, `scopes`, `expiresInDays`, `id` | Provisions and revokes client API keys. |
+| **`manage_clients`** | `list`, `register`, `delete` | `displayName`, `scopes`, `expiresInDays`, `id` | Manages dynamic OAuth 2.0 clients. |
+| **`manage_policies`** | `list`, `save`, `delete` | `targetId`, `requiredGroup`, `isAllowed`, `id` | Manages RBAC target access rules. |
+| **`manage_group_mappings`** | `list`, `save`, `delete` | `externalId`, `internalGroup`, `id` | Maps SSO groups and domain SIDs to internal roles. |
+| **`manage_providers`** | `list`, `save_secret`, `test_vault`, `save_auth`, `test_ldap` | `providerName`, `displayName`, `configJson`, `isEnabled`, `address`, `server` | Configures identity and secret providers. Tests connections live. |
+| **`manage_settings`** | `get`, `update` | `dashboardTitle`, `embeddingProvider`, `embeddingApiUrl`, `globalMaxKeys` | Updates system branding and semantic embeddings. |
+| **`manage_custom_files`** | `list`, `get`, `save`, `delete` | `type`, `name`, `content` | Manages virtual prompts and resource files. |
+| **`manage_system`** | `diagnostics`, `get_logs`, `clear_logs`, `query_audit` | `limit`, `user`, `server`, `since`, `take`, `skip` | Inspects gateway diagnostics, server logs, and audit trails. |
+| **`test_tool_call`** | *(default)* | `serverId`, `toolName`, `arguments` | Executes test tool calls on downstream servers. |
