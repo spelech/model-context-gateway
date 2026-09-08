@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to **Model Context Gateway (MCG)**.
 
-Please review this document to ensure a smooth development and review process.
+Read this document before you submit changes. It helps you prepare code, write tests, and pass reviews quickly.
 
 ---
 
@@ -14,19 +14,20 @@ Please review this document to ensure a smooth development and review process.
 4. [Commit Conventions](#commit-conventions)
 5. [Mandatory Versioning Rule](#mandatory-versioning-rule)
 6. [CI Quality Gates & Verification](#ci-quality-gates--verification)
-7. [Screenshots & Documentation Standards](#screenshots--documentation-standards)
+7. [Test Requirement Annotations Rule](#test-requirement-annotations-rule)
+8. [Screenshots & Documentation Standards](#screenshots--documentation-standards)
 
 ---
 
 ## 🤝 Code of Conduct
 
-We are committed to providing a welcoming, inclusive, and harassment-free experience for everyone. Be respectful, constructive, and open to feedback during code reviews and discussions.
+We provide a welcoming, inclusive, and respectful environment for everyone. Treat all contributors with respect. Give constructive feedback during code reviews and discussions.
 
 ---
 
 ## 💻 Development Environment Setup
 
-Review the [**Developer Guide**](docs/developer-guide.md) for detailed environment setup instructions.
+Read the [**Developer Guide**](docs/developer-guide.md) for detailed setup instructions.
 
 ### Core Prerequisites
 * **.NET 10.0 SDK** (`dotnet --version`)
@@ -49,19 +50,19 @@ cd frontend && npm install && cd ..
 
 ## 🌿 Branching & Git Workflow
 
-1. Create a descriptive feature or bugfix branch from `main`:
+1. Create a descriptive branch from `main`:
    * Feature: `feat/issue-<number>-<short-description>`
    * Bug Fix: `fix/issue-<number>-<short-description>`
    * Documentation: `docs/issue-<number>-<short-description>`
    * Refactoring: `refactor/issue-<number>-<short-description>`
 
-2. Keep branches focused and isolated. Avoid combining unrelated features in a single PR.
+2. Keep branches focused and isolated. Do not combine unrelated changes into one pull request.
 
 ---
 
 ## 📝 Commit Conventions
 
-We follow the [Conventional Commits](https://www.conventionalcommits.org/) standard. All commit messages must follow this structure:
+We follow the [Conventional Commits](https://www.conventionalcommits.org/) standard. Format every commit message like this:
 
 ```
 <type>(<scope>): <short summary>
@@ -74,15 +75,15 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) stand
 ### Allowed Types
 * `feat`: A new feature or capability.
 * `fix`: A bug fix.
-* `docs`: Documentation updates or additions only.
-* `refactor`: Code restructuring without functional changes.
-* `test`: Adding or correcting tests.
+* `docs`: Documentation updates only.
+* `refactor`: Code changes that do not fix bugs or add features.
+* `test`: New tests or test fixes.
 * `perf`: Performance improvements.
 * `chore`: Build tooling, dependency updates, or repository maintenance.
 
 ### Atomic Commits Rule
-* Organize changes into clean, logical atomic commits.
-* Keep code modifications and documentation updates neatly structured and self-contained.
+* Group your changes into clean, atomic commits.
+* Keep code modifications and documentation updates in separate or cleanly grouped commits.
 
 ---
 
@@ -90,10 +91,11 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) stand
 
 > [!IMPORTANT]
 > **EVERY COMMIT OR MERGE TO `main` MUST BUMP THE VERSION NUMBER.**
+> Exception: Documentation-only changes do not require a version bump.
 
-* **Patch Bumps (e.g. `4.12.2` -> `4.12.3`)**: For bug fixes, performance optimizations, log refactoring, or minor UI tweaks.
-* **Minor Bumps (e.g. `4.12.0` -> `4.13.0`)**: For new features, API endpoints, schema changes, or architectural additions.
-* **Major Bumps (e.g. `4.0.0` -> `5.0.0`)**: For breaking protocol or architectural redesigns.
+* **Patch Bumps (e.g. `4.12.2` -> `4.12.3`)**: Use for bug fixes, performance optimizations, log refactoring, or minor UI tweaks.
+* **Minor Bumps (e.g. `4.12.0` -> `4.13.0`)**: Use for new features, API endpoints, schema changes, or architectural additions.
+* **Major Bumps (e.g. `4.0.0` -> `5.0.0`)**: Use for breaking protocol or architectural redesigns.
 
 ### Files That MUST Be Updated Simultaneously:
 1. [`ModelContextGateway.csproj`](ModelContextGateway.csproj) (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`).
@@ -105,13 +107,13 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) stand
 
 ## 🚦 CI Quality Gates & Verification
 
-Before submitting a Pull Request, verify that all automated quality gates pass locally:
+Verify that all quality gates pass on your computer before you open a pull request:
 
 ### 1. Backend Tests & Coverage
 ```bash
 CI=true dotnet test ModelContextGateway.slnx --configuration Release --verbosity normal --collect:"XPlat Code Coverage"
 ```
-* All 670+ tests must pass with 0 errors.
+All tests must pass with 0 errors.
 
 ### 2. C# Formatting & Roslyn Analyzers
 ```bash
@@ -126,31 +128,29 @@ npm run build
 npm test
 cd ..
 ```
-* Zero ESLint warnings or TypeScript errors permitted.
+Resolve all ESLint warnings and TypeScript errors before you commit.
 
 ### 4. Living Requirements Catalog Verification
 ```bash
 dotnet run --project scripts/CatalogGenerator -- --verify-only
 ```
-* Ensures documentation in [`docs/software-requirements-and-test-catalog.md`](docs/software-requirements-and-test-catalog.md) has zero drift against test code annotations.
+This check ensures that [`docs/software-requirements-and-test-catalog.md`](docs/software-requirements-and-test-catalog.md) matches all test annotations without drift.
 
 ---
 
 ## 🧪 Test Requirement Annotations Rule
 
-All new or modified tests in C# (`ModelContextGateway.Tests`), Vitest (`frontend/src/test`), and Playwright (`frontend/e2e`) **MUST** include structured requirement annotations:
+Annotate all new or modified tests in C# (`ModelContextGateway.Tests`), Vitest (`frontend/src/test`), and Playwright (`frontend/e2e`):
 - **C#**: `[Requirement("AUTH-01", "AUTH", RequirementType.Positive, "Description")]`
-- **TypeScript**: JSDoc `@requirement AUTH-01` block
-- **Naming Rule**: Requirement IDs must **NEVER** use `REQ-` prefixes. Use standard category codes (`AUTH-01`, `DB-01`, `GUARD-01`, `MCP-01`, `SEC-01`, `TRANS-01`, `UI-01`).
+- **TypeScript**: Add a JSDoc `@requirement AUTH-01` block.
+- **Naming Rule**: Never use the `REQ-` prefix in requirement IDs. Use standard category codes (`AUTH-01`, `DB-01`, `GUARD-01`, `MCP-01`, `SEC-01`, `TRANS-01`, `UI-01`).
 
-For full conventions, category taxonomy (`AUTH`, `DB`, `GUARD`, `MCP`, `SEC`, `TRANS`, `UI`), and CLI usage, see the [**Software Requirements & Test Catalog Guide**](docs/test-catalog-guide.md).
-
-
-For comprehensive details on pipeline jobs, CodeQL SAST scanning, and integration smoke tests, see [**CI Quality Gates & Security Workflows**](docs/ci-quality-gates.md).
+Read the [**Software Requirements & Test Catalog Guide**](docs/test-catalog-guide.md) for full taxonomy conventions and generator instructions.
+For details on CI pipeline jobs, CodeQL scans, and smoke tests, read [**CI Quality Gates & Security Workflows**](docs/ci-quality-gates.md).
 
 ---
 
 ## 📸 Screenshots & Documentation Standards
 
-* **Real Screenshots Standard**: **AI-generated mockups or placeholder assets are strictly prohibited** in documentation. All assets in `docs/assets/` must be captured from the live application using the automated screenshot tool (`scripts/capture_guide_screenshots.mjs` or `scripts/take_screenshots.js`).
-* **Documentation Currency**: Every new feature or API change must include updated documentation in `docs/` and corresponding user guide updates.
+* **Real Screenshots Standard**: **Do not use AI-generated images or placeholder mockups** in documentation. Capture all images in `docs/assets/` from the live application with the automated screenshot tool (`scripts/capture_guide_screenshots.mjs` or `scripts/take_screenshots.js`).
+* **Documentation Currency**: Add or update documentation under `docs/` whenever you change features or APIs.
