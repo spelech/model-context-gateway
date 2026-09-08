@@ -197,9 +197,9 @@ Incoming requests undergo a 4-stage evaluation pipeline:
 
 To explore architecture, configuration, and implementation guides, proceed to:
 
-* 🏛️ [**Comprehensive Enterprise Architecture Guide**](architecture.md)
-* 📖 [**Official User Guide Suite**](user-guide/README.md)
-* 🔐 [**Enterprise Secret Providers Guide**](secret-providers.md)
+* [**Architecture Guide**](architecture.md)
+* [**Official User Guide**](user-guide.md)
+* [**Enterprise Secret Providers Guide**](secret-providers.md)
 * 🔑 [**AppKey Scopes & Authorization Guide**](appkey-scopes.md)
 * 🚀 [**Transport Capability & Configuration Guide**](transports.md)
 * 🗄️ [**Database Provider Support & Deployment Matrix**](database-providers.md)

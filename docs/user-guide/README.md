@@ -1,39 +1,42 @@
-# 📚 Model Context Gateway (MCG) - Official User Guide & Manual
+# Model Context Gateway (MCG) User Guide
 
-Welcome to the official user manual for the **Model Context Protocol (MCP) Gateway Router**. This router acts as a unified control plane, semantic proxy, and security gateway aggregating 100+ backend MCP services, optimizing tool calling for AI agents, and enforcing enterprise RBAC.
+Welcome to the **Model Context Gateway (MCG)** User Guide. 
+
+MCG connects your AI assistants to all your tools and data sources through a single secure connection.
+
+For a beginner-friendly overview and common workflows, see the [**User Guide Overview**](../user-guide.md).
 
 ---
 
-## 🗺️ User Guide Sitemap
+## User Guide Chapters
 
 1. [**01. Dashboard & Navigation Interface**](01-dashboard-and-navigation.md)
-   - Layout, primary navigation tabs (`Overview`, `App Keys & Security`, `Test Bench`, `Settings`, `My MCP Servers`), real-time stats cards, search filters, sorting, category/status grouping, and pagination.
+   - Dashboard layout, top navigation tabs, health metric cards, real-time search, sorting, and category grouping.
 2. [**02. Server Management & Secret Providers**](02-server-management-and-secrets.md)
-   - Registering backend MCP servers across transports (`SSE`, `HTTP`, `STDIO`), inspect modal schemas, custom JSON specifications, and configuring secret resolution strategies:
-     - Direct Static Keys
+   - Registering backend MCP servers across transports (`SSE`, `HTTP`, `STDIO`), inspecting tool schemas, and configuring secrets:
+     - Plaintext / Static Keys
      - Host Environment Variables (`ENV:KEY`)
-     - HashiCorp Vault (KV v2 engine, AppRole, JIT token renewal)
+     - HashiCorp Vault (KV v2 engine, AppRole, JIT renewal)
      - Windows Registry (DPAPI decryption)
-     - OAuth2 / OIDC Token Exchange (RFC 8693)
+     - OAuth 2.0 / OIDC Token Exchange (RFC 8693)
 3. [**03. RBAC, Security & Policies**](03-rbac-and-security.md)
-   - 4-Stage Authorization Pipeline (`Explicit Deny` > `Explicit Allow` > `AppKey Scope` > `Default Policy`), Identity Providers (OIDC headers, Active Directory Windows SIDs, AppKeys, Standalone CIDR allowlists, OAuth2), user quota limits, and group mappings.
-4. [**04. Client Setup & App Key Management**](04-client-setup-and-app-keys.md)
-   - Generating cryptographically hashed AppKeys, scope grammar (`*`, `category:*`, `server:*`, granular capabilities), dynamic client setup generator, and integration guides for Cursor IDE, Claude Desktop, Antigravity CLI, VS Code Cline, and TypeScript/Python SDKs.
+   - 4-Stage Authorization Pipeline (`Explicit Deny` > `Explicit Allow` > `AppKey Scope` > `Default Policy`), Identity Providers (OIDC headers, Active Directory SIDs, AppKeys, standalone IP allowlists), user quotas, and group mappings.
+4. [**04. Client Setup & AppKey Management**](04-client-setup-and-app-keys.md)
+   - Generating hashed AppKeys, scope syntax (`*`, `category:*`, `server:*`, granular capabilities), and integration snippets for Cursor, Claude Desktop, Antigravity CLI, and VS Code Cline.
 5. [**05. Interactive Test Bench**](05-interactive-test-bench.md)
-   - Interactive developer playground: Tool Execution Tester (dynamic JSON schema form builder & raw JSON editor), Virtual Resource Tester (`mcp://...`), Prompt Template Tester, Semantic Router Simulator (`search_tools`), direct JSON-RPC Console, and live gateway terminal logs.
+   - Testing tool execution directly, inspecting virtual resources (`mcp://...`), evaluating prompt templates, testing semantic vector search, and monitoring live gateway logs.
 6. [**06. System Settings & Vector Embeddings**](06-settings-and-embeddings.md)
-   - Multi-tab configuration plane: Vector & Search (Local ONNX `All-MiniLM-L6-v2` vs OpenAI/Ollama API), Identity & Auth, Secret Providers, Prompts & Resources File Manager, and Access Control matrices.
+   - Configuring vector search engines (Local ONNX CPU vs remote OpenAI/Ollama APIs), managing identity providers, and uploading custom prompt files.
 
 ---
 
-## 💡 Core Architecture & Concepts
+## Core System Concepts
 
-- **Meta-Mode (`/sse?meta=true`)**: Exposes only 2 bootstrap tools (`search_tools` and `execute_tool`) to prevent context window bloat and tool confusion.
-- **Namespaced Tool Routing**: Backend tools are automatically namespaced as `<serverId>__<toolName>` (e.g. `docker__restart_container` or `homeassistant__turn_off`).
-- **Zero CLI Secret Leakage**: STDIO subprocesses receive credentials strictly via process environment dictionaries, never exposed in command-line arguments.
-- **AES-256-GCM Envelope Encryption**: All sensitive tokens, API keys, and provider secrets are encrypted at rest with authenticated 128-bit GCM tags.
-- **Multi-Database Support**: Seamless operation across SQLite (SQLCipher), Microsoft SQL Server (`Microsoft.Data.SqlClient`), and MySQL (`MySqlConnector`).
-- **Universal Admin MCP Automation**: Fully automated headless gateway provisioning and hot-reloading via `/admin/sse` or `POST /admin`.
+- **Meta-Mode (`/sse`)**: Exposes only 2 tools (`search_tools` and `execute_tool`) by default to save AI context memory and prevent hallucinations.
+- **Slash Tool Routing**: Exposes tools with clean slash formatting (`{namespace}/{tool_name}`) with backwards-compatible format (`{serverId}__{toolName}`).
+- **Secure Secret Storage**: Subprocesses receive credentials via environment variables rather than command-line arguments.
+- **AES-256 Encryption**: All tokens, API keys, and provider secrets are encrypted at rest with AES-256-GCM.
+- **Multi-Database Support**: Runs on SQLite (WAL), Microsoft SQL Server, and MySQL.
 
 ---
 

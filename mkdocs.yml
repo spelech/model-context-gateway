@@ -48,6 +48,7 @@ theme:
 
 exclude_docs: |
   superpowers/**
+  user-guide/README.md
 
 plugins:
   - search
@@ -98,11 +99,10 @@ nav:
       - 04. Client Setup & AppKeys: user-guide/04-client-setup-and-app-keys.md
       - 05. Interactive Test Bench: user-guide/05-interactive-test-bench.md
       - 06. Settings & Embeddings: user-guide/06-settings-and-embeddings.md
-      - User Guide Reference: user-guide/README.md
   - Administration & Ops:
       - Administrator Guide: admin-guide.md
       - Admin MCP Automation Guide: admin-mcp-automation-guide.md
-      - Admin MCP Features: admin-mcp-features.md
+      - Admin MCP Tools Reference: admin-mcp-features.md
       - Operations Runbook: runbook.md
       - Troubleshooting & RCA: mcp-routing-and-admin-issues.md
   - Security & Authentication:
