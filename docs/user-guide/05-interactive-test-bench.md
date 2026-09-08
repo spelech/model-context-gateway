@@ -1,6 +1,6 @@
 # 05. Interactive Test Bench
 
-The **Interactive Test Bench** (`Test Bench` tab) is a developer and operator diagnostic playground for interactively testing backend MCP tools, reading virtual resources, evaluating prompt templates, simulating semantic vector search, executing raw JSON-RPC payloads, and inspecting real-time diagnostic logs.
+The **Interactive Test Bench** (`Test Bench` tab) helps you test and diagnose the gateway. You can execute tools, read virtual resources, test prompt templates, run semantic searches, send JSON-RPC payloads, and view live logs.
 
 ---
 
@@ -8,7 +8,7 @@ The **Interactive Test Bench** (`Test Bench` tab) is a developer and operator di
 
 ![Interactive Test Bench View](../assets/test_bench_view.jpg)
 
-The Test Bench aggregates six specialized diagnostic tools in an interactive multi-panel layout:
+The Test Bench provides six diagnostic tools:
 
 ```
 +---------------------------------------------------------------------------------------------------------------+
@@ -28,7 +28,7 @@ The Test Bench aggregates six specialized diagnostic tools in an interactive mul
 
 ## 🛠️ 1. Tool Execution Tester (`ToolTesterCard`)
 
-The Tool Tester allows direct interactive execution of any discovered or custom namespaced tool across connected servers without needing an external AI client or IDE.
+The Tool Tester executes any discovered or custom tool without an external AI client or IDE.
 
 ```
 +-------------------------------------------------------------------------------+
@@ -53,13 +53,13 @@ The Tool Tester allows direct interactive execution of any discovered or custom 
 ```
 
 ### How to Use the Tool Tester
-1. **Select Target Server**: Pick the server from the dropdown (e.g. `docker`, `contextcortex`, `plex`, or `custom`).
-2. **Select Tool**: Choose a tool belonging to that server. The UI automatically populates the form controls matching the tool's JSON Schema.
-3. **Fill Parameters**:
-   * **Booleans**: Rendered as interactive toggles/checkboxes.
-   * **Strings & Numbers**: Rendered as typed input boxes.
-   * **Arrays & Objects**: Enter valid JSON strings (e.g., `["item1", "item2"]` or `{"key": "value"}`).
-4. **Optional - Raw JSON Mode**: Toggle the Raw JSON Editor to edit the complete parameter payload directly:
+1. **Select Target Server**: Choose a server from the dropdown (for example, `docker`, `contextcortex`, `plex`, or `custom`).
+2. **Select Tool**: Choose a tool for that server. The form displays input fields for the tool JSON Schema.
+3. **Enter Parameters**:
+   * **Booleans**: Use checkboxes or toggle switches.
+   * **Strings and Numbers**: Enter values into the text boxes.
+   * **Arrays and Objects**: Enter valid JSON strings (for example, `["item1", "item2"]` or `{"key": "value"}`).
+4. **Optional - Raw JSON Mode**: Turn on the Raw JSON Editor to edit parameters as JSON:
    ```json
    {
      "container_id": "homewebservice",
@@ -67,10 +67,10 @@ The Tool Tester allows direct interactive execution of any discovered or custom 
      "force": true
    }
    ```
-5. **Execute**: Click **Execute Tool**. The request is dispatched, and the formatted response with execution status is displayed in the output console.
+5. **Execute**: Click **Execute Tool**. The gateway sends the request and displays the result with execution metrics in the output panel.
 
 ### API & cURL Examples
-The Test Bench interacts with either `POST /api/test/call` or `POST /api/test/call-tool`. Both canonical and alias routes are supported.
+The Test Bench sends requests to either `POST /api/test/call` or `POST /api/test/call-tool`. The gateway supports both endpoints.
 
 #### Standard Invocation with `serverId` and `toolName`:
 ```bash
@@ -104,7 +104,7 @@ curl -X POST http://localhost:8080/api/test/call-tool \
 
 ## 📄 2. Virtual Resource Tester (`ResourceTesterCard`)
 
-Inspect and read virtual MCP resources exposed by backend servers:
+Use this tool to read virtual MCP resources from backend servers:
 
 ```
 +-------------------------------------------------------------------------------+
@@ -127,16 +127,16 @@ Inspect and read virtual MCP resources exposed by backend servers:
 ```
 
 ### How to Use the Resource Tester
-1. **Select Server or Template**: Choose a server to filter its declared resources and URI templates.
-2. **Select Resource or Enter URI**: Select a known resource from the dropdown or manually type any custom URI (e.g. `mcp://docker/logs/caddy` or `router://database`).
-3. **Read Resource**: Click **Read Resource** to execute the query.
+1. **Select Server or Template**: Choose a server to display its available resources.
+2. **Select Resource or Enter URI**: Select a resource from the dropdown, or type a URI (for example, `mcp://docker/logs/caddy` or `router://database`).
+3. **Read Resource**: Click **Read Resource** to send the request.
 
 ### Supported Resource Types
-* **Backend MCP Resources**: URIs adhering to `mcp://{serverId}/{path}`.
+* **Backend MCP Resources**: URIs that use the format `mcp://{serverId}/{path}`.
 * **Router System Resources**:
-  * `router://status`: Returns live gateway runtime health, active sessions, and connection pools.
-  * `router://database`: Returns active database metadata and server configurations.
-  * `logs://recent`: Retrieves the most recent in-memory log entries.
+  * `router://status`: Returns runtime health, active sessions, and connection pools.
+  * `router://database`: Returns database metadata and server configurations.
+  * `logs://recent`: Returns the most recent in-memory log messages.
 
 ### API & cURL Example
 ```bash
@@ -152,7 +152,7 @@ curl -X POST http://localhost:8080/api/test/resources/read \
 
 ## 💬 3. Prompt Template Tester (`PromptTesterCard`)
 
-Evaluate parameterized prompt templates exposed by backend servers or custom file specifications:
+Use this tool to test prompt templates from backend servers or custom files:
 
 ```
 +-------------------------------------------------------------------------------+
@@ -174,9 +174,9 @@ Evaluate parameterized prompt templates exposed by backend servers or custom fil
 ```
 
 ### How to Use the Prompt Tester
-1. **Select Server & Template**: Select the upstream server and the prompt template name.
-2. **Fill Arguments**: Enter the argument values required by the template schema.
-3. **Render Prompt**: Click **Render Prompt**. The gateway evaluates the template and displays the rendered conversation turn messages (roles, text, and attachments).
+1. **Select Server & Template**: Select the backend server and the prompt template.
+2. **Enter Arguments**: Enter values for each required prompt argument.
+3. **Render Prompt**: Click **Render Prompt**. The gateway evaluates the template and displays the rendered messages.
 
 ### API & cURL Example
 ```bash
@@ -197,7 +197,7 @@ curl -X POST http://localhost:8080/api/test/prompts/get \
 
 ## 🧠 4. Semantic Router Simulator (`SemanticRouterCard`)
 
-Simulate how the router's vector embedding engine scores and ranks tools when an AI agent calls `search_tools`:
+Simulate how the gateway scores and ranks tools when an AI client calls `search_tools`:
 
 ```
 +-------------------------------------------------------------------------------+
@@ -222,11 +222,11 @@ Simulate how the router's vector embedding engine scores and ranks tools when an
 ```
 
 ### Understanding the Score Breakdown
-The score represents a hybrid composite of vector similarity and keyword boosting:
-* **Vector Cosine Similarity** (`0.00` – `1.00`): Computed using the 384-dimensional embedding vectors generated by Local ONNX (`all-MiniLM-L6-v2`) or remote embedding API.
-* **Exact Substring Boost**: Adds `+2.0` if the tool name contains the query, or `+1.5` if the description contains the query.
-* **Per-Word Token Match Boost**: Adds `+1.0` per word match on the tool name, and `+0.5` per word match on the description.
-* **Multi-Word Bonus**: Adds compound match multipliers when multi-word intent phrases match across metadata.
+The final score combines vector similarity with keyword matching:
+* **Vector Cosine Similarity** (`0.00` to `1.00`): Measures semantic similarity from dense vectors (Local ONNX `all-MiniLM-L6-v2` or an external API).
+* **Exact Substring Match**: Adds `+2.0` when the tool name contains the full query. Adds `+1.5` when the description contains the full query.
+* **Word Token Match**: Adds `+1.0` for each matching word in the tool name. Adds `+0.5` for each matching word in the description.
+* **Multi-Word Bonus**: Adds score multipliers when multiple query terms match across metadata.
 
 ### API & cURL Example
 ```bash
@@ -242,7 +242,7 @@ curl -X POST http://localhost:8080/api/test/semantic-search \
 
 ## 💻 5. Direct JSON-RPC Raw Console (`ConsoleCard`)
 
-Send raw JSON-RPC 2.0 payloads directly to the gateway router:
+Send raw JSON-RPC 2.0 messages directly to the gateway:
 
 ```
 +-------------------------------------------------------------------------------+
@@ -314,7 +314,7 @@ Send raw JSON-RPC 2.0 payloads directly to the gateway router:
 
 ## 📟 6. Live Diagnostic Logs Terminal (`LogsTerminalCard`)
 
-Positioned at the bottom of the Test Bench view, the Live Logs Terminal provides real-time visibility into internal router operations:
+The Live Logs Terminal sits at the bottom of the Test Bench view. It shows real-time gateway activity:
 
 ```
 +-------------------------------------------------------------------------------+
@@ -330,11 +330,11 @@ Positioned at the bottom of the Test Bench view, the Live Logs Terminal provides
 ```
 
 ### Key Capabilities
-* **Thread-Safe In-Memory Stream**: Streams live gateway logs without disk I/O bottlenecks.
-* **Automatic PII Redaction**: Sensitive authorization headers, Bearer tokens, and secrets are automatically masked (`[REDACTED]`).
-* **Severity Filtering**: Filter logs by `INFO`, `WARN`, or `ERROR` levels.
-* **Auto-Scroll & Freeze**: Pin terminal scroll position while diagnosing active issues.
-* **One-Click Clear**: Clear the buffer at any time via the `Clear` button or `DELETE /api/logs`.
+* **In-Memory Stream**: Streams live logs directly from memory without writing to disk.
+* **PII Redaction**: Masks authorization headers, tokens, and passwords as `[REDACTED]`.
+* **Severity Filters**: Filters log messages by `INFO`, `WARN`, or `ERROR` levels.
+* **Auto-Scroll and Pause**: Controls log scrolling while you inspect events.
+* **Clear Buffer**: Clears log messages with the **Clear** button or `DELETE /api/logs`.
 
 ### API & cURL Example for Logs
 ```bash
