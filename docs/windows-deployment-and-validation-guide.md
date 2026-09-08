@@ -1,4 +1,4 @@
-# Windows Deployment, Enterprise Hosting & Validation Guide
+# Windows Deployment, Enterprise Hosting and Validation Guide
 
 ![Windows Server](https://img.shields.io/badge/Windows%20Server-2022%20%7C%202025-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 ![IIS In-Process](https://img.shields.io/badge/IIS-In--Process%20ANCM-0052CC?style=for-the-badge&logo=windows-terminal&logoColor=white)
@@ -6,56 +6,56 @@
 ![DPAPI Protected](https://img.shields.io/badge/Secrets-Registry%20DPAPI-orange?style=for-the-badge&logo=shield&logoColor=white)
 ![Living Catalog](https://img.shields.io/badge/Quality%20Gate-Verified%20Zero--Drift-green?style=for-the-badge)
 
-Comprehensive, production-grade guide for deploying, configuring, validating, and operating the **Model Context Gateway (MCG)** natively on Microsoft Windows Server and Windows 10/11 environments.
+This guide explains how to deploy, configure, validate, and operate **Model Context Gateway (MCG)** on Microsoft Windows Server and Windows 10/11. Model Context Gateway routes and secures communication for the Model Context Protocol (MCP).
 
 ---
 
 ## 📑 Table of Contents
 
-1. [Executive Architecture & Windows Subsystems](#1-executive-architecture-windows-subsystems)
-   - [Architectural Topology & Gateway Model](#architectural-topology-gateway-model)
+1. [Executive Architecture and Windows Subsystems](#1-executive-architecture-and-windows-subsystems)
+   - [Architectural Topology and Gateway Model](#architectural-topology-and-gateway-model)
    - [Native Windows Subsystems](#native-windows-subsystems)
    - [Hosting Options Comparison Matrix](#hosting-options-comparison-matrix)
-2. [Prerequisites & Host Preparation](#2-prerequisites-host-preparation)
-   - [Operating System & Hardware](#operating-system-hardware)
-   - [Runtimes & SDKs](#runtimes-sdks)
-   - [IIS Roles & Features Installation](#iis-roles-features-installation)
-   - [PowerShell & Security Privileges](#powershell-security-privileges)
+2. [Prerequisites and Host Preparation](#2-prerequisites-and-host-preparation)
+   - [Operating System and Hardware](#operating-system-and-hardware)
+   - [Runtimes and SDKs](#runtimes-and-sdks)
+   - [IIS Roles and Features Installation](#iis-roles-and-features-installation)
+   - [PowerShell and Security Privileges](#powershell-and-security-privileges)
 3. [Option 1: Production IIS In-Process Deployment](#3-option-1-production-iis-in-process-deployment)
-   - [Overview & In-Process Benefits](#overview-in-process-benefits)
+   - [Overview and In-Process Benefits](#overview-and-in-process-benefits)
    - [Automated Deployment with Deploy-IIS.ps1](#automated-deployment-with-deploy-iisps1)
    - [web.config Architectural Deep Dive](#webconfig-architectural-deep-dive)
-   - [SSE Streaming & Zero-Buffering Architecture](#sse-streaming-zero-buffering-architecture)
-   - [Application Pool Tuning & Lifecycle](#application-pool-tuning-lifecycle)
+   - [SSE Streaming and Zero-Buffering Architecture](#sse-streaming-and-zero-buffering-architecture)
+   - [Application Pool Tuning and Lifecycle](#application-pool-tuning-and-lifecycle)
    - [Manual IIS Setup Reference](#manual-iis-setup-reference)
 4. [Option 2: Managed Windows Service (SCM)](#4-option-2-managed-windows-service-scm)
-   - [Overview & Service Architecture](#overview-service-architecture)
+   - [Overview and Service Architecture](#overview-and-service-architecture)
    - [Automated Lifecycle with Setup-WindowsService.ps1](#automated-lifecycle-with-setup-windowsserviceps1)
-   - [Auto-Recovery & SCM Crash Action Configuration](#auto-recovery-scm-crash-action-configuration)
-   - [Service Account & Security Permissions](#service-account-security-permissions)
+   - [Auto-Recovery and SCM Crash Action Configuration](#auto-recovery-and-scm-crash-action-configuration)
+   - [Service Account and Security Permissions](#service-account-and-security-permissions)
 5. [Option 3: Standalone Kestrel Console](#5-option-3-standalone-kestrel-console)
-   - [Developer & Interactive Execution](#developer-interactive-execution)
-   - [Command-Line Overrides & Ports](#command-line-overrides-ports)
+   - [Developer and Interactive Execution](#developer-and-interactive-execution)
+   - [Command-Line Overrides and Ports](#command-line-overrides-and-ports)
 6. [End-to-End Validation Runbook (4 Key Scenarios)](#6-end-to-end-validation-runbook-4-key-scenarios)
-   - [Scenario 1: Active Directory & Windows Integrated Auth (Kerberos / NTLM / SIDs)](#scenario-1-active-directory-windows-integrated-auth-kerberos-ntlm-sids)
-   - [Scenario 2: Windows Registry Secrets & DPAPI Encryption](#scenario-2-windows-registry-secrets-dpapi-encryption)
+   - [Scenario 1: Active Directory and Windows Integrated Authentication](#scenario-1-active-directory-and-windows-integrated-authentication)
+   - [Scenario 2: Windows Registry Secrets and DPAPI Encryption](#scenario-2-windows-registry-secrets-and-dpapi-encryption)
    - [Scenario 3: STDIO Transport Subprocess Execution on Windows](#scenario-3-stdio-transport-subprocess-execution-on-windows)
-   - [Scenario 4: Automated Environment Diagnostics & Quality Gates](#scenario-4-automated-environment-diagnostics-quality-gates)
-7. [Production Operations, Security Hardening & Observability](#7-production-operations-security-hardening-observability)
-   - [SSL/TLS Certificates & HTTPS Bindings](#ssltls-certificates-https-bindings)
-   - [Health Probes & Monitoring](#health-probes-monitoring)
+   - [Scenario 4: Automated Environment Diagnostics and Quality Gates](#scenario-4-automated-environment-diagnostics-and-quality-gates)
+7. [Production Operations, Security Hardening and Observability](#7-production-operations-security-hardening-and-observability)
+   - [SSL/TLS Certificates and HTTPS Bindings](#ssltls-certificates-and-https-bindings)
+   - [Health Probes and Monitoring](#health-probes-and-monitoring)
    - [Prometheus Metrics Scraping](#prometheus-metrics-scraping)
    - [Logging Architecture (IIS, Stdout, Windows Event Log)](#logging-architecture-iis-stdout-windows-event-log)
-   - [Database Backup & Recovery on Windows](#database-backup-recovery-on-windows)
+   - [Database Backup and Recovery on Windows](#database-backup-and-recovery-on-windows)
 8. [Comprehensive Troubleshooting Guide](#8-comprehensive-troubleshooting-guide)
 
 ---
 
-## 🏛️ 1. Executive Architecture & Windows Subsystems
+## 🏛️ 1. Executive Architecture and Windows Subsystems
 
-### Architectural Topology & Gateway Model
+### Architectural Topology and Gateway Model
 
-The **Model Context Gateway (MCG)** acts as an enterprise gateway and semantic proxy for the Model Context Protocol (MCP). On Windows Server, it natively bridges Windows infrastructure (Active Directory, DPAPI, IIS, Windows Services) with heterogeneous downstream MCP servers.
+Model Context Gateway (MCG) acts as a gateway and proxy for the Model Context Protocol (MCP). On Windows Server, it connects native Windows infrastructure (Active Directory, DPAPI, IIS, and Windows Services) to downstream MCP tools.
 
 ```mermaid
 flowchart TD
@@ -109,71 +109,71 @@ flowchart TD
 
 ### Native Windows Subsystems
 
-1. **Active Directory & Integrated Windows Authentication (`WindowsIdentity`)**:
-   - Implemented via [`IWindowsIdentityAccessor.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Identity/IWindowsIdentityAccessor.cs) and [`ActiveDirectoryIdentityProvider.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Identity/ActiveDirectoryIdentityProvider.cs).
-   - Extracts caller identity, Primary SID, and full Group SID security token lists directly from `WindowsIdentity.Groups` when running under IIS or Kestrel Negotiate authentication.
-   - Transparently handles well-known security identifiers such as `S-1-5-32-544` (Builtin Administrators) and domain security groups for role-based authorization without requiring external LDAP binds.
+1. **Active Directory and Windows Integrated Authentication (`WindowsIdentity`)**:
+   - Implemented in [`IWindowsIdentityAccessor.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Identity/IWindowsIdentityAccessor.cs) and [`ActiveDirectoryIdentityProvider.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Identity/ActiveDirectoryIdentityProvider.cs).
+   - Reads user identity, primary Security Identifier (SID), and group SIDs directly from `WindowsIdentity.Groups` when running under IIS or Kestrel Negotiate authentication.
+   - Identifies default security groups such as `S-1-5-32-544` (Local Administrators) for role access checks without external LDAP queries.
 
-2. **Windows Registry & DPAPI Cryptography (`WindowsRegistrySecretRetriever`)**:
-   - Implemented via [`WindowsRegistrySecretRetriever.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/WindowsRegistrySecretRetriever.cs).
+2. **Windows Registry and DPAPI Cryptography (`WindowsRegistrySecretRetriever`)**:
+   - Implemented in [`WindowsRegistrySecretRetriever.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/WindowsRegistrySecretRetriever.cs).
    - Reads secrets from `HKLM:\SOFTWARE\McpRouter\Secrets`.
-   - Supports plaintext `REG_SZ` strings and cryptographically secure `REG_BINARY` blobs protected with the Windows Data Protection API (`System.Security.Cryptography.ProtectedData.Protect` / `Unprotect`) under `DataProtectionScope.LocalMachine`.
-   - Allows machine-level secret provisioning that is completely decoupled from configuration files or source code repositories.
+   - Supports plaintext `REG_SZ` strings and encrypted `REG_BINARY` values protected by the Windows Data Protection API (DPAPI) under `DataProtectionScope.LocalMachine`.
+   - Stores machine-level secrets securely without putting credentials in source files.
 
 3. **Subprocess STDIO Transport Isolation (`StdioTransport`)**:
-   - Implemented via [`StdioTransport.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs).
-   - Spawns Windows processes (`.exe`, `.cmd`, `.bat`, `node.exe`, `python.exe`, `uvx.exe`, `npx.cmd`) with standard input/output redirection.
-   - Enforces **Zero CLI Secret Leakage**: sensitive API tokens and keys resolved from DPAPI, Vault, or environment variables are injected exclusively into `ProcessStartInfo.Environment` rather than command-line arguments.
+   - Implemented in [`StdioTransport.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs).
+   - Runs Windows programs (`.exe`, `.cmd`, `.bat`, `node.exe`, `python.exe`) with Standard Input and Output (STDIO) pipe redirection.
+   - Enforces **Zero Command-Line Secret Leakage**: The gateway passes secrets only through `ProcessStartInfo.Environment`, never as command-line arguments.
 
 ---
 
 ### Hosting Options Comparison Matrix
 
-| Feature / Attribute | Option 1: IIS In-Process (Recommended) | Option 2: Managed Windows Service | Option 3: Standalone Kestrel Console |
+| Feature and Attribute | Option 1: IIS In-Process (Recommended) | Option 2: Managed Windows Service | Option 3: Standalone Kestrel Console |
 | :--- | :--- | :--- | :--- |
-| **Primary Use Case** | Enterprise production servers, shared web infrastructure | Dedicated servers, headless background hosting | Local testing, debugging, CI/CD runners |
-| **Process Hosting Model** | In-Process inside `w3wp.exe` via `AspNetCoreModuleV2` | Standalone `.exe` managed by Windows SCM | Direct `dotnet run` / interactive executable |
-| **Throughput & Performance** | **Maximum** (Direct CLR execution in IIS worker process) | High (Direct Kestrel socket pipeline) | High (Development pipeline) |
-| **Port Sharing & Bindings** | Full HTTP.sys port sharing (80, 443, multiple hostnames) | Dedicated port binding (e.g. `http://0.0.0.0:8080`) | Dedicated port binding (e.g. `http://localhost:5000`) |
-| **SSL/TLS Termination** | Native IIS Certificate Store, SNI, win-acme Let's Encrypt | Kestrel PFX binding or upstream reverse proxy | Kestrel dev certificate or HTTP only |
-| **SSE Streaming Optimization** | Supported with `responseBufferLimit="0"` | Native (Zero buffering in Kestrel) | Native |
-| **Crash Auto-Recovery** | IIS Application Pool auto-restart & health monitoring | SCM failure actions (`sc.exe failure actions= restart`) | Manual restart or console loop |
-| **Integrated Windows Auth** | Native IIS Negotiate / Kerberos / NTLM module | Kestrel Negotiate or Header-based Auth | Negotiate or Anonymous |
-| **Automation Script** | [`Deploy-IIS.ps1`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/Deploy-IIS.ps1) | [`Setup-WindowsService.ps1`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/Setup-WindowsService.ps1) | Direct CLI / Terminal |
+| **Primary Use Case** | Enterprise production servers, shared web hosts | Dedicated application servers, background daemons | Local testing, debugging, CI pipelines |
+| **Hosting Model** | In-Process inside `w3wp.exe` through `AspNetCoreModuleV2` | Standalone executable managed by Windows SCM | Direct `dotnet run` or interactive binary |
+| **Throughput and Latency** | **Fastest** (direct in-memory execution in IIS worker process) | High (direct Kestrel HTTP pipeline) | High (development pipeline) |
+| **Port Sharing and Bindings** | Full HTTP.sys port sharing (ports 80, 443, multiple hosts) | Dedicated port binding (such as `http://0.0.0.0:8080`) | Dedicated port binding (such as `http://localhost:5000`) |
+| **SSL/TLS Termination** | Windows Certificate Store, SNI, win-acme Let's Encrypt | Kestrel certificate binding or reverse proxy | Developer certificates or HTTP only |
+| **SSE Streaming Settings** | Supported with `responseBufferLimit="0"` | Native (zero buffering in Kestrel) | Native |
+| **Automatic Crash Recovery** | IIS Application Pool restart and health monitoring | Service Control Manager failure restart triggers | Manual restart or console loop |
+| **Integrated Authentication** | Native IIS Negotiate, Kerberos, and NTLM modules | Kestrel Negotiate or header authentication | Negotiate or Anonymous |
+| **Automation Script** | [`Deploy-IIS.ps1`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/Deploy-IIS.ps1) | [`Setup-WindowsService.ps1`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/Setup-WindowsService.ps1) | Command prompt or PowerShell |
 
 ---
 
-## 🛠️ 2. Prerequisites & Host Preparation
+## 🛠️ 2. Prerequisites and Host Preparation
 
-### Operating System & Hardware
+### Operating System and Hardware
 
-- **Operating System**: Windows Server 2025, Windows Server 2022, Windows Server 2019, or Windows 10/11 (64-bit x64 / arm64).
-- **CPU & Memory**: Minimum 2 Cores, 4 GB RAM (8 GB+ recommended if utilizing local ONNX vector embeddings).
-- **Disk**: Minimum 2 GB free disk space for published binaries, SQLite database, and ONNX models.
+- **Operating System**: Windows Server 2025, Windows Server 2022, Windows Server 2019, or Windows 10/11 (64-bit x64 or arm64).
+- **CPU and Memory**: Minimum 2 Cores and 4 GB RAM (8 GB or more recommended for local ONNX embeddings).
+- **Disk Space**: Minimum 2 GB free disk space for application files, SQLite databases, and models.
 
-### Runtimes & SDKs
+### Runtimes and SDKs
 
-1. **.NET 10 SDK / ASP.NET Core 10 Windows Hosting Bundle**:
-   - Download and install the [.NET 10 Windows Hosting Bundle](https://dotnet.microsoft.com/download/dotnet/10.0). The hosting bundle installs the .NET Runtime, ASP.NET Core Runtime, and the **ASP.NET Core Module v2 (ANCM)** for IIS.
-   - Verify installation via PowerShell:
+1. **.NET 10 SDK and ASP.NET Core 10 Windows Hosting Bundle**:
+   - Install the [.NET 10 Windows Hosting Bundle](https://dotnet.microsoft.com/download/dotnet/10.0). This bundle includes the runtime and the **ASP.NET Core Module v2 (ANCM)** for IIS.
+   - Verify installation in PowerShell:
      ```powershell
      dotnet --info
      ```
 
-2. **Node.js & npm (Required for Dashboard UI Build)**:
-   - Node.js LTS (v20.x or v22.x) from [nodejs.org](https://nodejs.org/).
-   - Verify installation:
+2. **Node.js and npm (Required for Web Dashboard Build)**:
+   - Install Node.js LTS (v20.x or v22.x) from [nodejs.org](https://nodejs.org/).
+   - Check installed versions:
      ```powershell
      node -v
      npm -v
      ```
 
-### IIS Roles & Features Installation
+### IIS Roles and Features Installation
 
-To install IIS and all required modules on Windows Server, run an elevated Administrator PowerShell prompt:
+To install IIS and required components on Windows Server, run PowerShell as Administrator:
 
 ```powershell
-# Install IIS, Management Tools, WebSockets, and Windows Authentication
+# Install IIS, management tools, WebSockets, and Windows Authentication
 Install-WindowsFeature -Name Web-Server, `
                             Web-WebServer, `
                             Web-Common-Http, `
@@ -192,14 +192,14 @@ Install-WindowsFeature -Name Web-Server, `
                             Web-Scripting-Tools -IncludeManagementTools
 ```
 
-*For Windows 10/11 Workstations, enable features via `dism`:*
+*For Windows 10/11 workstations, enable optional features with `dism`:*
 ```powershell
 Enable-WindowsOptionalFeature -Online -FeatureName IIS-WebServerRole, IIS-WebServer, IIS-CommonHttpFeatures, IIS-StaticContent, IIS-DefaultDocument, IIS-DirectoryBrowsing, IIS-HttpErrors, IIS-ApplicationDevelopment, IIS-WebSockets, IIS-Security, IIS-WindowsAuthentication, IIS-RequestFiltering, IIS-WebServerManagementTools, IIS-ManagementConsole -All
 ```
 
-### PowerShell & Security Privileges
+### PowerShell and Security Privileges
 
-All deployment scripts must be run from an **Elevated Administrator PowerShell Prompt**. Ensure execution policy allows script execution:
+Run all deployment commands from an **Elevated Administrator PowerShell Prompt**. Configure the execution policy to permit script execution:
 
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
@@ -209,46 +209,46 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
 
 ## 🚀 3. Option 1: Production IIS In-Process Deployment
 
-### Overview & In-Process Benefits
+### Overview and In-Process Benefits
 
-In-Process hosting (`hostingModel="inprocess"`) loads the ASP.NET Core application directly inside the IIS worker process (`w3wp.exe`). This delivers:
-1. **Zero Loopback Latency**: Requests are processed directly in memory without out-of-process HTTP forwarding to a separate Kestrel process.
-2. **Native Windows Authentication**: Kerberos and NTLM tokens are transferred directly to `HttpContext.User` as `WindowsIdentity` objects.
-3. **Robust Lifecycle Management**: Application recycling, idle shutdown, and CPU throttling are handled by the IIS kernel.
+In-Process hosting (`hostingModel="inprocess"`) loads the gateway inside the IIS worker process (`w3wp.exe`). This model provides three key advantages:
+1. **Zero Loopback Latency**: Requests process in memory without extra network hops to an external process.
+2. **Native Windows Authentication**: Kerberos and NTLM tokens pass directly to `HttpContext.User` as `WindowsIdentity` objects.
+3. **Automated Lifecycle Management**: IIS manages worker recycling, idle timeouts, and CPU limits.
 
 ---
 
 ### Automated Deployment with Deploy-IIS.ps1
 
-The repository includes a comprehensive deployment automation script: [`scripts/windows/Deploy-IIS.ps1`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/Deploy-IIS.ps1).
+The repository includes an automation script: [`scripts/windows/Deploy-IIS.ps1`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/Deploy-IIS.ps1).
 
 #### Parameter Reference
 
 | Parameter | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `-SiteName` | string | `"ModelContextGateway"` | Name of the IIS Website. |
-| `-AppPoolName` | string | `"ModelContextGatewayAppPool"` | Name of the dedicated IIS Application Pool. |
-| `-Port` | int | `8080` | HTTP port for the website binding. |
-| `-HostName` | string | `""` | Optional hostname binding (e.g. `mcp.corp.local`). |
-| `-PhysicalPath` | string | `"C:\inetpub\mcg"` | Target physical deployment directory. |
+| `-SiteName` | string | `"ModelContextGateway"` | Name of the IIS website. |
+| `-AppPoolName` | string | `"ModelContextGatewayAppPool"` | Dedicated IIS Application Pool name. |
+| `-Port` | int | `8080` | HTTP port for the site binding. |
+| `-HostName` | string | `""` | Optional hostname binding (such as `mcp.corp.local`). |
+| `-PhysicalPath` | string | `"C:\inetpub\mcg"` | Deployment destination folder on disk. |
 | `-Configuration` | string | `"Release"` | Build configuration (`Release` or `Debug`). |
 | `-RepoRoot` | string | Auto-resolved | Path to the repository root directory. |
-| `-SkipFrontend` | switch | `false` | Skips compiling the Vite React frontend. |
-| `-SkipBuild` | switch | `false` | Skips compilation (assumes binaries are already published). |
-| `-SelfContained`| switch | `false` | Publishes self-contained .NET binary including runtime. |
-| `-RuntimeIdentifier` | string | `"win-x64"` | Target runtime architecture (`win-x64`, `win-arm64`). |
-| `-EnableWindowsAuth` | switch | `false` | Explicitly enables IIS Windows Authentication on the site. |
+| `-SkipFrontend` | switch | `false` | Skips building the React frontend. |
+| `-SkipBuild` | switch | `false` | Skips compilation when binaries exist. |
+| `-SelfContained`| switch | `false` | Builds a self-contained binary including the .NET runtime. |
+| `-RuntimeIdentifier` | string | `"win-x64"` | Target platform (`win-x64` or `win-arm64`). |
+| `-EnableWindowsAuth` | switch | `false` | Turns on Windows Authentication in IIS. |
 
 #### Deployment Commands
 
 ```powershell
-# Standard Production Deployment (Port 8080 with Windows Authentication):
+# Standard deployment on port 8080 with Windows Authentication:
 .\scripts\windows\Deploy-IIS.ps1 -SiteName "ModelContextGateway" -Port 8080 -EnableWindowsAuth
 
-# Host Header Binding Deployment (e.g. mcp.company.internal):
+# Host header binding deployment (e.g. mcp.company.internal):
 .\scripts\windows\Deploy-IIS.ps1 -SiteName "ModelContextGateway" -Port 80 -HostName "mcp.company.internal" -EnableWindowsAuth
 
-# Self-Contained Deployment to Custom Directory:
+# Self-contained deployment to a custom directory:
 .\scripts\windows\Deploy-IIS.ps1 -PhysicalPath "D:\Apps\ModelContextGateway" -Port 8443 -SelfContained
 ```
 
@@ -256,7 +256,7 @@ The repository includes a comprehensive deployment automation script: [`scripts/
 
 ### web.config Architectural Deep Dive
 
-The IIS deployment uses an optimized `web.config` file derived from [`scripts/windows/web.config.example`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/web.config.example):
+The IIS site uses an optimized `web.config` file based on [`scripts/windows/web.config.example`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/web.config.example):
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -322,28 +322,28 @@ The IIS deployment uses an optimized `web.config` file derived from [`scripts/wi
 
 ---
 
-### SSE Streaming & Zero-Buffering Architecture
+### SSE Streaming and Zero-Buffering Architecture
 
-The Model Context Protocol heavily relies on Server-Sent Events (`/sse` and `/message`) for real-time JSON-RPC messaging and streaming LLM token updates.
+The Model Context Protocol uses Server-Sent Events (`/sse` and `/message`) for real-time JSON-RPC messages and streaming responses.
 
 > [!CAUTION]
 > **Why `responseBufferLimit="0"` is Mandatory:**
-> By default, IIS buffers outbound HTTP responses in chunks up to 4 KB before flushing to the client. This breaks MCP SSE connections, causing client requests (`search_tools`, `execute_tool`) to hang indefinitely waiting for the buffer to fill. Setting `responseBufferLimit="0"` in `<aspNetCore>` completely turns off ANCM buffering.
+> By default, IIS buffers outbound HTTP traffic in chunks up to 4 KB before flushing. This buffering breaks MCP SSE streams, causing requests (`search_tools`, `execute_tool`) to hang. Setting `responseBufferLimit="0"` disables ANCM output buffering completely.
 
 > [!IMPORTANT]
 > **Disabling Dynamic Compression:**
-> IIS dynamic compression (`<urlCompression doDynamicCompression="false" />`) compresses streaming HTTP responses on the fly. Because compression algorithms require looking ahead across byte chunks, dynamic compression buffers SSE events. Static compression remains enabled for frontend assets (`.js`, `.css`), while dynamic compression is disabled.
+> IIS dynamic compression (`<urlCompression doDynamicCompression="false" />`) buffers response streams to calculate compression dictionaries. This delay blocks real-time events. Keep static compression enabled for static files, but keep dynamic compression disabled.
 
 ---
 
-### Application Pool Tuning & Lifecycle
+### Application Pool Tuning and Lifecycle
 
-To keep upstream connections persistently alive, configure the following IIS Application Pool properties (automatically applied by `Deploy-IIS.ps1`):
+Configure these Application Pool settings to keep long-running connections active (automatically handled by `Deploy-IIS.ps1`):
 
-1. **.NET CLR Version**: Set to `No Managed Code` (`""`). ANCM loads the .NET Core runtime directly.
-2. **Start Mode**: Set to `AlwaysRunning`. Prevents IIS from placing the worker process to sleep.
-3. **Idle Time-out**: Set to `0` (Disabled). Ensures the gateway remains active during quiet periods without dropping downstream MCP transport pipes.
-4. **Permissions**: The AppPool identity (`IIS AppPool\McgAppPool`) must have read/write access to the deployment folder and the `logs` subdirectory:
+1. **.NET CLR Version**: Set to `No Managed Code` (`""`). ANCM loads the .NET runtime directly.
+2. **Start Mode**: Set to `AlwaysRunning`. This stops IIS from putting the worker process to sleep.
+3. **Idle Time-out**: Set to `0` (Disabled). Prevents dropping downstream MCP connections during idle periods.
+4. **Permissions**: Grant the Application Pool identity (`IIS AppPool\McgAppPool`) read and write permissions on the application directory and log folder:
    ```powershell
    icacls "C:\inetpub\mcg" /grant "IIS AppPool\McgAppPool:(OI)(CI)M" /T /Q
    ```
@@ -352,58 +352,58 @@ To keep upstream connections persistently alive, configure the following IIS App
 
 ### Manual IIS Setup Reference
 
-For air-gapped systems or environments where automated scripts cannot be run directly:
+For offline or manual installations without scripts:
 
-1. Build and publish the application:
+1. Build and publish the gateway:
    ```powershell
    cd frontend; npm run build; cd ..
    dotnet publish ModelContextGateway.csproj -c Release -o C:\inetpub\mcg
    ```
 2. Copy `scripts\windows\web.config.example` to `C:\inetpub\mcg\web.config`.
 3. Open **IIS Manager (`inetmgr`)**:
-   - Create Application Pool: `McgAppPool` -> .NET CLR Version: `No Managed Code`.
-   - In AppPool **Advanced Settings**: set `Start Mode` = `AlwaysRunning`, `Idle Time-out (minutes)` = `0`.
-   - Add Website: Site Name = `ModelContextGateway`, Physical Path = `C:\inetpub\mcg`, Port = `8080`.
-   - Navigate to **Authentication**: Enable `Windows Authentication` and `Anonymous Authentication`.
+   - Create an Application Pool named `McgAppPool` with .NET CLR Version set to `No Managed Code`.
+   - In AppPool **Advanced Settings**, set `Start Mode` to `AlwaysRunning` and `Idle Time-out (minutes)` to `0`.
+   - Add a website: Name = `ModelContextGateway`, Physical Path = `C:\inetpub\mcg`, Port = `8080`.
+   - Under **Authentication**, enable `Windows Authentication` and `Anonymous Authentication`.
 4. Grant filesystem permissions to `IIS AppPool\McgAppPool`.
 
 ---
 
 ## ⚙️ 4. Option 2: Managed Windows Service (SCM)
 
-### Overview & Service Architecture
+### Overview and Service Architecture
 
-When deploying as a dedicated background daemon without IIS, the router can run directly as a **Windows Service** managed by the Windows Service Control Manager (SCM).
+You can run the gateway directly as a **Windows Service** without IIS. The Windows Service Control Manager (SCM) manages process lifecycle.
 
-- Uses ASP.NET Core Kestrel directly on a dedicated TCP port.
-- Configured with automatic crash recovery triggers.
-- Can run under `NT AUTHORITY\LocalSystem`, `NT AUTHORITY\NetworkService`, or a domain Group Managed Service Account (gMSA).
+- Uses ASP.NET Core Kestrel directly on a configured TCP port.
+- Configures automatic restart actions after unexpected errors.
+- Runs under `NT AUTHORITY\LocalSystem`, `NT AUTHORITY\NetworkService`, or a domain Group Managed Service Account (gMSA).
 
 ---
 
 ### Automated Lifecycle with Setup-WindowsService.ps1
 
-The repository provides the lifecycle management script: [`scripts/windows/Setup-WindowsService.ps1`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/Setup-WindowsService.ps1).
+The repository includes a service management script: [`scripts/windows/Setup-WindowsService.ps1`](https://github.com/spelech/model-context-gateway/blob/main/scripts/windows/Setup-WindowsService.ps1).
 
-#### Supported Actions
+#### Supported Commands
 
 ```powershell
-# 1. Install & Start Service on Port 8080:
+# 1. Install and start the service on Port 8080:
 .\scripts\windows\Setup-WindowsService.ps1 -Action Install -Port 8080
 
-# 2. Check Service Status & Health:
+# 2. Check service status and health:
 .\scripts\windows\Setup-WindowsService.ps1 -Action Status
 
-# 3. Restart Service:
+# 3. Restart the service:
 .\scripts\windows\Setup-WindowsService.ps1 -Action Restart
 
-# 4. Stop Service:
+# 4. Stop the service:
 .\scripts\windows\Setup-WindowsService.ps1 -Action Stop
 
-# 5. Start Service:
+# 5. Start the service:
 .\scripts\windows\Setup-WindowsService.ps1 -Action Start
 
-# 6. Uninstall & Remove Service:
+# 6. Uninstall the service:
 .\scripts\windows\Setup-WindowsService.ps1 -Action Uninstall
 ```
 
@@ -411,36 +411,36 @@ The repository provides the lifecycle management script: [`scripts/windows/Setup
 
 | Parameter | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `-Action` | string | *(Mandatory)* | `Install`, `Uninstall`, `Start`, `Stop`, `Restart`, `Status`. |
-| `-ServiceName` | string | `"ModelContextGateway"` | Unique service name in SCM. |
-| `-DisplayName` | string | `"Model Context Gateway (MCG) Service"` | User-friendly display name. |
-| `-InstallDir` | string | `"C:\Program Files\McpRouter"` | Target directory for published binaries. |
-| `-Port` | int | `8080` | Port for ASP.NET Core Kestrel HTTP listener. |
+| `-Action` | string | *(Mandatory)* | `Install`, `Uninstall`, `Start`, `Stop`, `Restart`, or `Status`. |
+| `-ServiceName` | string | `"ModelContextGateway"` | Service name in Windows SCM. |
+| `-DisplayName` | string | `"Model Context Gateway (MCG) Service"` | Display name shown in Services console. |
+| `-InstallDir` | string | `"C:\Program Files\McpRouter"` | Destination folder for published binaries. |
+| `-Port` | int | `8080` | Port for the Kestrel HTTP listener. |
 | `-Urls` | string | `"http://0.0.0.0:8080"` | Complete URL bindings. |
-| `-ServiceAccount` | string | `"NT AUTHORITY\LocalSystem"` | Service user account (e.g. `DOMAIN\gMSA_McpRouter$`). |
-| `-Configuration` | string | `"Release"` | Build configuration (`Release` or `Debug`). |
-| `-SelfContained` | switch | `false` | Publishes self-contained .NET binary. |
+| `-ServiceAccount` | string | `"NT AUTHORITY\LocalSystem"` | Account running the service (such as `DOMAIN\svc_mcp$`). |
+| `-Configuration` | string | `"Release"` | Build mode (`Release` or `Debug`). |
+| `-SelfContained` | switch | `false` | Publishes a self-contained executable. |
 
 ---
 
-### Auto-Recovery & SCM Crash Action Configuration
+### Auto-Recovery and SCM Crash Action Configuration
 
-`Setup-WindowsService.ps1` automatically configures Windows Service Control Manager recovery actions using `sc.exe`:
+`Setup-WindowsService.ps1` configures restart triggers automatically with `sc.exe`:
 
 ```powershell
-# Automatically restart the service after 60 seconds on 1st, 2nd, and subsequent crashes:
+# Automatically restart the service after 60 seconds on crashes:
 sc.exe failure McpRouter reset= 86400 actions= restart/60000/restart/60000/restart/60000
 sc.exe failureflag McpRouter 1
 ```
 
 ---
 
-### Service Account & Security Permissions
+### Service Account and Security Permissions
 
-If running under a restricted domain service account or gMSA (`DOMAIN\svc_mcp`):
-1. Grant the service account read/write access to the install folder (`C:\Program Files\McpRouter`).
-2. Grant read access to the Windows Registry subkey `HKLM:\SOFTWARE\McpRouter\Secrets`.
-3. Reserve the URL port binding via `netsh`:
+When you run under a restricted domain account or gMSA (`DOMAIN\svc_mcp`):
+1. Grant the service account read and write permissions on `C:\Program Files\McpRouter`.
+2. Grant read permissions on the registry key `HKLM:\SOFTWARE\McpRouter\Secrets`.
+3. Reserve the URL port binding with `netsh`:
    ```cmd
    netsh http add urlacl url=http://+:8080/ user="DOMAIN\svc_mcp"
    ```
@@ -449,16 +449,16 @@ If running under a restricted domain service account or gMSA (`DOMAIN\svc_mcp`):
 
 ## 💻 5. Option 3: Standalone Kestrel Console
 
-For local development, testing, or ad-hoc validation on Windows:
+Use standalone console mode for local development, testing, or debugging on Windows:
 
-### Developer & Interactive Execution
+### Developer and Interactive Execution
 
 ```powershell
 # Run from repository root in Development mode:
 dotnet run --project ModelContextGateway.csproj --urls "http://localhost:5000"
 ```
 
-### Command-Line Overrides & Ports
+### Command-Line Overrides and Ports
 
 ```powershell
 # Run published binary in Production mode:
@@ -472,7 +472,7 @@ $env:MCG_MASTER_KEY="your_32_char_secure_hex_master_key_here"
 
 ## 🧪 6. End-to-End Validation Runbook (4 Key Scenarios)
 
-This section provides executable runbooks for verifying all native Windows capabilities across 4 core scenarios.
+This section provides verification procedures for native Windows features across 4 core scenarios.
 
 ```mermaid
 graph TD
@@ -503,14 +503,14 @@ graph TD
 
 ---
 
-### Scenario 1: Active Directory & Windows Integrated Auth (Kerberos / NTLM / SIDs)
+### Scenario 1: Active Directory and Windows Integrated Authentication
 
 #### Objective
-Validate that Windows caller identities, user security identifiers (SIDs), and group security identifiers (e.g. `S-1-5-32-544` for Administrators) are extracted by `IWindowsIdentityAccessor` and mapped to RBAC permissions by `ActiveDirectoryIdentityProvider`.
+Verify that `IWindowsIdentityAccessor` extracts user SIDs and group SIDs (including `S-1-5-32-544`), and that `ActiveDirectoryIdentityProvider` applies role-based access controls correctly.
 
 #### Step-by-Step Validation
 
-1. **Verify Windows Identity & SIDs via PowerShell**:
+1. **Check Identity and SIDs in PowerShell**:
    ```powershell
    # Inspect current token identity and security SIDs:
    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -520,9 +520,9 @@ Validate that Windows caller identities, user security identifiers (SIDs), and g
    $identity.Groups | ForEach-Object { Write-Host " - $($_.Value)" -ForegroundColor DarkGray }
    ```
 
-2. **Test IIS Windows Integrated Authentication**:
+2. **Test Windows Integrated Authentication on IIS**:
    ```powershell
-   # Test with current Windows logon credentials:
+   # Test with current logon credentials:
    $response = Invoke-RestMethod -Uri "http://localhost:8080/api/auth/me" -UseDefaultCredentials
    $response | ConvertTo-Json -Depth 4
    ```
@@ -541,21 +541,21 @@ Validate that Windows caller identities, user security identifiers (SIDs), and g
    }
    ```
 
-3. **Verify Builtin Administrator Authorization (`S-1-5-32-544`)**:
-   - The router automatically identifies members of the local `Administrators` group (`S-1-5-32-544`) and grants administrative access without requiring manual group mapping in the database.
+3. **Verify Builtin Administrator Access (`S-1-5-32-544`)**:
+   - The gateway automatically recognizes members of the local `Administrators` group (`S-1-5-32-544`) and grants administrative access without manual database mappings.
 
 ---
 
-### Scenario 2: Windows Registry Secrets & DPAPI Encryption
+### Scenario 2: Windows Registry Secrets and DPAPI Encryption
 
 #### Objective
-Validate that API keys and credentials can be securely stored in the Windows Registry (`HKLM:\SOFTWARE\McpRouter\Secrets`) with DPAPI encryption (`DataProtectionScope.LocalMachine`) and dynamically retrieved at runtime by `WindowsRegistrySecretRetriever`.
+Verify that credentials stored in `HKLM:\SOFTWARE\McpRouter\Secrets` with DPAPI encryption (`DataProtectionScope.LocalMachine`) are decrypted by `WindowsRegistrySecretRetriever` at runtime.
 
 #### Step-by-Step Validation
 
-1. **Store DPAPI-Encrypted Secret using `Set-RegistrySecrets.ps1`**:
+1. **Store a DPAPI-Encrypted Secret using `Set-RegistrySecrets.ps1`**:
    ```powershell
-   # Write an encrypted PAT token:
+   # Write an encrypted token:
    .\scripts\windows\Set-RegistrySecrets.ps1 -SecretName "DockerApiKey" -SecretValue "dckr_pat_secret_token_12345" -Encrypt
    ```
 
@@ -592,27 +592,27 @@ Validate that API keys and credentials can be securely stored in the Windows Reg
    Plaintext   : dckr_pat_secret_token_12345
    ```
 
-5. **Test in Model Context Gateway Runtime**:
-   - Register a backend server with `SecretProvider = "WindowsRegistry"`, `SecretPath = "SOFTWARE\McpRouter\Secrets"`, and `SecretItemKey = "DockerApiKey"`.
-   - Invoke a tool on that server via the Test Bench. The gateway dynamically reads and decrypts the registry binary value and injects it into the transport request.
+5. **Test in the Gateway Runtime**:
+   - Configure a backend server with `SecretProvider = "WindowsRegistry"`, `SecretPath = "SOFTWARE\McpRouter\Secrets"`, and `SecretItemKey = "DockerApiKey"`.
+   - Run a tool from that server in the Test Bench. The gateway reads and decrypts the value automatically.
 
 ---
 
 ### Scenario 3: STDIO Transport Subprocess Execution on Windows
 
 #### Objective
-Validate that the router can spawn local Windows subprocesses (`.exe`, `.bat`, `node.exe`, `python.exe`), safely inject credentials via environment variables without CLI leakage, and manage process tree lifecycles.
+Verify that the gateway spawns local Windows processes, injects credentials through environment variables without command-line leakage, and manages child processes safely.
 
 #### Step-by-Step Validation
 
-1. **Verify Executable Path Resolution in PowerShell**:
+1. **Verify Executable Path Resolution**:
    ```powershell
-   # Test node and python resolution:
+   # Verify node and python tools:
    Get-Command node, python, npx, uvx -ErrorAction SilentlyContinue | Select-Object Name, Source
    ```
 
-2. **Register a Local STDIO Backend Server**:
-   Create a sample STDIO server in the router database or test configuration:
+2. **Register a Local STDIO Server**:
+   Create a sample STDIO server in the gateway:
    - **Name**: `LocalFilesystemMcp`
    - **Transport**: `stdio`
    - **Command / URL**: `npx -y @modelcontextprotocol/server-filesystem C:\data`
@@ -620,30 +620,30 @@ Validate that the router can spawn local Windows subprocesses (`.exe`, `.bat`, `
    - **Secret Path**: `SOFTWARE\McpRouter\Secrets`
    - **Secret Key**: `FilesystemSecretKey`
 
-3. **Validate Zero CLI Secret Leakage**:
-   - When the router executes `StdioTransport`, observe running processes in PowerShell:
+3. **Confirm Zero Command-Line Secret Leakage**:
+   - While the tool runs, inspect active processes in PowerShell:
      ```powershell
      Get-CimInstance Win32_Process -Filter "Name like '%node%'" | Select-Object ProcessId, CommandLine
      ```
-   - Notice that the secret key does **not** appear anywhere in `CommandLine`. It is securely passed inside `ProcessStartInfo.Environment["API_KEY"]`.
+   - Verify that secrets do **not** appear in `CommandLine`. Secrets pass exclusively inside `ProcessStartInfo.Environment["API_KEY"]`.
 
-4. **Execute Tools via Test Bench**:
-   - Open the web dashboard: `http://localhost:8080/#/testbench`.
-   - Select the `LocalFilesystemMcp` server tools (e.g. `list_directory`).
-   - Execute the tool and verify JSON-RPC output streaming.
+4. **Execute Tools in the Test Bench**:
+   - Open the dashboard: `http://localhost:8080/#/testbench`.
+   - Select tools for `LocalFilesystemMcp` (such as `list_directory`).
+   - Run the tool and verify streaming output.
 
 ---
 
-### Scenario 4: Automated Environment Diagnostics & Quality Gates
+### Scenario 4: Automated Environment Diagnostics and Quality Gates
 
 #### Objective
-Execute the unified Windows diagnostic runner, backend test suites, and living requirements catalog zero-drift verification.
+Run automated diagnostic checks, execute backend test suites, and confirm living requirements catalog compliance.
 
 #### Step-by-Step Validation
 
-1. **Run Automated Diagnostic Runner (`Test-WindowsEnvironment.ps1`)**:
+1. **Run the Diagnostic Tool (`Test-WindowsEnvironment.ps1`)**:
    ```powershell
-   # Execute full diagnostic suite and export JSON report:
+   # Run full diagnostics and output a JSON report:
    .\scripts\windows\Test-WindowsEnvironment.ps1 -JsonReportPath ".\diagnostics-report.json"
    ```
 
@@ -690,40 +690,40 @@ Execute the unified Windows diagnostic runner, backend test suites, and living r
      Skipped           : 0
    ```
 
-2. **Execute C# Solution Tests**:
+2. **Run Solution Tests**:
    ```powershell
    dotnet test McpRouter.slnx --logger "console;verbosity=normal"
    ```
 
-3. **Execute Requirements Catalog Zero-Drift Verification**:
+3. **Verify Living Requirements Catalog**:
    ```powershell
    dotnet run --project scripts/CatalogGenerator -- --verify-only
    ```
 
 ---
 
-## 🔒 7. Production Operations, Security Hardening & Observability
+## 🔒 7. Production Operations, Security Hardening and Observability
 
-### SSL/TLS Certificates & HTTPS Bindings
+### SSL/TLS Certificates and HTTPS Bindings
 
 For enterprise production deployments on IIS, configure HTTPS bindings:
-1. **Corporate PKI Certificate**: Import your enterprise certificate into `Certificates (Local Computer) -> Personal`.
-2. **Automated ACME (Let's Encrypt)**: Use `win-acme` (wacs.exe) to automatically provision and renew certificates:
+1. **Enterprise Certificate**: Import your certificate into `Certificates (Local Computer) -> Personal`.
+2. **Automated ACME (Let's Encrypt)**: Use `win-acme` (`wacs.exe`) to renew certificates automatically:
    ```cmd
    wacs.exe --target iissite --siteid 1 --host mcp.domain.local
    ```
-3. In IIS Manager, add HTTPS binding on port 443 with SNI enabled.
+3. In IIS Manager, add an HTTPS binding on port 443 with Server Name Indication (SNI) enabled.
 
-### Health Probes & Monitoring
+### Health Probes and Monitoring
 
-The router exposes a structured health endpoint at `/health` for uptime monitors (e.g. PRTG, Uptime Kuma, Nagios):
+The gateway provides a structured status endpoint at `/health` for monitoring tools (such as PRTG, Uptime Kuma, and Nagios):
 
 ```powershell
 # Probe health endpoint:
 Invoke-RestMethod -Uri "http://localhost:8080/health"
 ```
 
-*Response Contract:*
+*Response Schema:*
 ```json
 {
   "status": "Healthy",
@@ -744,18 +744,18 @@ Invoke-RestMethod -Uri "http://localhost:8080/health"
 
 ### Prometheus Metrics Scraping
 
-Configure Prometheus to scrape `GET /metrics`:
-- `mcp_router_active_sessions_total`: Active SSE client connections.
-- `mcp_router_tool_executions_total`: Tool call throughput by server ID and response status code.
-- `mcp_router_tool_execution_duration_seconds`: Execution latency histogram.
+Configure Prometheus to collect metrics from `GET /metrics`:
+- `mcp_router_active_sessions_total`: Active SSE client sessions.
+- `mcp_router_tool_executions_total`: Tool call throughput grouped by server ID and response status code.
+- `mcp_router_tool_execution_duration_seconds`: Tool execution latency histogram.
 
 ### Logging Architecture (IIS, Stdout, Windows Event Log)
 
-1. **IIS W3C Logs**: Located at `C:\inetpub\logs\LogFiles\W3SVC*`.
-2. **ASP.NET Core Stdout Logs**: Enable in `web.config` (`stdoutLogEnabled="true"`) to log unhandled crashes to `C:\inetpub\mcg\logs\stdout\*.log`.
-3. **Windows Event Log**: Service startup events and catastrophic unhandled exceptions are logged under **Event Viewer -> Windows Logs -> Application** (Source: `IIS AspNetCore Module V2` or `ModelContextGateway`).
+1. **IIS W3C Logs**: Stored under `C:\inetpub\logs\LogFiles\W3SVC*`.
+2. **ASP.NET Core Stdout Logs**: Enable in `web.config` (`stdoutLogEnabled="true"`) to capture crashes under `C:\inetpub\mcg\logs\stdout\*.log`.
+3. **Windows Event Log**: Service startup and fatal runtime errors log to **Event Viewer -> Windows Logs -> Application** (Source: `IIS AspNetCore Module V2` or `ModelContextGateway`).
 
-### Database Backup & Recovery on Windows
+### Database Backup and Recovery on Windows
 
 1. **SQLite Provider**:
    ```powershell
@@ -775,15 +775,15 @@ Configure Prometheus to scrape `GET /metrics`:
 
 ### 1. SSE Streaming Hangs or Responses Are Buffered
 
-**Symptom**: LLM clients connect to `/sse`, but tool execution responses or semantic search results do not stream in real time; responses arrive in one large batch after a delay or time out.
+**Symptom**: LLM clients connect to `/sse`, but tool output arrives in large chunks or times out.
 
-**Root Causes & Solutions**:
-1. **IIS Response Buffering Enabled**:
+**Root Causes and Solutions**:
+1. **IIS Output Buffering Enabled**:
    - Check `web.config`. Ensure `<aspNetCore ... responseBufferLimit="0">` is present.
 2. **IIS Dynamic Compression Enabled**:
    - Check `web.config`. Ensure `<urlCompression doDynamicCompression="false" />` is set.
-3. **Upstream Reverse Proxy Buffering**:
-   - If an external reverse proxy (NGINX, Caddy, Cloudflare) sits in front of IIS, disable proxy buffering (`proxy_buffering off;` in NGINX, or bypass buffering in Cloudflare).
+3. **Reverse Proxy Buffering**:
+   - If an external reverse proxy (NGINX, Caddy, Cloudflare) sits in front of IIS, disable response buffering on that proxy.
 
 ---
 
@@ -791,26 +791,26 @@ Configure Prometheus to scrape `GET /metrics`:
 
 **Symptom**: `WindowsRegistrySecretRetriever` logs `CryptographicException: The system cannot find the file specified` or `Keyset does not exist`.
 
-**Root Causes & Solutions**:
+**Root Causes and Solutions**:
 1. **DPAPI Scope Mismatch**:
-   - Secrets protected with `DataProtectionScope.CurrentUser` can only be decrypted by the user who encrypted them.
-   - Secrets must be encrypted using `DataProtectionScope.LocalMachine` (default in `Set-RegistrySecrets.ps1 -Encrypt`).
-2. **Application Pool / Service Account Permissions**:
-   - When running under `IIS AppPool\McgAppPool` or `NT AUTHORITY\NetworkService`, verify that the account has access to the machine key container (`C:\ProgramData\Microsoft\Crypto\RSA\MachineKeys`).
+   - Secrets encrypted with `DataProtectionScope.CurrentUser` can only be decrypted by that specific user.
+   - Encrypt secrets using `DataProtectionScope.LocalMachine` (default in `Set-RegistrySecrets.ps1 -Encrypt`).
+2. **Application Pool Permissions**:
+   - If running under `IIS AppPool\McgAppPool` or `NT AUTHORITY\NetworkService`, verify read access to machine keys (`C:\ProgramData\Microsoft\Crypto\RSA\MachineKeys`).
 
 ---
 
-### 3. Integrated Windows Authentication Fails (401 Unauthorized)
+### 3. Integrated Windows Authentication Fails (HTTP 401 Unauthorized)
 
-**Symptom**: Requests to `/api/auth/me` return `401 Unauthorized` or fail to negotiate Kerberos tickets.
+**Symptom**: Calls to `/api/auth/me` return `401 Unauthorized` or fail Kerberos ticket exchange.
 
-**Root Causes & Solutions**:
-1. **IIS Windows Authentication Feature Not Installed**:
-   - Run `Install-WindowsFeature Web-Windows-Auth`.
+**Root Causes and Solutions**:
+1. **Windows Authentication Missing**:
+   - Install the role with `Install-WindowsFeature Web-Windows-Auth`.
 2. **Windows Authentication Disabled in IIS**:
    - In IIS Manager, select the site -> **Authentication** -> Enable **Windows Authentication**.
 3. **Service Principal Name (SPN) Missing for Custom Domain**:
-   - If accessing via custom hostname (e.g. `http://mcp.domain.local`), register SPNs on the service account:
+   - When using custom domain names, register Service Principal Names (SPNs) on the service account:
      ```cmd
      setspn -s HTTP/mcp.domain.local DOMAIN\svc_mcp
      setspn -s HTTP/mcp DOMAIN\svc_mcp
@@ -820,29 +820,29 @@ Configure Prometheus to scrape `GET /metrics`:
 
 ### 4. Kestrel Port Conflict (`System.IO.IOException: Failed to bind to address`)
 
-**Symptom**: Windows Service or Standalone Kestrel fails to start with port conflict error.
+**Symptom**: Service fails to start due to port conflicts.
 
-**Root Causes & Solutions**:
-1. Identify process occupying the port:
+**Root Causes and Solutions**:
+1. Identify the process using the port:
    ```powershell
    Get-NetTCPConnection -LocalPort 8080 | Select-Object LocalAddress, LocalPort, OwningProcess
    ```
-2. If another service is listening, either stop that service or reconfigure gateway to use an alternative port:
+2. Stop the conflicting process, or reconfigure the gateway port:
    ```powershell
    .\scripts\windows\Setup-WindowsService.ps1 -Action Restart -Port 8090
    ```
 
 ---
 
-### 5. IIS HTTP Error 500.19 or 500.30 (In-Process Startup Failure)
+### 5. IIS Error 500.19 or 500.30 (In-Process Startup Failure)
 
-**Symptom**: Browsing the website returns `HTTP Error 500.19 - Internal Server Error` or `HTTP Error 500.30 - ANCM In-Process Start Failure`.
+**Symptom**: Browsing the site returns `HTTP Error 500.19 - Internal Server Error` or `HTTP Error 500.30 - ANCM In-Process Start Failure`.
 
-**Root Causes & Solutions**:
-1. **.NET Hosting Bundle Missing**:
+**Root Causes and Solutions**:
+1. **Hosting Bundle Missing**:
    - Install the [.NET 10 Windows Hosting Bundle](https://dotnet.microsoft.com/download/dotnet/10.0) and restart IIS (`iisreset`).
-2. **AppPool Managed Runtime Version Incorrect**:
+2. **Application Pool CLR Version**:
    - Set .NET CLR Version in AppPool settings to `No Managed Code`.
-3. **Diagnose via Stdout Logs**:
-   - Edit `web.config`: set `stdoutLogEnabled="true"`.
-   - Re-run the request and inspect the generated log in `C:\inetpub\mcg\logs\stdout\`.
+3. **Inspect Logs**:
+   - In `web.config`, set `stdoutLogEnabled="true"`.
+   - Send a request and check log files under `C:\inetpub\mcg\logs\stdout\`.

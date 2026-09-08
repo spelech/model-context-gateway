@@ -1,6 +1,6 @@
 # Model Context Gateway (MCG): Operations Runbook
 
-Production deployment, reverse proxy configuration, database backup/recovery, observability, health checks, and disaster recovery procedures for **Model Context Gateway (MCG)**.
+This runbook covers production deployment, reverse proxy configuration, database backup and recovery, monitoring, health checks, and disaster recovery for **Model Context Gateway (MCG)**. Model Context Gateway routes and secures communication for the Model Context Protocol (MCP).
 
 ---
 
@@ -8,7 +8,7 @@ Production deployment, reverse proxy configuration, database backup/recovery, ob
 
 ### 1. Docker Compose Deployment (Recommended)
 
-Below is the standard production `docker-compose.yaml` configuration with persistent volume mounts, security hardening, and resource limits:
+The configuration below shows the standard production `docker-compose.yaml` file. It includes persistent volume mounts, security settings, and container resource limits:
 
 ```yaml
 version: "3.8"
@@ -65,11 +65,11 @@ networks:
 
 ---
 
-### 2. Systemd Service Deployment (Linux Bare-Metal / VM)
+### 2. Systemd Service Deployment (Linux Bare-Metal / Virtual Machine)
 
-For bare-metal Linux deployments:
+Use these steps to deploy on a Linux host or Virtual Machine (VM) without containers.
 
-Create `/etc/systemd/system/mcg.service`:
+Create the file `/etc/systemd/system/mcg.service`:
 ```ini
 [Unit]
 Description=Model Context Gateway (MCG)
@@ -104,7 +104,7 @@ PrivateTmp=true
 WantedBy=multi-user.target
 ```
 
-Enable and start the service:
+Reload systemd and start the service:
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now mcg
@@ -113,40 +113,40 @@ sudo systemctl status mcg
 
 ---
 
-### 3. Windows Server Deployment (IIS In-Process & Windows Service)
+### 3. Windows Server Deployment (IIS In-Process and Windows Service)
 
-For Windows Server hosting and validation, the repository provides automation scripts and operational documentation:
+For Windows Server deployments, the repository supplies automated scripts and documentation:
 
 - **Comprehensive Guide**: [**Windows Deployment, Enterprise Hosting & Validation Guide (`docs/windows-deployment-and-validation-guide.md`)**](windows-deployment-and-validation-guide.md)
-- **IIS In-Process Automation**: `scripts/windows/Deploy-IIS.ps1` (configures `No Managed Code`, `AlwaysRunning`, unbuffered SSE streaming with `responseBufferLimit="0"`, and Windows Authentication).
-- **Windows Service Automation**: `scripts/windows/Setup-WindowsService.ps1` (registers SCM auto-restart recovery triggers and service lifecycle).
-- **Secret Management**: `scripts/windows/Set-RegistrySecrets.ps1` (DPAPI machine encryption for registry keys).
-- **Diagnostic Runner**: `scripts/windows/Test-WindowsEnvironment.ps1` (end-to-end environment validation).
+- **IIS In-Process Automation**: `scripts/windows/Deploy-IIS.ps1` (configures Internet Information Services [IIS] with `No Managed Code`, `AlwaysRunning`, unbuffered Server-Sent Events [SSE] streaming with `responseBufferLimit="0"`, and Windows Authentication).
+- **Windows Service Automation**: `scripts/windows/Setup-WindowsService.ps1` (registers Service Control Manager [SCM] restart triggers and service lifecycles).
+- **Secret Management**: `scripts/windows/Set-RegistrySecrets.ps1` (uses Data Protection API [DPAPI] machine encryption for registry keys).
+- **Diagnostic Runner**: `scripts/windows/Test-WindowsEnvironment.ps1` (runs complete environment validation).
 
-#### Quick IIS Deployment (PowerShell as Administrator):
+#### Fast IIS Deployment (Run PowerShell as Administrator):
 ```powershell
 # Deploy to IIS with Windows Authentication on Port 8080:
 .\scripts\windows\Deploy-IIS.ps1 -SiteName "ModelContextGateway" -Port 8080 -EnableWindowsAuth
 ```
 
-#### Quick Windows Service Lifecycle (PowerShell as Administrator):
+#### Windows Service Management (Run PowerShell as Administrator):
 ```powershell
-# Install and start Windows Service with auto-recovery on Port 8080:
+# Install and start the Windows Service with automatic recovery on Port 8080:
 .\scripts\windows\Setup-WindowsService.ps1 -Action Install -Port 8080
 
-# Query service status and health:
+# Check service status and health:
 .\scripts\windows\Setup-WindowsService.ps1 -Action Status
 ```
 
 ---
 
-## 🔒 Reverse Proxy & SSL/TLS Configuration
+## 🔒 Reverse Proxy and TLS Configuration
 
-Because the gateway uses Server-Sent Events (`SSE`) for streaming JSON-RPC responses, reverse proxies must disable response buffering and preserve long-lived HTTP streams.
+The gateway uses Server-Sent Events (SSE) to stream responses. Reverse proxies must disable response buffering and preserve long-lived HTTP streams.
 
 ### 1. Caddy Reverse Proxy (`Caddyfile`)
 
-Caddy handles SSE streams out of the box. Forward identity headers from your authentication middleware:
+Caddy streams SSE connections by default. Pass identity headers from your authentication middleware:
 
 ```caddy
 mcp.yourdomain.com {
@@ -163,7 +163,7 @@ mcp.yourdomain.com {
 }
 ```
 
-*Note: Always format and validate Caddy configs before reloading:*
+*Note: Format and validate Caddy configuration before reloading:*
 ```bash
 docker compose exec caddy caddy fmt --overwrite /etc/caddy/Caddyfile
 docker compose exec caddy caddy validate --config /etc/caddy/Caddyfile
@@ -173,7 +173,7 @@ docker compose exec caddy caddy validate --config /etc/caddy/Caddyfile
 
 ### 2. NGINX / SWAG Configuration
 
-In NGINX, explicitly disable buffering and increase read timeouts for SSE endpoints:
+In NGINX, disable proxy buffering and increase connection timeouts for streaming endpoints:
 
 ```nginx
 server {
@@ -208,17 +208,17 @@ server {
 
 ---
 
-## 🗄️ Database Operations: Backup, Restore & Maintenance
+## 🗄️ Database Operations: Backup, Restore, and Maintenance
 
-The gateway persistence tier manages 12 core tables across SQLite, MS SQL Server, and MySQL. For schema contracts and the complete Entity-Relationship Diagram, see [**Database Provider Support & Deployment Matrix (`docs/database-providers.md`)**](database-providers.md#unified-database-entity-relationship-diagram-erd).
+The gateway database layer manages 12 core tables across SQLite, Microsoft SQL Server, and MySQL. For schema contracts and the Entity-Relationship Diagram (ERD), read [**Database Provider Support & Deployment Matrix (`docs/database-providers.md`)**](database-providers.md#unified-database-entity-relationship-diagram-erd).
 
 ### 1. SQLite Provider (`Data Source=/data/mcg.db`)
 
 #### Safe Online Backup (Zero Downtime)
-SQLite locks during active transactions. Use the SQLite CLI online backup API to take a consistent snapshot:
+SQLite locks write transactions during file copies. Use the SQLite online backup tool to capture a safe database snapshot:
 
 ```bash
-# Execute online backup without stopping the container
+# Take an online backup without stopping the container
 docker compose exec mcg sqlite3 /data/mcg.db ".backup '/data/mcg-backup-$(date +%Y%m%d_%H%M%S).db'"
 ```
 
@@ -238,14 +238,14 @@ docker compose start mcg
 
 ### 2. Microsoft SQL Server Provider
 
-#### Taking a Database Backup
+#### Backing Up the Database
 ```sql
 BACKUP DATABASE [ModelContextGateway]
 TO DISK = N'/var/opt/mssql/backup/ModelContextGateway_Full.bak'
 WITH FORMAT, INIT, COMPRESSION, STATS = 10;
 ```
 
-#### Restoring Database
+#### Restoring the Database
 ```sql
 USE [master];
 ALTER DATABASE [ModelContextGateway] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
@@ -259,22 +259,22 @@ ALTER DATABASE [ModelContextGateway] SET MULTI_USER;
 
 ### 3. MySQL Provider
 
-#### Taking a Backup via `mysqldump`
+#### Backing Up with `mysqldump`
 ```bash
 mysqldump -u mcp_user -p --single-transaction --routines --triggers --databases mcpmaster > /backups/mcpmaster_$(date +%F).sql
 ```
 
-#### Restoring Backup
+#### Restoring from Backup
 ```bash
 mysql -u mcp_user -p mcpmaster < /backups/mcpmaster_2026-08-25.sql
 ```
 
 ---
 
-## 📊 Observability, Health Checks, & Logs
+## 📊 Observability, Health Checks, and Logs
 
 ### 1. Health Probe (`GET /health`)
-The `/health` endpoint provides structured status information for orchestrators and uptime monitors (e.g. Uptime Kuma):
+The `/health` endpoint returns JSON health status for container orchestrators and monitoring tools (such as Uptime Kuma):
 
 ```bash
 curl -s http://10.0.0.10:8026/health | jq .
@@ -305,54 +305,54 @@ Example JSON Response:
 
 ### 2. Prometheus Metrics (`GET /metrics`)
 Scrape Prometheus metrics for Grafana dashboards:
-* `mcg_active_sessions_total`: Current number of open client sessions.
+* `mcg_active_sessions_total`: Current count of active client sessions.
 * `mcg_tool_execution_duration_seconds`: Histogram of tool execution latency.
-* `mcg_tool_executions_total{status="200"}`: Total tool execution count by status code.
-* `mcg_semantic_search_duration_seconds`: Latency of ONNX vector scoring.
+* `mcg_tool_executions_total{status="200"}`: Tool invocation count categorized by status code.
+* `mcg_semantic_search_duration_seconds`: Latency of ONNX (Open Neural Network Exchange) vector calculations.
 
 ---
 
-### 3. Log Inspection with Dozzle
-View live streaming container logs via Dozzle or Docker CLI:
+### 3. Log Inspection
+View real-time container logs using Dozzle or Docker commands:
 ```bash
-# Follow logs in real-time
+# Follow live container logs
 docker compose logs -f --tail=100 mcg
 
-# Check for warnings or errors
+# Search logs for warnings or errors
 docker compose logs mcg | grep -E "WARN|FAIL|ERR"
 ```
 
-*Note: The gateway's built-in `PiiSanitizer` automatically scrubs Bearer tokens, passwords, and API keys before logging.*
+*Note: The built-in `PiiSanitizer` removes Bearer tokens, passwords, and API keys automatically before writing logs.*
 
 ---
 
-## 🔄 Disaster Recovery & Secret Rotation
+## 🔄 Disaster Recovery and Secret Rotation
 
 ### 1. AES-256-GCM Master Key Rotation
-If the master encryption key (`MCG_MASTER_KEY`) must be rotated:
-1. Export unencrypted backup or use the internal migration utility:
+If you must rotate the master encryption key (`MCG_MASTER_KEY`):
+1. Re-encrypt database secrets with the migration utility:
    ```bash
    dotnet run --project ModelContextGateway.csproj -- re-encrypt-master-key --old-key <OLD_HEX> --new-key <NEW_HEX>
    ```
-2. Update the `MCG_MASTER_KEY` environment variable in `docker-compose.yaml`.
+2. Update `MCG_MASTER_KEY` in `docker-compose.yaml`.
 3. Restart the container: `docker compose up -d mcg`.
 
 ### 2. HashiCorp Vault AppRole Credential Rotation
-1. Generate new `secret-id` in Vault:
+1. Generate a new `secret-id` in Vault:
    ```bash
    vault write -f auth/approle/role/mcg/secret-id
    ```
-2. Navigate to **`Settings`** -> **`Secret Providers`** tab in the Model Context Gateway UI.
-3. Paste the new `Secret ID` and click **`Save Provider Settings`**.
-4. The gateway dynamically invalidates existing cached tokens and authenticates with the new credentials without dropping active client connections.
+2. In the Model Context Gateway UI, select **`Settings`** -> **`Secret Providers`**.
+3. Enter the new `Secret ID` and select **`Save Provider Settings`**.
+4. The gateway invalidates cached tokens and connects using the new secret without dropping client sessions.
 
 ### 3. Emergency Container Rollback
-If a newly deployed container version encounters issues:
+If a newly deployed container version fails:
 ```bash
-# 1. Update tag in docker-compose.yaml to previous stable release
+# 1. Change the image tag in docker-compose.yaml to the earlier stable release
 sed -i 's/v5.0.0/v4.35.0/g' docker-compose.yaml
 
-# 2. Re-create container
+# 2. Re-create the container
 docker compose up -d --force-recreate mcg
 
 # 3. Verify health

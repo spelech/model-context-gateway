@@ -1,11 +1,11 @@
-# 🔐 Enterprise Secret Providers & Key Management Guide
+# 🔐 Enterprise Secret Providers and Key Management Guide
 
-The **Model Context Gateway (MCG) & Semantic Proxy** provides a pluggable secrets management subsystem (`ISecretRetriever`). It prevents plaintext storage of downstream MCP server credentials (API keys, bearer tokens, passwords, service account keys) in database columns, configuration files, or container environments.
+The **Model Context Gateway (MCG)** provides a pluggable secrets management system (`ISecretRetriever`). It prevents storing plaintext credentials (such as API keys, Bearer tokens, passwords, and service account keys) in database tables, configuration files, or container environment variables. MCG routes and secures traffic for the Model Context Protocol (MCP).
 
-This guide details supported secret providers, AES-256-GCM encryption-at-rest architecture, dynamic runtime reloading, audit safety mechanisms, Docker configurations, and troubleshooting.
+This guide explains supported secret providers, AES-256-GCM (Advanced Encryption Standard in Galois/Counter Mode) encryption at rest, runtime configuration reloading, audit sanitization, Docker settings, and troubleshooting.
 
 > [!TIP]
-> **Need server setup recipes?** Check the [**MCP Server Authentication & Integration Cookbook**](mcp-server-auth-cookbook.md) for quick-lookup tables and copy-paste examples (*"If your server requires Bearer / Custom Header / Basic Auth / Vault / STDIO ➔ Setup is Y"*).
+> **Need server setup recipes?** Read the [**MCP Server Authentication & Integration Cookbook**](mcp-server-auth-cookbook.md) for lookup tables and configuration examples (*"If your server requires Bearer / Custom Header / Basic Auth / Vault / STDIO ➔ Setup is Y"*).
 
 ---
 
@@ -15,25 +15,25 @@ This guide details supported secret providers, AES-256-GCM encryption-at-rest ar
   - [1. HashiCorp Vault (KV v2)](#1-hashicorp-vault-kv-v2)
   - [2. Windows Registry (DPAPI)](#2-windows-registry-dpapi)
   - [3. Environment Variables](#3-environment-variables)
-- [Encryption at Rest & Key Derivation](#encryption-at-rest-key-derivation)
+- [Encryption at Rest and Key Derivation](#encryption-at-rest-and-key-derivation)
   - [AES-256-GCM Envelope Encryption](#aes-256-gcm-envelope-encryption)
   - [Master Key Derivation (PBKDF2)](#master-key-derivation-pbkdf2)
 - [Dynamic Runtime Reloading](#dynamic-runtime-reloading)
-- [Secret Redaction & Audit Safety](#secret-redaction-audit-safety)
-  - [Masking & Mask-Preserving Updates](#masking-mask-preserving-updates)
+- [Secret Redaction and Audit Safety](#secret-redaction-and-audit-safety)
+  - [Masking and Mask-Preserving Updates](#masking-and-mask-preserving-updates)
   - [Audit Trail Sanitization](#audit-trail-sanitization)
   - [Fail-Closed Security Validation](#fail-closed-security-validation)
-- [Copy-Pasteable Configuration Examples](#copy-pasteable-configuration-examples)
+- [Configuration Examples](#configuration-examples)
   - [Docker Compose with HashiCorp Vault](#docker-compose-with-hashicorp-vault)
-  - [Vault KV v2 & AppRole Setup Commands](#vault-kv-v2-approle-setup-commands)
+  - [Vault KV v2 and AppRole Setup Commands](#vault-kv-v2-and-approle-setup-commands)
   - [Registering Backend MCP Servers with Secrets](#registering-backend-mcp-servers-with-secrets)
-- [Troubleshooting & Operational Guide](#troubleshooting-operational-guide)
+- [Troubleshooting and Operational Guide](#troubleshooting-and-operational-guide)
 
 ---
 
 ## 🏛️ Architecture Overview
 
-When an incoming client request (via HTTP, SSE, or STDIO) requires communication with a downstream MCP server, the router resolves the required authentication token on-demand using the `CompositeSecretRetriever`.
+When an incoming client request (over HTTP, Server-Sent Events [SSE], or Standard Input/Output [STDIO]) targets a downstream MCP server, the router resolves credentials on demand using `CompositeSecretRetriever`.
 
 ```mermaid
 flowchart TD
@@ -60,11 +60,11 @@ flowchart TD
     CacheAndReturn --> Downstream["Downstream MCP Server (Docker, Plex, HA, etc.)"]
 ```
 
-### Key Architectural Guarantees:
-1. **Zero Plaintext Storage**: Secrets are never persisted unencrypted in SQLite, MS SQL Server, or MySQL databases.
-2. **Fail-Closed Resolution**: If a configured secret provider fails to resolve a secret, plaintext fallback is strictly disabled and an explicit `SecurityException` is thrown.
-3. **In-Memory Caching with Rolling TTL**: Resolved secrets are cached in `IMemoryCache` (5–10 minutes) to avoid degrading throughput with repeated remote secret store lookups while still supporting automated secret rotation.
-4. **Platform Isolation**: Providers check OS capabilities at runtime (e.g., Windows Registry safely returns `null` on Linux containers without throwing).
+### Core Architecture Rules:
+1. **Zero Plaintext Storage**: The gateway never stores unencrypted credentials in SQLite, Microsoft SQL Server, or MySQL tables.
+2. **Fail-Closed Resolution**: If a configured secret provider cannot resolve a secret, the gateway throws an explicit `SecurityException`. It never falls back to plaintext.
+3. **In-Memory Cache with Rolling TTL**: Resolved secrets remain in memory (`IMemoryCache`) for 5 to 10 minutes. This avoids repeated remote network calls while still supporting secret rotation. TTL means Time-to-Live.
+4. **Platform Isolation**: Providers inspect operating system capabilities at runtime. On Linux containers, the Windows Registry provider returns `null` safely without crashing.
 
 ---
 
@@ -74,20 +74,20 @@ flowchart TD
 **Implementation**: [`VaultSecretRetriever.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/VaultSecretRetriever.cs)  
 **Provider Identifiers**: `"HashiCorpVault"` or `"Vault"`
 
-The Vault retriever integrates with HashiCorp Vault's Key-Value Version 2 (`kv-v2`) secret engine.
+The Vault retriever connects to HashiCorp Vault Key-Value Version 2 (`kv-v2`) secret engines.
 
 #### Features:
-* **Key-Value v2 Engine**: Reads versioned secrets from the path `v1/{mountPoint}/data/{secretPath}`.
+* **Key-Value v2 Engine**: Reads versioned secrets from `v1/{mountPoint}/data/{secretPath}`.
 * **Authentication Methods**:
-  * **AppRole Authentication**: Highly recommended for production workloads. Requires `roleId` and `secretId`.
-  * **Token Authentication**: Direct token authentication via `token` (or `vault_token`).
-* **Environment & Dev Fallbacks**:
-  * If not configured in the database, automatically checks `VAULT_ADDR` and `VAULT_TOKEN` (or `Vault:Address`, `Vault:RoleId`, `Vault:SecretId`) from environment variables.
-* **Just-In-Time (JIT) Token TTL Monitoring & Renewal**:
-  * Before executing secret reads, the retriever inspects the token's remaining time-to-live using `client.V1.Auth.Token.LookupSelfAsync()`.
-  * If the remaining TTL is **less than 300 seconds (5 minutes)** or lookup fails, the retriever automatically recreates the Vault client and re-authenticates to prevent dropped requests during long-running sessions.
-* **High-Performance Memory Caching**:
-  * Successfully retrieved secrets are cached in `IMemoryCache` for 10 minutes under the key pattern `vault:{mountPoint}:{path}:{keyName}`. The cache is checked before initiating network calls.
+  * **AppRole Authentication**: Recommended for production systems. Requires `roleId` and `secretId`.
+  * **Token Authentication**: Static token authentication using `token` (or `vault_token`).
+* **Environment Fallbacks**:
+  * If configuration is missing from the database, the gateway reads `VAULT_ADDR` and `VAULT_TOKEN` (or `Vault:Address`, `Vault:RoleId`, `Vault:SecretId`) from environment variables.
+* **Just-In-Time (JIT) Token TTL Monitoring and Renewal**:
+  * Before reading secrets, the retriever checks remaining token lifetime using `client.V1.Auth.Token.LookupSelfAsync()`.
+  * If the remaining TTL is **less than 300 seconds (5 minutes)** or lookup fails, the retriever rebuilds the client and authenticates again. This prevents dropped requests during long sessions.
+* **Memory Caching**:
+  * Successfully resolved secrets stay in `IMemoryCache` for 10 minutes under `vault:{mountPoint}:{path}:{keyName}`. The retriever checks this cache before making network calls.
 
 #### Database Configuration JSON Schema:
 ```json
@@ -98,7 +98,7 @@ The Vault retriever integrates with HashiCorp Vault's Key-Value Version 2 (`kv-v
   "secretId": "6c2e39ff-b52b-426b-9c78-65e3170e7039"
 }
 ```
-*Alternatively, for static/dev token authentication:*
+*Alternatively, for static token authentication:*
 ```json
 {
   "address": "https://vault.homelab.local:8200",
@@ -113,16 +113,16 @@ The Vault retriever integrates with HashiCorp Vault's Key-Value Version 2 (`kv-v
 **Implementation**: [`WindowsRegistrySecretRetriever.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/WindowsRegistrySecretRetriever.cs)  
 **Provider Identifiers**: `"WindowsRegistry"` or `"Registry"`
 
-The Windows Registry retriever reads encrypted or plaintext configuration values directly from the host system's Windows Registry hive.
+The Windows Registry retriever reads encrypted or plaintext configuration values from the Windows Registry on the host machine. DPAPI stands for Data Protection Application Programming Interface.
 
 #### Features:
 * **Registry Hive**: Accesses `RegistryHive.LocalMachine` (`HKLM`) using `RegistryView.Registry64`.
 * **DPAPI Decryption**:
-  * If the registry value is a `byte[]` binary blob, it is automatically decrypted using Windows DPAPI via `ProtectedData.Unprotect(rawBytes, null, DataProtectionScope.LocalMachine)`.
-  * If the registry value is a `string`, it is returned directly.
+  * If the registry value is a binary `byte[]` blob, the gateway decrypts it using `ProtectedData.Unprotect(rawBytes, null, DataProtectionScope.LocalMachine)`.
+  * If the registry value is a `string`, the gateway returns it directly.
 * **Operating System Requirements**:
   > [!IMPORTANT]
-  > **Windows-Only OS Requirement**: The Windows Registry retriever relies on `Microsoft.Win32.Registry` and Windows Data Protection API (DPAPI). When running inside Linux containers (Docker) or macOS environments, `RuntimeInformation.IsOSPlatform(OSPlatform.Windows)` safely returns `false`, causing the retriever to return `null` without throwing unhandled exceptions.
+  > **Windows-Only Requirement**: The Windows Registry retriever requires `Microsoft.Win32.Registry` and Windows DPAPI. When running inside Linux containers (Docker) or macOS environments, the gateway detects the non-Windows operating system and returns `null` safely without unhandled exceptions.
 
 #### Resolution Syntax:
 * **Registry Path (`secretPath`)**: `SOFTWARE\Homelab\McpSecrets`
@@ -134,85 +134,85 @@ The Windows Registry retriever reads encrypted or plaintext configuration values
 **Implementation**: [`EnvironmentSecretRetriever.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/EnvironmentSecretRetriever.cs)  
 **Provider Identifiers**: `"Environment"` or `"Env"`
 
-The Environment retriever allows dynamic interpolation of host or container environment variables at runtime without hardcoding keys into database tables.
+The Environment retriever reads operating system and container environment variables at runtime. You do not need to store secret values in database tables.
 
 #### Features:
-* **Dual Resolution Strategy**:
-  1. Searches for `Environment.GetEnvironmentVariable(keyName)`.
-  2. If empty and `secretPath` is provided, searches for `Environment.GetEnvironmentVariable(secretPath)`.
-* **Standard Variable Syntax**:
+* **Two-Step Lookup**:
+  1. Checks `Environment.GetEnvironmentVariable(keyName)`.
+  2. If empty and `secretPath` is set, checks `Environment.GetEnvironmentVariable(secretPath)`.
+* **Accepted Variable Patterns**:
   * `MY_SECRET_KEY`
   * `env:MY_SECRET_KEY`
   * `${MY_SECRET_KEY}`
 
 ---
 
-## 🔒 Encryption at Rest & Key Derivation
+## 🔒 Encryption at Rest and Key Derivation
 
-All secret provider configurations stored in the database (e.g. `SecretProviders.EncryptedConfigJson` and `AuthProviderConfigs.EncryptedConfigJson`) are encrypted at rest using industry-standard authenticated symmetric encryption.
+All secret provider configurations stored in the database (such as `SecretProviders.EncryptedConfigJson` and `AuthProviderConfigs.EncryptedConfigJson`) are encrypted at rest using authenticated symmetric encryption.
 
 ### AES-256-GCM Envelope Encryption
 **Implementation**: [`SymmetricEncryptionHelper.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/SymmetricEncryptionHelper.cs)
 
 * **Cipher**: `AES-256-GCM` (Galois/Counter Mode).
-* **Nonce**: 96-bit (12-byte) cryptographically secure random nonce generated per payload via `RandomNumberGenerator.GetBytes(12)`.
-* **Authentication Tag**: 128-bit (16-byte) MAC tag to prevent ciphertext tampering.
+* **Nonce**: 96-bit (12-byte) cryptographically secure random nonce generated per payload via `RandomNumberGenerator.GetBytes(12)`. A nonce is a number used once.
+* **Authentication Tag**: 128-bit (16-byte) tag that verifies ciphertext integrity and prevents data tampering.
 * **Packed Base64 Format**:
   ```
   +-------------------+------------------+-----------------------------+
   | Nonce (12 Bytes)  | Tag (16 Bytes)   | Ciphertext (N Bytes)        |
   +-------------------+------------------+-----------------------------+
   ```
-  The concatenated byte array is stored as a standard Base64 string.
+  The gateway encodes this combined byte array as a Base64 string.
 
-### Master Key Resolution Hierarchy & Lifecycle
+### Master Key Resolution Hierarchy and Lifecycle
 
 **Implementation**: [`DbKeyHelper.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/DbKeyHelper.cs)
 
-The 256-bit symmetric encryption key is resolved according to the following precedence hierarchy, automatically detecting the origin `KeySource`:
+The gateway resolves the 256-bit encryption key in this order of precedence, tracking the `KeySource`:
 
 1. **Vault Master Key Bootstrapping (`KeySource.External`)**:
-   In enterprise multi-replica clusters, if `VAULT_ADDR` is present, the gateway connects to HashiCorp Vault (via AppRole, Token, or Kubernetes Service Account auth) and fetches `secret/data/mcg/master-key` (or `secret/data/mcp-router/master-key`).
+   In multi-node clusters with `VAULT_ADDR`, the gateway fetches `secret/data/mcg/master-key` (or `secret/data/mcp-router/master-key`) directly from Vault.
 2. **Environment Variables (`KeySource.External`)**:
-   `MCG_MASTER_KEY`, `MCG_SECRET`, or `DB_ENCRYPTION_KEY`.
+   Checks `MCG_MASTER_KEY`, `MCG_SECRET`, or `DB_ENCRYPTION_KEY`.
 3. **Secret File Mount (`KeySource.External`)**:
-   `MCG_MASTER_KEY_FILE` or standard Docker/Kubernetes secret mounts (`/run/secrets/mcg_master_key`, `/run/secrets/master_key`).
+   Checks `MCG_MASTER_KEY_FILE` or default Docker/Kubernetes paths (`/run/secrets/mcg_master_key`, `/run/secrets/master_key`).
 4. **Existing Configured Keyfile (`KeySource.Configured`)**:
-   Persistent `./data/.master.key` configured explicitly by an administrator.
+   Reads `./data/.master.key` created or configured by an administrator.
 5. **Auto-Generated Persistent Keyfile (`KeySource.AutoGenerated`)**:
-   If no master key is supplied on first boot, the gateway automatically generates a cryptographically secure 256-bit key and persists it to `./data/.master.key` (with restricted permissions `chmod 0600`).
+   If no master key is supplied on first boot, the gateway creates a 256-bit key automatically. It saves the key to `./data/.master.key` with restricted permissions (`chmod 0600`).
 
-### Dynamic Database Re-Encryption & Master Key Setting
+### Dynamic Database Re-Encryption and Master Key Updates
 
-When running with an auto-generated master key (`KeySource.AutoGenerated`), the Web UI surfaces an actionable indicator, allowing administrators to set a permanent Master Key at runtime without downtime:
+When the gateway runs on an auto-generated key (`KeySource.AutoGenerated`), the Web UI displays a prompt. Administrators can promote a permanent Master Key at runtime without downtime:
 
-1. **API / Admin MCP Tool**:
+1. **API and Admin MCP Tool**:
    - Web UI: `POST /api/config/master-key` with `{ "masterKey": "Your32CharKey" }`
    - Admin MCP Server: `manage_system(action: "set_master_key", newKey: "Your32CharKey")`
 2. **Atomic Transaction**:
-   - Decrypts all existing rows in `SecretProviders`, `AuthProviderConfigs`, `Servers`, and `UserSecrets` using the current active key.
+   - Decrypts all existing rows in `SecretProviders`, `AuthProviderConfigs`, `Servers`, and `UserSecrets` using the active key.
    - Re-encrypts all rows using the new master key.
-   - Overwrites `./data/.master.key` with the new key.
-   - Updates the in-memory key cache and transitions `KeySource` to `Configured`.
+   - Overwrites `./data/.master.key` with the new key value.
+   - Updates the key cache in memory and sets `KeySource` to `Configured`.
 
 ### Master Key Derivation (PBKDF2)
 
-The 256-bit symmetric encryption key is derived deterministically from the master secret using Password-Based Key Derivation Function 2 (PBKDF2):
+The gateway derives the 256-bit encryption key from the master secret using Password-Based Key Derivation Function 2 (PBKDF2):
 
-1. **Key Derivation Parameters**:
+1. **Derivation Settings**:
    - **Salt**: `SHA256(masterSecret + "_McpRouter_Salt_v2")`
    - **Iterations**: `600,000` rounds
    - **Hash Algorithm**: `HMAC-SHA256`
    - **Key Length**: 256 bits (32 bytes)
 
 2. **Dual-Key Rotation Fallback**:
-   When reading stored payloads, `SymmetricEncryptionHelper` attempts decryption with the primary derived key. If tag validation fails (e.g., during secret rotation from a legacy key), it automatically falls back to attempt decryption using `DB_ENCRYPTION_KEY` before failing closed.
+   When reading stored payloads, `SymmetricEncryptionHelper` decrypts with the primary key. If authentication fails, it attempts fallback decryption using `DB_ENCRYPTION_KEY` before reporting an error.
 
 ### Declarative Admin AppKey Seeding (`MCG_ADMIN_AUTH_KEY` / `MCG_ADMIN_KEY`)
 
-The gateway supports declarative admin key provisioning:
+The gateway supports declarative admin key setup:
 - **Environment Variables**: `MCG_ADMIN_AUTH_KEY` or `MCG_ADMIN_KEY`.
-- **Behavior**: On startup, `ClientAppKeySeeder` hashes and seeds the admin key for user `admin` with `["all", "admin"]` scopes. If omitted on initial startup, a compact Base62 admin key is generated.
+- **Behavior**: On startup, `ClientAppKeySeeder` hashes and seeds the admin key for user `admin` with `["all", "admin"]` scopes. If omitted on initial startup, MCG generates a compact Base62 key.
 
 ---
 
@@ -220,7 +220,7 @@ The gateway supports declarative admin key provisioning:
 
 **Implementation**: [`ProvidersController.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Providers/ProvidersController.cs)
 
-To maintain 99.999% uptime for connected AI agents and IDEs, Model Context Gateway (MCG) supports **hot-reloading of secret providers without restarting the application or Docker container**.
+To maintain continuous uptime for AI assistants and IDEs, Model Context Gateway supports **hot-reloading secret providers without restarting the application or container**.
 
 ```mermaid
 sequenceDiagram
@@ -250,43 +250,43 @@ sequenceDiagram
     end
 ```
 
-### Thread Safety & Zero Downtime:
-- `VaultSecretRetriever` protects client creation with a `SemaphoreSlim(1, 1)` synchronization primitive.
-- Calling `ReloadConfigAsync()` safely sets the internal `_vaultClient` to `null`.
-- The very next request lazily re-instantiates the client using the newly saved database configuration without race conditions or dropped client connections.
+### Thread Safety and Zero Downtime:
+- `VaultSecretRetriever` protects client creation with a `SemaphoreSlim(1, 1)` lock.
+- Calling `ReloadConfigAsync()` clears the internal `_vaultClient` reference safely.
+- The next request creates a new client using the updated database configuration. Active sessions continue without interruptions.
 
 ---
 
-## 🛡️ Secret Redaction & Audit Safety
+## 🛡️ Secret Redaction and Audit Safety
 
 **Implementation**: [`ProviderConfigSecurityHelper.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Providers/ProviderConfigSecurityHelper.cs)
 
-To adhere to Zero Trust principles, the Model Context Gateway (MCG) enforces multi-layered redaction and audit protection across all APIs and logs.
+To enforce Zero Trust security, Model Context Gateway applies multi-layered redaction across all APIs and log outputs.
 
-### Masking & Mask-Preserving Updates
+### Masking and Mask-Preserving Updates
 1. **Automatic JSON Redaction**:
-   Any property matching sensitive tokens (`token`, `vault_token`, `secret_id`, `role_id`, `password`, `bind_password`, `apikey`, `client_secret`, `master_key`, or properties containing `secret`, `token`, `password`) is automatically replaced with `********` whenever queried via:
+   Any property matching sensitive tokens (`token`, `vault_token`, `secret_id`, `role_id`, `password`, `bind_password`, `apikey`, `client_secret`, `master_key`, or terms containing `secret`, `token`, or `password`) is replaced with `********` on query endpoints:
    - `GET /api/providers`
    - `GET /api/providers/secrets`
    - `GET /api/admin/providers`
 2. **Mask Preservation (`MergeWithExistingConfig`)**:
-   When administrators update non-sensitive configuration fields (such as changing a Vault URL or Mount Path) in the UI, existing masked values (`********`) are merged with the existing decrypted secrets from the database. Administrators do not need to re-type or re-expose sensitive credentials when modifying metadata.
+   When administrators update non-sensitive fields (such as a Vault URL or mount path) in the UI, masked values (`********`) are merged with existing decrypted database values. Operators do not need to re-enter sensitive tokens when modifying metadata.
 
 ### Audit Trail Sanitization
-All administrative changes trigger audit logs via `IAuditLogger.LogAdminActionAsync`. Before logging, configuration payloads are passed through `RedactConfigJson`. Audit logs stored in `AuditLogs` tables and emitted to standard out never contain plaintext credentials.
+Administrative operations trigger audit logs through `IAuditLogger.LogAdminActionAsync`. Before saving records, the system filters payloads through `RedactConfigJson`. Audit records in `AuditLogs` and standard console logs never contain plaintext passwords.
 
 ### Fail-Closed Security Validation
-- **JSON Object Enforcement**: Configuration bodies must be valid JSON objects.
-- **HTTPS Enforcement**: Vault endpoints must use secure `https://` URLs (validated via `SecurityValidationHelper.ValidateJsonUrlsRequireHttps`).
-- **AppRole Completeness**: If `roleId` is supplied, `secretId` must also be present.
+- **JSON Object Verification**: Configuration bodies must be valid JSON objects.
+- **HTTPS Enforcement**: Vault endpoints must use secure `https://` URLs (checked by `SecurityValidationHelper.ValidateJsonUrlsRequireHttps`).
+- **AppRole Completeness**: When you supply `roleId`, you must also supply `secretId`.
 
 ---
 
-## 📋 Copy-Pasteable Configuration Examples
+## 📋 Configuration Examples
 
 ### Docker Compose with HashiCorp Vault
 
-The following `docker-compose.yaml` provisions `mcg` connected to a local `vault` container with persistent data and mutual networking:
+This `docker-compose.yaml` file configures `mcg` connected to a local `vault` container with persistent data and network isolation:
 
 ```yaml
 version: '3.8'
@@ -338,9 +338,9 @@ services:
 
 ---
 
-### Vault KV v2 & AppRole Setup Commands
+### Vault KV v2 and AppRole Setup Commands
 
-Run these commands inside your Vault container to initialize the KV v2 secrets engine, create a least-privilege policy, and generate AppRole credentials for the gateway:
+Run these commands inside your Vault container to configure the KV v2 secrets engine, create access policies, and generate AppRole credentials:
 
 ```bash
 # 1. Enable Key-Value Version 2 engine at 'secret/'
@@ -429,21 +429,21 @@ echo "Vault Secret ID: $SECRET_ID"
 
 ---
 
-## 🛠️ Troubleshooting & Operational Guide
+## 🛠️ Troubleshooting and Operational Guide
 
-| Symptom / Error | Probable Cause | Verified Resolution |
+| Symptom or Error | Probable Cause | Verified Resolution |
 | :--- | :--- | :--- |
-| **`401 Unauthorized: Vault secret read failed`** | Expired or invalid Vault token / AppRole Secret ID. | Verify `token_ttl` and `token_max_ttl` in Vault AppRole. Confirm JIT renewal check has access to `auth/token/lookup-self` capability in the Vault policy. |
-| **`403 Forbidden: permission denied at secret/data/...`** | Vault ACL policy path mismatch. | Vault KV v2 paths require the `data/` prefix in policies (`path "secret/data/*"`), but API lookups use mount `secret` and path `services/docker`. Ensure policy covers `secret/data/*`. |
-| **`SecurityException: Failed to resolve secret from provider 'Vault'...`** | The requested secret key or path does not exist in Vault. | Run `vault kv get secret/<path>` to confirm the field name matches `secretField` exactly (case-sensitive). |
-| **`FATAL: Master encryption key is missing.`** | Neither `MCG_MASTER_KEY` nor `DB_ENCRYPTION_KEY` is defined. | Define `MCG_MASTER_KEY` in `docker-compose.yaml` or `.env`. Ensure it is a persistent, non-empty secret string. |
-| **`WindowsRegistry provider returns null`** | Model Context Gateway (MCG) is running in a Linux/Docker container. | Windows Registry lookups require a native Windows host environment. Switch the server's `secretProvider` to `Vault` or `Environment`. |
-| **`System.Net.Http.HttpRequestException: Connection refused`** | Network isolation between Router and Vault. | Ensure both containers share the same Docker network bridge (`networks: [mcp_network]`) and use container DNS names (e.g. `http://vault:8200`). |
-| **`ArgumentException: Vault Address must use HTTP or HTTPS scheme`** | Malformed URL in database or environment. | Ensure `address` starts with `https://` (or `http://` for local development networks). |
+| **`401 Unauthorized: Vault secret read failed`** | Expired or invalid Vault token or AppRole Secret ID. | Verify `token_ttl` and `token_max_ttl` in Vault AppRole. Confirm JIT renewal can access `auth/token/lookup-self` in the Vault policy. |
+| **`403 Forbidden: permission denied at secret/data/...`** | Vault Access Control List (ACL) path mismatch. | Vault KV v2 paths require the `data/` prefix in policies (`path "secret/data/*"`). Ensure the policy includes `secret/data/*`. |
+| **`SecurityException: Failed to resolve secret from provider 'Vault'...`** | The secret key or path does not exist in Vault. | Run `vault kv get secret/<path>` to confirm the field name matches `secretField` exactly (case-sensitive). |
+| **`FATAL: Master encryption key is missing.`** | Neither `MCG_MASTER_KEY` nor `DB_ENCRYPTION_KEY` is set. | Define `MCG_MASTER_KEY` in `docker-compose.yaml` or `.env`. Provide a persistent, non-empty secret string. |
+| **`WindowsRegistry provider returns null`** | The gateway is running in a Linux or Docker container. | Windows Registry lookups require a Windows host. Switch the server's `secretProvider` to `Vault` or `Environment`. |
+| **`System.Net.Http.HttpRequestException: Connection refused`** | Network separation between Gateway and Vault. | Ensure both containers share the Docker network bridge (`networks: [mcp_network]`) and use container DNS names (such as `http://vault:8200`). |
+| **`ArgumentException: Vault Address must use HTTP or HTTPS scheme`** | Malformed URL in database or environment. | Ensure `address` begins with `https://` (or `http://` for local development networks). |
 
 ---
 
-## 🔗 Related Documentation & Links
+## 🔗 Related Documentation and Links
 
 - [Official User Guide: Server Management & Secrets](user-guide/02-server-management-and-secrets.md)
 - [Architecture & Domain Model](architecture.md)
