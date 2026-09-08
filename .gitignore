@@ -43,3 +43,8 @@ docs/superpowers/
 # Python virtual environments & MkDocs build directory
 .venv*/
 site/
+
+# Node.js & VitePress
+node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/

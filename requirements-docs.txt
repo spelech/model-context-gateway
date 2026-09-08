@@ -1,4 +1,0 @@
-mkdocs-material>=9.5.0
-pymdown-extensions>=10.7
-mkdocs-callouts>=1.17.0
-

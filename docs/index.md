@@ -82,97 +82,145 @@ flowchart LR
 
 ## Documentation Directory
 
-<div class="grid cards" markdown>
+<div class="grid cards">
 
--   :material-rocket-launch: __[Container Deployment Guide](deployment-guide.md)__
+<ul>
+<li>
 
-    ---
+🚀 **[Container Deployment Guide](deployment-guide.md)**
 
-    Production Docker, Docker Compose, environment settings, and database configurations.
+---
 
--   :material-home: __[Single-User & Home-Lab Setup](single-user-and-homelab-guide.md)__
+Production Docker, Docker Compose, environment settings, and database configurations.
 
-    ---
+</li>
+<li>
 
-    Fast setup for personal use, home labs, SQLite database, and local AI clients.
+🏠 **[Single-User & Home-Lab Setup](single-user-and-homelab-guide.md)**
 
--   :material-shield-account: __[Authentication Architecture](authentication-architecture.md)__
+---
 
-    ---
+Fast setup for personal use, home labs, SQLite database, and local AI clients.
 
-    Active Directory SIDs, OIDC reverse proxy SSO, standalone trust, and AppKey scopes.
+</li>
+<li>
 
--   :material-cog-transfer: __[Administrator Guide](admin-guide.md)__
+🛡️ **[Authentication Architecture](authentication-architecture.md)**
 
-    ---
+---
 
-    Server management, the 10 Admin MCP tools, RBAC policies, and provider setup.
+Active Directory SIDs, OIDC reverse proxy SSO, standalone trust, and AppKey scopes.
 
--   :material-robot: __[Admin MCP Automation Guide](admin-mcp-automation-guide.md)__
+</li>
+<li>
 
-    ---
+⚙️ **[Administrator Guide](admin-guide.md)**
 
-    Autonomous agent administration via the `mcg-admin` skill, control plane tools, and programmatic provisioning.
+---
 
--   :material-book-open-page-variant: __[Official User Guide](user-guide.md)__
+Server management, the 10 Admin MCP tools, RBAC policies, and provider setup.
 
-    ---
+</li>
+<li>
 
-    Interactive dashboard walkthrough, server registration, RBAC management, client configuration, and test bench usage.
+🤖 **[Admin MCP Automation Guide](admin-mcp-automation-guide.md)**
 
--   :material-chef-hat: __[MCP Server Auth Cookbook](mcp-server-auth-cookbook.md)__
+---
 
-    ---
+Autonomous agent administration via the `mcg-admin` skill, control plane tools, and programmatic provisioning.
 
-    Scenario-driven integration recipes for Bearer auth, Custom Headers, Vault, BYOK, Pass-Through, and Identity-Forwarding.
+</li>
+<li>
 
--   :material-sitemap: __[Comprehensive Architecture](architecture.md)__
+📖 **[Official User Guide](user-guide.md)**
 
-    ---
+---
 
-    Complete enterprise architecture specification, sequence diagrams, component models, and AES-256-GCM encryption pipelines.
+Interactive dashboard walkthrough, server registration, RBAC management, client configuration, and test bench usage.
 
--   :material-database: __[Database Providers & Data Model](database-providers.md)__
+</li>
+<li>
 
-    ---
+🧑‍🍳 **[MCP Server Auth Cookbook](mcp-server-auth-cookbook.md)**
 
-    Canonical 12-table ERD, dialect specifications for SQLite, MSSQL, and MySQL, stored procedures, and migration guide.
+---
 
--   :material-key-wireless: __[AppKey Scopes & Authorization](appkey-scopes.md)__
+Scenario-driven integration recipes for Bearer auth, Custom Headers, Vault, BYOK, Pass-Through, and Identity-Forwarding.
 
-    ---
+</li>
+<li>
 
-    Scope grammar (`*`, `server:*`, `category:*`, `tool:*`), evaluation pipeline, least-privilege personas, and token hashing.
+🗺️ **[Comprehensive Architecture](architecture.md)**
 
--   :material-safe: __[Secret Providers & Key Management](secret-providers.md)__
+---
 
-    ---
+Complete enterprise architecture specification, sequence diagrams, component models, and AES-256-GCM encryption pipelines.
 
-    HashiCorp Vault KV v2 JIT renewal, Windows DPAPI, Master Key lifecycle, and secure credential storage.
+</li>
+<li>
 
--   :material-swap-horizontal: __[Downstream Transports Guide](transports.md)__
+🗄️ **[Database Providers & Data Model](database-providers.md)**
 
-    ---
+---
 
-    SSE, HTTP/streamable, subprocess STDIO security policies, environment secret injection, and process tree isolation.
+Canonical 12-table ERD, dialect specifications for SQLite, MSSQL, and MySQL, stored procedures, and migration guide.
 
--   :material-clipboard-check: __[SRS & Test Catalog](software-requirements-and-test-catalog.md)__
+</li>
+<li>
 
-    ---
+🔑 **[AppKey Scopes & Authorization](appkey-scopes.md)**
 
-    Living Software Requirements Specification, requirement taxonomy (`AUTH`, `MCP`, `SEC`, `GUARD`), and test verification matrix.
+---
 
--   :material-alert-circle-outline: __[Troubleshooting & RCA Guide](mcp-routing-and-admin-issues.md)__
+Scope grammar (`*`, `server:*`, `category:*`, `tool:*`), evaluation pipeline, least-privilege personas, and token hashing.
 
-    ---
+</li>
+<li>
 
-    In-depth root cause analysis and resolution guide covering session lifecycles, cache synchronization, and downstreams.
+🔒 **[Secret Providers & Key Management](secret-providers.md)**
 
--   :material-file-document-outline: __[Management Overview & Briefing](management-brief.md)__
+---
 
-    ---
+HashiCorp Vault KV v2 JIT renewal, Windows DPAPI, Master Key lifecycle, and secure credential storage.
 
-    Executive-level summary of architecture, selling points, enterprise governance, and NotebookLM briefing prompt.
+</li>
+<li>
+
+🔄 **[Downstream Transports Guide](transports.md)**
+
+---
+
+SSE, HTTP/streamable, subprocess STDIO security policies, environment secret injection, and process tree isolation.
+
+</li>
+<li>
+
+📋 **[SRS & Test Catalog](software-requirements-and-test-catalog.md)**
+
+---
+
+Living Software Requirements Specification, requirement taxonomy (`AUTH`, `MCP`, `SEC`, `GUARD`), and test verification matrix.
+
+</li>
+<li>
+
+⚠️ **[Troubleshooting & RCA Guide](mcp-routing-and-admin-issues.md)**
+
+---
+
+In-depth root cause analysis and resolution guide covering session lifecycles, cache synchronization, and downstreams.
+
+</li>
+<li>
+
+📄 **[Management Overview & Briefing](management-brief.md)**
+
+---
+
+Executive-level summary of architecture, selling points, enterprise governance, and NotebookLM briefing prompt.
+
+</li>
+</ul>
 
 </div>
 
@@ -182,40 +230,40 @@ flowchart LR
 
 Run the gateway container with zero required configuration. On first boot, the gateway automatically generates a 256-bit AES Master Key in `./data/.master.key` and initializes a secure SQLite database:
 
-=== "Docker CLI"
+::: code-group
 
-    ```bash
-    docker run -d \
-      --name mcg \
-      --restart unless-stopped \
-      -p 8080:8080 \
-      -v $(pwd)/data:/app/data \
-      -v /var/run/docker.sock:/var/run/docker.sock \
-      ghcr.io/spelech/model-context-gateway:latest
-    ```
+```bash [Docker CLI]
+docker run -d \
+  --name mcg \
+  --restart unless-stopped \
+  -p 8080:8080 \
+  -v $(pwd)/data:/app/data \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  ghcr.io/spelech/model-context-gateway:latest
+```
 
-=== "Docker Compose"
+```yaml [Docker Compose]
+services:
+  mcg:
+    image: ghcr.io/spelech/model-context-gateway:latest
+    container_name: mcg
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DB_PROVIDER=sqlite
+      - MCG_ADMIN_KEY=mcp-adm-prod-bootstrap-token-99
+```
 
-    ```yaml
-    services:
-      mcg:
-        image: ghcr.io/spelech/model-context-gateway:latest
-        container_name: mcg
-        restart: unless-stopped
-        ports:
-          - "8080:8080"
-        volumes:
-          - ./data:/app/data
-          - /var/run/docker.sock:/var/run/docker.sock
-        environment:
-          - DB_PROVIDER=sqlite
-          - MCG_ADMIN_KEY=mcp-adm-prod-bootstrap-token-99
-    ```
+:::
 
 ### Live Endpoints
 
-* **Web UI Dashboard**: [`http://localhost:8080/`](http://localhost:8080/)
-* **Health Check**: [`http://localhost:8080/health`](http://localhost:8080/health) &rarr; `{"status":"healthy","service":"ModelContextGateway","version":"5.11.0"}`
+* **Web UI Dashboard**: `http://localhost:8080/`
+* **Health Check**: `http://localhost:8080/health` &rarr; `{"status":"healthy","service":"ModelContextGateway","version":"5.11.0"}`
 * **Meta-Mode Gateway**: `http://localhost:8080/sse`
 * **Admin MCP Server**: `http://localhost:8080/admin/sse` (or `POST /admin` / `GET /mcg-admin/sse`)
 * **Direct Backend Proxy**: `http://localhost:8080/{targetServerId}`
@@ -226,31 +274,31 @@ Run the gateway container with zero required configuration. On first boot, the g
 
 ### 1. Claude Desktop (`claude_desktop_config.json`)
 
-=== "Meta-Mode Gateway (/sse)"
+::: code-group
 
-    ```json
-    {
-      "mcpServers": {
-        "mcg": {
-          "command": "npx",
-          "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8080/sse"]
-        }
-      }
+```json [Meta-Mode Gateway (/sse)]
+{
+  "mcpServers": {
+    "mcg": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8080/sse"]
     }
-    ```
+  }
+}
+```
 
-=== "Admin Control Plane (/admin)"
-
-    ```json
-    {
-      "mcpServers": {
-        "mcg-admin": {
-          "command": "npx",
-          "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8080/admin"]
-        }
-      }
+```json [Admin Control Plane (/admin)]
+{
+  "mcpServers": {
+    "mcg-admin": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8080/admin"]
     }
-    ```
+  }
+}
+```
+
+:::
 
 ### 2. Cursor / Windsurf / Cline (`mcp.json` / `cline_mcp_settings.json`)
 
