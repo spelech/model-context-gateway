@@ -1,41 +1,42 @@
-# Model Context Gateway Transport Capability & Configuration Guide
+# Model Context Gateway Transport Capability and Configuration Guide
 
-The **Model Context Protocol (MCP) Gateway** supports multiple downstream transport mechanisms to communicate with backend tools, services, and local processes, as well as multiple upstream client connectivity models.
+The **Model Context Protocol (MCP) Gateway** supports multiple downstream transport mechanisms to communicate with backend tools, services, and local processes. It also supports multiple upstream client connection models.
 
-This guide details supported transports, security policies, concurrency architectures, configuration parameters, and troubleshooting procedures.
+This guide details supported transports, security policies, concurrency architecture, configuration settings, and troubleshooting steps.
 
 ---
 
 ## Table of Contents
 
-1. [Transport Comparison & Capability Matrix](#1-transport-comparison-capability-matrix)
+1. [Transport Comparison and Capability Matrix](#1-transport-comparison-and-capability-matrix)
 2. [Subprocess STDIO Deep-Dive](#2-subprocess-stdio-deep-dive)
-   - [Executable Path & Argument Configuration](#executable-path-argument-configuration)
+   - [Executable Path and Argument Configuration](#executable-path-and-argument-configuration)
    - [Strict Process Security Policy](#strict-process-security-policy)
    - [Secure Credential Injection via Environment Variables](#secure-credential-injection-via-environment-variables)
-   - [Process Tree Management & Lifecycle](#process-tree-management-lifecycle)
-   - [Stderr Log Capture & Secret Masking](#stderr-log-capture-secret-masking)
-   - [Stream EOF Draining & Buffer Loss Prevention](#stream-eof-draining-buffer-loss-prevention)
+   - [Process Tree Management and Lifecycle](#process-tree-management-and-lifecycle)
+   - [Stderr Log Capture and Secret Masking](#stderr-log-capture-and-secret-masking)
+   - [Stream EOF Draining and Buffer Loss Prevention](#stream-eof-draining-and-buffer-loss-prevention)
    - [Health Checking: Non-HTTP Process Liveness](#health-checking-non-http-process-liveness)
-3. [SSE Concurrency & Session Isolation](#3-sse-concurrency-session-isolation)
-   - [JSON-RPC ID Type Preservation & Rewriting](#json-rpc-id-type-preservation-rewriting)
+3. [SSE Concurrency and Session Isolation](#3-sse-concurrency-and-session-isolation)
+   - [JSON-RPC ID Type Preservation and Rewriting](#json-rpc-id-type-preservation-and-rewriting)
    - [Concurrent Response Isolation Under High Load](#concurrent-response-isolation-under-high-load)
    - [Stateless vs Stateful Request Routing](#stateless-vs-stateful-request-routing)
    - [Target Proxy Routing (`/{targetServerId}`)](#target-proxy-routing-targetserverid)
-   - [Cancellation Token Handling & Disconnect Race Prevention](#cancellation-token-handling-disconnect-race-prevention)
+   - [Cancellation Token Handling and Disconnect Race Prevention](#cancellation-token-handling-and-disconnect-race-prevention)
 4. [Configuration Examples](#4-configuration-examples)
-   - [Backend Server Configuration (JSON & UI)](#backend-server-configuration-json-ui)
-   - [Client IDE & Agent Configurations](#client-ide-agent-configurations)
-5. [Troubleshooting & Recovery Procedures](#5-troubleshooting-recovery-procedures)
+   - [Auth Token Pass-Through](#auth-token-pass-through)
+   - [Backend Server Configuration (JSON and UI)](#backend-server-configuration-json-and-ui)
+   - [Client IDE and Agent Configurations](#client-ide-and-agent-configurations)
+5. [Troubleshooting and Recovery Procedures](#5-troubleshooting-and-recovery-procedures)
    - [JSON-RPC Error Codes](#json-rpc-error-codes)
    - [HTTP Status Codes](#http-status-codes)
-   - [Common Operational Issues & Solutions](#common-operational-issues-solutions)
+   - [Common Operational Issues and Solutions](#common-operational-issues-and-solutions)
 
 ---
 
-## 1. Transport Comparison & Capability Matrix
+## 1. Transport Comparison and Capability Matrix
 
-The gateway router abstracts transport differences behind the unified [`ITransport`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/ITransport.cs) interface and [`BackendConnection`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/BackendConnection.cs) wrapper. Backend servers specify their transport type via the `Type` column (`sse`, `http`, `streamable`, `stdio`, or `custom`).
+The gateway abstracts transport differences using the unified [`ITransport`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/ITransport.cs) interface and the [`BackendConnection`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/BackendConnection.cs) wrapper. Backend servers specify their transport type in the `Type` column (`sse`, `http`, `streamable`, `stdio`, or `custom`).
 
 ```mermaid
 graph TD
@@ -63,26 +64,26 @@ graph TD
 
 ### Capability Matrix
 
-| Feature / Capability | Server-Sent Events (`sse`) | HTTP Stream (`http` / `streamable`) | Subprocess STDIO (`stdio`) | Target Proxy (`/{server_id}`) |
+| Feature and Capability | Server-Sent Events (`sse`) | HTTP Stream (`http` / `streamable`) | Subprocess STDIO (`stdio`) | Target Proxy (`/{server_id}`) |
 | :--- | :--- | :--- | :--- | :--- |
-| **Protocol Framing** | W3C Server-Sent Events (`text/event-stream`) + HTTP POST | HTTP POST with `application/json` or chunked streaming | Newline-delimited JSON-RPC 2.0 (NDJSON) over standard pipes | Passthrough MCP SSE or HTTP stream directly to target server |
-| **Connection Model** | Long-lived persistent SSE connection with duplex HTTP POST | Request-Response or single-shot chunked stream per request | Long-lived managed subprocess with redirected `stdin`/`stdout`/`stderr` | Stateful or stateless client session mapped to a single backend |
-| **Duplex Streaming** | Full duplex (server events via SSE, client calls via POST) | Half duplex (request/response body stream) | Full duplex (asynchronous line-by-line read/write locks) | Full duplex passthrough directly to target server |
-| **Session Identification** | `Mcp-Session-Id` header and `event: endpoint` payload | `Mcp-Session-Id` header (propagated across requests) | Subprocess Process ID (PID) + dedicated transport instance | Target session ID + client connection token |
-| **Secret Injection** | Authorization headers (`Bearer`, `Basic`, `Raw`, `X-API-Key`, `Custom-Header`) or Query Param | Authorization headers (`Bearer`, `Basic`, `Raw`, `X-API-Key`, `Custom-Header`) or Query Param | Environment Variables (`startInfo.Environment`) — **never CLI arguments** | Inherits target server auth + AppKey scope validation |
-| **Health Probing** | HTTP GET probe every 15s + 30s background JSON-RPC `ping` loop | HTTP GET probe every 15s | Process liveness check (`!_process.HasExited`) & syntax check | Evaluates target server backend connection health |
-| **Auto-Reconnection** | Automatic reconnect with 5-second backoff and clean state reset | Stateless per-request retries with 15-second default timeout | Subprocess exit detection, state cleanup, and lazy re-spawn | Rebinds client session upon reconnect |
-| **Best For** | Persistent MCP services, Docker containers, remote network microservices | Serverless functions, stateless API gateways, lightweight webhooks | Local CLI tools, Python/Node packages (`uvx`, `npx`), sandboxed binary tools | Client sessions requiring direct target access without Meta-Mode filtering |
+| **Protocol Framing** | W3C Server-Sent Events (SSE) (`text/event-stream`) + HTTP POST | HTTP POST with `application/json` or chunked streaming | Newline-Delimited JSON (NDJSON) over standard OS pipes | Direct passthrough of MCP SSE or HTTP streams to target servers |
+| **Connection Model** | Persistent SSE connection with duplex HTTP POST | Request-Response or single-shot chunked stream per request | Long-lived managed child process with redirected standard input/output (`stdin`, `stdout`, `stderr`) | Stateful or stateless client session mapped directly to one backend |
+| **Duplex Streaming** | Full duplex (server events over SSE, client tool calls over POST) | Half duplex (request and response body stream) | Full duplex (asynchronous line-by-line read and write locks) | Full duplex passthrough directly to target server |
+| **Session Identification** | `Mcp-Session-Id` header and `event: endpoint` payload | `Mcp-Session-Id` header (passed across requests) | Subprocess Process ID (PID) + dedicated transport instance | Target session ID + client connection token |
+| **Secret Injection** | Authorization headers (`Bearer`, `Basic`, `Raw`, `X-API-Key`, `Custom-Header`) or Query Parameter | Authorization headers (`Bearer`, `Basic`, `Raw`, `X-API-Key`, `Custom-Header`) or Query Parameter | Environment variables (`startInfo.Environment`) — **never command-line arguments** | Inherits target server authentication + AppKey scope validation |
+| **Health Probing** | HTTP GET probe every 15s + background 30s JSON-RPC `ping` loop | HTTP GET probe every 15s | Process liveness check (`!_process.HasExited`) and syntax checks | Evaluates health of downstream backend connection |
+| **Auto-Reconnection** | Automatic reconnect with 5-second backoff and clean state reset | Stateless per-request retries with 15-second default timeout | Exit detection, state cleanup, and lazy process restart | Rebinds client session upon reconnect |
+| **Best For** | Long-running MCP services, Docker containers, remote network microservices | Serverless functions, stateless API gateways, lightweight webhooks | Local CLI tools, Python/Node packages (`uvx`, `npx`), sandboxed binary tools | Client sessions requiring direct target access without Meta-Mode filtering |
 
 ---
 
 ## 2. Subprocess STDIO Deep-Dive
 
-The [`StdioTransport`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs) provides zero-network-overhead execution for local MCP tools, script interpreters, and binary executables.
+The [`StdioTransport`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs) executes local MCP tools, script interpreters, and binary programs without network overhead. It communicates through Standard Input and Output (STDIO).
 
-### Executable Path & Argument Configuration
+### Executable Path and Argument Configuration
 
-When configuring a `stdio` server, the `Url` field contains the executable and its arguments. The router parses this command line using [`StdioTransport.ParseCommandLine`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs#L115-L165), supporting single quotes, double quotes, and space-separated tokens:
+When you configure a `stdio` server, provide the program name and arguments in the `Url` field. The gateway parses this command line with [`StdioTransport.ParseCommandLine`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs#L115-L165). The parser supports single quotes, double quotes, and space-separated tokens:
 
 ```csharp
 // Example command string:
@@ -92,44 +93,44 @@ var executable = parsed[0];
 var arguments = parsed.Skip(1);
 ```
 
-- **Working Directory**: Defaults to `AppContext.BaseDirectory` (the application runtime root) to prevent unexpected path traversal.
-- **Process Start Configuration**: Configured with `UseShellExecute = false`, `CreateNoWindow = true`, and redirected `StandardInput`, `StandardOutput`, and `StandardError`.
+- **Working Directory**: Defaults to `AppContext.BaseDirectory` (the application runtime root). This default prevents unexpected path traversal.
+- **Process Start Settings**: Runs with `UseShellExecute = false` and `CreateNoWindow = true`. Redirects `StandardInput`, `StandardOutput`, and `StandardError`.
 
 ### Strict Process Security Policy
 
-To prevent arbitrary command execution, privilege escalation, and shell injection vulnerabilities, [`ValidateSecurityPolicy`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs#L167-L191) strictly enforces:
+To prevent arbitrary command execution, privilege escalation, and command injection attacks, [`ValidateSecurityPolicy`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs#L167-L191) enforces these rules:
 
-1. **Blocked Shell Interpreters**: Direct invocation of system shells is rejected:
+1. **Blocked Shell Interpreters**: Direct calls to system shells fail immediately:
    - `sh`, `bash`, `zsh`, `cmd`, `powershell`, `pwsh`
-   - *Rationale*: Shells allow subshell execution, piping, and variable expansion bypasses. Tools must be invoked directly via their binary or language runtime (e.g. `node`, `python3`, `dotnet`).
-2. **Disallowed Metacharacters**: Commands and arguments containing shell metacharacters are rejected with a `SecurityException`:
+   - *Reason*: Shells permit nested scripts, pipe redirection, and variable expansion bypasses. The gateway must invoke tools directly through their binary executable or language runtime (such as `node`, `python3`, or `dotnet`).
+2. **Disallowed Metacharacters**: Commands and arguments containing shell metacharacters trigger a `SecurityException`:
    - Disallowed characters: `;`, `&`, `|`, `<`, `>`, `\n`, `\r`, `` ` ``, `$`, `*`
 3. **URL Scheme Prohibition**: `stdio` commands starting with `http://` or `https://` are rejected.
 
 ### Secure Credential Injection via Environment Variables
 
 > [!IMPORTANT]
-> **Zero Command-Line Credential Leakage Rule**: Secrets and API keys are **NEVER** passed as command-line arguments.
+> **Zero Command-Line Credential Rule**: Never pass secrets or API keys as command-line arguments.
 
-When secrets are passed via command-line arguments, they are visible to any unprivileged user on the host system via:
-- Process table inspections (`ps aux`, `ps -ef`)
-- Linux `/proc/[pid]/cmdline` pseudo-filesystem
+When you pass secrets through command-line arguments, any local user can view them through:
+- Operating system process lists (`ps aux`, `ps -ef`)
+- The Linux `/proc/[pid]/cmdline` pseudo-filesystem
 - Windows Task Manager and Process Explorer
-- OS error logs and system crash dumps
+- System crash reports and error logs
 
 #### Injection Implementation:
-1. Secret retrieval is performed dynamically through [`ResolveTokenAsync`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs#L47-L98) (supporting HashiCorp Vault KV v2, Windows DPAPI / Registry, Environment Variables, or database-stored keys).
-2. The resolved secret is injected exclusively into the subprocess's isolated environment dictionary:
+1. The gateway resolves secrets dynamically through [`ResolveTokenAsync`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs#L47-L98). It supports HashiCorp Vault KV v2, Windows Data Protection API (DPAPI), registry values, environment variables, or encrypted database values.
+2. The gateway injects the resolved secret only into the isolated environment of the child process:
    ```csharp
    var envKey = !string.IsNullOrWhiteSpace(_server.SecretItemKey) ? _server.SecretItemKey : "API_KEY";
    startInfo.Environment[envKey] = _resolvedSecret;
    startInfo.Environment["MCP_API_KEY"] = _resolvedSecret;
    ```
-3. **Fail-Closed Guarantee**: If secret resolution fails (e.g. Vault token expired or secret path missing), `ConnectAsync` throws a `SecurityException` and aborts immediately. The subprocess is never launched.
+3. **Fail-Closed Design**: If secret retrieval fails (for example, if a Vault token expires), `ConnectAsync` throws a `SecurityException` and stops. The gateway never starts the child process without required secrets.
 
-### Process Tree Management & Lifecycle
+### Process Tree Management and Lifecycle
 
-Subprocesses often spawn child helper processes or worker threads. If the parent is terminated without cleaning the process tree, orphaned zombie processes remain running in the background.
+Child processes often start worker threads or secondary subprocesses. If the gateway stops the parent process without cleaning child processes, orphaned processes remain active in memory.
 
 ```mermaid
 sequenceDiagram
@@ -151,24 +152,24 @@ sequenceDiagram
     Router->>Router: JsonRpcStateManager.CancelAll()
 ```
 
-- **Graceful Shutdown**: Upon disposal or session end, `StdioTransport` closes `StandardInput` to signal EOF to the child process.
-- **Grace Period & Forced Termination**: If the process does not terminate within 1000ms (`WaitForExit(1000)`), the router calls `_process.Kill(entireProcessTree: true)` to terminate the process and all descendant processes.
-- **Disposal Safety**: All `Process`, `StreamReader`, `StreamWriter`, and `SemaphoreSlim` handles are disposed cleanly.
+- **Graceful Shutdown**: During disposal or session termination, `StdioTransport` closes `StandardInput`. This action sends an End of File (EOF) signal to the child process.
+- **Grace Period and Forced Termination**: If the process does not stop within 1000ms (`WaitForExit(1000)`), the gateway calls `_process.Kill(entireProcessTree: true)`. This kills the parent process and all child processes.
+- **Resource Disposal**: The gateway cleans and releases all `Process`, `StreamReader`, `StreamWriter`, and `SemaphoreSlim` instances.
 
-### Stderr Log Capture & Secret Masking
+### Stderr Log Capture and Secret Masking
 
-Subprocess standard error (`stderr`) is read asynchronously on a dedicated background thread:
+The gateway reads standard error (`stderr`) asynchronously on a dedicated background thread:
 
-- **Log Routing**: Non-empty `stderr` output is captured line-by-line and routed to the gateway logger as `LogLevel.Warning` with prefix `[STDIO Backend {ServerId} Stderr]`.
-- **Secret Redaction**: All logged lines pass through [`SanitizeLogOutput`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs#L100-L113):
-  - Sanitized via [`PiiSanitizer.SanitizePayload`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Logging/PiiSanitizer.cs) (redacting Bearer tokens, passwords, and authorization headers).
-  - Explicit string replacement masks `_resolvedSecret` and `_server.ApiKey` with `[REDACTED]`.
+- **Log Forwarding**: The gateway reads non-empty `stderr` lines and logs them as `LogLevel.Warning` with prefix `[STDIO Backend {ServerId} Stderr]`.
+- **Secret Redaction**: Every log line passes through [`SanitizeLogOutput`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs#L100-L113):
+  - Sanitized with [`PiiSanitizer.SanitizePayload`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Logging/PiiSanitizer.cs) to remove Bearer tokens, passwords, and authorization headers.
+  - Replaces `_resolvedSecret` and `_server.ApiKey` values with `[REDACTED]`.
 
-### Stream EOF Draining & Buffer Loss Prevention
+### Stream EOF Draining and Buffer Loss Prevention
 
-A common bug in subprocess I/O is exiting the read loop as soon as `_process.HasExited == true`, which discards responses remaining in the pipe's internal kernel buffer.
+A common bug in subprocess I/O is exiting the read loop as soon as `_process.HasExited == true`. This bug drops unread responses waiting in the operating system pipe buffer.
 
-`StdioTransport` avoids this race condition by looping until `ReadLineAsync()` returns `null` (stream EOF):
+`StdioTransport` avoids this race condition. It continues reading until `ReadLineAsync()` returns `null` (stream EOF):
 
 ```csharp
 while (!_cts.Token.IsCancellationRequested && _process != null)
@@ -179,26 +180,26 @@ while (!_cts.Token.IsCancellationRequested && _process != null)
 }
 ```
 
-This guarantees that fast-executing one-shot tools or tools that exit immediately after writing their response are fully read and dispatched to the caller before cleanup.
+This ensures fast one-shot tools send their complete response to the caller before the process terminates.
 
 ### Health Checking: Non-HTTP Process Liveness
 
-`stdio` backends do not expose network ports or HTTP endpoints. [`BackendHealthCheckService.ProbeServerAsync`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/BackendHealthCheckService.cs#L112-L122) validates `stdio` servers via:
-1. **Command Syntax & Security Validation**: Runs `ServerValidationHelper.IsValidStdioCommand` to ensure the executable exists and meets security policies.
-2. **Process Liveness**: Verifies the process is either running or ready to be spawned on-demand.
-3. **No Phantom Socket Consumption**: Bypasses HTTP socket generation entirely.
+`stdio` backends do not expose network ports or HTTP URLs. [`BackendHealthCheckService.ProbeServerAsync`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/BackendHealthCheckService.cs#L112-L122) validates `stdio` servers with these steps:
+1. **Command Syntax and Security Verification**: Runs `ServerValidationHelper.IsValidStdioCommand` to confirm the executable exists and meets security policy.
+2. **Process Liveness**: Confirms the process is running or ready to start on demand.
+3. **Zero Socket Usage**: Bypasses network sockets entirely.
 
 ---
 
-## 3. SSE Concurrency & Session Isolation
+## 3. SSE Concurrency and Session Isolation
 
-The Model Context Protocol allows client and backend communication over duplex channels where multiple concurrent tool invocations, notifications, and prompts occur simultaneously.
+The Model Context Protocol supports full-duplex communication. Multiple concurrent tool calls, notifications, and prompts can run at the same time.
 
-### JSON-RPC ID Type Preservation & Rewriting
+### JSON-RPC ID Type Preservation and Rewriting
 
-The JSON-RPC 2.0 specification allows request `id` values to be **strings**, **numbers (integers or floating point)**, or **null**. 
+The JSON-RPC 2.0 specification allows request `id` values to be **strings**, **numbers**, or **null**.
 
-When multiple client sessions connect through the gateway, they often use overlapping request IDs (e.g. Client A sends `id: 1`, and Client B simultaneously sends `id: 1`).
+When multiple client sessions connect through the gateway, they often send identical request IDs (for example, Client A sends `id: 1` while Client B also sends `id: 1`).
 
 ```mermaid
 sequenceDiagram
@@ -224,60 +225,60 @@ sequenceDiagram
     Gateway-->>ClientA: 200 OK {"id": 1, "result": {...}}
 ```
 
-#### Gateway State Tracking Engine ([`JsonRpcStateManager`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs)):
-1. **Extraction**: Reads the client's original ID and preserves its exact primitive data type (`string`, `long`, `double`, or `null`) using [`GetJsonElementValue`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/SseTransport.cs#L325-L344).
-2. **Upstream Rewriting**: Generates a cryptographically unique 32-character hexadecimal GUID string (`upstreamRequestId = Guid.NewGuid().ToString("N")`) and replaces the `id` field in the outgoing payload.
-3. **Tracking**: Creates a [`PendingRequestTcs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs#L9-L31) storing:
-   - `OriginalId`: The client's original ID and data type.
+#### State Tracking Engine ([`JsonRpcStateManager`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs)):
+1. **Extraction**: Reads the original client ID and keeps its exact type (`string`, `long`, `double`, or `null`) using [`GetJsonElementValue`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/SseTransport.cs#L325-L344).
+2. **Upstream Rewriting**: Creates a unique 32-character hexadecimal GUID (`upstreamRequestId = Guid.NewGuid().ToString("N")`) and replaces the outgoing `id` field.
+3. **Request Tracking**: Saves a [`PendingRequestTcs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs#L9-L31) record containing:
+   - `OriginalId`: The original client ID and data type.
    - `UpstreamId`: The unique upstream GUID.
-   - `SessionId`: The originating client session.
-   - `CancellationToken`: The caller's cancellation token.
+   - `SessionId`: The originating client session identifier.
+   - `CancellationToken`: The caller cancellation token.
    - `Expiry`: The request expiration deadline (`DateTime.UtcNow + RequestTimeout`).
-4. **Response Restoration**: When the downstream backend emits an SSE message or standard response with `upstreamRequestId`, [`TryCompleteRequest`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs#L112-L134) removes the tracked entry, sets `response.Id = tracked.OriginalId`, and completes the awaiting `TaskCompletionSource`.
+4. **Response Restoration**: When the downstream server replies with `upstreamRequestId`, [`TryCompleteRequest`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs#L112-L134) removes the tracking entry. It restores `response.Id = tracked.OriginalId` and completes the awaiting task.
 
 ### Concurrent Response Isolation Under High Load
 
-Under heavy concurrent usage (e.g. 50+ simultaneous tool executions across multiple IDEs and agents):
-- All request tracking is thread-safe using `ConcurrentDictionary<string, TaskCompletionSource<JsonRpcResponse>>` guarded by atomic synchronization.
-- Responses returning out of order or interleaved across the same backend connection never cross-talk or overwrite each other.
-- Attempting to register duplicate IDs throws an explicit `InvalidOperationException("Duplicate request ID detected")` rather than causing silent data corruption.
+Under heavy concurrent load across multiple IDEs and AI agents:
+- The gateway tracks requests with thread-safe `ConcurrentDictionary<string, TaskCompletionSource<JsonRpcResponse>>` collections.
+- Out-of-order and interleaved backend responses route to the correct caller without cross-talk.
+- Reusing an active request ID throws an `InvalidOperationException("Duplicate request ID detected")` to prevent data corruption.
 
 ### Stateless vs Stateful Request Routing
 
-The gateway seamlessly handles both stateful and stateless MCP client models:
+The gateway supports both stateful and stateless MCP client connection models:
 
 #### 1. Stateful Client Sessions (`GET /sse` + `POST /message?sessionId=...`)
-- Client establishes a long-lived SSE stream at `/sse`.
-- Gateway assigns a unique `sessionId` and returns an `event: endpoint` pointing to `/message?sessionId={sessionId}`.
-- All subsequent tool calls, cancellations, and notifications are sent via HTTP POST to `/message`.
-- Connection state, warmed tools cache, and active cancellation tokens are retained in [`ClientSession`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession.cs).
+- The client starts a long-lived SSE stream at `/sse`.
+- The gateway assigns a unique `sessionId` and returns an `event: endpoint` payload pointing to `/message?sessionId={sessionId}`.
+- The client sends subsequent tool calls, cancellations, and notifications via HTTP POST to `/message`.
+- The gateway maintains session state, cached tool schemas, and cancellation tokens inside [`ClientSession`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession.cs).
 
 #### 2. Stateless Single-Shot Requests (`POST /sse`)
-- Clients (or lightweight HTTP agents) send HTTP POST directly to `/sse` without establishing an SSE stream first.
-- The router detects subsequent stateless calls (`method != "initialize"`) and routes them automatically to the `global-stateless-session`.
-- Tool listing, tool calling, and prompt rendering are executed on-demand and returned immediately as JSON responses (`StatusCode 200/202`).
+- Clients and lightweight HTTP agents send HTTP POST directly to `/sse` without opening an SSE stream.
+- The router detects stateless calls (`method != "initialize"`) and routes them to `global-stateless-session`.
+- Tool searches, tool calls, and prompt rendering execute on demand and return immediate JSON responses (`HTTP 200` or `202`).
 
 ### Target Proxy Routing (`/{targetServerId}`)
 
-Clients that need direct, unmediated communication with a specific backend (bypassing Meta-Mode discovery) connect via `/{targetServerId}`:
+Clients that need direct communication with a single backend (bypassing Meta-Mode tool aggregation) connect directly to `/{targetServerId}`:
 
-- **Routing**: `GET /{targetServerId}` initializes a direct SSE session mapped exclusively to the target server; `POST /{targetServerId}` dispatches JSON-RPC payloads directly.
-- **AppKey Scope Enforcement**: Verifies the caller's AppKey includes wildcard (`*`, `all`), server-specific (`server:{targetServerId}`), or category-specific (`category:{name}`) scopes.
-- **Fine-Grained RBAC**: Executes `sp_EvaluateUserAccess` against the target server ID, verifying the authenticated user or SID has permission to access the server.
+- **Routing**: `GET /{targetServerId}` creates a direct SSE session for that server. `POST /{targetServerId}` forwards JSON-RPC payloads directly.
+- **Scope Validation**: Verifies that the client AppKey includes wildcard (`*`, `all`), server-specific (`server:{targetServerId}`), or category-specific (`category:{name}`) scopes.
+- **Role-Based Access Control (RBAC)**: Executes `sp_EvaluateUserAccess` for the target server ID to confirm user or group permissions.
 
-### Cancellation Token Handling & Disconnect Race Prevention
+### Cancellation Token Handling and Disconnect Race Prevention
 
-Network drops and client aborts are handled without leaving orphaned tasks or memory leaks:
+Network interruptions and client cancellations are handled cleanly without memory leaks:
 
 1. **Client Cancellation (`notifications/cancelled`)**:
-   - When a client cancels an ongoing tool call, it sends `notifications/cancelled` with `params.requestId`.
-   - [`ClientSession.CancelRequest`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession.cs) looks up the caller's `CancellationTokenSource` and cancels it immediately.
+   - When a client cancels a tool call, it sends `notifications/cancelled` with `params.requestId`.
+   - [`ClientSession.CancelRequest`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession.cs) finds the associated `CancellationTokenSource` and cancels it immediately.
 2. **Timeout Expiration**:
-   - Every request is bounded by `RequestTimeout` (default 15 seconds, configurable per server).
-   - If the downstream server fails to respond, `WaitAsync(RequestTimeout)` raises a `TimeoutException`.
-3. **Disconnect Race Cleanup**:
-   - If a backend connection drops unexpectedly (stream EOF or socket error), [`JsonRpcStateManager.MarkDisconnected()`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs#L58-L69) cancels all pending `TaskCompletionSource` instances (`tcs.TrySetCanceled()`) and clears the pending requests collection.
-   - All `SendRequestAsync` invocations feature `try ... finally { _stateManager.TryRemoveRequest(upstreamRequestId); }` to guarantee no memory leaks occur under any failure branch.
+   - Every request uses a configurable `RequestTimeout` (default 15 seconds).
+   - If the downstream server does not respond within this window, `WaitAsync(RequestTimeout)` throws a `TimeoutException`.
+3. **Disconnect Cleanup**:
+   - If a backend connection drops unexpectedly, [`JsonRpcStateManager.MarkDisconnected()`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/JsonRpcStateManager.cs#L58-L69) cancels all pending tasks (`tcs.TrySetCanceled()`) and purges the pending collection.
+   - All `SendRequestAsync` calls use `try ... finally { _stateManager.TryRemoveRequest(upstreamRequestId); }` to prevent memory leaks during failures.
 
 ---
 
@@ -285,9 +286,9 @@ Network drops and client aborts are handled without leaving orphaned tasks or me
 
 ### Auth Token Pass-Through
 
-The router supports an `AllowPassThroughAuth` flag for backend servers. When this flag is enabled, clients can pass individual user tokens directly to the backend server via the `X-Target-Auth` header. The router will intercept this header and inject it as the authentication token for the downstream connection, overriding any static token configured for the server.
+The router supports an `AllowPassThroughAuth` flag for backend servers. When enabled, clients pass user tokens directly to the backend through the `X-Target-Auth` header. The router forwards this token to the downstream service, overriding any static token configured on the server.
 
-Example `custom_servers.json` configuration:
+Example `custom_servers.json` entry:
 ```json
 {
   "id": "user-scoped-service",
@@ -304,10 +305,9 @@ POST /sse HTTP/1.1
 X-Target-Auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
+### Backend Server Configuration (JSON and UI)
 
-### Backend Server Configuration (JSON & UI)
-
-Backend servers can be configured dynamically via the Web Dashboard or declaratively via `/app/data/custom_servers.json`.
+You can configure backend servers through the Web Dashboard or declaratively through `/app/data/custom_servers.json`.
 
 #### Example `custom_servers.json`:
 ```json
@@ -351,7 +351,7 @@ Backend servers can be configured dynamically via the Web Dashboard or declarati
 ]
 ```
 
-### Client IDE & Agent Configurations
+### Client IDE and Agent Configurations
 
 #### 1. Claude Desktop (`claude_desktop_config.json`)
 ```json
@@ -417,8 +417,8 @@ Backend servers can be configured dynamically via the Web Dashboard or declarati
 }
 ```
 
-#### 5. Direct Target Server Connection (e.g. Docker MCP direct)
-To connect directly to a single backend bypassing Meta-Mode, point the client URL to the target server ID:
+#### 5. Direct Target Server Connection
+To connect directly to one backend without Meta-Mode discovery, point the client URL to the target server ID:
 ```json
 {
   "mcpServers": {
@@ -434,55 +434,55 @@ To connect directly to a single backend bypassing Meta-Mode, point the client UR
 
 ---
 
-## 5. Troubleshooting & Recovery Procedures
+## 5. Troubleshooting and Recovery Procedures
 
 ### JSON-RPC Error Codes
 
 | Error Code | Error Message | Typical Cause | Recommended Action |
 | :--- | :--- | :--- | :--- |
-| `-32700` | `Parse error` | Client sent malformed or invalid JSON payload. | Verify JSON syntax and escaping in client payloads. |
-| `-32600` | `Invalid Request` | JSON is not a valid JSON-RPC 2.0 request object. | Ensure payload includes `"jsonrpc": "2.0"` and valid `"method"`. |
-| `-32601` | `Method not found` | Method is not implemented or namespaced identifier is invalid. | Query `search_tools` first or verify exact `<serverId>__<toolName>` spelling. |
-| `-32602` | `Invalid params / Resource Not Found` | Arguments do not match tool input schema or requested resource URI not found. | Inspect tool input schema using the Test Bench form builder or verify URI. |
-| `-32603` | `Internal error` | Unhandled downstream server error or serialization failure. | Check gateway diagnostic logs in Web UI for backend stack trace. |
-| `-32001` | `Server Disconnected / Not Running` | Downstream SSE stream or STDIO subprocess is offline. | Check backend server status on Overview dashboard; inspect container logs. |
-| `-32020` | `Connection Closed` | Downstream connection terminated during communication. | Check backend server connectivity and logs. |
-| `-32021` | `Request Cancelled` | Request was cancelled by client session via `notifications/cancelled`. | Check client session lifecycle and timeouts. |
-| `-32022` | `Missing Required Client Capability` | Client lacked declared capability for requested operation (e.g. sampling). | Declare required client capability in initialize handshake. |
+| `-32700` | `Parse error` | The client sent malformed JSON syntax. | Verify JSON syntax and string escaping in client payloads. |
+| `-32600` | `Invalid Request` | Payload is not a valid JSON-RPC 2.0 object. | Ensure the payload includes `"jsonrpc": "2.0"` and a valid `"method"`. |
+| `-32601` | `Method not found` | Method does not exist or tool name is invalid. | Query `search_tools` first, or verify the `<serverId>__<toolName>` spelling. |
+| `-32602` | `Invalid params / Resource Not Found` | Arguments do not match tool schema, or resource URI is invalid. | Check tool input schema in the Test Bench form or verify the URI. |
+| `-32603` | `Internal error` | Unhandled error in downstream server or serialization failure. | Inspect gateway diagnostic logs in the Web UI for the backend stack trace. |
+| `-32001` | `Server Disconnected / Not Running` | Downstream SSE stream or STDIO child process is offline. | Check backend server status on the dashboard; inspect container logs. |
+| `-32020` | `Connection Closed` | Downstream connection dropped during communication. | Check backend server health and network logs. |
+| `-32021` | `Request Cancelled` | Client cancelled the request with `notifications/cancelled`. | Check client session lifecycle and timeout settings. |
+| `-32022` | `Missing Required Client Capability` | Client lacked declared capability for requested operation. | Declare required client capability in initialize handshake. |
 
 ### HTTP Status Codes
 
-| Status Code | Description | Diagnostics & Resolution |
+| Status Code | Description | Diagnostics and Resolution |
 | :--- | :--- | :--- |
-| `400 Bad Request` | Malformed request body or missing `sessionId` parameter on `/message`. | Ensure POST requests to `/message` include `?sessionId={id}` query parameter. |
-| `401 Unauthorized` | Missing or invalid AppKey / OIDC authentication token. | Provide a valid `X-App-Key` header or verify reverse proxy SSO headers. |
-| `403 Forbidden` | User or AppKey lacks permission for the requested server, category, or tool. | Verify RBAC group permissions in the Security tab; ensure AppKey scopes include required servers. |
+| `400 Bad Request` | Malformed request body or missing `sessionId` parameter on `/message`. | Include the `?sessionId={id}` query parameter on POST requests to `/message`. |
+| `401 Unauthorized` | Missing or invalid AppKey, or invalid OIDC token. | Provide a valid `X-App-Key` header or verify reverse proxy SSO headers. |
+| `403 Forbidden` | User or AppKey lacks permission for the server, category, or tool. | Verify RBAC permissions in the Security tab; ensure AppKey includes required scopes. |
 | `404 Not Found` | Server ID not found or target proxy path does not exist. | Verify server ID exists and is enabled in the Servers management tab. |
-| `502 Bad Gateway` | Downstream server is unreachable or failed to respond to initial handshake. | Ensure downstream service is running and accessible on the local Docker network. |
-| `504 Gateway Timeout` | Downstream tool execution exceeded `RequestTimeout` (default 15s). | Increase server `RequestTimeout` for long-running operations or optimize downstream tool. |
+| `502 Bad Gateway` | Downstream server is unreachable or failed during startup handshake. | Ensure downstream service is running and accessible on the Docker network. |
+| `504 Gateway Timeout` | Downstream tool execution exceeded `RequestTimeout` (default 15s). | Increase server `RequestTimeout` for long operations or optimize downstream tool. |
 
-### Common Operational Issues & Solutions
+### Common Operational Issues and Solutions
 
 #### Issue 1: STDIO Process Exits Immediately or Throws `SecurityException`
 - **Symptom**: Server status displays `Failed: Command contains disallowed unsafe characters` or `Direct invocation of shell is blocked`.
 - **Cause**: Using shell chaining (`;`, `&&`, `|`) or invoking a shell (`bash -c`, `sh script.sh`, `powershell`).
-- **Solution**: Invoke the runtime binary directly without a shell wrapper:
+- **Solution**: Call the runtime executable directly without shell wrappers:
   - ❌ *Incorrect*: `bash -c "node server.js"`
   - 🟢 *Correct*: `node /path/to/server.js`
 
 #### Issue 2: STDIO Fails Secret Resolution
 - **Symptom**: `SecurityException: Failed to resolve secret from provider 'Vault'`.
-- **Cause**: Vault token expired, path is invalid, or secret retriever configuration is incorrect.
-- **Solution**: Verify secret provider configuration in Settings; ensure the secret key exists at the configured mount and path.
+- **Cause**: Vault token expired, path is invalid, or secret retriever settings are wrong.
+- **Solution**: Check secret provider configuration in Settings; ensure the secret key exists at the configured mount and path.
 
 #### Issue 3: SSE Connection Drops Repeatedly Behind Reverse Proxy (Caddy / Nginx)
-- **Symptom**: SSE connection drops every 30–60 seconds; client continuously reconnects.
-- **Cause**: Reverse proxy response buffering is enabled, preventing SSE event streaming.
+- **Symptom**: SSE connection drops every 30 to 60 seconds; client continuously reconnects.
+- **Cause**: Reverse proxy response buffering is active, blocking SSE event streaming.
 - **Solution**:
-  - **Nginx**: Add `proxy_buffering off; proxy_cache off; proxy_read_timeout 86400s;` to the site config.
+  - **Nginx**: Add `proxy_buffering off; proxy_cache off; proxy_read_timeout 86400s;` to the site configuration.
   - **Caddy**: Ensure `flush_interval -1` is active for `/sse` streaming endpoints.
 
 #### Issue 4: Tools Return `Duplicate request ID detected`
 - **Symptom**: Client logs report `InvalidOperationException: Duplicate request ID detected`.
-- **Cause**: A custom client library is reusing the same in-flight request ID before the previous request completed.
-- **Solution**: The gateway automatically rewrites IDs for standard clients; ensure custom clients generate distinct request IDs or wait for response completion before reusing IDs.
+- **Cause**: A custom client library reuses an active request ID before the earlier request completes.
+- **Solution**: The gateway rewrites IDs automatically for standard clients. For custom clients, send unique request IDs or wait for response completion before reusing an ID.

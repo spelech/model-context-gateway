@@ -1,6 +1,11 @@
 # MCP Request Auth End-to-End Flow
 
-This diagram illustrates the complete, end-to-end authentication lifecycle of an MCP request passing from a Client, through the Router, to a backend MCP Server.
+This diagram shows the end-to-end authentication lifecycle of an MCP request. It traces the request from a client, through the gateway, to a downstream MCP server.
+
+### Core Concepts for Beginners
+- **Reverse Proxy**: A server that authenticates users and passes identity headers to the gateway.
+- **Bearer Token**: A secret key sent in the `Authorization: Bearer <token>` header.
+- **AuthShape**: The credential format required by a downstream server (Bearer token, Basic auth, custom header, or query parameter).
 
 ```mermaid
 sequenceDiagram
@@ -53,12 +58,13 @@ sequenceDiagram
 ```
 
 ### Auth & Setup Matrix Reference
-This flow highlights how the different matrices combine:
-1. **Client Identity**: The router knows *who* is making the request (Username from SSO, or Username/OwnerSid from an AppKey).
-2. **Server Auth Requirement**: The backend server expects a specific credential format (`AuthShape`).
-3. **Secret Origin**: The router fulfills the backend's requirement by fetching a global secret (`Vault`, `Env`) OR a per-user secret (`UserProvided`), bridging the gap between the authenticated client and the target server transparently.
+
+This flow combines three security layers:
+1. **Client Identity**: The gateway resolves caller identity from SSO headers or AppKey records.
+2. **Server Auth Requirement**: The downstream server specifies its credential format (`AuthShape`).
+3. **Secret Origin**: The gateway retrieves a shared secret (`Vault`, `Env`) or a personal secret (`UserProvided`). It formats the credential and forwards the request transparently.
 
 > [!WARNING]
-> **Dynamic Token Limitation:** The gateway does not support *retrieving* dynamic tokens (like short-lived JWTs) from internal Auth endpoints on behalf of the user. All configured `SecretProviders` (including `UserProvided`) yield **static** credentials.
+> **Dynamic Token Limitation**: The gateway does not mint dynamic tokens (such as short-lived JWTs) on behalf of users. Configured secret providers return static credentials.
 >
-> If a backend requires a dynamic JWT with claims or timestamp checks, the client (IDE) must fetch the token itself and send it to the router using the `X-Target-Auth` header (provided `AllowPassThroughAuth` is enabled on the server config). The router will then format this token according to the backend's `AuthShape` (e.g., standard Bearer header) before forwarding the request.
+> If a backend server requires a dynamic JWT, the client must obtain the token first. The client sends the token in the `X-Target-Auth` header. When the server has `AllowPassThroughAuth: true`, the gateway formats this token into the target `AuthShape` before forwarding the request.

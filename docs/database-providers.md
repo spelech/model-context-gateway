@@ -1,31 +1,31 @@
-# Database Provider Support & Deployment Matrix
+# Database Provider Support and Deployment Matrix
 
-This document details the architectural specification, schema contracts, encryption model, and deployment configurations for database engines supported by the **Model Context Protocol (MCP) Router Gateway**.
+This document details the architecture, schema contracts, encryption model, and deployment configurations for database engines supported by **Model Context Gateway (MCG)**. Model Context Gateway routes and secures communication for the Model Context Protocol (MCP).
 
 ---
 
 ## Database Engine Support Matrix
 
-Model Context Gateway (MCG) employs **Dapper** with specialized dialect handlers and native ADO.NET providers to deliver high-throughput, low-latency persistence across embedded, enterprise on-premises, and cloud environments.
+Model Context Gateway uses the **Dapper** micro-Object Relational Mapper (ORM) with custom dialect handlers and native ADO.NET (ActiveX Data Objects for .NET) drivers. This design delivers fast data operations across local workstations, enterprise servers, and cloud environments.
 
-| Feature / Dimension | 🪶 SQLite (Default) | 🏢 Microsoft SQL Server | 🐬 MySQL / MariaDB |
+| Feature and Dimension | 🪶 SQLite (Default) | 🏢 Microsoft SQL Server | 🐬 MySQL / MariaDB |
 | :--- | :--- | :--- | :--- |
 | **Provider Identifier (`DB_PROVIDER`)** | `sqlite` | `mssql` | `mysql` |
 | **Underlying ADO.NET Driver** | [`Microsoft.Data.Sqlite`](https://www.nuget.org/packages/Microsoft.Data.Sqlite) | [`Microsoft.Data.SqlClient`](https://www.nuget.org/packages/Microsoft.Data.SqlClient) | [`MySqlConnector`](https://www.nuget.org/packages/MySqlConnector) |
 | **Target Versions** | 3.35+ (WAL Mode Enabled) | 2016, 2019, 2022, Azure SQL | MySQL 8.0+, MariaDB 10.5+ |
-| **Execution Paradigm** | Direct SQL & In-Process DDL | T-SQL Stored Procedures (`sp_*`) | Stored Procedures (`sp_*`) |
-| **Upsert Mechanism** | `ON CONFLICT(Id) DO UPDATE` | Stored Proc `IF EXISTS ... UPDATE` | `ON DUPLICATE KEY UPDATE` |
+| **Execution Paradigm** | Direct SQL and in-process DDL | T-SQL Stored Procedures (`sp_*`) | Stored Procedures (`sp_*`) |
+| **Upsert Mechanism** | `ON CONFLICT(Id) DO UPDATE` | Stored procedure `IF EXISTS ... UPDATE` | `ON DUPLICATE KEY UPDATE` |
 | **Parameter Prefix Convention** | Named parameters (`@Param`) | Named T-SQL parameters (`@Param`) | Strict `p_` prefix (`p_Param`) |
 | **Timestamp Generation** | `CURRENT_TIMESTAMP` (UTC ISO-8601) | `SYSUTCDATETIME()` (DATETIME2) | `CURRENT_TIMESTAMP` / `NOW()` |
 | **Schema Migration Mode** | Automatic in-process migrations | Scripted DDL (`scripts/db/mssql/`) | Scripted DDL (`scripts/db/mysql/`) |
-| **Startup Validation** | Table, column & pragma checks | Table, column, FK & proc checks | Table, column, FK & proc checks |
-| **Recommended Deployment** | Single-node homelab & edge agents | Corporate Windows/AD enterprise | Cloud-native, Linux & Kubernetes |
+| **Startup Validation** | Table, column, and pragma checks | Table, column, FK, and procedure checks | Table, column, FK, and procedure checks |
+| **Recommended Deployment** | Single-node homelab and edge agents | Corporate Windows and Active Directory enterprise | Cloud containers, Linux, and Kubernetes |
 
 ---
 
 ## Unified Database Entity-Relationship Diagram (ERD)
 
-The following diagram models the complete schema architecture, primary keys (`PK`), unique keys (`UK`), foreign key constraints (`FK`), data types, and relational cardinality across all 12 core tables in Model Context Gateway (MCG) persistence tier. A dedicated standalone specification is available at [**Canonical Data Model & Database ERD**](data-model.md):
+The diagram below shows the complete database schema across all 12 core tables in Model Context Gateway. It highlights primary keys (`PK`), unique keys (`UK`), and foreign key constraints (`FK`). A dedicated specification is available at [**Canonical Data Model & Database ERD**](data-model.md):
 
 ```mermaid
 erDiagram
@@ -195,22 +195,22 @@ erDiagram
 
 ---
 
-## Dialect Specifications & Schema Contracts
+## Dialect Specifications and Schema Contracts
 
 ### 1. SQLite Engine Dialect
 
-SQLite is the zero-configuration embedded engine designed for single-node instances, developer workstations, and edge agent deployments.
+SQLite is the embedded zero-configuration engine. Use SQLite for single-node instances, developer workstations, and edge agents.
 
-#### Engine Characteristics & Concurrency
-* **Embedded Storage**: Database resides in a single binary file on disk (default: `data/mcg.db`) or in-memory for ephemeral test runs (`Data Source=:memory:`).
-* **Write-Ahead Logging (WAL)**: SQLite operates with Write-Ahead Logging to support concurrent read operations while writes execute, preventing database lock contention.
-* **Type Handlers**: JSON arrays and complex collections (such as `Categories` and `ScopesJson`) are stored as serialized UTF-8 `TEXT` and mapped via custom Dapper `JsonListTypeHandler` instances.
+#### Engine Characteristics and Concurrency
+* **Embedded Storage**: The database resides in a single file on disk (default: `data/mcg.db`), or in memory for automated tests (`Data Source=:memory:`).
+* **Write-Ahead Logging (WAL)**: SQLite runs with Write-Ahead Logging (WAL) enabled. This allows concurrent read operations while writes execute, preventing file locks.
+* **Type Handlers**: The gateway serializes complex JSON arrays (such as `Categories` and `ScopesJson`) as UTF-8 `TEXT`. Dapper maps them using custom `JsonListTypeHandler` classes.
 
 #### In-Process Data-Preserving Upgrades (`DatabaseSeederService.cs`)
-On startup, `DatabaseSeederService.ApplySqliteMigrations` inspects `sqlite_master` and SQLite table pragmas (`pragma_table_info`) to apply additive, non-destructive schema migrations automatically:
-1. **Legacy Table Migration**: Automatically renames legacy `McpServers` tables to `Servers` while preserving all server configurations.
-2. **Column Expansion**: Dynamically adds missing columns (`EncryptedConfigJson` on `SecretProviders` and `AuthProviderConfigs`, `OwnerSid` on `AppKeys`, vector embedding settings on `Settings`, and dynamic auth fields on `Servers`).
-3. **Data Integrity**: Migrates legacy unencrypted `ConfigJson` payloads directly into `EncryptedConfigJson` without loss.
+On startup, `DatabaseSeederService.ApplySqliteMigrations` checks the `sqlite_master` catalog and SQLite table pragmas (`pragma_table_info`). It applies schema changes without deleting data:
+1. **Legacy Table Migration**: Renames older `McpServers` tables to `Servers` while preserving all existing configurations.
+2. **Column Expansion**: Adds missing columns automatically. These include `EncryptedConfigJson` on providers, `OwnerSid` on `AppKeys`, vector embedding settings on `Settings`, and dynamic authentication columns on `Servers`.
+3. **Data Integrity**: Migrates existing unencrypted `ConfigJson` data directly into `EncryptedConfigJson` without loss.
 
 ```sql
 -- SQLite Upsert Contract Example (Servers)
@@ -228,16 +228,16 @@ ON CONFLICT(Id) DO UPDATE SET
 
 ### 2. Microsoft SQL Server Engine Dialect
 
-Microsoft SQL Server provides enterprise-grade reliability, strict security isolation, high availability (Always On availability groups), and centralized DBA management.
+Microsoft SQL Server provides enterprise security, Always On availability group failover, and centralized administration for corporate deployments.
 
-#### Schema Initialization & Migration Scripts
-DDL scripts are located in `scripts/db/mssql/`:
-* `01_tables.sql`: Tables, primary keys, nonclustered indexes (`UQ_AppKeys_KeyPrefix`), and foreign key constraints.
-* `02_procedures.sql`: Complete suite of 10 T-SQL stored procedures.
+#### Schema Initialization and Migration Scripts
+Data Definition Language (DDL) scripts reside in `scripts/db/mssql/`:
+* `01_tables.sql`: Creates tables, primary keys, nonclustered indexes (`UQ_AppKeys_KeyPrefix`), and foreign key constraints.
+* `02_procedures.sql`: Creates 10 Transact-SQL (T-SQL) stored procedures.
 * `migrations/`: Incremental upgrade scripts (`003_add_appkeys_ownersid.sql`, `004_align_runtime_persistence.sql`).
 
 #### Complete Stored Procedure Suite
-All persistence operations in MSSQL execute via pre-compiled stored procedures:
+All persistence operations in MSSQL execute through compiled stored procedures:
 
 | Stored Procedure | Purpose | Key Parameters |
 | :--- | :--- | :--- |
@@ -250,15 +250,15 @@ All persistence operations in MSSQL execute via pre-compiled stored procedures:
 | `sp_SaveAppKey` | Upserts client application API keys with owner SID tracking | `@Id`, `@Name`, `@Username`, `@KeyPrefix`, `@EncryptedKey`, `@ScopesJson`, `@OwnerSid`, `@ExpiresAt` |
 | `sp_DeleteAppKey` | Permanently revokes an application API key by ID | `@Id` |
 | `sp_GetAppKeys` | Queries active API keys (filtered by username or all for admins) | `@Username` |
-| `sp_SaveOAuthClient` | Upserts OAuth / DCR client application with hashed secret and metadata | `@ClientId`, `@ClientSecretHash`, `@ClientName`, `@ClientType`, `@RedirectUrisJson`, `@GrantTypesJson`, `@ScopesJson`, `@OwnerSid`, `@CreatedBy`, `@ExpiresAt` |
+| `sp_SaveOAuthClient` | Upserts OAuth / Dynamic Client Registration (DCR) client with hashed secret and metadata | `@ClientId`, `@ClientSecretHash`, `@ClientName`, `@ClientType`, `@RedirectUrisJson`, `@GrantTypesJson`, `@ScopesJson`, `@OwnerSid`, `@CreatedBy`, `@ExpiresAt` |
 | `sp_GetOAuthClients` | Retrieves all registered OAuth client applications | *(None)* |
 | `sp_GetOAuthClientById` | Retrieves a specific OAuth client by Client ID | `@ClientId` |
 | `sp_DeleteOAuthClient` | Deletes a registered OAuth client application by Client ID | `@ClientId` |
-| `sp_InsertAdminAuditLog` | Records administrative mutations (server additions, policy edits) | `@Id`, `@Username`, `@Action`, `@Target`, `@Details`, `@Success`, `@ErrorMessage` |
+| `sp_InsertAdminAuditLog` | Records administrative actions (server additions, policy edits) | `@Id`, `@Username`, `@Action`, `@Target`, `@Details`, `@Success`, `@ErrorMessage` |
 
-#### Parameter Mapping Contract (`sp_SaveAppKey` & `@CreatedAt`)
+#### Parameter Mapping Contract (`sp_SaveAppKey` and `@CreatedAt`)
 > [!IMPORTANT]
-> **Strict Dapper Parameter Mapping Rule**: The `sp_SaveAppKey` stored procedure generates creation timestamps server-side using `SYSUTCDATETIME()`. It does **NOT** accept an `@CreatedAt` parameter. Dapper parameter objects must supply `@Id`, `@Name`, `@Username`, `@KeyPrefix`, `@EncryptedKey`, `@ScopesJson`, `@OwnerSid`, and `@ExpiresAt`. Passing `@CreatedAt` will fail schema compatibility validation.
+> **Strict Parameter Rule for Dapper**: The stored procedure `sp_SaveAppKey` generates creation timestamps server-side with `SYSUTCDATETIME()`. It does **NOT** accept an `@CreatedAt` parameter. Dapper parameter objects must pass `@Id`, `@Name`, `@Username`, `@KeyPrefix`, `@EncryptedKey`, `@ScopesJson`, `@OwnerSid`, and `@ExpiresAt`. Passing `@CreatedAt` fails schema compatibility checks.
 
 ```sql
 -- MS SQL Server Stored Procedure Contract (sp_SaveAppKey)
@@ -294,19 +294,19 @@ END;
 
 ### 3. MySQL / MariaDB Engine Dialect
 
-MySQL and MariaDB support Linux-based infrastructure, cloud container platforms (Amazon ECS, EKS, Azure Container Apps), and managed database services (Amazon RDS, Google Cloud SQL, Azure Database for MySQL).
+MySQL and MariaDB support Linux environments, cloud containers (such as Amazon ECS, EKS, and Azure Container Apps), and managed cloud databases.
 
-#### Schema Initialization & Migration Scripts
-DDL scripts are located in `scripts/db/mysql/`:
-* `01_tables.sql`: InnoDB tables with `utf8mb4` charset and foreign key cascades.
-* `02_procedures.sql`: MySQL stored procedures using `DELIMITER //` definitions.
+#### Schema Initialization and Migration Scripts
+DDL scripts reside in `scripts/db/mysql/`:
+* `01_tables.sql`: Creates InnoDB tables with the `utf8mb4` character set and foreign key cascading.
+* `02_procedures.sql`: Creates MySQL stored procedures with `DELIMITER //` definitions.
 * `migrations/`: Incremental upgrade scripts (`003_add_appkeys_ownersid.sql`, `004_align_runtime_persistence.sql`).
 
-#### Strict `p_` Parameter Binding Convention
+#### Strict `p_` Parameter Prefix Rule
 > [!CAUTION]
-> **MySQL Parameter Scoping**: In MySQL stored procedures, parameter names that match column names (e.g. `WHERE Username = Username`) resolve to column references, creating tautologies. To prevent variable shadowing and silent query bugs, **all MySQL stored procedure parameters MUST use the `p_` prefix** (e.g., `p_Id`, `p_Name`, `p_Username`, `p_KeyPrefix`, `p_EncryptedKey`, `p_ScopesJson`, `p_OwnerSid`, `p_ExpiresAt`).
+> **MySQL Parameter Scoping**: In MySQL stored procedures, parameter names that match table columns (such as `WHERE Username = Username`) resolve as column references. This causes variable shadowing and logical bugs. **All MySQL stored procedure parameters MUST use the `p_` prefix** (for example, `p_Id`, `p_Name`, `p_Username`, `p_KeyPrefix`, `p_EncryptedKey`, `p_ScopesJson`, `p_OwnerSid`, `p_ExpiresAt`).
 
-In the C# repository layer ([`Repositories.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Persistence/Repositories.cs)), MySQL procedure calls explicitly bind parameters with this prefix:
+In the C# data access layer ([`Repositories.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Persistence/Repositories.cs)), the gateway binds MySQL parameters with this prefix:
 
 ```csharp
 // MySQL Dapper Parameter Invocation in Repositories.cs
@@ -358,9 +358,9 @@ DELIMITER ;
 
 ---
 
-## Database Encryption & Secrets Architecture
+## Database Encryption and Secrets Architecture
 
-Model Context Gateway (MCG) implements authenticated envelope encryption for all sensitive secrets, tokens, and third-party configuration payloads persisted in the database.
+Model Context Gateway applies authenticated envelope encryption to all tokens, passwords, and third-party secrets stored in the database.
 
 ```mermaid
 flowchart TD
@@ -382,29 +382,29 @@ flowchart TD
 ```
 
 ### 1. Key Resolution (`DbKeyHelper.cs`)
-Encryption keys are resolved during bootstrap via [`DbKeyHelper.ResolveDbEncryptionKey(configuration)`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/DbKeyHelper.cs):
-1. **Lookup Hierarchy**: Inspects `MCG_MASTER_KEY` first, falling back to `DB_ENCRYPTION_KEY`.
-2. **Fail-Closed Security**: If both keys are missing or blank, startup terminates with a fatal `InvalidOperationException`. Self-generating ephemeral fallback keys is strictly disabled in production to prevent silent data loss upon container restart.
-3. **Thread-Safe Caching**: Key resolution uses double-checked locking to cache the resolved string in memory, minimizing configuration lookups.
+The gateway resolves the encryption key during startup through [`DbKeyHelper.ResolveDbEncryptionKey(configuration)`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/DbKeyHelper.cs):
+1. **Lookup Hierarchy**: The gateway inspects `MCG_MASTER_KEY` first. If missing, it checks `DB_ENCRYPTION_KEY`.
+2. **Fail-Closed Security**: If both environment variables are empty, startup stops with an `InvalidOperationException`. In production, MCG does not generate temporary in-memory keys, preventing data loss across container restarts.
+3. **Thread-Safe Caching**: Key resolution uses double-checked locks to cache the key string in memory, reducing lookups.
 
 ### 2. Symmetric Encryption Engine (`SymmetricEncryptionHelper.cs`)
-* **Data Loss Prevention**: If decryption fails (e.g., due to key loss or corruption), the system tracks this state (`IsDecryptionFailed`) to prevent the frontend or API from accidentally overwriting the encrypted ciphertext with an empty string during generic configuration updates.
-* **Key Derivation**: Derives a 256-bit symmetric encryption key using `Rfc2898DeriveBytes.Pbkdf2` with **SHA-256**, **600,000 iterations**, and a domain-isolated salt (`{secretString}_McpRouter_Salt_v2`).
-* **Authenticated Encryption**: Uses **AES-256-GCM** (`System.Security.Cryptography.AesGcm`) providing confidentiality, integrity, and authenticity.
-* **Payload Structure**: Packed binary payload containing `[ 12-byte Nonce | 16-byte Auth Tag | N-byte Ciphertext ]`, encoded as Base64.
-* **Transparent Decryption & Key Fallback**: If decryption with the primary master key encounters an authentication tag mismatch, the engine automatically attempts fallback decryption using the legacy `DB_ENCRYPTION_KEY` before failing gracefully.
+* **Data Loss Prevention**: If decryption fails (for example, after key loss), the gateway marks this state with `IsDecryptionFailed`. This stops the API and user interface from replacing encrypted data with empty strings.
+* **Key Derivation**: Derives a 256-bit symmetric encryption key using `Rfc2898DeriveBytes.Pbkdf2` with **SHA-256**, **600,000 iterations**, and a domain salt (`{secretString}_McpRouter_Salt_v2`).
+* **Authenticated Encryption**: Uses **AES-256-GCM** (`System.Security.Cryptography.AesGcm`) to verify data confidentiality and integrity.
+* **Binary Payload Structure**: Encodes a binary block containing `[ 12-byte Nonce | 16-byte Auth Tag | N-byte Ciphertext ]` into Base64 format. A nonce is a cryptographic number used once.
+* **Fallback Decryption**: If the primary key fails verification, the engine attempts decryption with legacy `DB_ENCRYPTION_KEY` values before reporting an error.
 
 ### 3. Protected Columns (`EncryptedConfigJson`)
-Sensitive provider settings are stored in dedicated encrypted columns:
-* `SecretProviders.EncryptedConfigJson`: Stores HashiCorp Vault access tokens, namespace headers, and registry paths.
-* `AuthProviderConfigs.EncryptedConfigJson`: Stores Active Directory service account passwords, OIDC client secrets, and token endpoint credentials.
-* **Automatic Decryption on Read**: Data repositories automatically decrypt `EncryptedConfigJson` when populating `SecretProviderDto.ConfigJson` and `AuthProviderDto.ConfigJson`, ensuring application code operates on clean in-memory representations.
+The database stores sensitive settings inside dedicated encrypted columns:
+* `SecretProviders.EncryptedConfigJson`: Stores HashiCorp Vault tokens, namespace headers, and registry paths.
+* `AuthProviderConfigs.EncryptedConfigJson`: Stores Active Directory service passwords, OIDC client secrets, and authentication credentials.
+* **Automatic Decryption on Read**: Data repositories decrypt `EncryptedConfigJson` automatically into `SecretProviderDto.ConfigJson` and `AuthProviderDto.ConfigJson` objects for in-memory processing.
 
 ---
 
-## Startup Schema Validation & Fail-Closed Integrity Checks
+## Startup Schema Validation and Fail-Closed Integrity Checks
 
-To prevent runtime data corruption or silent failures caused by misconfigured schemas, the gateway executes a comprehensive validation pass on every startup ([`DatabaseSeederService.ValidateSchemaCompatibility`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Persistence/DatabaseSeederService.cs)):
+To prevent data corruption caused by incomplete database schemas, the gateway runs validation checks on every startup ([`DatabaseSeederService.ValidateSchemaCompatibility`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Persistence/DatabaseSeederService.cs)):
 
 ```mermaid
 sequenceDiagram
@@ -448,13 +448,13 @@ sequenceDiagram
 
 ### Fail-Closed Error Handling
 If any column, stored procedure, data type, or parameter convention is missing or invalid:
-1. The gateway writes a `Critical` log entry detailing the exact failure and required migration script.
-2. An `InvalidOperationException` is thrown, halting server startup immediately.
-3. Traffic is not accepted until the underlying database schema is brought into full compliance.
+1. The gateway writes a `Critical` log entry describing the missing item and required migration script.
+2. The gateway throws an `InvalidOperationException` and stops immediately.
+3. The server rejects incoming network traffic until administrators fix the database schema.
 
 ---
 
-## Deployment & Configuration Matrix
+## Deployment and Configuration Matrix
 
 ### 1. SQLite Deployment (Default / Embedded)
 
@@ -508,13 +508,13 @@ ConnectionStrings__DefaultConnection=Server=tcp:sqlserver.internal,1433;Database
 ConnectionStrings__DefaultConnection=Server=tcp:sqlserver.internal,1433;Database=McpEnterpriseDb;User ID=sa;Password=YourComplexPassword123!;TrustServerCertificate=True;
 ```
 
-#### Schema Initialization Command
-Execute the initialization scripts against your MSSQL instance prior to launching the router:
+#### Schema Initialization Commands
+Execute the DDL scripts against your MSSQL database before starting the gateway:
 ```bash
-# 1. Initialize Tables & Baseline Indexes
+# 1. Create tables and indexes
 sqlcmd -S sqlserver.internal -U sa -P "YourComplexPassword123!" -i scripts/db/mssql/01_tables.sql
 
-# 2. Deploy Stored Procedures Suite
+# 2. Deploy stored procedures
 sqlcmd -S sqlserver.internal -U sa -P "YourComplexPassword123!" -i scripts/db/mssql/02_procedures.sql
 ```
 
@@ -572,20 +572,20 @@ volumes:
 
 ---
 
-### 3. MySQL / MariaDB Deployment (Cloud / Linux Stack)
+### 3. MySQL / MariaDB Deployment (Cloud and Linux Stack)
 
 #### Connection String Format
 ```ini
 ConnectionStrings__DefaultConnection=Server=mysql.internal;Port=3306;Database=McpEnterpriseDb;Uid=mcp_app;Pwd=YourComplexPassword123!;AllowUserVariables=True;
 ```
 
-#### Schema Initialization Command
-Execute the initialization scripts against your MySQL / MariaDB instance:
+#### Schema Initialization Commands
+Execute the initialization scripts against your MySQL or MariaDB instance:
 ```bash
-# 1. Initialize Tables & Baseline Indexes
+# 1. Create tables and indexes
 mysql -h mysql.internal -u root -p"YourComplexPassword123!" < scripts/db/mysql/01_tables.sql
 
-# 2. Deploy Stored Procedures Suite
+# 2. Deploy stored procedures
 mysql -h mysql.internal -u root -p"YourComplexPassword123!" < scripts/db/mysql/02_procedures.sql
 ```
 
@@ -647,7 +647,7 @@ volumes:
 
 ---
 
-## Related Documentation & References
+## Related Documentation and References
 
 * [Production Deployment & Database Migration Guide](deployment-guide.md)
 * [System Architecture & Dependency Injection](architecture.md)

@@ -1,12 +1,12 @@
 # 03. RBAC, Security & Access Control Policies
 
-The **Model Context Gateway (MCG)** enforces multi-stage Role-Based Access Control (RBAC), multi-provider identity resolution, explicit deny safety barriers, user quota limits, and cryptographic AppKey scope validation.
+The **Model Context Gateway (MCG)** enforces Role-Based Access Control (RBAC). It resolves user identities, checks access rules, enforces user quotas, and validates AppKey scopes.
 
 ---
 
 ## 🛡️ The 4-Stage Authorization Pipeline
 
-Every request directed at a backend tool, virtual resource, or prompt undergoes rigorous 4-stage pipeline evaluation before execution:
+The gateway evaluates every tool invocation, virtual resource request, and prompt evaluation through a four-stage pipeline:
 
 ```
                            4-STAGE AUTHORIZATION PIPELINE
@@ -49,23 +49,23 @@ Every request directed at a backend tool, virtual resource, or prompt undergoes 
 ```
 
 ### Stage 1: Explicit Deny Rules (Highest Precedence)
-* If **any** of the caller's Active Directory SIDs or OIDC groups match a server's `DeniedGroups` list, the request is immediately rejected (`403 Forbidden`).
-* Deny rules always override allow rules or administrative scopes.
+* If any caller group or SID matches the server `DeniedGroups` list, the gateway rejects the request (`403 Forbidden`).
+* Deny rules always override allow rules and administrative scopes.
 
 ### Stage 2: Explicit Allow Rules
-* If any of the caller's groups match a server's `AllowedGroups` list, the request passes group-level checks and advances to scope verification.
+* If any caller group matches the server `AllowedGroups` list, the gateway accepts the group check and evaluates key scopes.
 
 ### Stage 3: AppKey Scope Verification
-* When authenticating via an AppKey, the router verifies whether the requested action is permitted by the key's scopes (`*`, `all`, `admin`, `category:<name>`, `server:<id>`, `tool:<name>`, `resource:<uri>`, `prompt:<name>`).
+* For AppKey requests, the gateway verifies that the key scope permits the action. Supported scopes include `*`, `all`, `admin`, `category:<name>`, `server:<id>`, `tool:<name>`, `resource:<uri>`, and `prompt:<name>`.
 
 ### Stage 4: Default Policy Fallback
-* If no explicit group policy matches, the router checks the server's `DefaultAllow` flag. If `DefaultAllow` is `false`, the request is rejected by default (fail-closed security).
+* If no explicit group rule matches, the gateway checks the server `DefaultAllow` setting. If `DefaultAllow` is `false`, the gateway rejects the request (`403 Forbidden`).
 
 ---
 
 ## 👥 Pluggable Identity Providers
 
-The router determines the caller's identity and group claims through the `IIdentityProvider` interface:
+The gateway determines caller identity and group claims through pluggable identity providers:
 
 ```mermaid
 graph TD
@@ -85,33 +85,33 @@ graph TD
 ```
 
 ### 1. Reverse Proxy SSO Headers (`OidcHeader`)
-* Integrates with identity proxies such as **Authentik**, **Authelia**, **PocketID**, **Keycloak**, or **Traefik/Caddy/Nginx**.
-* Inspects standard forward-auth headers:
-  * `Remote-User`: Username or UPN (e.g. `admin`).
-  * `Remote-Groups`: Comma-delimited list of group claims (e.g. `full_admin, engineering, devops`).
+* Integrates with reverse proxies and identity providers such as Authentik, Authelia, PocketID, Keycloak, Traefik, Caddy, or Nginx.
+* Reads forward-auth headers:
+  * `Remote-User`: Username or user principal name (for example, `admin`).
+  * `Remote-Groups`: Comma-separated group names (for example, `full_admin, engineering, devops`).
   * `Remote-Email`: User email address.
-  * `Remote-Name`: Full display name.
+  * `Remote-Name`: User display name.
 
 ### 2. Active Directory Windows SIDs (`ActiveDirectory`)
-* Integrates directly with Windows Domain Controllers and Active Directory.
-* Resolves Windows Kerberos / NTLM Security Identifiers (SIDs) and Active Directory group memberships (e.g. `S-1-5-32-544` / Administrators, `Domain Admins`).
+* Integrates with Windows Domain Controllers and Active Directory.
+* Resolves Windows Security Identifiers (SIDs) and group memberships from Kerberos or NTLM tokens (for example, `S-1-5-32-544` or `Domain Admins`).
 
 ### 3. AppKey Authentication (`AppKey`)
-* Connects AI agents and external IDEs using cryptographically hashed SHA-256 tokens (`mcp-...`).
-* Supports granular scope controls (`*`, `all`, `admin`, `category:<name>`, `server:<id>`, `tool:<name>`, `resource:<uri>`, `prompt:<name>`).
-* Keys carrying `admin`, `all`, or `*` scopes assign `ClaimTypes.Role = Administrator` to grant administrative access over the management plane and Admin MCP Server.
+* Authenticates AI clients and developer tools with SHA-256 tokens (`mcp-...`).
+* Supports granular scopes (`*`, `all`, `admin`, `category:<name>`, `server:<id>`, `tool:<name>`, `resource:<uri>`, `prompt:<name>`).
+* Keys with `admin`, `all`, or `*` scopes assign the `Administrator` role. This role grants access to administrative endpoints and the Admin MCP Server.
 
 ### 4. Standalone Mode & Local Network Authorization
-* Active when **no external IDP** (Active Directory LDAP or OIDC SSO) is configured.
-* Evaluates client IP address against `Admin:StandaloneAllowedNetworks` (defaults to loopback `127.0.0.1`, `::1`).
-* Administrators can configure local LAN CIDRs (e.g. `10.0.0.0/8`, `192.168.0.0/16`) or central open mode (`0.0.0.0/0`) via environment variable `Admin__StandaloneAllowedNetworks__0=10.0.0.0/8`.
-* External non-matching IPs require an Admin AppKey (`mcp-global-admin...`).
+* Operates when you do not configure an external identity provider.
+* Compares client IP addresses against `Admin:StandaloneAllowedNetworks`. The default setting allows loopback addresses (`127.0.0.1`, `::1`).
+* You can allow local subnets (such as `10.0.0.0/8` or `192.168.0.0/16`) through the environment variable `Admin__StandaloneAllowedNetworks__0=10.0.0.0/8`.
+* Requests from other IP addresses require an Admin AppKey (`mcp-global-admin...`).
 
 ### 5. OAuth 2.0 Authorization Server (`OpenIddict`) & RFC 7591 Dynamic Client Registration
-* Built-in OAuth 2.0 authorization server for issuing signed access tokens with standard token lifecycles and scopes.
-* **Dynamic Client Registration (RFC 7591)**: Enables AI platforms (e.g. Google Gemini, Slack MCP) to dynamically register client credentials at `/api/register`, `/connect/register`, or `/oauth/register`.
-* **Isolated `OAuthClients` Storage**: Stores client credentials separately from API keys with SHA-256 secret hashing, whitelisted redirect URIs, grant types, and scope constraints.
-* **Rich Web UI Management**: View, register, and revoke OAuth applications from the **`App Keys & Security`** tab under **Dynamic Client Registration (RFC 7591)**.
+* Includes an OAuth 2.0 authorization server that issues signed access tokens.
+* **Dynamic Client Registration (RFC 7591)**: External clients can register credentials at `/api/register`, `/connect/register`, or `/oauth/register`.
+* **Isolated OAuth Client Storage**: Stores client credentials separately from API keys. The gateway hashes client secrets with SHA-256 and validates redirect URIs, grant types, and scopes.
+* **Web Interface Management**: View, register, and revoke OAuth client applications in the **App Keys & Security** tab.
 
 ---
 
@@ -120,16 +120,16 @@ graph TD
 ![Settings Access Control and RBAC Policies](../assets/settings_access_control.jpg)
 
 ### 1. Server Policy Configuration Modal
-Click **`Policy`** on any server card on the Overview dashboard:
+Click **Policy** on any server card on the Overview dashboard:
 
-* **Allowed Groups**: Comma-separated group names or SIDs permitted to access this server (e.g. `full_admin, homelab_users`).
-* **Denied Groups**: Comma-separated group names or SIDs explicitly blocked from accessing this server (e.g. `contractors, guest_users`).
-* **Default Behavior**: Toggle **Allow by Default** or **Deny by Default**.
+* **Allowed Groups**: Enter comma-separated group names or SIDs that can access this server (for example, `full_admin, homelab_users`).
+* **Denied Groups**: Enter comma-separated group names or SIDs blocked from this server (for example, `contractors, guest_users`).
+* **Default Behavior**: Select **Allow by Default** or **Deny by Default**.
 
 ### 2. Access Control Settings Tab
-Navigate to **`Settings`** -> **`Access Control`**:
-* **Group Mappings Table**: Map external SSO/AD groups to standardized internal roles.
-* **Server Policies Table**: Centralized grid of all server policies with quick inline editing.
+Go to **Settings**, then select **Access Control**:
+* **Group Mappings Table**: Maps external SSO or Active Directory groups to internal roles.
+* **Server Policies Table**: Shows all server policies in a table for quick editing.
 
 ![Settings Identity and Authentication Providers](../assets/settings_identity_auth.jpg)
 
@@ -137,19 +137,19 @@ Navigate to **`Settings`** -> **`Access Control`**:
 
 ## 📊 User Quotas & Lifecycle Limits
 
-To prevent key sprawl and resource exhaustion across multi-tenant environments, the router provides built-in user quota management:
+The gateway provides user quota management to control key creation and resource usage:
 
-* **Max AppKeys per User**: Administrators can enforce custom key generation quotas per user principal (default: 5 keys).
-* **Key Expiration Lifecycles**: Supports mandatory or optional expiration dates (`30 Days`, `90 Days`, `1 Year`, `Never`).
-* **Instant Revocation**: Administrators and key owners can revoke active AppKeys with immediate effect across all gateway sessions.
-* **Quota Management UI**: Available directly in the **`App Keys & Security`** tab under **User Quota Limits**.
+* **Maximum AppKeys per User**: Administrators can set key limits for each user (default: 5 keys).
+* **Key Expiration**: Keys support expiration periods (`30 Days`, `90 Days`, `1 Year`, or `Never`).
+* **Instant Revocation**: Administrators and key owners can revoke AppKeys immediately.
+* **Quota Controls**: Configure quotas in the **App Keys & Security** tab under **User Quota Limits**.
 
 ---
 
 ## 🔒 PII Sanitization & Audit Logging
 
-The router features automated payload redaction (`PiiSanitizer`) paired with stored procedure audit logging (`sp_InsertAuditLog`):
-* **Automatic Redaction**: Automatically scrubs Bearer tokens, passwords, API keys, and sensitive tokens from audit logs before writing to the database.
-* **Audit Metadata**: Captures timestamp, client identity, target server, tool name, execution duration (ms), response status code, and sanitized payload parameters.
+The gateway sanitizes payloads (`PiiSanitizer`) and writes audit records (`sp_InsertAuditLog`):
+* **Automatic Redaction**: Removes bearer tokens, passwords, API keys, and sensitive secrets before saving audit records to the database.
+* **Audit Metadata**: Records timestamps, client identity, target server, tool name, execution time, HTTP status code, and sanitized parameters.
 
-For the underlying database schema definitions of security policies and audit tables (`AccessPolicies`, `ToolAccessPolicies`, `AdGroups`, `AuditLogs`), see the [**Database Entity-Relationship Diagram**](../database-providers.md#unified-database-entity-relationship-diagram-erd).
+For database schema details and security tables (`AccessPolicies`, `ToolAccessPolicies`, `AdGroups`, and `AuditLogs`), see the [**Database Entity-Relationship Diagram**](../database-providers.md#unified-database-entity-relationship-diagram-erd).

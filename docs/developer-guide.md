@@ -1,6 +1,6 @@
 # Developer & Contributor Guide
 
-This document defines setup instructions, architectural conventions, coding guidelines, testing protocols, version management rules, and release verification workflows for the **Model Context Gateway (MCG) & Semantic Proxy**.
+This document provides instructions for developers. It explains setup steps, architecture rules, coding standards, testing procedures, version rules, and release checks for the **Model Context Gateway (MCG) & Semantic Proxy**.
 
 ---
 
@@ -27,21 +27,21 @@ This document defines setup instructions, architectural conventions, coding guid
 
 ## 🛠️ Prerequisites & Development Environment
 
-Ensure the following toolchains are installed:
+Install these tools before you start development:
 
 | Tool / Runtime | Minimum Version | Purpose |
 | :--- | :--- | :--- |
-| **.NET SDK** | `10.0.x` | Compiling C# backend, minimal APIs, Dapper repositories, and xUnit tests |
-| **Node.js** | `22.x LTS` | Vite development server, ESLint v10, Vitest, and React 19 UI build |
-| **npm** | `10.x+` | Package management for the frontend SPA |
-| **Python** | `3.10+` | Release verification and automated version bump scripts |
-| **Docker** | `24.x+` | Multi-stage container builds and integration test environments |
+| **.NET SDK** | `10.0.x` | Compiles the C# backend, Minimal APIs, Dapper repositories, and xUnit tests. |
+| **Node.js** | `22.x LTS` | Runs the Vite development server, ESLint v10, Vitest, and the React 19 UI build. |
+| **npm** | `10.x+` | Manages packages for the frontend Single Page Application (SPA). |
+| **Python** | `3.10+` | Runs release verification and automated version bump scripts. |
+| **Docker** | `24.x+` | Builds multi-stage container images and runs integration test environments. |
 
 ---
 
 ## 🏛️ Repository Structure & Architecture Conventions
 
-The repository uses the following domain boundaries:
+The repository organizes code into these domains:
 
 ```
 ├── Components/                 # Decomposed domain modules & Minimal API mappers
@@ -108,7 +108,7 @@ The repository uses the following domain boundaries:
    ```bash
    npm run dev
    ```
-   The development proxy routes `/api`, `/sse`, and `/mcp` traffic directly to `http://localhost:8080`.
+   The development proxy forwards `/api`, `/sse`, and `/mcp` traffic directly to `http://localhost:8080`.
 
 3. **Build production bundle**:
    ```bash
@@ -121,7 +121,7 @@ The repository uses the following domain boundaries:
 
 ### Backend Test Suite
 
-The C# suite includes 600+ unit, integration, and security contract tests:
+The C# test suite contains more than 600 unit, integration, and security contract tests:
 
 ```bash
 # Run all backend tests
@@ -133,7 +133,7 @@ CI=true dotnet test ModelContextGateway.slnx --configuration Release --collect:"
 
 ### Frontend Vitest Suite
 
-The frontend suite covers Zustand stores, typed API handlers, and React components:
+The frontend test suite validates Zustand stores, typed API handlers, and React components:
 
 ```bash
 cd frontend
@@ -147,7 +147,7 @@ npm run test:coverage
 
 ### End-to-End Testing (Playwright)
 
-Execute UI workflows across multi-user security matrices:
+Run user workflows across multi-user security matrices:
 
 ```bash
 cd frontend
@@ -156,7 +156,7 @@ npx playwright test
 
 ### Living Software Requirements Specification (SRS) & Test Catalog
 
-Requirements and safety guardrails are annotated in C# and TypeScript tests. To regenerate or verify the catalog:
+Tests in C# and TypeScript include annotations for requirements and safety guardrails. Use these commands to generate or verify the catalog:
 
 ```bash
 # Generate human-readable Markdown and machine JSON matrix
@@ -169,7 +169,6 @@ dotnet run --project scripts/CatalogGenerator -- --verify-only
 * **Living SRS Document:** [`docs/software-requirements-and-test-catalog.md`](software-requirements-and-test-catalog.md)
 * **Test Catalog & Annotation Guide:** [`docs/test-catalog-guide.md`](test-catalog-guide.md)
 
-
 ---
 
 ## 🎨 Formatting, Linting & Static Analysis
@@ -178,14 +177,14 @@ dotnet run --project scripts/CatalogGenerator -- --verify-only
    ```bash
    dotnet format ModelContextGateway.slnx --verify-no-changes
    ```
-   Rules are defined in `.editorconfig` and `Directory.Build.props`.
+   Configuration rules reside in `.editorconfig` and `Directory.Build.props`.
 
 2. **Frontend ESLint (Zero-Warning Policy)**:
    ```bash
    cd frontend
    npm run lint
    ```
-   Uses ESLint v10 flat configuration (`frontend/eslint.config.js`).
+   This command uses the ESLint v10 configuration in `frontend/eslint.config.js`. You must resolve all warnings.
 
 ---
 
@@ -193,7 +192,7 @@ dotnet run --project scripts/CatalogGenerator -- --verify-only
 
 ### Mandatory Version Synchronization Contract
 
-Every release, pull request, and commit to `main` must synchronize the version number across **four mandatory locations**:
+Every release, pull request, and commit to `main` must update the version number in **four required locations**:
 
 1. **`ModelContextGateway.csproj`**:
    - `<Version>X.Y.Z</Version>`
@@ -209,7 +208,7 @@ Every release, pull request, and commit to `main` must synchronize the version n
 
 ### Release Verification Script (`verify-release.sh`)
 
-The release verification engine is located at `scripts/verify_release.py` with a bash wrapper `scripts/verify-release.sh`.
+The release verification engine is located at `scripts/verify_release.py`. Use the bash wrapper `scripts/verify-release.sh` to run the suite:
 
 ```bash
 # 🛡️ Run full verification suite (versions, links, tests, builds)
@@ -260,44 +259,44 @@ The release verification engine is located at `scripts/verify_release.py` with a
 
 ### CLI Flags & Options Reference
 
-Available flags:
+Use these flags to control verification steps:
 
 | Flag | Purpose | Example |
 | :--- | :--- | :--- |
-| **`--skip-tests`** | Skips slow backend/frontend test execution; executes fast version sync and markdown link verification in <2s. | `./scripts/verify-release.sh --skip-tests` |
+| **`--skip-tests`** | Skips backend and frontend tests. Verifies versions and links in less than 2 seconds. | `./scripts/verify-release.sh --skip-tests` |
 | **`--skip-links`** | Skips markdown link and anchor validation. | `./scripts/verify-release.sh --skip-links` |
 | **`--skip-versions`** | Skips version synchronization checks. | `./scripts/verify-release.sh --skip-versions` |
-| **`--check-versions-only`** | Executes only the version synchronization validation. | `python3 scripts/verify_release.py --check-versions-only` |
-| **`--check-links-only`** | Executes only the markdown relative link and anchor validation. | `python3 scripts/verify_release.py --check-links-only` |
-| **`--check-tests-only`** | Executes only backend and frontend test/build suites. | `python3 scripts/verify_release.py --check-tests-only` |
-| **`--ci`** | Streamlined output mode designed for automated CI environments. | `python3 scripts/verify_release.py --ci` |
+| **`--check-versions-only`** | Runs only version synchronization checks. | `python3 scripts/verify_release.py --check-versions-only` |
+| **`--check-links-only`** | Runs only markdown relative link and anchor checks. | `python3 scripts/verify_release.py --check-links-only` |
+| **`--check-tests-only`** | Runs only backend and frontend test and build suites. | `python3 scripts/verify_release.py --check-tests-only` |
+| **`--ci`** | Uses simple output formatted for automated CI jobs. | `python3 scripts/verify_release.py --ci` |
 | **`-v`, `--verbose`** | Enables verbose logging with detailed check descriptions. | `./scripts/verify-release.sh -v` |
 
 ### Automated Version Bumping & Atomic Commits
 
-Bump the version and commit atomically:
+Use `./commit.sh` to bump the version and commit files atomically:
 
 ```bash
 ./commit.sh "feat(auth): add fine-grained category scopes"
 ```
 
-The script executes the following:
+The script runs these steps:
 1. Validates the .NET project build.
-2. Invokes `scripts/bump_version.py` to increment the version (minor for `feat:`/breaking changes, patch for `fix:`/`docs:`).
-3. Synchronizes all version references (`.csproj`, `useUserStore.ts`, `CHANGELOG.md`, `README.md`).
+2. Runs `scripts/bump_version.py` to increment the version number. Minor versions increment for `feat:` or breaking changes. Patch versions increment for `fix:` or `docs:`.
+3. Synchronizes version references in `.csproj`, `useUserStore.ts`, `CHANGELOG.md`, and `README.md`.
 4. Creates a clean, atomic git commit.
 
 ---
 
 ## 🔒 Continuous Integration & Quality Gates
 
-Pull requests to `main` execute the quality gates defined in `.github/workflows/ci.yml`:
+Pull requests to `main` must pass the quality gates defined in `.github/workflows/ci.yml`:
 
-1. **`release-verification`**: Validates version synchronization and ensures 0 broken markdown links/anchors.
-2. **`backend`**: Runs `dotnet build` (`Release`) and the full 500+ xUnit test suite with coverage collection.
-3. **`frontend`**: Enforces strict zero-warning ESLint, builds the Vite production SPA, and runs Vitest suites.
-4. **`integration-smoke`**: Boots the compiled Release binary on an ephemeral Kestrel port with an isolated SQLite database, testing health probes, AppKey minting, and live MCP discovery.
+1. **`release-verification`**: Validates version synchronization and checks that markdown links and anchors are valid.
+2. **`backend`**: Compiles the release build and runs all xUnit tests with coverage collection.
+3. **`frontend`**: Enforces zero ESLint warnings, builds the Vite production SPA, and runs Vitest suites.
+4. **`integration-smoke`**: Starts the compiled release binary on a local port with an ephemeral SQLite database. Tests health endpoints, AppKey generation, and live MCP discovery.
 5. **`docker-check`**: Validates multi-stage Docker build integrity.
-6. **`CodeQL` & `Dependency Review`**: Static security analysis and vulnerability scanning.
+6. **`CodeQL` & `Dependency Review`**: Runs static security analysis and scans dependencies for vulnerabilities.
 
-For further details on CI workflows, branch protection rules, and coverage metrics, see [**CI Quality Gates & Security Workflows**](ci-quality-gates.md) and [**Code Coverage Report**](coverage-report.md).
+For more details on CI workflows, branch protection rules, and coverage metrics, read [**CI Quality Gates & Security Workflows**](ci-quality-gates.md) and the [**Code Coverage Report**](coverage-report.md).

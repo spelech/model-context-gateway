@@ -1,6 +1,6 @@
 # AppKey Scopes & Authorization Guide
 
-This document details the **AppKey Scoping and Authorization Engine** in the **Model Context Gateway (MCG)**, covering scope grammar, normalization rules, the multi-stage authorization pipeline, capability enforcement matrices, cryptographic key lifecycle management, and least-privilege configuration recipes.
+This document explains the **AppKey Scoping and Authorization Engine** in the **Model Context Gateway (MCG)**. It covers scope syntax, normalization rules, pipeline stages, capability matrices, key lifecycle management, and least-privilege configuration recipes.
 
 ---
 
@@ -17,15 +17,21 @@ This document details the **AppKey Scoping and Authorization Engine** in the **M
 
 ## 1. Overview & Security Architecture
 
-The Model Context Gateway (MCG) acts as an enterprise-grade gateway and semantic proxy that aggregates Model Context Protocol (MCP) servers (Docker, Home Assistant, Plex, Actual Budget, Databases, etc.) into a unified endpoint.
+The Model Context Gateway (MCG) aggregates Model Context Protocol (MCP) servers (Docker, Home Assistant, Plex, databases) into a single secure endpoint.
 
-External callers authenticate via two primary vectors:
-- **Interactive SSO / Forward-Auth Sessions**: Web UI and reverse-proxy users authenticate via OIDC/Proxy headers (`Remote-User`, `Remote-Groups`, `Remote-User-Sid`) or Active Directory Windows SIDs.
-- **Machine Clients & Automated Agents (AppKeys)**: IDEs (Cursor, VS Code), autonomous coding agents (Claude Desktop, OpenClaw, Antigravity CLI), and CI/CD pipelines authenticate using high-entropy **AppKeys** (`mcp-*-*-*`).
+External callers authenticate through two methods:
+- **Interactive SSO / Forward-Auth Sessions**: Web users authenticate through reverse-proxy headers (`Remote-User`, `Remote-Groups`, `Remote-User-Sid`) or Active Directory Windows SIDs.
+- **Machine Clients & Automated Agents (AppKeys)**: IDEs (Cursor, VS Code), autonomous coding agents (Claude Desktop, OpenClaw, Antigravity CLI), and CI/CD pipelines authenticate with high-entropy **AppKeys** (`mcp-*-*-*`).
+
+### Core Concepts for Beginners
+
+- **AppKey (Bearer Token)**: A high-entropy secret string. A client sends this key with HTTP requests. Whoever holds ("bears") the key receives access.
+- **Scope**: A permission rule bound to a key. Scopes limit which servers, categories, tools, or resources an AppKey can access.
+- **Reverse Proxy**: A server that sits in front of the gateway. It authenticates users with Single Sign-On (SSO) and passes user identity headers to the gateway.
 
 ### Defense-in-Depth Model
 
-Authorization in Model Context Gateway (MCG) enforces four concentric security boundaries:
+The gateway enforces four concentric security boundaries:
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -63,15 +69,15 @@ Authorization in Model Context Gateway (MCG) enforces four concentric security b
 
 ## 2. Canonical Scope Syntax & Normalization
 
-AppKeys are bound to a JSON array of scope strings (`ScopesJson`). Scopes define the maximum outer capability perimeter granted to the bearer of that key.
+AppKeys store assigned scopes in a JSON array (`ScopesJson`). Scopes define the outer permission perimeter for the token.
 
 ### Scope Grammar & Taxonomy
 
 | Scope Pattern | Type | Description | Example |
 | :--- | :--- | :--- | :--- |
 | `*`<br>`all`<br>`mcp_client` | **Global Wildcard** | Grants access to all capabilities across all registered backend servers. | `"*"` |
-| `server:<serverId>`<br>`<serverId>` | **Server-Level** | Grants access to all tools, prompts, resources, and templates provided by the specified server. | `"server:ha"`<br>`"docker"` |
-| `category:<name>`<br>`group:<name>` | **Category-Level** | Dynamically authorizes all servers classified under the given category name in the database. | `"category:smarthome"`<br>`"group:infrastructure"` |
+| `server:<serverId>`<br>`<serverId>` | **Server-Level** | Grants access to all tools, prompts, resources, and templates on the specified server. | `"server:ha"`<br>`"docker"` |
+| `category:<name>`<br>`group:<name>` | **Category-Level** | Dynamically authorizes all servers classified under the given category name. | `"category:smarthome"`<br>`"group:infrastructure"` |
 | `tool:<toolName>` | **Tool Capability** | Grants access to a specific namespaced tool or native router tool. | `"tool:ha__turn_on"`<br>`"tool:docker__ps"` |
 | `prompt:<promptName>` | **Prompt Capability** | Grants access to a specific namespaced prompt template. | `"prompt:ha__diagnose_device"` |
 | `resource:<uri>` | **Resource Capability** | Grants access to a specific virtualized resource URI. | `"resource:mcp://ha/states"`<br>`"resource:router://status"` |
@@ -80,25 +86,25 @@ AppKeys are bound to a JSON array of scope strings (`ScopesJson`). Scopes define
 
 ### Normalization & Parsing Rules
 
-The scope engine in `ClientSession.Authorization.cs` executes the following normalization steps during evaluation:
+The scope engine in `ClientSession.Authorization.cs` runs these normalization steps:
 
-1. **Trimming & Case-Insensitivity**: All scope strings and target identifiers are trimmed and converted using invariant lower-case (`s.Trim().ToLowerInvariant()`).
-2. **Server ID Extraction**: When evaluating targets, the router extracts the root `serverId` across multiple URI and delimiter syntaxes:
+1. **Trimming & Lowercase Conversion**: The engine trims whitespace from all scope strings and converts characters to lowercase (`s.Trim().ToLowerInvariant()`).
+2. **Server ID Extraction**: The engine extracts the root `serverId` across multiple URI formats:
    - `mcp://{serverId}/{path}` $\rightarrow$ `{serverId}` (e.g. `mcp://ha/states` $\rightarrow$ `ha`)
    - `logs://{serverId}/{path}` $\rightarrow$ `{serverId}`
    - `router://{path}` $\rightarrow$ `router`
    - `server:{serverId}` $\rightarrow$ `{serverId}`
    - `{serverId}__{toolName}` $\rightarrow$ `{serverId}` (e.g. `docker__list_containers` $\rightarrow$ `docker`)
    - Native prefixes: `plex_*` $\rightarrow$ `plex`, `seerr_*` $\rightarrow$ `seerr`
-3. **Meta-Mode Built-In Passthrough**: The router's built-in discovery and execution tools (`search_tools` and `execute_tool`) are permitted to execute the wrapper call; when `execute_tool` runs, the *inner* target tool is independently evaluated against the caller's scopes and RBAC.
+3. **Meta-Mode Built-In Passthrough**: Discovery and execution tools (`search_tools` and `execute_tool`) can always run. When `execute_tool` runs, the engine checks the target tool against caller scopes and RBAC rules.
 4. **Dynamic Category Resolution**:
-   - For `category:<name>` and `group:<name>` scopes, the router queries the `Servers` table in the database to retrieve the server's current categories (`SELECT Categories FROM Servers WHERE Id = @Id`).
-   - Categories can be formatted as JSON arrays (e.g. `["smarthome","iot"]`) or comma-separated strings (`smarthome, iot`).
-   - **Dynamic Membership**: If an administrator adds or removes a category tag on a server in the dashboard, access takes effect immediately across all existing category-scoped AppKeys without key re-issuance.
+   - For `category:<name>` and `group:<name>` scopes, the gateway reads server categories from the database (`SELECT Categories FROM Servers WHERE Id = @Id`).
+   - Categories can be formatted as JSON arrays or comma-separated lists.
+   - When an administrator updates a category tag on a server, all category-scoped AppKeys update their access immediately.
 5. **Scope Creation Validation**:
-   - When non-admin users create AppKeys via `POST /api/appkeys` or `POST /api/clients`, the router checks all `category:<name>` scopes against registered server categories in the database.
-   - If an empty category (`category: `) or unknown category is specified, the request is rejected with `400 Bad Request`.
-   - Administrators are permitted to pre-provision keys for future categories.
+   - When non-admin users create AppKeys via `POST /api/appkeys` or `POST /api/clients`, the gateway verifies each `category:<name>` scope against registered categories.
+   - If a category is empty or unknown, the gateway returns `400 Bad Request`.
+   - Administrators can pre-provision keys for future categories.
 
 ---
 
@@ -107,30 +113,30 @@ The scope engine in `ClientSession.Authorization.cs` executes the following norm
 Every incoming MCP request undergoes deterministic evaluation through `IsUserAuthorizedAsync(requestMethod, targetId, httpContext)`:
 
 ### Stage 1: AppKey Scope Validation
-If the request authenticated using an AppKey (`context.Items["AppKeyUsed"] == true`):
-1. Parse the JSON scope list from `context.Items["AppKeyScopes"]`. If the JSON is missing or malformed, the pipeline **fails closed** (returns `false`).
-2. Match the requested target against the scope rules:
-   - Matches wildcard (`*`, `all`, `mcp_client`) $\rightarrow$ Proceed to Stage 2.
-   - Matches `server:{serverId}` or `{serverId}` $\rightarrow$ Proceed to Stage 2.
-   - Matches `category:{category}` or `group:{category}` where the target server belongs to that category $\rightarrow$ Proceed to Stage 2.
-   - Matches granular `tool:{targetId}`, `prompt:{targetId}`, `resource:{targetId}`, `template:{targetId}`, `completion:{targetId}` $\rightarrow$ Proceed to Stage 2.
-3. If no scope matches the target, the request is rejected immediately with an audit log warning and `403 Forbidden` response.
+If the request authenticates with an AppKey (`context.Items["AppKeyUsed"] == true`):
+1. Parse the JSON scope list from `context.Items["AppKeyScopes"]`. If the JSON is missing or malformed, the pipeline fails closed and denies access.
+2. Compare the requested target with the scope rules:
+   - Wildcard (`*`, `all`, `mcp_client`) $\rightarrow$ Proceed to Stage 2.
+   - `server:{serverId}` or `{serverId}` $\rightarrow$ Proceed to Stage 2.
+   - `category:{category}` or `group:{category}` where the server belongs to that category $\rightarrow$ Proceed to Stage 2.
+   - Specific `tool:{targetId}`, `prompt:{targetId}`, `resource:{targetId}`, `template:{targetId}`, `completion:{targetId}` $\rightarrow$ Proceed to Stage 2.
+3. If no scope matches the target, the gateway logs a warning and returns `403 Forbidden`.
 
 ### Stage 2: Identity Resolution & Group Mapping
-The caller's identity is resolved into a unified `UserIdentityContext`:
-1. Claims/headers provide `Username`, `GroupNames` (from `Remote-Groups`, `roles`, `groups`), and `Sids` (from `Remote-User-Sid`, `Sid`, `GroupSid`).
-2. The router queries the `GroupMappings` table for all external identifiers (`ExternalId IN @ExternalIds`).
-3. Mapped `InternalGroup` values are added to the user's active groups set.
+The gateway resolves caller identity into a `UserIdentityContext`:
+1. Claims and headers supply `Username`, `GroupNames` (from `Remote-Groups`, `roles`, `groups`), and `Sids` (from `Remote-User-Sid`, `Sid`, `GroupSid`).
+2. The gateway queries the `GroupMappings` database table for external identifiers (`ExternalId IN @ExternalIds`).
+3. Mapped `InternalGroup` entries join the active group set for the user.
 
 ### Stage 3: Administrative SID Bypass
-The router checks if the caller is an administrator:
+The gateway checks whether the caller is an administrator:
 - `SecurityValidationHelper.IsAdmin(identity, config)` inspects `identity.AllSids`.
-- If the principal contains the administrative SID configured in `Admin:GroupSid` (default: `S-1-5-32-544`) or the `full_admin` claim, access is **unconditionally granted**.
-- **Important**: Role names alone (such as `Administrator` or `full_admin` in `ClaimTypes.Role`) do *not* grant bypass unless backed by the verified administrative SID or group mapping.
+- If the identity contains the administrative SID in `Admin:GroupSid` (default: `S-1-5-32-544`) or the `full_admin` claim, the gateway grants access immediately.
+- Role names alone (such as `Administrator` in `ClaimTypes.Role`) do not grant bypass without a verified SID or group mapping.
 
 ### Stage 4: RBAC Policy Evaluation (Fail-Closed)
-For non-admin callers, access policies in the database are evaluated against the target:
-1. Target keys are generated:
+For non-admin callers, the gateway checks database access policies against the target:
+1. Generates target keys:
    - `{targetId}`
    - `tool:{targetId}`
    - `prompt:{targetId}`
@@ -141,21 +147,21 @@ For non-admin callers, access policies in the database are evaluated against the
    - `server:{serverId}`
    - `category:{category}` (for all categories the server belongs to)
    - `group:{category}`
-2. **Deny Precedence**: The router checks for explicit deny rules (`IsAllowed = 0`) where `TargetId IN @TargetKeys AND RequiredGroup IN @UserGroups`. If *any* explicit deny exists, access is **DENIED**.
-3. **Allow Matching**: The router checks for explicit allow rules (`IsAllowed = 1`) where `TargetId IN @TargetKeys AND RequiredGroup IN @UserGroups`. If at least one matching allow policy exists, access is **GRANTED**.
-4. **Default Deny (Fail-Closed)**: If no policy matches the target and user groups, the request is **DENIED**.
+2. **Deny Precedence**: The gateway checks for explicit deny rules (`IsAllowed = 0`) where `TargetId IN @TargetKeys AND RequiredGroup IN @UserGroups`. If any explicit deny exists, access is **DENIED**.
+3. **Allow Matching**: The gateway checks for explicit allow rules (`IsAllowed = 1`) where `TargetId IN @TargetKeys AND RequiredGroup IN @UserGroups`. If at least one matching allow policy exists, access is **GRANTED**.
+4. **Default Deny (Fail-Closed)**: If no policy matches the target and user groups, access is **DENIED**.
 
 ### Creator Ownership Decoupling
-When an administrator provisions an AppKey or Machine Client on behalf of another user or automated service:
-- The key's `OwnerSid` is set to the target user's resolved SID or left empty (`""`).
-- The administrator's administrative SID (`S-1-5-32-544`) is **explicitly stripped** from the credential.
-- Machine tokens authenticated with the generated secret never inherit administrative permissions or access to `AdminPolicy` endpoints (`/api/*`).
+When an administrator creates an AppKey or Machine Client for another user:
+- The gateway sets `OwnerSid` to the target user's SID or leaves it empty (`""`).
+- The gateway removes the administrator's SID (`S-1-5-32-544`) from the key.
+- Machine tokens never inherit administrator permissions or access to `AdminPolicy` endpoints (`/api/*`).
 
 ---
 
 ## 4. Capability Authorization Matrix
 
-The table below outlines how each Model Context Protocol (MCP) method and Router capability maps to scopes, RBAC evaluation keys, and filtering behavior:
+This table shows how each MCP method and router capability maps to scopes, RBAC evaluation keys, and filtering behavior:
 
 | MCP Method | Target Identifier Format | Allowed Scope Types | RBAC Target Keys Checked | List Filtering vs Invocation | Behavior on Unauthorized |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -174,7 +180,7 @@ The table below outlines how each Model Context Protocol (MCP) method and Router
 
 ## 5. Key Lifecycle & Cryptographic Architecture
 
-Model Context Gateway (MCG) implements industry-standard token hashing, high-entropy selectors, and constant-time authentication to safeguard machine credentials:
+Model Context Gateway (MCG) uses token hashing, high-entropy selectors, and constant-time authentication to protect machine credentials:
 
 ### 1. Token Structure & Entropy Specification
 
@@ -183,7 +189,7 @@ Generated AppKeys follow a structured, multi-segment format:
 $$\text{Token Format} = \underbrace{\texttt{mcp}}_{\text{Scheme}}-\underbrace{\texttt{\{scopeSlug\}}}_{\text{Scope Hint}}-\underbrace{\texttt{\{selector\}}_{32\text{ hex}}}_{\text{128-bit Selector}}-\underbrace{\texttt{\{secret\}}_{64\text{ hex}}}_{\text{256-bit CSPRNG Secret}}$$
 
 - **Scope Slug**: Derived from the primary assigned scope (`global`, `server`, `group`, or `tool`).
-- **Selector (128-bit entropy / 16 bytes)**: Generated using cryptographically secure random number generation (`RandomNumberGenerator.GetBytes`). Used for $O(1)$ database indexing and prefix lookup.
+- **Selector (128-bit entropy / 16 bytes)**: Generated using cryptographically secure random number generation (`RandomNumberGenerator.GetBytes`). The database indexes this prefix for fast lookup ($O(1)$).
 - **Secret (256-bit entropy / 32 bytes)**: High-entropy cryptographic secret.
 - **Prefix Key**: Stored as `KeyPrefix` in the database: `mcp-{scopeSlug}-{selector}`.
 
@@ -197,48 +203,48 @@ $$\text{Token Format} = \underbrace{\texttt{mcp}}_{\text{Scheme}}-\underbrace{\t
 [Plaintext Discarded from Memory]
 ```
 
-- **One-Way SHA-256 Hash**: The database stores only the one-way SHA-256 digest of the complete plaintext key in the `EncryptedKey` column.
-- **One-Time Secret Presentation**: The plaintext key is returned in the API response **exactly once** upon creation. It is never stored in plaintext and cannot be recovered if lost.
-- **Sanitized Management APIs**: `GET /api/appkeys` sanitizes the response, returning only `Id`, `Name`, `Username`, `KeyPrefix`, `Scopes`, `ExpiresAt`, and `CreatedAt`. Cipher hashes are never exposed over the API.
+- **One-Way SHA-256 Hash**: The database stores only the SHA-256 hash digest of the key in the `EncryptedKey` column.
+- **One-Time Secret Presentation**: The API returns the plaintext key **exactly once** upon creation. The gateway never saves plaintext keys. You cannot recover a lost key.
+- **Sanitized Management APIs**: `GET /api/appkeys` sanitizes the response. It returns only `Id`, `Name`, `Username`, `KeyPrefix`, `Scopes`, `ExpiresAt`, and `CreatedAt`. It never exposes cipher hashes.
 
 ### 3. Constant-Time Authentication Flow
 
-Incoming requests supply the token via HTTP headers or query parameters:
+Incoming requests supply the token in HTTP headers or query parameters:
 1. `Authorization: Bearer mcp-...`
 2. `X-App-Key: mcp-...`
 3. `X-Api-Key: mcp-...`
-4. Query string: `?app_key=mcp-...`, `?api_key=mcp-...`, `?key=mcp-...`
+4. Query string: `?app_key=mcp-...`, `?api_key=mcp-...`, or `?key=mcp-...`
 
 `AppKeyAuthenticationHandler` validates the credential:
 1. Extracts the selector prefix (`mcp-{scopeSlug}-{selector}`).
 2. Executes an indexed database query against `KeyPrefix`.
 3. Computes the SHA-256 hash of the incoming token string.
-4. Executes constant-time byte comparison using `CryptographicOperations.FixedTimeEquals`:
+4. Performs constant-time byte comparison using `CryptographicOperations.FixedTimeEquals`:
    ```csharp
    bool isValid = CryptographicOperations.FixedTimeEquals(
        Encoding.UTF8.GetBytes(appKey.EncryptedKey.ToLowerInvariant()),
        Encoding.UTF8.GetBytes(computedHash)
    );
    ```
-   *This completely eliminates side-channel timing attacks.*
-5. Verifies `ExpiresAt` timestamp against UTC time.
-6. Attaches `ClaimsPrincipal` with `ClaimTypes.Name`, role `McpClient`, and sets `HttpContext.Items["AppKeyUsed"] = true` and `HttpContext.Items["AppKeyScopes"] = appKey.ScopesJson`.
+   This prevents timing attacks.
+5. Verifies the `ExpiresAt` timestamp against UTC time.
+6. Attaches `ClaimsPrincipal` with `ClaimTypes.Name` and role `McpClient`. Sets `HttpContext.Items["AppKeyUsed"] = true` and `HttpContext.Items["AppKeyScopes"] = appKey.ScopesJson`.
 
 ### 4. Quotas, Expiration & Revocation
 
-- **Key Quotas**: Configured in `Settings` table (`GlobalMaxKeys`, default 0; `UserMaxKeys`, default 0, where `0` = Unlimited). Non-admin users who exceed an administrator-configured limit receive `400 Bad Request`.
-- **Expiration**: Keys support optional expiration (`ExpiresInDays`). Expired keys fail authentication with an audited `App Key has expired` message.
-- **Revocation**: Keys can be revoked via `DELETE /api/appkeys/{id}` or `DELETE /api/clients/{id}` (`sp_DeleteAppKey`). Revocations take effect immediately.
-- **Audit Logging**: All administrative key creations, revocations, and authentication failures are recorded via `IAuditLogger.LogAdminActionAsync` and stored in the database audit log table.
+- **Key Quotas**: Configured in the `Settings` table (`GlobalMaxKeys`, default 0; `UserMaxKeys`, default 0; `0` = Unlimited). Non-admin users who exceed an administrator-configured limit receive `400 Bad Request`.
+- **Expiration**: Keys support optional expiration (`ExpiresInDays`). Expired keys fail authentication with an audited `App Key has expired` error.
+- **Revocation**: You can revoke keys via `DELETE /api/appkeys/{id}` or `DELETE /api/clients/{id}` (`sp_DeleteAppKey`). Revocations take effect immediately.
+- **Audit Logging**: The gateway records key creations, revocations, and authentication failures in the audit log database table.
 
 ---
 
 ## 6. Least-Privilege Personas & Configuration Recipes
 
-Below are recommended configurations adhering strictly to the principle of least privilege:
+Use these configurations to apply least-privilege access:
 
 ### Persona 1: Read-Only Discovery Agent
-*For documentation bots, vector indexers, or status aggregators that only need to inspect server metadata and read system logs without invoking operational tools.*
+Use this setup for documentation bots, indexers, or status monitors. The key allows inspecting server metadata and reading logs without running operational tools.
 
 ```json
 {
@@ -254,7 +260,7 @@ Below are recommended configurations adhering strictly to the principle of least
 ```
 
 ### Persona 2: Single-Server Developer IDE (Cursor / VS Code)
-*For a developer working strictly on Docker infrastructure tools without access to Home Assistant or Media servers.*
+Use this setup for a developer working only on Docker infrastructure. The key denies access to Home Assistant or Media servers.
 
 **AppKey Request (`POST /api/appkeys`):**
 ```json
@@ -282,7 +288,7 @@ Below are recommended configurations adhering strictly to the principle of least
 ```
 
 ### Persona 3: Smart Home Automation Agent (Category-Scoped)
-*For an agent managing smart home hardware. The key uses a dynamic category scope; any future server tagged with `smarthome` (e.g. Zigbee2MQTT, Homebox) becomes immediately accessible without updating the key.*
+Use this setup for an agent that manages smart home hardware. The key uses a dynamic category scope. Any future server tagged with `smarthome` becomes available immediately.
 
 **AppKey Request (`POST /api/appkeys`):**
 ```json
@@ -315,7 +321,7 @@ Below are recommended configurations adhering strictly to the principle of least
 ```
 
 ### Persona 4: Fine-Grained Mixed-Capability Agent
-*For an agent needing access to all Media servers plus a single pinpoint tool from Docker (`docker__ps`), but explicitly forbidden from invoking destructive commands.*
+Use this setup for an agent that needs all media servers and a single Docker inspection tool (`docker__ps`). The key forbids destructive commands.
 
 **AppKey Request (`POST /api/appkeys`):**
 ```json
@@ -330,7 +336,7 @@ Below are recommended configurations adhering strictly to the principle of least
 ```
 
 ### Persona 5: Administrative Automation Pipeline
-*For scheduled cluster maintenance scripts running in CI/CD requiring access across all tools and servers.*
+Use this setup for scheduled cluster maintenance jobs in CI/CD. The key grants access across all servers and tools.
 
 **AppKey Request (`POST /api/appkeys` with Admin Token):**
 ```json
@@ -351,15 +357,15 @@ Below are recommended configurations adhering strictly to the principle of least
 
 | HTTP Status / Error Message | Root Cause | Remediation Step |
 | :--- | :--- | :--- |
-| `401 Unauthorized`<br>`Invalid App Key prefix.` | The key format is invalid or does not match any registered `KeyPrefix` in the database. | Verify that the full token (including `mcp-*` prefix) was copied without truncation or whitespace. |
-| `401 Unauthorized`<br>`Invalid App Key.` | The selector matched a database record, but the secret portion failed constant-time SHA-256 verification. | The key secret has been mistyped or corrupted. Generate a new key. |
-| `401 Unauthorized`<br>`App Key has expired.` | The key's `ExpiresAt` date is in the past. | Revoke the expired key and generate a fresh key with the desired expiration. |
-| `403 Forbidden`<br>`AppKey rejected: requested target '{target}' is outside the key's allowed scopes` | The key is valid, but its assigned `Scopes` array does not include the requested server, category, or tool. | Update the client configuration to request within scope, or generate a key with the required `server:<id>` or `category:<cat>` scope. |
-| `403 Forbidden`<br>`User does not have permission to execute tool '{tool}'` | The AppKey scope allowed the target, but the user's RBAC policies in the database have no matching Allow rule or an Explicit Deny rule. | In the Dashboard, open **Policy** on the target server/tool and ensure the caller's group is granted access. |
-| `400 Bad Request`<br>`Category '{cat}' does not exist among registered servers.` | A non-admin attempted to create an AppKey with a non-existent category scope. | Register a server under that category first or create the key as an administrator. |
+| `401 Unauthorized`<br>`Invalid App Key prefix.` | The key format is invalid or does not match any registered `KeyPrefix` in the database. | Copy the full token without spaces. Keep the `mcp-*` prefix intact. |
+| `401 Unauthorized`<br>`Invalid App Key.` | The selector matched a database row, but the secret portion failed constant-time SHA-256 verification. | The key secret contains a typing error. Create a new key. |
+| `401 Unauthorized`<br>`App Key has expired.` | The `ExpiresAt` date is in the past. | Revoke the expired key. Create a new key with a future expiration date. |
+| `403 Forbidden`<br>`AppKey rejected: requested target '{target}' is outside the key's allowed scopes` | The key is valid, but its `Scopes` array does not include the requested target. | Update client settings to stay within scope, or create a key with the needed `server:<id>` or `category:<cat>` scope. |
+| `403 Forbidden`<br>`User does not have permission to execute tool '{tool}'` | The AppKey scope allowed the target, but RBAC policies deny access or lack an Allow rule. | Open **Policy** in the Dashboard. Add an Allow rule for the caller group. |
+| `400 Bad Request`<br>`Category '{cat}' does not exist among registered servers.` | A non-admin tried to create an AppKey with an unknown category scope. | Register a server with that category first, or ask an administrator to create the key. |
 
 ### Real-Time Diagnostics & Auditing
 
-1. **Invocation Audit Logs**: Every execution is recorded in the `AuditLogs` table with `Username`, `ServerId`, `ItemName`, `RequestMethod`, `ExecutionTimeMs`, `StatusCode`, and sanitized payloads.
-2. **Dashboard Logs Console**: Open the **Logs** tab in the Web Dashboard to view real-time color-coded invocation traces, request IDs, and security authorization verdicts.
-3. **Interactive Test Bench**: Use the **Test Bench** view in the Web Dashboard to simulate tool executions and inspect response headers and authorization codes.
+1. **Invocation Audit Logs**: The gateway records every execution in the `AuditLogs` table with username, server, method, run time, status code, and sanitized parameters.
+2. **Dashboard Logs Console**: Open the **Logs** tab in the Web Dashboard to view real-time color-coded invocation traces, request IDs, and security verdicts.
+3. **Interactive Test Bench**: Open the **Test Bench** view in the Web Dashboard to run test calls and inspect response headers and status codes.

@@ -1,10 +1,18 @@
 # Dynamic Auth & Kerberos Limitations
 
-This document outlines fundamental architectural limitations when dealing with dynamic credentials (like short-lived JWTs) and Windows Integrated Authentication (Kerberos/NTLM) in Model Context Gateway (MCG).
+This document explains architectural limitations when using dynamic credentials (such as short-lived JWTs) and Windows Integrated Authentication (Kerberos or NTLM) in Model Context Gateway (MCG).
+
+### Core Concepts for Beginners
+- **Kerberos / NTLM**: Windows security protocols that authenticate domain users automatically.
+- **Double-Hop Issue**: Windows prevents a server from forwarding a user's Kerberos credentials to a third computer without special delegation settings.
+- **Dynamic JWT**: A short-lived security token that expires after a short period (such as 15 to 60 minutes).
+- **Trusted Gateway**: A reverse proxy that authenticates users and connects to backend servers using a shared service account.
+
+---
 
 ## 1. The Kerberos "Double-Hop" Boundary
 
-The gateway supports identifying incoming users via Windows Integrated Authentication (NTLM/Kerberos), but it **cannot** masquerade as the user to downstream MCP servers.
+The gateway identifies incoming users through Windows Integrated Authentication (NTLM or Kerberos). However, the gateway **cannot** forward the user's Windows credentials to downstream MCP servers.
 
 ```mermaid
 sequenceDiagram
@@ -24,18 +32,21 @@ sequenceDiagram
     B-->>R: 401 Unauthorized (Router cannot pass User's token)
 ```
 
-### Why this fails natively:
-To solve the Double-Hop problem natively, the environment requires **Kerberos Constrained Delegation (S4U2Proxy)**. The Router's service account must be explicitly trusted in Active Directory to delegate credentials to the backend server's SPN (Service Principal Name).
-Additionally, the Router's C# codebase would need to wrap outgoing requests in `WindowsIdentity.RunImpersonatedAsync()` and configure its `HttpClient` with `UseDefaultCredentials = true`, which it currently does not do. 
-Therefore, the router acts strictly as a security boundary: it enforces RBAC at the edge but acts as a service account (or passes a static key) to the backend.
+### Why this fails natively
+
+Windows networks require **Kerberos Constrained Delegation (S4U2Proxy)** to solve the double-hop problem. An Active Directory administrator must configure the gateway's service account to delegate credentials to downstream Service Principal Names (SPNs).
+
+In addition, the gateway C# code would need to wrap outgoing requests in `WindowsIdentity.RunImpersonatedAsync()`.
+
+Therefore, the gateway acts as a strict security boundary: it enforces RBAC rules at the edge and connects to backend servers using a service account or static key.
 
 ---
 
 ## 2. The Meta-Routing & Pass-Through Auth Paradox
 
-While the router supports `AllowPassThroughAuth` (allowing clients to send a dynamic JWT via `X-Target-Auth`), this feature breaks down when combined with the router's core capability: **Semantic Meta-Routing**.
+The gateway supports `AllowPassThroughAuth` (clients pass a dynamic JWT in the `X-Target-Auth` header). However, this feature conflicts with **Semantic Meta-Routing**.
 
-When the router operates in meta-mode, the client only sees universal tools (`search_tools`, `execute_tool`). The client has no idea *which* backend server will actually fulfill the request.
+In meta-mode, the client only sees universal tools (`search_tools`, `execute_tool`). The client does not know which backend server the gateway will select.
 
 ```mermaid
 flowchart TD
@@ -49,28 +60,26 @@ flowchart TD
 ```
 
 ### The Problem
-If Server A and Server B require different dynamic tokens from an internal Identity Provider, the client cannot pre-fetch the token because it doesn't know which server the Router will select. Furthermore, the Model Context Protocol (MCP) does not currently define a standard handshake for a server to pause execution, request a specific token from the client, and resume.
+If Server A and Server B require different dynamic tokens from an identity provider, the client cannot pre-fetch the correct token. The client does not know which server the gateway will choose. Furthermore, the Model Context Protocol (MCP) does not define a standard mechanism to pause execution and request tokens from the client.
 
-### Current Workarounds
-1. **Targeted Proxy Routes**: If the client connects directly to a specific backend via the `/{targetServerId}` proxy route, it knows exactly which server it is talking to and can fetch the correct JWT.
-2. **UserProvided Secret Store**: If the backend accepts a *static* user credential (like a Personal Access Token), the router can automatically look up the user's specific PAT from the database at runtime and inject it, completely solving the meta-routing paradox.
-3. **Universal SSO Token**: The client fetches a single, universal JWT that all internal backends accept and passes it via `X-Target-Auth`.
+### Recommended Workarounds
+1. **Targeted Proxy Routes**: The client connects to `/{targetServerId}` directly. The client knows the target server and fetches the correct token.
+2. **UserProvided Secret Store**: If the backend accepts a static credential (such as a Personal Access Token), the gateway retrieves the user's PAT from the database at runtime.
+3. **Universal SSO Token**: The client fetches a universal JWT accepted by all internal backends and passes it in `X-Target-Auth`.
 
 ---
 
 ## 3. The Enterprise Solution: Trusted Gateway Pattern
 
-If an organization controls both the Router and the internal downstream MCP servers, the industry-standard architectural solution is the **Trusted Gateway Pattern**. This eliminates the need for dynamic JWTs or Kerberos Double-Hops entirely.
+When an organization controls both the gateway and downstream MCP servers, the **Trusted Gateway Pattern** solves this problem cleanly.
 
 ### How it Works
-1. **Edge Authentication**: The Router fully authenticates the client (via AppKey, SSO, or LDAP) and establishes the user's identity.
-2. **Service Account Auth**: The downstream backend server is configured to bypass standard JWT/Kerberos checks for requests originating from the Router. Instead, the backend trusts a highly secure, global Service Account API Key injected by the Router (fetched from Vault or Windows DPAPI).
-3. **Identity Propagation**: The Router passes the authenticated user's identity to the backend via a trusted HTTP header (e.g., `X-Forwarded-User: DOMAIN\Steve`).
+1. **Edge Authentication**: The gateway authenticates the client using an AppKey, SSO header, or LDAP.
+2. **Service Account Auth**: Downstream servers trust a shared Service Account API key sent by the gateway (stored in Vault or Windows DPAPI).
+3. **Identity Propagation**: The gateway passes the user's identity to the backend in an HTTP header (e.g., `X-Forwarded-User: DOMAIN\Steve`).
 
-### How Downstream Servers Use the Forwarded User
-When the downstream MCP server receives the request, it verifies the Service Account API Key. Once validated, it explicitly trusts the `X-Forwarded-User` header. The backend server uses this username to:
-- **Enforce Fine-Grained RBAC**: Check if the specific user has permission to execute the requested tool or read specific files.
-- **Audit Logging**: Record exactly which human or IDE initiated the action (e.g., *"Tool 'query_db' executed by DOMAIN\Steve via Gateway"*).
-- **Row-Level Security**: Apply data filters based on the user's identity before returning results.
-
-*(Note: While the Router natively supports injecting the Service Account keys today, natively injecting the `X-Forwarded-User` header based on the resolved session identity is a recommended future enhancement for the C# routing engine).*
+### How Downstream Servers Use Forwarded User Headers
+When the downstream MCP server receives the request, it verifies the Service Account API key. Once verified, it trusts the `X-Forwarded-User` header to:
+- **Enforce Fine-Grained RBAC**: Verify whether the user can run the requested tool.
+- **Audit Logging**: Record which human user or agent executed the action.
+- **Row-Level Security**: Filter database rows based on user identity before returning results.

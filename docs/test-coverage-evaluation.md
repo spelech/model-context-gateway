@@ -1,20 +1,19 @@
 # Test Coverage & Reliability Evaluation Report
 
-**Date:** 2026-08-17 (Updated Post-Windows IIS & DPAPI Validation)  
-**Project:** Model Context Gateway (`/containers/dev/csharp-mcp-router`) & Standalone Media MCP (`/containers/dev/csharp-media-mcp`)  
-**Scope:** Backend .NET Unit & Integration Suite (`ModelContextGateway.Tests`), Standalone Media Server (`MediaMcp.Tests`), Frontend Vitest Suite (`frontend/src/test`), Playwright E2E Suite (`frontend/e2e`), and Windows Native Environment Diagnostics (`scripts/windows/Test-WindowsEnvironment.ps1`).
+**Date:** 2026-09-06 (Release v5.11.0)  
+**Scope:** Backend .NET Unit & Integration Suite (`ModelContextGateway.Tests`), Frontend Vitest Suite (`frontend/src/test`), Playwright E2E Suite (`frontend/e2e`), and Windows Native Diagnostics (`scripts/windows/Test-WindowsEnvironment.ps1`).
 
 ---
 
-## 1. Executive Confidence & Coverage Summary
+## 1. Executive Summary
 
-Following the comprehensive Windows host deployment, IIS In-Process ANCM v2 integration, and DPAPI validation cycle, the test suite across Model Context Gateway and Standalone Media MCP is **exceptionally robust, modular, and enterprise-ready**, providing **high overall confidence (98–99%)** for production homelab, enterprise Active Directory, Windows Server IIS, and multi-cloud container workloads.
+The automated test suite contains **1,063 passing tests** with high code coverage across core modules. Tests validate functionality across Linux container and Windows IIS hosting environments.
 
 ### Key Milestones Completed:
-1. **Frontend Coverage Elevated to $\ge 90.5\%$ Across All Components (Overall 92.7%)**:
-   - `AppKeysCard.tsx`: **100.0%** (elevated from 81.5%)
-   - `SecretProvidersTab.tsx`: **96.8%** (elevated from 79.9%)
-   - `CustomFileModal.tsx`: **90.8%** (elevated from 84.6%)
+1. **Frontend Coverage $\ge 90\%$ Across All Components (Overall 92.7%)**:
+   - `AppKeysCard.tsx`: **100.0%**
+   - `SecretProvidersTab.tsx`: **96.8%**
+   - `CustomFileModal.tsx`: **90.8%**
    - `ToolTesterCard.tsx`: **100.0%**
    - `ServerInspectModal.tsx`: **100.0%**
    - `ServerCard.tsx`: **99.1%**
@@ -29,23 +28,20 @@ Following the comprehensive Windows host deployment, IIS In-Process ANCM v2 inte
    - `SemanticRouterCard.tsx`: **100.0%**
    - `ConsoleCard.tsx`: **100.0%**
    - `TestBenchView.tsx`: **85.4%**
-2. **Backend Controller & Multi-Database Hardening**:
+2. **Backend Controller & Multi-Database Verification**:
    - `ProvidersController.cs`: **100.0%**
    - `ClientsController.cs`: **100.0%**
    - `PermissionsController.cs`: **100.0%**
    - `ApiEmbeddingService.cs`: **100.0%**
-   - `ResourceRoutingManager.cs`: **86.8% to 100%** across all routing/resource methods
-   - **Live MySQL 8.0 Integration Suite** (`MySqlLiveIntegrationTests.cs`): 100% live verified against `mcp-mysql-test:33066` executing stored procedures (`sp_SaveAppKey`, `sp_GetAppKeys`, `sp_SaveSecretProvider`, `sp_SaveAuthProvider`).
+   - `ResourceRoutingManager.cs`: **86.8% to 100%**
+   - **Live MySQL 8.0 Integration Suite** (`MySqlLiveIntegrationTests.cs`): 100% verified against live MySQL executing stored procedures (`sp_SaveAppKey`, `sp_GetAppKeys`, `sp_SaveSecretProvider`, `sp_SaveAuthProvider`).
 3. **Windows Native IIS In-Process & DPAPI Validation**:
-   - Deployed and validated native IIS In-Process ANCM v2 hosting with unbuffered streaming SSE (`responseBufferLimit="0"`) on port 8085 connected to Microsoft SQL Server 2022 and HashiCorp Vault.
+   - Validated native IIS In-Process ANCM v2 hosting with unbuffered streaming SSE (`responseBufferLimit="0"`) on port 8085 connected to Microsoft SQL Server 2022 and HashiCorp Vault.
    - Verified end-to-end DPAPI `LocalMachine` machine-level encryption and dynamic runtime decryption from `HKLM:\SOFTWARE\ModelContextGateway\Secrets` into downstream HTTP/SSE/STDIO transports.
    - Verified Active Directory & Windows Integrated Authentication (Kerberos/NTLM caller SIDs, group token extraction, and builtin administrator SID `S-1-5-32-544` mapping).
    - Automated Windows diagnostic runner `Test-WindowsEnvironment.ps1` completed **18 of 18 checks passing (100%)**.
-4. **Media Tools Decoupling & Docker Auto-Discovery**:
-   - Native Plex & Overseerr tools were extracted from the router codebase into an independent, containerized service [`csharp-media-mcp`](https://github.com/spelech/csharp-media-mcp) with its own **28 passing unit & integration tests** (`MediaMcp.Tests`), registered in `/containers/mcp/docker-compose.yaml`.
-   - Documented dynamic Docker label auto-discovery (`mcp.enabled=true`, `mcp.id`, `mcp.port`, `mcp.displayName`, etc.) in `README.md` and `docs/features-guide.md`.
-5. **Living SRS & Test Verification Catalog**:
-   - Automated Roslyn C# and TypeScript AST extraction tool (`scripts/CatalogGenerator`) verifies zero-drift living requirements documentation ([`software-requirements-and-test-catalog.md`](software-requirements-and-test-catalog.md)) mapping **23 Requirements across 102 Test Proofs**.
+4. **Living SRS & Test Verification Catalog**:
+   - Automated Roslyn C# and TypeScript AST extraction tool (`scripts/CatalogGenerator`) verifies zero-drift living requirements documentation ([`software-requirements-and-test-catalog.md`](software-requirements-and-test-catalog.md)) mapping **74 Requirements across 1,063 Test Proofs**.
 
 
 ```

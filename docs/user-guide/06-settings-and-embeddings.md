@@ -1,6 +1,6 @@
 # 06. System Settings & Vector Embeddings
 
-The **Settings View** (`Settings` tab - accessible to administrators) provides a comprehensive configuration plane for adjusting vector embedding search engines, identity & authentication providers, enterprise secret retrievers, custom JSON specification files, and access control matrices.
+The **Settings View** (`Settings` tab) lets administrators configure vector search engines, identity providers, secret providers, custom files, and access rules.
 
 ---
 
@@ -8,7 +8,7 @@ The **Settings View** (`Settings` tab - accessible to administrators) provides a
 
 ![System Settings Overview](../assets/settings_view.jpg)
 
-The Settings interface is organized into 5 modular domain tabs:
+The Settings interface contains five tabs:
 
 ```
 +-------------------------------------------------------------------------------------------------------------------------+
@@ -22,7 +22,7 @@ The Settings interface is organized into 5 modular domain tabs:
 
 ![Settings Vector and Semantic Search Options](../assets/settings_vector_search.jpg)
 
-The vector embedding engine powers the **Meta-Mode** dynamic discovery pipeline (`search_tools`), matching natural language agent queries against the tool catalog:
+The vector engine powers the **Meta-Mode** tool discovery function (`search_tools`). It matches client queries to backend tools in the catalog:
 
 ```
 +-------------------------------------------------------------------------------+
@@ -46,15 +46,15 @@ The vector embedding engine powers the **Meta-Mode** dynamic discovery pipeline 
 ```
 
 ### 1. Local ONNX Engine (Recommended / Default)
-* **Model**: Embedded `All-MiniLM-L6-v2` transformer model.
-* **Zero External Dependencies**: Runs entirely in-process on CPU using `Microsoft.ML.OnnxRuntime` and `Microsoft.ML.Tokenizers`.
-* **Privacy & Air-Gapped**: Queries and tool descriptions never leave the local container.
-* **Auto-Initialization**: Model weights and tokenizers are automatically verified and cached in the persistent models directory (`/data/models`).
+* **Model**: Uses the embedded `All-MiniLM-L6-v2` transformer model.
+* **No External Dependencies**: Runs in-process on CPU using `Microsoft.ML.OnnxRuntime` and `Microsoft.ML.Tokenizers`.
+* **Data Privacy**: Queries and tool descriptions never leave the local host or container.
+* **Automatic Download**: The gateway downloads, verifies, and caches model files in the models directory (`/data/models`).
 
 ### 2. External API Provider (OpenAI / Ollama / LiteLLM)
-* **Usage**: Ideal when standardizing across external embedding models or connecting to a shared GPU inference cluster.
-* **Supported Backends**: OpenAI, Azure OpenAI, Ollama, LiteLLM, Open WebUI, and vLLM.
-* **Secure Storage**: External API keys are encrypted at rest in the database using authenticated AES-256-GCM envelope encryption.
+* **Usage**: Connects to remote embedding endpoints or GPU clusters.
+* **Supported Providers**: OpenAI, Azure OpenAI, Ollama, LiteLLM, Open WebUI, and vLLM.
+* **Key Security**: The gateway encrypts API keys at rest with AES-256-GCM envelope encryption.
 
 ---
 
@@ -62,19 +62,19 @@ The vector embedding engine powers the **Meta-Mode** dynamic discovery pipeline 
 
 ![Settings Identity and Authentication Providers](../assets/settings_identity_auth.jpg)
 
-Manages incoming authentication and user identity resolution:
+This tab configures how the gateway verifies incoming users and client tokens:
 
 ### 1. Active Directory / Windows SID Provider
-* Enable or disable Windows Kerberos/NTLM authentication.
-* Configure Domain Controller endpoints, Base DN, and service account credentials.
+* Enable or disable Windows Kerberos and NTLM authentication.
+* Configure Domain Controller hosts, Base DN paths, and service credentials.
 
 ### 2. OIDC / Reverse Proxy Headers Provider
-* Enable or disable header-based identity inspection from reverse proxies (Authentik, Authelia, PocketID, Keycloak, Traefik, Caddy, Nginx, etc.).
-* Custom header field names: `Remote-User`, `Remote-Groups`, `Remote-Email`, `Remote-Name`.
+* Enable or disable reverse proxy headers (Authentik, Authelia, PocketID, Keycloak, Traefik, Caddy, or Nginx).
+* Configure header names: `Remote-User`, `Remote-Groups`, `Remote-Email`, and `Remote-Name`.
 
 ### 3. OpenIddict OAuth 2.0 Authorization Server
-* Configure OAuth 2.0 token lifetimes (Access Token TTL, Refresh Token TTL).
-* X.509 signing certificate paths and encryption keys for distributed microservice trust.
+* Configure token lifetimes, including access token and refresh token durations.
+* Set paths for X.509 signing certificates and encryption keys.
 
 ---
 
@@ -82,11 +82,11 @@ Manages incoming authentication and user identity resolution:
 
 ![Settings Enterprise Secret Providers](../assets/settings_secret_providers.jpg)
 
-Manage centralized configurations for external secret stores:
-* **HashiCorp Vault KV v2**: AppRole (`roleId` / `secretId`) or direct Token with JIT renewal.
-* **Windows Registry**: DPAPI-encrypted secrets stored in `HKLM` or `HKCU`.
-* **Container Environment**: Secrets dynamically loaded from prefix-matched container env vars.
-* **OAuth2 / OIDC Token Exchange (RFC 8693 / PocketID)**: On-Behalf-Of (OBO) token exchange for downstream tools.
+Configure external systems that store secrets:
+* **HashiCorp Vault KV v2**: Uses AppRole authentication (`roleId` and `secretId`) or a direct Vault Token with automatic renewal.
+* **Windows Registry**: Uses DPAPI-encrypted secrets stored in `HKLM` or `HKCU` keys.
+* **Container Environment**: Reads secrets from environment variables.
+* **OAuth 2.0 Token Exchange (RFC 8693 / PocketID)**: Exchanges user tokens for downstream tools.
 
 ---
 
@@ -94,11 +94,11 @@ Manage centralized configurations for external secret stores:
 
 ![Settings Prompts and Resources File Manager](../assets/settings_prompts_resources.jpg)
 
-Create and manage custom JSON files that define virtual tools, prompt templates, and virtual resource endpoints:
+Create and manage custom JSON files for virtual tools, prompt templates, and virtual resources:
 
-* **File Catalog Grid**: Lists all registered specification files with file name, type (`Tools`, `Prompts`, `Resources`), and last updated timestamp.
-* **Interactive Editor & Visual Prompt Builder**: Built-in JSON editor and visual template builder with validation before persistence.
-* **Hot Reload**: Instantly updates catalog caches and vector embeddings upon saving.
+* **File Catalog Table**: Lists registered files by name, type (`Tools`, `Prompts`, or `Resources`), and update date.
+* **Interactive Editor**: Includes a JSON editor and template builder that validate syntax before saving.
+* **Immediate Reload**: Updates catalog caches and vector embeddings when you save changes.
 
 ---
 
@@ -106,11 +106,11 @@ Create and manage custom JSON files that define virtual tools, prompt templates,
 
 ![Settings Access Control and Group Mappings](../assets/settings_access_control.jpg)
 
-Fine-tune enterprise permissions across servers and external groups:
+Configure access permissions for servers, tools, and user groups:
 
-* **Group Mappings Table**: Define mappings that translate external Identity Provider groups (e.g. `CN=IT-Admins,OU=Groups,DC=corp` or `S-1-5-21-1001`) to simplified internal roles (`full_admin`).
-* **Server Policies Table**: Complete matrix of server-level access rules:
-  * Target Identifier (e.g. `server:docker`, `tool:docker__ps`, `prompt:router__diagnose`)
-  * Required Group (e.g. `Engineering`, `Administrators`)
+* **Group Mappings Table**: Maps external identity groups (such as `CN=IT-Admins,OU=Groups,DC=corp` or `S-1-5-21-1001`) to internal roles (`full_admin`).
+* **Server Policies Table**: Defines server access rules:
+  * Target Identifier (for example, `server:docker`, `tool:docker__ps`, or `prompt:router__diagnose`)
+  * Required Group (for example, `Engineering` or `Administrators`)
   * Mode (`ALLOW Access` or `DENY Access`)
 

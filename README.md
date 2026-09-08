@@ -9,9 +9,9 @@
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
 
-An enterprise C# ASP.NET Core gateway, OAuth 2.0 provider, and semantic proxy for the **Model Context Protocol (MCP)**. 
+An enterprise C# ASP.NET Core gateway, OAuth 2.0 provider, and routing proxy for the **Model Context Protocol (MCP)**. 
 
-**Model Context Gateway (MCG)** consolidates downstream MCP servers (Docker, Home Assistant, SQL databases, Plex, Actual Budget, Excel, and custom APIs) and proxies them to AI clients (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) through a single unified connection.
+**Model Context Gateway (MCG)** connects your AI assistants (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) to all your tools and data sources through a single secure connection.
 
 📖 **Documentation Portal:** [https://spelech.github.io/model-context-gateway/](https://spelech.github.io/model-context-gateway/)
 
@@ -19,38 +19,44 @@ An enterprise C# ASP.NET Core gateway, OAuth 2.0 provider, and semantic proxy fo
 
 ---
 
-## Why Model Context Gateway?
+## What is Model Context Gateway?
 
-Connecting AI clients directly to dozens of isolated microservices creates severe operational friction: credentials leak across workstations, connection configurations diverge, and loading hundreds of tool schemas saturates the LLM's context window.
+The **Model Context Protocol (MCP)** lets AI assistants use external tools and data sources.
 
-**Model Context Gateway provides a unified, secure control plane for all your MCP tools:**
+When you connect an AI assistant directly to many individual tools, you face common problems:
+* **Memory Waste**: Loading hundreds of tool schemas fills the AI context memory before your conversation begins.
+* **Higher Costs and Latency**: Large prompts increase inference costs and response times.
+* **Security Risks**: API keys and database passwords sit in plain text across local config files.
+* **Configuration Overhead**: You must configure each tool separately in every AI application.
 
-* **Single Connection Endpoint (`/sse`)**: AI assistants connect once to a centralized gateway instead of managing separate connection configurations for every individual service.
-* **Context Window Optimization (Meta-Mode)**: Rather than overwhelming the model's context window with hundreds of tool schemas upfront, Meta-Mode exposes only `search_tools` and `execute_tool`. The model searches for and loads tools semantically on demand.
-* **Centralized Governance & Security**: Authenticates users via Active Directory Windows SIDs, OIDC reverse-proxy headers, or scoped AppKeys. Enforces least-privilege RBAC policies and redacts sensitive credentials before logging.
-* **Universal Transport Support**: Transparently routes requests across Docker containers (auto-discovered via socket), remote HTTP/SSE services, and local STDIO subprocesses without client-side reconfiguration.
+**Model Context Gateway (MCG) solves these problems:**
 
----
-
-## Key Features
-
-* **Admin MCP Control Plane (`/admin`, `/mcg-admin`)**: In-process virtual MCP server providing 10 consolidated entity management tools (`manage_servers`, `manage_appkeys`, `manage_clients`, `manage_policies`, `manage_group_mappings`, `manage_providers`, `manage_settings`, `manage_custom_files`, `manage_system`, `test_tool_call`), allowing autonomous AI agents to administer the gateway programmatically. See [Admin MCP Guide](docs/admin-mcp-automation-guide.md).
-* **Zero-Code Agent Automation**: Autonomous setup and admin skills (`mcg-setup` and `mcg-admin`) enable AI agents to provision identity providers, secret stores, RBAC policies, and backend servers with zero manual UI clicking. See [User Guide](docs/user-guide/README.md).
-* **Meta-Mode Context Optimization**: Hides hundreds of backend tools during bootstrap; exposes only `search_tools` and `execute_tool` by default to prevent LLM context exhaustion and hallucinations.
-* **Dual-Key Routing & Namespace Aliasing**: Exposes tools with clean modern slash formatting (`{namespace}/{tool_name}`) with backwards-compatible normalization (`{serverId}__{toolName}`) and collision guards.
-* **Dynamic Docker Discovery**: Automatically registers containers labeled with `mcp.enabled=true`, `mcp.id`, `mcp.port`, and `mcp.alias` directly via `/var/run/docker.sock`. See [Features Guide](docs/features-guide.md).
-* **Pluggable Identity & Single Sign-On**: Native support for **Active Directory** (Kerberos / NTLM Windows SIDs) and **OIDC / Reverse Proxy Headers** (`Remote-User`, `Remote-Groups` from Authentik, Authelia, Keycloak, etc.). See [Authentication Architecture](docs/authentication-architecture.md).
-* **Enterprise Secret Providers**: Fetches downstream credentials dynamically from **HashiCorp Vault (KV v2)**, **Windows Registry (DPAPI)**, or **Environment Variables**, with AES-256-GCM envelope encryption at rest. See [Secret Providers Guide](docs/secret-providers.md).
-* **Multi-Database Persistence**: Complete stored procedure and Dapper suites across **SQLite (WAL)**, **Microsoft SQL Server**, and **MySQL**. See [Database Providers Guide](docs/database-providers.md) and [Data Model & ERD](docs/data-model.md).
-* **PII Sanitization & Audit Trails**: Real-time redaction of Bearer tokens, API keys, and passwords (`PiiSanitizer`) paired with stored procedure audit logging (`sp_InsertAuditLog`).
-* **Batteries-Included Docker Tag**: `ghcr.io/spelech/model-context-gateway:latest-full` includes Node.js, Python 3, `uv`, and `bun` pre-installed for executing `stdio` sub-process tools without sidecar networking complexity. See [Transports Guide](docs/transports.md).
-* **Built-in Web Dashboard**: Responsive, dark-mode, glassmorphic UI with real-time stats, server health cards, logs console, interactive test bench, and settings management.
+* **One Connection Endpoint (`/sse`)**: Connect your AI assistant to a single gateway URL. MCG routes requests to the correct tool.
+* **Context Optimization (Meta-Mode)**: By default, the gateway exposes only two tools: `search_tools` and `execute_tool`. The AI searches for tools when needed and executes them on demand. This saves context memory and reduces token costs.
+* **Central Security**: MCG keeps credentials secure on the server with AES-256 encryption. The gateway checks user permissions before tools run.
+* **Universal Tool Support**: Route requests across Docker containers, remote HTTP/SSE services, and local scripts (Node.js, Python) without reconfiguring clients.
 
 ---
 
-## Quickstart: Zero-Config Deployment
+## Key Capabilities
 
-Spin up **Model Context Gateway** with **zero required environment variables**. On first launch, the gateway automatically generates a 256-bit AES master key saved to `./data/.master.key` and initializes safe defaults:
+* **Admin MCP Control Plane (`/admin`, `/mcg-admin`)**: Control the gateway programmatically through standard MCP tools (`manage_servers`, `manage_appkeys`, `manage_clients`, `manage_policies`, `manage_group_mappings`, `manage_providers`, `manage_settings`, `manage_custom_files`, `manage_system`, `test_tool_call`). See [Admin Guide](docs/admin-guide.md).
+* **Autonomous Setup & Administration**: Built-in agent skills (`mcg-setup` and `mcg-admin`) let AI agents configure servers, secret stores, and access policies automatically. See [User Guide](docs/user-guide.md).
+* **Meta-Mode Context Saving**: Hides tool schemas during startup to prevent context memory exhaustion and model hallucinations.
+* **Modern Slash Tool Routing**: Use modern slash format (`{namespace}/{tool_name}`) with backwards-compatible format (`{serverId}__{toolName}`) and collision checks.
+* **Dynamic Docker Discovery**: Automatically discovers containers labeled `mcp.enabled=true` through `/var/run/docker.sock`. See [Features Guide](docs/features-guide.md).
+* **Identity and Single Sign-On**: Authenticate users through **Active Directory** (Windows SIDs) or **OIDC / Reverse Proxy Headers** (Authentik, Keycloak, Authelia). See [Authentication Architecture](docs/authentication-architecture.md).
+* **Enterprise Secret Storage**: Resolve credentials at runtime from **HashiCorp Vault (KV v2)**, **Windows Registry (DPAPI)**, or **Environment Variables**. See [Secret Providers Guide](docs/secret-providers.md).
+* **Multi-Database Support**: Run on **SQLite (WAL)**, **Microsoft SQL Server**, or **MySQL**. See [Database Providers Guide](docs/database-providers.md) and [Data Model & ERD](docs/data-model.md).
+* **PII Sanitization & Audit Logs**: Redact tokens and passwords automatically while writing complete audit logs.
+* **Pre-Configured Docker Image**: The `ghcr.io/spelech/model-context-gateway:latest-full` image includes Node.js, Python 3, `uv`, and `bun` pre-installed for local scripts. See [Transports Guide](docs/transports.md).
+* **Web UI Dashboard**: Modern dark-mode web interface with real-time metrics, server health cards, logs, and an interactive test bench.
+
+---
+
+## Quickstart: Run in 2 Minutes
+
+Run **Model Context Gateway** with Docker. The gateway starts with safe default settings:
 
 ```bash
 docker run -d \
@@ -61,33 +67,33 @@ docker run -d \
   ghcr.io/spelech/model-context-gateway:latest
 ```
 
-### Safe Out-of-the-Box Defaults
-* **Auto-Generated Master Key**: Created in `./data/.master.key` (with `chmod 0600`) so credentials remain encrypted at rest with zero plaintext environment variables.
-* **Compact Base62 AppKeys**: Semantic, high-entropy tokens (`mcp-adm-`, `mcp-glb-`, `mcp-usr-`).
-* **SQLite Database**: Automatically created and migrated at `./data/mcg.db`.
-* **Standalone Security**: Local loopback (`127.0.0.1`, `::1`) is trusted as `Administrator` for the Web Dashboard (`http://localhost:8080`).
-* **Declarative Admin Key**: Seed custom keys via `MCG_ADMIN_AUTH_KEY` or connect with the auto-generated admin key for remote AI agents and DevOps automation. See [Deployment Guide](docs/deployment-guide.md).
-* **Single-User & Home-Lab Walkthrough**: For dedicated homelab instructions, see [Single-User & Home-Lab Setup Guide](docs/single-user-and-homelab-guide.md).
+### What Happens on First Start
+* **Master Key**: Generates a 256-bit AES key at `./data/.master.key` with restricted permissions (`chmod 0600`).
+* **Database**: Creates and migrates the SQLite database at `./data/mcg.db`.
+* **Local Trust**: Grants admin access to local connections (`127.0.0.1`, `::1`) on the Web Dashboard (`http://localhost:8080`).
+* **Admin Key**: Generates a compact admin key (`mcp-adm-...`) saved to `./data/.admin.key` for remote AI agents.
+* **Docker Discovery**: Automatically connects to any containers labeled `mcp.enabled=true`.
+
+For homelab instructions, see the [Single-User & Home-Lab Setup Guide](docs/single-user-and-homelab-guide.md).
 
 ---
 
-## Client Agent Integration
+## Client Integration
 
 ### 1. General Tool Access (Meta-Mode Gateway)
-When using agentic coding assistants connected to `/sse`:
-1. **Search Tools**: The agent calls `search_tools` with a natural language query describing the desired action (e.g. `"restart actual budget container"`).
-2. **Execute Tool**: The agent invokes the returned namespaced tool (e.g. `docker/restart_container` or `docker__restart_container`) via `execute_tool(name, arguments)`.
+Connect your AI assistant to `/sse`:
+1. **Search Tools**: The AI calls `search_tools` with a plain text query (for example: `"restart container"`).
+2. **Execute Tool**: The AI runs the returned tool (for example: `docker/restart_container`) with `execute_tool(name, arguments)`.
 
-### 2. Autonomous Gateway Administration (Admin MCP Server)
-Autonomous agents (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) can directly manage gateway configuration by connecting to `/admin` or `/mcg-admin`:
+### 2. Connect Your AI Application
 
 #### Claude Desktop (`claude_desktop_config.json`)
 ```json
 {
   "mcpServers": {
-    "mcg-admin": {
+    "mcg": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8080/admin"]
+      "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8080/sse"]
     }
   }
 }
@@ -97,8 +103,8 @@ Autonomous agents (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) can dir
 ```json
 {
   "mcpServers": {
-    "mcg-admin": {
-      "url": "http://localhost:8080/admin",
+    "mcg": {
+      "url": "http://localhost:8080/sse",
       "headers": {
         "Authorization": "Bearer mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
       }
@@ -107,54 +113,56 @@ Autonomous agents (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) can dir
 }
 ```
 
-### 3. Universal Agent Setup Skill (Zero-Clone Bootstrapping)
-Equip any AI assistant (Antigravity, Claude Code, Cursor, Cline, Windsurf, Copilot CLI) to install, configure, and bootstrap the gateway without cloning or compiling source code:
+### 3. Universal Agent Setup Skill
+Install the setup skill in your workspace to let your AI assistant configure the gateway automatically:
 
 ```bash
 mkdir -p .agents/skills/mcg-setup && curl -fsSL https://raw.githubusercontent.com/spelech/model-context-gateway/main/skills/mcg-setup/SKILL.md -o .agents/skills/mcg-setup/SKILL.md
 ```
 
-Once installed, prompt your agent: *"Set up Model Context Gateway for my environment"*.
+Then tell your agent: *"Set up Model Context Gateway for my environment"*.
 
 ---
 
-## Authentication Modes & Standalone Access
+## Authentication Modes
 
-For a complete breakdown of end-to-end credential passing and token flows, see the [Authentication Support Matrix](docs/auth-flows/auth-support-matrix.md).
+For complete credential flow diagrams, see the [Authentication Support Matrix](docs/auth-flows/auth-support-matrix.md).
 
 ### 1. Standalone Mode (Zero-Config / Personal Network)
-* **When Active**: Whenever no external identity provider (Active Directory LDAP or OIDC Reverse Proxy) is configured.
-* **Local Loopback (`127.0.0.1`, `::1`)**: Connections originating from localhost are granted administrative privileges automatically.
-* **Private LAN / Docker Subnets**: Configure `Admin:StandaloneAllowedNetworks` in `appsettings.json` or environment variables (e.g. `ADMIN__STANDALONE_ALLOWED_NETWORKS__0="10.0.0.0/8"`) to grant admin access across your local network.
-* **External Clients**: Requests originating from outside allowed subnets require an Admin AppKey (`mcp-adm-...`).
+* **Active**: Runs automatically when no external identity provider (Active Directory or OIDC) is configured.
+* **Local Loopback (`127.0.0.1`, `::1`)**: Local connections receive administrator access automatically.
+* **Local Subnets**: Configure `ADMIN__STANDALONE_ALLOWED_NETWORKS__0="192.168.1.0/24"` to trust your home or office network.
+* **Remote Clients**: Requests from outside trusted networks require an AppKey (`mcp-adm-...` or `mcp-usr-...`).
 
-### 2. Enterprise IDP Mode (Active Directory & OIDC Reverse Proxy)
-* **Active Directory (Windows Authentication / LDAP)**: Users whose SID matches `Admin:GroupSid` (default: `S-1-5-32-544` / Local Administrators) or domain admin groups receive administrative privileges.
-* **OIDC & Reverse Proxy SSO**: Reverse proxies transmitting `Remote-User` and `Remote-Groups` matching `Admin:GroupName` or `Admin:Groups` (e.g. `full_admin`, `Administrator`) are authorized.
-* **Dynamic Group Mappings**: Map external IdP group names to internal roles via the `GroupMappings` database table or Web Dashboard.
-* **Admin AppKeys**: Autonomous AI agents presenting an AppKey with `admin`, `all`, or `*` scope are granted the `Administrator` role across all endpoints.
+### 2. Enterprise Mode (Active Directory & Single Sign-On)
+* **Active Directory**: Users matching `Admin:GroupSid` (default: `S-1-5-32-544` / Administrators) receive admin rights.
+* **OIDC & Reverse Proxy**: Proxies passing `Remote-User` and `Remote-Groups` headers grant access according to group rules.
+* **Group Mappings**: Map external group names to internal roles in the Web Dashboard or database.
+* **Admin AppKeys**: AI agents with `admin`, `all`, or `*` scopes receive full administrative access.
 
 ---
 
-## Subsystem Documentation Library
+## Documentation Directory
 
-| Guide | Focus Area |
+| Guide | Description |
 | :--- | :--- |
-| [**Architecture & System Specification**](docs/architecture.md) | Architectural Tenets, Sequence Flows, Component Models, and Encryption Pipelines |
-| [**Single-User & Home-Lab Setup Guide**](docs/single-user-and-homelab-guide.md) | 60-Second Setup, AppKey Generation, Standalone Trust, and Local Agent Integration |
-| [**Enterprise Deployment & Operations Runbook**](docs/runbook.md) | Production Topology, Backups, Health Monitoring, and Disaster Recovery |
-| [**Windows & IIS Deployment Guide**](docs/windows-deployment-and-validation-guide.md) | Windows Server IIS In-Process Hosting, Windows Services, DPAPI, and PowerShell Automation |
-| [**Official User Guide Suite**](docs/user-guide/README.md) | Interactive Dashboard, Server Registration, RBAC, Client Setup, and Test Bench |
-| [**MCP Server Auth & Integration Cookbook**](docs/mcp-server-auth-cookbook.md) | Scenario-Driven Setup Recipes for Bearer, Custom Headers, Vault, BYOK, and Pass-Through |
-| [**Canonical Data Model & Database ERD**](docs/data-model.md) | Complete 12-Table Entity-Relationship Diagram, Constraints, and Schema Specifications |
-| [**Database Provider Support & Dialects**](docs/database-providers.md) | SQLite WAL, Microsoft SQL Server Stored Procedures, and MySQL Parameter Conventions |
-| [**AppKey Scopes & Authorization Guide**](docs/appkey-scopes.md) | Scope Syntax Grammar, Multi-Stage Pipeline Evaluation, and Least-Privilege Personas |
-| [**Enterprise Secret Providers & Key Management**](docs/secret-providers.md) | HashiCorp Vault KV v2 JIT Renewal, Windows DPAPI, and Master Key Rotation |
-| [**Downstream Transports & Subprocess STDIO**](docs/transports.md) | Transport Comparison, Process Security Policies, JSON-RPC Concurrency, and Isolation |
-| [**Admin MCP Server & Automation Guide**](docs/admin-mcp-automation-guide.md) | Autonomous Agent Administration via `mcg-admin` Skill and Control Plane Tools |
-| [**Product Evaluation & Gateway Comparison**](docs/evaluation-guide.md) | Context Window Reduction, Token Savings, Security Isolation, and Proxy Comparisons |
-| [**Troubleshooting & RCA Postmortem**](docs/mcp-routing-and-admin-issues.md) | Root Cause Analysis and Remediation Guide for Session Lifecycles and Routing Caches |
-| [**Executive Management Briefing**](docs/management-brief.md) | Leadership Summary, Enterprise Value Propositions, and NotebookLM Audio Overview Prompt |
+| [**Single-User & Home-Lab Setup Guide**](docs/single-user-and-homelab-guide.md) | Fast setup for personal use, home labs, and local AI clients. |
+| [**Official User Guide**](docs/user-guide.md) | Web dashboard, server management, AppKeys, and test bench. |
+| [**Administrator Guide**](docs/admin-guide.md) | Server management, 10 Admin MCP tools, RBAC policies, and providers. |
+| [**Admin MCP Automation Guide**](docs/admin-mcp-automation-guide.md) | AI agent automation with `mcg-admin` and configuration playbooks. |
+| [**Architecture Specification**](docs/architecture.md) | System components, request flow diagrams, and encryption pipelines. |
+| [**Container Deployment Guide**](docs/deployment-guide.md) | Production Docker, Docker Compose, and environment settings. |
+| [**Operations Runbook**](docs/runbook.md) | Health checks, database backups, key rotation, and disaster recovery. |
+| [**Windows & IIS Deployment Guide**](docs/windows-deployment-and-validation-guide.md) | Windows Server IIS hosting, Windows services, and DPAPI keys. |
+| [**MCP Server Auth Cookbook**](docs/mcp-server-auth-cookbook.md) | Setup recipes for Bearer auth, custom headers, Vault, and BYOK. |
+| [**Canonical Data Model & Database ERD**](docs/data-model.md) | Complete 12-table entity-relationship diagram and schema details. |
+| [**Database Providers Guide**](docs/database-providers.md) | SQLite, Microsoft SQL Server, and MySQL database setup. |
+| [**AppKey Scopes & Authorization Guide**](docs/appkey-scopes.md) | Scope rules (`*`, `category:*`, `server:*`, `tool:*`) and role checks. |
+| [**Secret Providers Guide**](docs/secret-providers.md) | HashiCorp Vault, Windows DPAPI, and AES master key lifecycle. |
+| [**Downstream Transports Guide**](docs/transports.md) | SSE, HTTP, and STDIO local subprocess security and isolation. |
+| [**Product Evaluation Guide**](docs/evaluation-guide.md) | Context window reduction, token cost savings, and comparisons. |
+| [**Troubleshooting & RCA Guide**](docs/mcp-routing-and-admin-issues.md) | Solutions for session timeouts, cache sync, and backend errors. |
+| [**Management Briefing**](docs/management-brief.md) | Executive summary and NotebookLM briefing prompt. |
 
 ---
 

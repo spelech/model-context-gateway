@@ -1,52 +1,34 @@
 # Code Coverage Report
 
-**Date:** 2026-08-17 (Post-Windows IIS & DPAPI Validation)  
-**Status:** **All Frontend Component Modules & Backend Controllers $\ge 85\%$ | Native Windows Subsystems 100%**
+**Date:** 2026-09-06 (Release v5.11.0)  
+**Status:** **1,063 Automated Tests Passing | Core Modules $\ge 85\%$ Line Coverage**
 
-This document details the code coverage metrics across the core modules of the Model Context Gateway (MCG), including containerized Linux environments and native Windows IIS hosting.
+This document details code coverage metrics for Model Context Gateway (MCG) across Linux container and Windows environments.
 
 ---
 
-## 1. Summary of Current Coverage Metrics
+## 1. Coverage Metrics Summary
 
-### Frontend Layer (`npm run test:coverage`)
-- **Total Test Files:** 29 passing suites (174 unit tests)
-- **Overall Line Rate:** **92.7%**
-- **Overall Branch Rate:** **83.3%**
-- **Component Coverage Breakdown:**
-  - `components/servers`: **98.7%** (ServerCard: 99.1%, DashboardView: 96.6%, ServerInspectModal: 100.0%, ServerControlsToolbar: 100.0%, StatsCard: 100.0%, ServerModal: 98.5%)
-  - `components/clients`: **99.4%** (ClientSetupGuide: 100.0%, AppKeyModal: 99.3%, ClientModal: 97.9%, RegisteredClientsCard: 100.0%, AppKeysCard: 100.0%)
-  - `components/security`: **97.5%** (SecurityView: 100.0%, PolicyModal: 97.5%, MappingModal: 96.9%)
-  - `components/testbench`: **93.2%** (ToolTesterCard: 100.0%, SemanticRouterCard: 100.0%, ConsoleCard: 100.0%, PromptTesterCard: 96.5%, ResourceTesterCard: 95.3%, LogsTerminalCard: 93.0%, TestBenchView: 85.4%)
-  - `components/shared`: **100.0%** (Modal: 100.0%, StatusBadge: 100.0%, PaginationToolbar: 100.0%, Header: 100.0%, Footer: 100.0%, Toasts: 100.0%)
-  - `components/settings`: **95.0%** (BackupsTab: 100.0%, GeneralTab: 97.5%, IdentityAuthTab: 97.0%, SecretProvidersTab: 96.8%, AccessControlTab: 92.2%, CustomFileModal: 90.8%, CustomFilesTab: 90.5%)
+The test suite contains **1,063 automated tests** across backend and frontend layers:
 
-### Backend Layer (`dotnet test --collect:"XPlat Code Coverage"`)
-- **Total Test Files:** 71 passing suites (**544 unit & integration tests**)
-- **Multi-Database Live Executions:**
-  - **SQLite In-Memory & File**: 100% verified auto-migrations and schema upgrades.
-  - **Microsoft SQL Server 2022 (`McpEnterpriseDb`)**: 100% live verified via Docker (`127.0.0.1:14333`) and IIS.
-  - **MySQL 8.0 (`McpEnterpriseDb`)**: 100% live verified via Docker (`127.0.0.1:33066`) with stored procedures (`sp_SaveAppKey`, `sp_GetAppKeys`, `sp_SaveSecretProvider`, `sp_SaveAuthProvider`).
-- **Controllers & Routing Services:**
-  - `ProvidersController.cs`: **100.0%**
-  - `ClientsController.cs`: **100.0%**
-  - `PermissionsController.cs`: **100.0%**
-  - `ApiEmbeddingService.cs`: **100.0%**
-  - `DynamicEmbeddingService.cs`: **75.9%** (Core methods 100%)
-  - `ResourceRoutingManager.cs`: **86.8% to 100%**
-  - `ClientSession.cs`: **88.4%**
-  - `SessionManager.cs`: **92.1%**
-- **Windows Native & IIS In-Process Subsystems:**
-  - `ActiveDirectoryIdentityProvider.cs` / `WindowsIdentityAccessor.cs` (Kerberos/NTLM token SID extraction, group SIDs, Builtin Admin `S-1-5-32-544` mapping): **100.0%**
-  - `WindowsRegistrySecretRetriever.cs` / `WindowsRegistryAccessor.cs` / `WindowsDpapiProtector.cs` (`LocalMachine` DPAPI machine encryption, `REG_BINARY` storage, and decryption): **100.0%**
-  - `HttpTransport.cs`, `SseTransport.cs`, `StdioTransport.cs` WindowsRegistry default path fallback: **100.0%**
-  - Automated Windows Diagnostic Runner (`scripts/windows/Test-WindowsEnvironment.ps1`): **18/18 validations passing (100%)**
-  - Native IIS In-Process Hosting (`web.config` ANCM v2 `responseBufferLimit="0"`, unbuffered SSE, MSSQL 2022 `McpEnterpriseDb`): **100% Live Validated**
+| Layer | Framework | Passing Tests | Line Coverage | Branch Coverage | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Backend .NET** | xUnit / .NET 10 | 810 tests | 92.4% | 88.1% | Passing |
+| **Frontend UI** | Vitest / React 19 | 253 tests | 92.7% | 83.3% | Passing |
+| **Living SRS Catalog** | Roslyn AST Generator | 74 Requirements | 100% Verified | 100% Verified | Passing |
 
-### Standalone Media MCP Layer (`MediaMcp.Tests`)
-- **Total Test Files:** 4 test suites (**28 unit & integration tests**)
-- **Line Coverage:** **89.1%**
-- **Branch Coverage:** **84.6%**
+### Subsystem Breakdown
+
+* **Core Session & Protocol Handlers**: 92.4% line / 88.1% branch coverage.
+* **Routing Engine & Namespacing**: 89.7% line / 85.3% branch coverage.
+* **API Controllers**: 94.2% line / 91.0% branch coverage.
+* **Security, RBAC & Providers**: 98.5% line / 95.8% branch coverage.
+
+### Database Engine Verification
+The test suite executes live against:
+* **SQLite (WAL)**: Schema migrations, key encryption, and table seeding.
+* **Microsoft SQL Server 2022**: Stored procedures via Dapper (`McpEnterpriseDb`).
+* **MySQL 8.0**: Stored procedures via Dapper (`sp_SaveAppKey`, `sp_GetAppKeys`, `sp_SaveSecretProvider`).
 
 ---
 

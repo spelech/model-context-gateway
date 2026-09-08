@@ -1,9 +1,9 @@
 # 02. Server Management & Secret Providers
 
-The **Model Context Gateway (MCG)** enables seamless registration and management of backend Model Context Protocol (MCP) servers across multiple transport types (`SSE`, `HTTP`, `STDIO`), while providing enterprise-grade secret providers to prevent credential leakage.
+The **Model Context Gateway (MCG)** registers and manages backend Model Context Protocol (MCP) servers. It supports three transport types: `SSE`, `HTTP`, and `STDIO`. It also integrates with secret providers to protect credentials.
 
 > [!TIP]
-> **Need a recipe for your specific MCP server?** Check the [**MCP Server Authentication & Integration Cookbook**](../mcp-server-auth-cookbook.md) for quick-lookup decision matrices and copy-paste examples (*"If your server requires Bearer / Custom Header / Basic Auth / Vault / STDIO ➔ Setup is Y"*).
+> **Need a configuration recipe for your server?** Check the [**MCP Server Authentication & Integration Cookbook**](../mcp-server-auth-cookbook.md) for quick decision tables and configuration examples.
 
 ---
 
@@ -11,7 +11,7 @@ The **Model Context Gateway (MCG)** enables seamless registration and management
 
 ![Add Server Registration Modal](../assets/add_server_modal.jpg)
 
-Click the **`+ Add Server`** button in the dashboard toolbar to launch the Server Registration Modal.
+Click the **`+ Add Server`** button in the dashboard toolbar to open the registration modal.
 
 ```
 +-------------------------------------------------------------------------------+
@@ -38,41 +38,41 @@ Click the **`+ Add Server`** button in the dashboard toolbar to launch the Serve
 
 | Field | Description | Example |
 | :--- | :--- | :--- |
-| **Server Identifier (`id`)** | Unique alphanumeric string used for namespacing tools (`{id}__{tool}`) and direct routing (`/{id}`). | `docker`, `homeassistant`, `plex` |
-| **Display Name** | Human-readable name shown on dashboard cards and test bench selector. | `Docker Infrastructure Daemon` |
+| **Server Identifier (`id`)** | Unique text string. The gateway uses this identifier to namespace tools (`{id}__{tool}`) and route requests (`/{id}`). | `docker`, `homeassistant`, `plex` |
+| **Display Name** | Human-readable name shown on cards and test bench selectors. | `Docker Infrastructure Daemon` |
 | **Transport Type** | Communication protocol: `SSE`, `HTTP`, or `STDIO`. | `SSE` |
-| **Endpoint / Command** | Full HTTP/SSE URL or binary CLI command. | `http://docker-mcp:8080/sse` or `npx` |
-| **Categories** | Comma-separated list of tags for filtering and category-scoped AppKey access. | `Infrastructure, Smart Home` |
-| **Secret Provider** | Credential resolution backend: `None`, `Environment`, `Vault`, `WindowsRegistry`. | `Vault` |
-| **Custom Headers** | Optional JSON key-value dictionary of HTTP headers injected on downstream requests. | `{"Authorization": "Bearer token"}` |
+| **Endpoint / Command** | Full HTTP or SSE URL, or a CLI command path. | `http://docker-mcp:8080/sse` or `npx` |
+| **Categories** | Comma-separated tags for filtering and category-scoped AppKeys. | `Infrastructure, Smart Home` |
+| **Secret Provider** | Secret resolution system: `None`, `Environment`, `Vault`, or `WindowsRegistry`. | `Vault` |
+| **Custom Headers** | Optional JSON key-value map of HTTP headers sent with downstream requests. | `{"Authorization": "Bearer token"}` |
 
 ---
 
 ## 🚀 Transport Types & Lifecycle Behaviors
 
 > [!TIP]
-> For in-depth architectural specifications, process tree lifecycle policies, and SSE concurrency isolation details, see the canonical [**Transport Capability & Configuration Guide**](../transports.md).
+> For technical specifications and process lifecycle policies, read the [**Transport Capability & Configuration Guide**](../transports.md).
 
 ### 1. Server-Sent Events (`SSE`)
-* **Usage**: Persistent, stateful duplex stream for real-time notifications and long-running operations.
+* **Usage**: Stateful stream for real-time notifications and long operations.
 * **Endpoint Pattern**: `http://host:port/sse`
-* **Session Lifecycle**: The router opens a persistent SSE connection to the backend, negotiates session IDs, and forwards bidirectional JSON-RPC messages across client sessions.
+* **Session Lifecycle**: The gateway opens an SSE connection to the backend server. It tracks session IDs and routes JSON-RPC messages between clients and the server.
 
 ### 2. HTTP JSON-RPC (`HTTP` / `Streamable`)
-* **Usage**: Stateless HTTP POST communication using standard JSON-RPC 2.0 payloads.
+* **Usage**: Stateless HTTP POST requests with standard JSON-RPC 2.0 payloads.
 * **Endpoint Pattern**: `http://host:port/mcp` or `http://host:port/v1/jsonrpc`
-* **Session Lifecycle**: Independent HTTP requests are dispatched per tool invocation, prompt evaluation, or resource read. Ideal for high-throughput, horizontally scaled microservices.
+* **Session Lifecycle**: The gateway sends an independent HTTP request for each tool call, prompt evaluation, or resource read. This mode works well for microservices.
 
 ### 3. Local Subprocess (`STDIO`)
-* **Usage**: Spawns local CLI tools or containerized binaries that communicate over standard input/output (`stdin`/`stdout`).
-* **Command Syntax**: Binary executable with separated arguments (e.g. `npx -y @modelcontextprotocol/server-filesystem /shared/data`).
-* **Zero CLI Secret Leakage**: Credentials resolved from secret providers are injected exclusively into `ProcessStartInfo.Environment`, ensuring secrets never appear in command-line strings or OS process monitors (`ps aux`).
+* **Usage**: Starts local CLI tools or container binaries that communicate through standard input and output (`stdin`/`stdout`).
+* **Command Syntax**: Executable name with command-line arguments (for example, `npx -y @modelcontextprotocol/server-filesystem /shared/data`).
+* **Secret Protection**: The gateway injects resolved secrets directly into the process environment variables. Secrets never appear in command strings or system process lists (`ps aux`).
 
 ---
 
 ## 🔐 Enterprise Secret Providers
 
-To eliminate hardcoded credentials and plaintext secrets in databases, the router supports 4 pluggable secret resolution strategies:
+The gateway supports four secret resolution options to avoid plaintext credentials in database records:
 
 ```
                   SECRET RESOLUTION ARCHITECTURE
@@ -96,32 +96,32 @@ To eliminate hardcoded credentials and plaintext secrets in databases, the route
 ```
 
 ### 1. Direct Static Key (`None`)
-* Credentials stored directly in the server configuration.
-* Suitable for local development, public APIs, or un-authenticated internal networks.
+* Stores credentials directly in the server configuration.
+* Use this option for local development, public APIs, or unauthenticated internal networks.
 
 ### 2. Environment Variables (`Environment` / `Env`)
-* Resolves secrets dynamically at runtime from environment variables defined on the router host.
-* **Configuration**: Set `Item Key / Path` to the environment variable name (e.g. `HOME_ASSISTANT_LONG_LIVED_TOKEN` or `ACTUAL_API_PASSWORD`).
-* Supports `ENV:` prefix notation (e.g. `env:DOCKER_SECRET_KEY`).
+* Resolves secrets from environment variables on the gateway host.
+* **Configuration**: Set `Item Key / Path` to the environment variable name (for example, `HOME_ASSISTANT_LONG_LIVED_TOKEN`).
+* You can use the `ENV:` prefix notation (for example, `env:DOCKER_SECRET_KEY`).
 
 ### 3. HashiCorp Vault KV v2 (`Vault` / `HashiCorpVault`)
-* Dynamic runtime integration with HashiCorp Vault Key-Value Version 2 (`kv-v2`) secret engines.
-* **Authentication**: AppRole authentication (`roleId` + `secretId`) or direct Vault Token.
+* Reads secrets from HashiCorp Vault Key-Value Version 2 (`kv-v2`) engines.
+* **Authentication**: Supports AppRole authentication (`roleId` and `secretId`) or a direct Vault Token.
 * **Features**:
-  * **JIT Token Renewal**: Inspects token TTL before every request; automatically re-authenticates if < 5 minutes remain.
-  * **In-Memory Cache**: Caches retrieved secrets for 10 minutes with thread-safe invalidation.
+  * **Automatic Token Renewal**: Checks token time-to-live before each request. The gateway re-authenticates if less than five minutes remain.
+  * **In-Memory Cache**: Stores retrieved secrets in memory for 10 minutes.
   * **Parameters**:
     * **Secret Mount**: Mount path of the KV v2 engine (default: `secret`).
-    * **Secret Path**: Path to the secret document (e.g. `homelab/services/radarr`).
-    * **Secret Field**: Specific key inside the JSON payload (e.g. `api_key`).
+    * **Secret Path**: Path to the secret document (for example, `homelab/services/radarr`).
+    * **Secret Field**: Specific key name in the secret document (for example, `api_key`).
 
 ### 4. Windows Registry DPAPI (`WindowsRegistry` / `Registry`)
-* Resolves credentials from local Windows Registry hives (`HKLM` or `HKCU`).
-* **DPAPI Decryption**: Automatically detects and decrypts DPAPI-encrypted byte blobs (`CryptUnprotectData`).
+* Reads credentials from Windows Registry keys (`HKLM` or `HKCU`).
+* **DPAPI Decryption**: Detects and decrypts DPAPI-encrypted data blobs automatically.
 * **Parameters**:
-  * **Secret Path**: Subkey path (e.g. `SOFTWARE\Homelab\McpSecrets`).
-  * **Secret Field**: Value name (e.g. `PlexToken`).
-* *Note: Safely returns `null` when running on Linux containers.*
+  * **Secret Path**: Subkey registry path (for example, `SOFTWARE\Homelab\McpSecrets`).
+  * **Secret Field**: Registry value name (for example, `PlexToken`).
+* *Note: Returns `null` when running on Linux containers.*
 
 ---
 
@@ -131,20 +131,20 @@ To eliminate hardcoded credentials and plaintext secrets in databases, the route
 
 Click **`Inspect`** on any server card to open the Server Inspect Modal:
 
-* **Tools Tab**: Lists all discovered backend tools, their display names, descriptions, and full interactive JSON schema parameter definitions.
-* **Resources Tab**: Displays all exposed virtual resource URIs (e.g. `mcp://docker/containers/list`), MIME types, and descriptions.
-* **Prompts Tab**: Displays prompt templates with expected argument schemas.
-* **Raw Schema**: View or copy the complete, un-namespaced JSON-RPC discovery payload returned by the downstream server.
+* **Tools Tab**: Lists all discovered tools, their names, descriptions, and parameter JSON schemas.
+* **Resources Tab**: Displays virtual resource URIs (for example, `mcp://docker/containers/list`), MIME types, and descriptions.
+* **Prompts Tab**: Displays prompt templates and required arguments.
+* **Raw Schema**: Shows the raw JSON-RPC discovery response from the downstream server.
 
 ---
 
 ## 📄 Custom Tool JSON Specifications
 
-For downstream services that do not implement the MCP protocol natively, custom tool definitions can be uploaded:
+If downstream services do not support the MCP protocol directly, you can upload custom specifications:
 
-1. Click **`Settings`** -> **`Prompts & Resources`** (or **`Custom Files`**).
-2. Click **`+ Add Custom File`**.
-3. Select file type (`Tools`, `Prompts`, or `Resources`), provide a filename, and paste valid JSON:
+1. Click **Settings**, then click **Prompts & Resources** (or **Custom Files**).
+2. Click **+ Add Custom File**.
+3. Select the file type (`Tools`, `Prompts`, or `Resources`). Enter a filename and paste valid JSON:
 
 ```json
 [
@@ -170,4 +170,4 @@ For downstream services that do not implement the MCP protocol natively, custom 
 ]
 ```
 
-4. Save the file to instantly index the custom capabilities into the catalog and vector search engine.
+4. Click **Save File**. The gateway indexes the new items into the catalog and vector search engine.

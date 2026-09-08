@@ -1,23 +1,31 @@
 # ⚡ Dynamic Client Registration (RFC 7591) & OAuth 2.0 Flow
 
-This document provides the definitive architectural specification, sequence flows, protocol contracts, and integration guides for **OAuth 2.0 Dynamic Client Registration (RFC 7591)** in **Model Context Gateway (MCG)**.
+This document describes **OAuth 2.0 Dynamic Client Registration (RFC 7591)** in **Model Context Gateway (MCG)**. It explains protocols, workflows, registration schemas, token exchanges, and administration tools.
 
 ---
 
-## 📖 1. Protocol Standards & Specifications
+## 📖 1. Protocol Standards & Core Concepts
 
-Model Context Gateway implements full compliance with the modern OAuth 2.0 / 2.1 and OpenID Connect discovery and registration specifications:
+### Core Concepts for Beginners
 
-* **[RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591)**: *OAuth 2.0 Dynamic Client Registration Protocol* — Enables external AI agents, IDEs, and services to register as OAuth clients programmatically without human administrator intervention.
-* **[RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414)**: *OAuth 2.0 Authorization Server Metadata* — Publishes endpoints (`issuer`, `authorization_endpoint`, `token_endpoint`, `registration_endpoint`, `jwks_uri`) via standard `/.well-known` endpoints.
-* **[RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728)**: *OAuth 2.0 Protected Resource Metadata* — Enables clients connecting to individual SSE/HTTP proxy paths (e.g. `/sse`, `/docker`, `/plex`) to discover resource server authorization servers via `/.well-known/oauth-protected-resource`.
+- **OAuth 2.0**: An authorization standard. It allows applications to access services on behalf of users without sharing passwords.
+- **Dynamic Client Registration (DCR / RFC 7591)**: A protocol that lets client applications register themselves automatically. AI agents and IDEs register without manual administrator setup.
+- **Bearer Token**: A secret security token. The client passes it in the `Authorization: Bearer <token>` header to access resources.
+
+### Implemented Specifications
+
+The gateway complies with modern OAuth 2.0, OAuth 2.1, and OpenID Connect specifications:
+
+* **[RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591)**: *OAuth 2.0 Dynamic Client Registration Protocol* — Lets external AI agents and IDEs register as OAuth clients programmatically.
+* **[RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414)**: *OAuth 2.0 Authorization Server Metadata* — Advertises endpoints (`issuer`, `authorization_endpoint`, `token_endpoint`, `registration_endpoint`) through `/.well-known` endpoints.
+* **[RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728)**: *OAuth 2.0 Protected Resource Metadata* — Lets clients discover resource authorization servers via `/.well-known/oauth-protected-resource`.
 * **[OpenID Connect Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html)**: Standard dynamic client registration profile for OpenID Connect providers.
 
 ---
 
 ## 🔄 2. End-to-End Dynamic Client Registration Sequence
 
-The following sequence illustrates the complete lifecycle from automated discovery to dynamic registration, secret hashing, token issuance, and MCP tool execution:
+This diagram shows the complete registration, token issuance, and MCP execution sequence:
 
 ```mermaid
 sequenceDiagram
@@ -57,7 +65,7 @@ sequenceDiagram
 
 ## 🛠️ 3. Discovery Endpoints & RFC 8414 Advertisement
 
-External AI agents (such as Google Gemini) query the gateway's discovery endpoints to discover the `registration_endpoint` and supported authentication methods before initiating communication.
+External AI agents (such as Google Gemini) query discovery endpoints to locate the `registration_endpoint` and supported authentication methods before connecting.
 
 ### Endpoints
 * `GET /.well-known/oauth-authorization-server` (RFC 8414)
@@ -101,7 +109,7 @@ External AI agents (such as Google Gemini) query the gateway's discovery endpoin
 
 ## 📝 4. Client Registration Endpoint (`POST /api/register`)
 
-The gateway accepts Dynamic Client Registration requests at the following route aliases:
+The gateway accepts Dynamic Client Registration requests at these route aliases:
 * `/api/register` *(Primary)*
 * `/connect/register`
 * `/oauth/register`
@@ -136,10 +144,10 @@ Content-Type: application/json
 | Parameter | Type | Required | Default | Description |
 | :--- | :--- | :---: | :--- | :--- |
 | `client_name` | String | No | `"Unknown Client"` | Human-readable name identifying the client application. |
-| `redirect_uris` | Array\<String\> | No | `[]` | Whitelisted redirection URIs for interactive `authorization_code` flows. |
+| `redirect_uris` | Array\<String\> | No | `[]` | Allowed redirection destinations for `authorization_code` flows. |
 | `grant_types` | Array\<String\> | No | `["authorization_code", "refresh_token"]` | Allowed OAuth 2.0 grant types for this client. |
 | `response_types` | Array\<String\> | No | `["code"]` | Allowed response types for authorization requests. |
-| `token_endpoint_auth_method` | String | No | `"client_secret_post"` | Authentication method: `"client_secret_post"`, `"client_secret_basic"`, or `"none"` (public client). |
+| `token_endpoint_auth_method` | String | No | `"client_secret_post"` | Authentication method: `"client_secret_post"`, `"client_secret_basic"`, or `"none"`. |
 | `application_type` | String | No | `"web"` | Application type: `"web"` or `"native"` (native defaults to public client with PKCE). |
 | `scope` | String | No | `"mcp_client"` | Space-delimited string of requested OAuth scopes (e.g. `"openid mcp_client tools:execute"`). |
 
@@ -201,13 +209,13 @@ Pragma: no-cache
 ```
 
 > [!CAUTION]
-> **One-Time Secret Disclosure**: For confidential clients, the plaintext `client_secret` is **only returned once** in the HTTP 201 response. The gateway computes and stores only its SHA-256 hash in the database. Plaintext secrets are never stored on disk and cannot be retrieved via any subsequent API call. Public clients never have secrets.
+> **One-Time Secret Disclosure**: For confidential clients, the gateway returns the plaintext `client_secret` **only once** in the HTTP 201 response. The database stores only its SHA-256 hash. The gateway never saves plaintext secrets to disk. You cannot retrieve a lost secret through the API. Public clients do not use secrets.
 
 ---
 
 ## 🔒 5. Persistence Isolation: `OAuthClients` vs `AppKeys`
 
-In MCG v5.1.0+, OAuth 2.0 Dynamic Client Registrations are completely isolated from static user API keys (`AppKeys`):
+OAuth 2.0 Dynamic Client Registrations remain strictly separate from static user API keys (`AppKeys`):
 
 ```mermaid
 graph LR
@@ -223,11 +231,11 @@ graph LR
 | Dimension | 🔑 Static `AppKeys` | ⚡ Dynamic `OAuthClients` |
 | :--- | :--- | :--- |
 | **Primary Use Case** | Local IDEs (Cursor, VS Code), CLI scripts | Dynamic AI Agents (Gemini, Slack, Multi-Tenant apps) |
-| **Protocol Standards** | Header-based (`X-App-Key: mcp-...`) | RFC 7591 (DCR), RFC 6749 (OAuth2), OpenID Connect |
+| **Protocol Standards** | Header-based (`X-App-Key: mcp-...`) | RFC 7591 (DCR), RFC 6749 (OAuth 2.0), OpenID Connect |
 | **Underlying Database Table** | `AppKeys` | `OAuthClients` |
 | **Secret Storage Scheme** | Argon2id / AES-256-GCM encrypted key | SHA-256 Hex Hash (`ClientSecretHash`) |
-| **Owner Binding** | Bound to user's Active Directory SID / UPN | Machine application (`OwnerSid = ''` / decoupled) |
-| **Token Lifecycle** | Static key lifetime (or optional expiration) | Short-lived JWT Access Tokens + Refresh Tokens |
+| **Owner Binding** | Bound to user Active Directory SID or UPN | Machine application (`OwnerSid = ''` / decoupled) |
+| **Token Lifecycle** | Static key lifetime (or optional expiration) | Short-lived JWT Access Tokens and Refresh Tokens |
 | **Stored Procedures** | `sp_SaveAppKey`, `sp_GetAppKeys`, `sp_DeleteAppKey` | `sp_SaveOAuthClient`, `sp_GetOAuthClients`, `sp_DeleteOAuthClient` |
 
 ---
@@ -235,50 +243,51 @@ graph LR
 ## 🛡️ 6. Security Architecture & Threat Mitigations
 
 ### 1. Timing-Attack Mitigation
-During token exchange (`/connect/token`), the provided `client_secret` is hashed using SHA-256 and compared against `OAuthClient.ClientSecretHash` using **constant-time byte comparison** (`CryptographicOperations.FixedTimeEquals`):
+During token exchange (`/connect/token`), the gateway computes the SHA-256 hash of the client secret. It compares the hash with `OAuthClient.ClientSecretHash` using **constant-time byte comparison** (`CryptographicOperations.FixedTimeEquals`):
 
 ```csharp
 byte[] inputHash = SHA256.HashData(Encoding.UTF8.GetBytes(clientSecret));
 byte[] storedHash = Convert.FromHexString(client.ClientSecretHash);
 bool isValid = CryptographicOperations.FixedTimeEquals(inputHash, storedHash);
 ```
+This comparison prevents timing attacks.
 
 ### 2. Privilege Decoupling
-Machine clients registered dynamically or manually are provisioned with `OwnerSid = string.Empty`. This guarantees that autonomous AI agents cannot inherit administrative Windows SIDs or bypass Role-Based Access Control (RBAC) rules.
+The gateway sets `OwnerSid = string.Empty` on all dynamic machine clients. This prevents autonomous AI agents from inheriting administrator Windows SIDs or bypassing Role-Based Access Control (RBAC) rules.
 
 ### 3. Expiration & Revocation
-* **Expiration**: Clients can be provisioned with an optional `ExpiresAt` UTC timestamp. Requests to authenticate expired clients are rejected with HTTP 400 `invalid_client`.
-* **Instant Revocation**: Administrators can instantly delete registered clients via the Web UI (**App Keys & Security > Registered Clients**) or via `DELETE /api/clients/{clientId}`. Revocation terminates subsequent token issuances immediately.
+* **Expiration**: Clients support an optional `ExpiresAt` UTC timestamp. The gateway rejects authentication requests from expired clients with HTTP 400 `invalid_client`.
+* **Instant Revocation**: Administrators can delete registered clients in the Web UI (**App Keys & Security > Registered Clients**) or via `DELETE /api/clients/{clientId}`. Revocation blocks new token requests immediately.
 
 ### 4. Idempotency, Client Reuse & Automated Cleanup
-Autonomous AI clients and IDE agents (such as Google Antigravity, VS Code, Cursor) periodically reconnect and re-evaluate registration discovery metadata. To prevent unbounded record accumulation in the `OAuthClients` table:
-* **Idempotent Client Reuse**: If an incoming DCR request matches an existing dynamic client's `ClientName` and `ClientType` (where `CreatedBy = 'dcr'`), the gateway reuses the existing `ClientId`, updates registration timestamps and scope/redirect metadata, and returns the existing registration rather than creating orphan duplicates.
-* **Automated Startup Pruning**: During startup database migrations and background maintenance (`DatabaseSeederService`), the gateway automatically prunes stale duplicate DCR records across SQLite, MySQL, and MSSQL, preserving only the most recent configuration.
-* **Administrative Cleanup**: Operators can trigger immediate DCR client cleanup via the Web UI button (**Clean Up DCR**) or the API endpoint `POST /api/clients/cleanup?retentionDays=30`.
+Autonomous AI clients and IDE agents frequently reconnect and query registration discovery endpoints. To prevent duplicate database rows:
+* **Idempotent Client Reuse**: If an incoming DCR request matches an existing client's name and type (with `CreatedBy = 'dcr'`), the gateway reuses the existing `ClientId`. It updates timestamps and scope metadata instead of creating duplicate records.
+* **Automated Startup Pruning**: During startup migrations and background maintenance (`DatabaseSeederService`), the gateway prunes old duplicate DCR records across SQLite, MySQL, and MSSQL. It keeps only the latest record.
+* **Administrative Cleanup**: Operators can trigger immediate DCR cleanup using the Web UI button (**Clean Up DCR**) or via `POST /api/clients/cleanup?retentionDays=30`.
 
 ---
 
 ## 🖥️ 7. Web UI Management
 
-Administrators and operators can view and manage registered dynamic and manual OAuth applications in the Web Dashboard:
+Administrators can view and manage registered OAuth applications in the Web Dashboard:
 
-1. Navigate to **App Keys & Security**.
+1. Open **App Keys & Security**.
 2. Scroll to **Dynamic Client Registration (RFC 7591)**.
-3. The table displays:
+3. Review the client table:
    - **Application Name**: Display name provided during registration.
    - **Client ID**: Alphanumeric identifier with one-click copy button.
-   - **Type**: Badges indicating `confidential` / `public` and `Dynamic` (via API) / `Manual` (via UI).
-   - **Grant Types**: Visual tags for supported grants (`authorization_code`, `refresh_token`, `client_credentials`).
-   - **Redirect URIs**: Whitelisted callback destinations.
+   - **Type**: Badges indicating `confidential` or `public` and `Dynamic` (API) or `Manual` (UI).
+   - **Grant Types**: Tags for supported grants (`authorization_code`, `refresh_token`, `client_credentials`).
+   - **Redirect URIs**: Allowed callback destinations.
    - **Scopes**: Allowed permission tags.
    - **Created / Expires**: Timestamp tracking with expiration status warnings.
-4. Click **Register Client** to manually provision an OAuth application with custom redirect URIs and grant types.
+4. Click **Register Client** to provision an OAuth application manually with custom redirect URIs and grant types.
 
 ---
 
 ## 🔗 8. Related Documentation
 
-- [Multi-Tenant OAuth Consent Flow](multi-tenant-oauth-consent.md): Interactive user authorization and consent screen architecture.
+- [Multi-Tenant OAuth Consent Flow](multi-tenant-oauth-consent.md): User authorization and consent screen architecture.
 - [Canonical Data Model & Database ERD](../data-model.md): Database schema and entity relationships for `OAuthClients`.
 - [Database Provider Support Matrix](../database-providers.md): Dialect-specific DDL and stored procedures across SQLite, MSSQL, and MySQL.
 - [RBAC & Access Control Policies](../user-guide/03-rbac-and-security.md): 4-Stage authorization pipeline and identity providers.

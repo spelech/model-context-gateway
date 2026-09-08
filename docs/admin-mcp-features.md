@@ -1,16 +1,20 @@
-# Admin MCP Server Features
+# Admin MCP Tools Quick Reference
 
-Model Context Gateway (MCG) embeds a virtual, in-process **Admin MCP Server**. This allows administrators to manage the gateway's configuration, servers, clients, policies, and diagnostics using the standard Model Context Protocol (MCP), effectively treating the gateway administration interface as just another MCP server.
+Model Context Gateway (MCG) provides an in-process **Admin MCP Server** at `/admin` and `/mcg-admin`.
 
-This server exposes 10 consolidated tools that cover 100% of the gateway's administration and diagnostics flows.
+This server provides 10 tools for automated administration by AI assistants (like Claude, Cursor, or Antigravity) and DevOps scripts.
 
-## Admin Tools Reference
+For full administration procedures, see the [**Administrator Guide**](admin-guide.md). For automation playbooks, see the [**Admin MCP Automation Guide**](admin-mcp-automation-guide.md).
+
+---
+
+## 10 Admin Tools Reference
 
 ### 1. `manage_servers`
-Manage backend MCP server configurations and connectivity in the router gateway.
+Manage backend MCP server configurations and connections.
 - **Actions**: `list`, `get`, `create`, `update`, `delete`, `toggle`, `reconnect`, `reconnect_all`
-- **Key Parameters**: `id`, `name`, `url`, `type` (`sse`, `http`, `stdio`), `alias` (concise namespace alias for tool routing, e.g. `ha`), `category`, `enabled`, `secret_provider`, `secret_key`
-- **Use Cases**: Provisioning new backend servers, updating connection settings (URLs, auth shapes, headers, aliases), toggling enabled states, and manually forcing health checks or reconnections.
+- **Key Parameters**: `id`, `name`, `url`, `type` (`sse`, `http`, `stdio`), `alias`, `category`, `enabled`, `secret_provider`, `secret_key`
+- **Description**: Add new backend servers, update URLs or headers, toggle active status, and refresh connections.
 
 ### 2. `manage_appkeys`
 Manage user and application API keys, quotas, and expiration.

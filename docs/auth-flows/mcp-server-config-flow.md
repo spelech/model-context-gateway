@@ -1,6 +1,11 @@
 # MCP Server Configuration Flow
 
-This document illustrates how an administrator configures a backend MCP Server in the Gateway, focusing on authentication and secret management.
+This document explains how an administrator configures a backend MCP server in the gateway. It focuses on authentication options and secret management.
+
+### Core Concepts for Beginners
+- **Secret Provider**: The storage location where the gateway fetches credentials (environment variables, Windows registry, or HashiCorp Vault).
+- **AuthShape**: The format used to send credentials to the backend server (Bearer token, Basic auth, custom header, or query string).
+- **Bearer Token**: A secret key string sent in the `Authorization: Bearer <token>` header.
 
 ```mermaid
 flowchart TD
@@ -52,19 +57,23 @@ flowchart TD
     G --> Z[(Database: Servers Table)]
 ```
 
-### Explanation
-1. **Connection Type**: The transport used to connect to the backend MCP server (e.g. `sse` for network, `stdio` for local binaries).
-2. **Secret Provider**: Dictates where the router will fetch the credentials for this server at runtime.
-    - **Environment**: Fetched from the router host's environment variables.
-    - **WindowsRegistry**: Fetched from the router host's registry.
-    - **Vault**: Fetched securely from a HashiCorp Vault instance.
-    - **UserProvided**: The router will not use a global secret. Instead, it expects each platform user to have stored their own credentials in the `UserServerCredentials` table.
-3. **Auth Shape**: Dictates how the fetched secret is injected into the HTTP request sent to the backend server (e.g., as a Bearer token in the Authorization header, or a custom HTTP header like `X-API-Key`).
+### Configuration Options Reference
 
-### Note on Dynamic vs. Static Credentials
-The Gateway is currently designed to fetch **static** secrets only (whether global via Vault/Env or user-specific via the Database). 
+1. **Connection Type**: The transport used to reach the backend server (`sse`, `http`, or `stdio`).
+2. **Secret Provider**: The source where the gateway retrieves credentials:
+   - **Environment**: Reads values from host environment variables.
+   - **WindowsRegistry**: Reads values from the Windows registry.
+   - **Vault**: Reads secrets securely from HashiCorp Vault.
+   - **UserProvided**: Uses personal credentials saved by individual users.
+   - **None**: Uses a static API key saved directly in the server configuration.
+3. **Auth Shape**: Dictates how the gateway injects credentials into outbound requests (e.g., Bearer tokens or custom headers like `X-API-Key`).
 
-**The router does NOT natively support retrieving dynamic credentials** (such as negotiating an OAuth2/JWT token exchange with an internal identity provider on behalf of the user prior to calling the backend). 
+### Dynamic vs. Static Credentials
 
-If a backend server strictly requires a dynamic, short-lived JWT, the router cannot fetch it automatically. However, there is a workaround:
-- **Pass-Through Auth**: An admin can enable `AllowPassThroughAuth` on the backend server. The *client* (IDE) must then retrieve the dynamic token itself and send it to the router in the `X-Target-Auth` HTTP header. The router extracts this token and seamlessly injects it into the outgoing backend request **using the configured `AuthShape`** (e.g., translating it into a standard `Authorization: Bearer <token>` header). The backend server remains completely unaware of the router's `X-Target-Auth` mechanism.
+The gateway retrieves **static** credentials only. It does not fetch dynamic tokens (such as running OAuth 2.0 token exchanges) on behalf of users.
+
+If a backend server requires a dynamic JWT, use **Pass-Through Auth**:
+1. Enable `AllowPassThroughAuth` in the backend server configuration.
+2. Have the client (IDE) obtain the dynamic JWT from the identity provider.
+3. Pass the JWT in the `X-Target-Auth` HTTP header.
+4. The gateway reads this token and injects it into outbound requests using the configured `AuthShape` (such as `Authorization: Bearer <token>`). The backend server receives standard authorization headers.

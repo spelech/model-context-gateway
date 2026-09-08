@@ -21,7 +21,7 @@ AppKeys grant external clients secure, authenticated access to the router withou
    * **Access Scopes**: Assign least-privilege permissions (see scope grammar below).
    * **Expiration**: Select `30 Days`, `90 Days`, `1 Year`, or `Never`.
 4. Click **Generate Key**.
-5. **Copy the Secret Key**: The plaintext key (`mcp_app_key_...`) is displayed **only once**. Store it in your client configuration or secrets manager immediately. The database stores only the one-way SHA-256 hash.
+5. **Copy the Secret Key**: The plaintext key (`mcp-usr-...` or `mcp-adm-...`) displays **only once**. Store it in your client configuration or secrets manager immediately. The database stores only the one-way SHA-256 hash.
 
 ---
 
@@ -32,7 +32,7 @@ AppKeys grant external clients secure, authenticated access to the router withou
 
 | Scope Pattern | Description | Example |
 | :--- | :--- | :--- |
-| `*`, `all` | **Global Access**: Grants unrestricted access to all servers, tools, resources, and prompts. | `*`, `all` |
+| `*`, `all` | **Global Access**: Grants access to all servers, tools, resources, and prompts. | `*`, `all` |
 | `admin` | **Administrative Access**: Grants full gateway administration rights and access to the `/admin` MCP server. | `admin` |
 | `category:<name>` | **Category Scope**: Grants access to all servers tagged with the specified category. | `category:smarthome`, `category:media` |
 | `server:<id>` | **Server Scope**: Grants access to all capabilities of a specific backend server. | `server:docker`, `server:actual_budget` |
@@ -47,8 +47,8 @@ AppKeys grant external clients secure, authenticated access to the router withou
 The **Client Setup Guide** card (available on both the Overview and App Keys & Security views) features an interactive configuration generator:
 
 ```
-[ Target Route: Unified Meta-Mode (/sse?meta=true) ▾ ]
-[ Client Tool: Cursor IDE ▾ ]  [ Host: http://localhost:8080 ]  [☑ Include X-App-Key ]
+[ Target Route: Unified Meta-Mode (/sse) ▾ ]
+[ Client Tool: Cursor IDE ▾ ]  [ Host: http://localhost:8080 ]  [☑ Include Key ]
 ```
 
 ---
@@ -61,22 +61,22 @@ To connect Cursor to the unified Meta-Mode gateway:
 ```json
 {
   "mcpServers": {
-    "model-context-gateway": {
+    "mcg": {
       "url": "http://localhost:8080/sse",
       "headers": {
-        "X-App-Key": "mcp_app_key_your_generated_secret_key_here"
+        "Authorization": "Bearer mcp-usr-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
       }
     }
   }
 }
 ```
-2. Restart Cursor or reload MCP servers in Cursor Settings (`Features` -> `MCP Servers`).
+2. Reload MCP servers in Cursor Settings (`Features` -> `MCP Servers`).
 
 ---
 
 ### 2. Claude Desktop (`claude_desktop_config.json`)
 
-Claude Desktop connects using the official MCP inspector bridge or direct SSE transport:
+Claude Desktop connects using the official SSE client bridge:
 
 * **File Location**:
   * **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -86,15 +86,15 @@ Claude Desktop connects using the official MCP inspector bridge or direct SSE tr
 ```json
 {
   "mcpServers": {
-    "model-context-gateway": {
+    "mcg": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/inspector",
+        "@modelcontextprotocol/client-sse",
         "http://localhost:8080/sse"
       ],
       "env": {
-        "X_APP_KEY": "mcp_app_key_your_generated_secret_key_here"
+        "Authorization": "Bearer mcp-usr-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
       }
     }
   }
@@ -103,17 +103,17 @@ Claude Desktop connects using the official MCP inspector bridge or direct SSE tr
 
 ---
 
-### 3. Antigravity CLI / OpenClaw Autonomous Agent
+### 3. Antigravity CLI / Autonomous Agent
 
 For CLI coding agents and autonomous workflows:
 
 ```bash
-# Export environment variable
+# Export environment variables
 export MCG_URL="http://localhost:8080/sse"
-export MCG_KEY="mcp-adm-your_generated_secret_key_here"
+export MCG_KEY="mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
 
 # Connect via Antigravity CLI
-agy mcp connect --url "$MCG_URL" --header "X-App-Key: $MCG_KEY"
+agy mcp connect --url "$MCG_URL" --header "Authorization: Bearer $MCG_KEY"
 ```
 
 ---
@@ -125,10 +125,10 @@ In VS Code with the Cline or Roo Code extension:
 ```json
 {
   "mcpServers": {
-    "model-context-gateway": {
+    "mcg": {
       "url": "http://localhost:8080/sse",
       "headers": {
-        "X-App-Key": "mcp_app_key_your_generated_secret_key_here"
+        "Authorization": "Bearer mcp-usr-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
       }
     }
   }
@@ -149,7 +149,7 @@ const transport = new SSEClientTransport(
   {
     requestInit: {
       headers: {
-        "X-App-Key": "mcp_app_key_your_generated_secret_key_here"
+        "Authorization": "Bearer mcp-usr-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
       }
     }
   }
@@ -173,7 +173,7 @@ from mcp import ClientSession
 from mcp.client.sse import sse_client
 
 async def main():
-    headers = {"X-App-Key": "mcp_app_key_your_generated_secret_key_here"}
+    headers = {"Authorization": "Bearer mcp-usr-Xk9L2mPq-7vN3wZ8aB1cE4fG9"}
     async with sse_client("http://localhost:8080/sse", headers=headers) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()

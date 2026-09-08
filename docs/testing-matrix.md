@@ -1,6 +1,6 @@
 # Pairwise Integration & E2E Requirements Matrix
 
-This document defines the canonical pairwise requirements matrix, interaction coverage tables, and end-to-end verification contracts for the **C# Model Context Protocol (MCP) Router**.
+This document defines the canonical pairwise requirements matrix, interaction coverage tables, and end-to-end verification contracts for the **Model Context Gateway (MCG)**.
 
 > **Living Test Catalog & SRS:** For automated requirement-to-test traceability and fail-closed safety guardrails, see the [**Software Requirements Specification (SRS) & Test Verification Catalog**](software-requirements-and-test-catalog.md) and [**Test Catalog Guide**](test-catalog-guide.md).
 
