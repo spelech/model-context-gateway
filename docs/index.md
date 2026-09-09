@@ -211,15 +211,6 @@ Living Software Requirements Specification, requirement taxonomy (`AUTH`, `MCP`,
 In-depth root cause analysis and resolution guide covering session lifecycles, cache synchronization, and downstreams.
 
 </li>
-<li>
-
-📄 **[Management Overview & Briefing](management-brief.md)**
-
----
-
-Executive-level summary of architecture, selling points, enterprise governance, and NotebookLM briefing prompt.
-
-</li>
 </ul>
 
 </div>

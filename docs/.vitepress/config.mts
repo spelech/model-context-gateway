@@ -69,13 +69,6 @@ export default withMermaid(
             { text: 'Code Coverage Report', link: '/coverage-report' },
             { text: 'Evaluation Guide', link: '/evaluation-guide' }
           ]
-        },
-        {
-          text: 'About',
-          items: [
-            { text: 'Management Briefing', link: '/management-brief' },
-            { text: 'Pitch Deck', link: '/pitch-deck' }
-          ]
         }
       ],
 
@@ -161,14 +154,6 @@ export default withMermaid(
             { text: 'Test Coverage Evaluation', link: '/test-coverage-evaluation' },
             { text: 'Code Coverage Report', link: '/coverage-report' },
             { text: 'Evaluation Guide', link: '/evaluation-guide' }
-          ]
-        },
-        {
-          text: 'About',
-          collapsed: true,
-          items: [
-            { text: 'Management Briefing', link: '/management-brief' },
-            { text: 'Pitch Deck', link: '/pitch-deck' }
           ]
         }
       ],
