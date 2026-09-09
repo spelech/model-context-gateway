@@ -162,7 +162,6 @@ For complete credential flow diagrams, see the [Authentication Support Matrix](d
 | [**Downstream Transports Guide**](docs/transports.md) | SSE, HTTP, and STDIO local subprocess security and isolation. |
 | [**Product Evaluation Guide**](docs/evaluation-guide.md) | Context window reduction, token cost savings, and comparisons. |
 | [**Troubleshooting & RCA Guide**](docs/mcp-routing-and-admin-issues.md) | Solutions for session timeouts, cache sync, and backend errors. |
-| [**Management Briefing**](docs/management-brief.md) | Executive summary and NotebookLM briefing prompt. |
 
 ---
 
