@@ -211,6 +211,33 @@ Living Software Requirements Specification, requirement taxonomy (`AUTH`, `MCP`,
 In-depth root cause analysis and resolution guide covering session lifecycles, cache synchronization, and downstreams.
 
 </li>
+<li>
+
+🏢 **[Active Directory & RBAC Guide](active-directory-and-rbac-guide.md)**
+
+---
+
+Inbound Windows Kerberos and LDAPS tokenGroups recursive resolution, multi-level group policies, and impersonation.
+
+</li>
+<li>
+
+🌐 **[OIDC & SSO Reverse Proxy Guide](oidc-and-sso-guide.md)**
+
+---
+
+External JWT validation, trusted proxy header SSO, multi-level claims authorization, and RFC 8693 token exchange.
+
+</li>
+<li>
+
+🎯 **[Downstream Auth & Delegation Guide](downstream-auth-and-delegation-guide.md)**
+
+---
+
+Six credential delegation patterns, RLS identity forwarding, token exchange, and mixing guardrails.
+
+</li>
 </ul>
 
 </div>

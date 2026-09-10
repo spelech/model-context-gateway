@@ -208,5 +208,16 @@ AI assistants and LLM tools (Claude Desktop, Cursor, Cline, Windsurf) can manage
 * `Identity__Jwt__Audience="model-context-gateway"`
 * `Identity__Jwt__Issuer="https://idp.corp.internal/auth/realms/corp"`
 
+---
+
+## 6. Related Documentation
+
+* [**Active Directory & RBAC Guide**](active-directory-and-rbac-guide.md) — Windows Kerberos, LDAPS `tokenGroups` recursive resolution, and multi-level group policies.
+* [**OIDC & SSO Reverse Proxy Guide**](oidc-and-sso-guide.md) — External JWT validation, header SSO, and downstream token exchange.
+* [**Downstream Auth & Delegation Guide**](downstream-auth-and-delegation-guide.md) — Six credential delegation patterns, RLS identity forwarding, and mixing guardrails.
+* [**RBAC & Security Policies Guide**](user-guide/03-rbac-and-security.md) — The 4-stage authorization pipeline and policy engine.
+* [**Enterprise AD, Vault & Auth Architecture**](enterprise-ad-vault-scenarios-and-gap-analysis.md) — Enterprise hosting topologies and secret management.
+
+
 
 

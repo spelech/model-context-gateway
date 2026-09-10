@@ -163,6 +163,9 @@ For complete credential flow diagrams, see the [Authentication Support Matrix](d
 | [**Product Evaluation Guide**](docs/evaluation-guide.md) | Context window reduction, token cost savings, and comparisons. |
 | [**Troubleshooting & RCA Guide**](docs/mcp-routing-and-admin-issues.md) | Solutions for session timeouts, cache sync, and backend errors. |
 | [**Enterprise AD, Vault & Auth Architecture**](docs/enterprise-ad-vault-scenarios-and-gap-analysis.md) | Enterprise AD, Vault topology, and downstream auth matrix architecture. |
+| [**Active Directory & RBAC Guide**](docs/active-directory-and-rbac-guide.md) | Inbound AD Kerberos/LDAPS, tokenGroups recursive resolution, and multi-level RBAC. |
+| [**OIDC & SSO Reverse Proxy Guide**](docs/oidc-and-sso-guide.md) | External JWT validation, header SSO, and downstream token exchange. |
+| [**Downstream Auth & Delegation Guide**](docs/downstream-auth-and-delegation-guide.md) | Six credential delegation patterns, RLS identity forwarding, and mixing guardrails. |
 
 ---
 
