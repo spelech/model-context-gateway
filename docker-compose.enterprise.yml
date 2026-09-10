@@ -1,0 +1,139 @@
+version: '3.8'
+
+networks:
+  net_enterprise:
+    driver: bridge
+
+services:
+  # 1. HashiCorp Vault in dev mode for Enterprise Secrets
+  vault-enterprise:
+    image: hashicorp/vault:latest
+    container_name: mcg-vault-enterprise
+    networks:
+      - net_enterprise
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "root-enterprise-token"
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+      VAULT_ADDR: "http://127.0.0.1:8200"
+    ports:
+      - "18200:8200"
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 4s
+      timeout: 3s
+      retries: 5
+
+  # 2. Vault Populator / Initializer
+  vault-enterprise-init:
+    image: hashicorp/vault:latest
+    container_name: mcg-vault-enterprise-init
+    networks:
+      - net_enterprise
+    depends_on:
+      vault-enterprise:
+        condition: service_healthy
+    volumes:
+      - ./tests/enterprise/vault/vault-enterprise-init.sh:/vault-init.sh:ro
+    environment:
+      VAULT_ADDR: "http://vault-enterprise:8200"
+      VAULT_TOKEN: "root-enterprise-token"
+    entrypoint: ["sh", "/vault-init.sh"]
+
+  # 3. OpenLDAP Test Container for On-Prem Active Directory Simulation
+  ldap-enterprise:
+    image: osixia/openldap:latest
+    container_name: mcg-ldap-enterprise
+    networks:
+      - net_enterprise
+    environment:
+      LDAP_ORGANISATION: "Corp Local"
+      LDAP_DOMAIN: "corp.local"
+      LDAP_ADMIN_PASSWORD: "AdminPassword2026!"
+      LDAP_TLS: "true"
+      LDAP_TLS_VERIFY_CLIENT: "never"
+    volumes:
+      - ./tests/enterprise/ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom:ro
+    ports:
+      - "13389:389"
+      - "16636:636"
+    healthcheck:
+      test: ["CMD", "ldapsearch", "-x", "-H", "ldap://localhost", "-b", "dc=corp,dc=local", "-s", "base"]
+      interval: 4s
+      timeout: 3s
+      retries: 5
+
+  # 4. In-House Mock Identity Provider (OIDC / JWT / .well-known / Token Exchange)
+  mock-idp:
+    image: node:20-alpine
+    container_name: mcg-mock-idp
+    networks:
+      - net_enterprise
+    volumes:
+      - ./tests/enterprise/mock-idp/mock-idp.mjs:/app/mock-idp.mjs:ro
+    working_dir: /app
+    command: ["node", "mock-idp.mjs"]
+    environment:
+      PORT: "8095"
+    ports:
+      - "18095:8095"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8095/health || exit 1"]
+      interval: 4s
+      timeout: 3s
+      retries: 5
+
+  # 5. Enterprise Downstream Mock MCP Servers
+  # Hosts endpoints: /apikey, /customheader, /slack, /idp-token, /forwarded-identity
+  mock-downstream:
+    image: node:20-alpine
+    container_name: mcg-mock-downstream
+    networks:
+      - net_enterprise
+    volumes:
+      - ./tests/enterprise/mock-downstream/mock-downstream-servers.mjs:/app/mock-downstream-servers.mjs:ro
+    working_dir: /app
+    command: ["node", "mock-downstream-servers.mjs"]
+    environment:
+      PORT: "8090"
+    ports:
+      - "18090:8090"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8090/health || exit 1"]
+      interval: 4s
+      timeout: 3s
+      retries: 5
+
+  # 6. Model Context Gateway (MCG)
+  mcg-enterprise:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/spelech/model-context-gateway:latest
+    container_name: mcg-enterprise
+    networks:
+      - net_enterprise
+    ports:
+      - "18088:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - MCG_MASTER_KEY=SecureEnterprisePassphrase2026!
+      - MCG_VAULT_ADDR=http://vault-enterprise:8200
+      - MCG_VAULT_TOKEN=root-enterprise-token
+      - Ldap__Server=ldap-enterprise
+      - Ldap__Port=636
+      - Ldap__UseSsl=true
+      - Ldap__Domain=corp.local
+      - Ldap__BaseDn=dc=corp,dc=local
+      - Ldap__BindDn=cn=admin,dc=corp,dc=local
+      - Ldap__BindPassword=AdminPassword2026!
+      - Oidc__RequireTrustedProxy=false
+      - Security__AllowedIpRanges__0=0.0.0.0/0
+    depends_on:
+      vault-enterprise:
+        condition: service_healthy
+      ldap-enterprise:
+        condition: service_healthy
+      mock-idp:
+        condition: service_healthy
+      mock-downstream:
+        condition: service_healthy
