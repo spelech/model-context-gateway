@@ -1,0 +1,106 @@
+# Organizational Units
+dn: ou=users,dc=corp,dc=local
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,dc=corp,dc=local
+objectClass: organizationalUnit
+ou: groups
+
+# 1. Administrator (Builtin Admin SID S-1-5-32-544)
+dn: cn=Administrator,ou=users,dc=corp,dc=local
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Administrator
+sn: Admin
+givenName: Domain
+mail: admin@corp.local
+userPassword: AdminPassword2026!
+description: S-1-5-32-544
+telephoneNumber: S-1-5-32-544
+employeeNumber: S-1-5-32-544
+
+# 2. Steve (Lead Engineer / Slack User, SID S-1-5-21-1001)
+dn: cn=Steve,ou=users,dc=corp,dc=local
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Steve
+sn: Pelech
+givenName: Steve
+mail: steve@corp.local
+userPassword: StevePassword2026!
+description: S-1-5-21-1001
+telephoneNumber: S-1-5-21-1001
+employeeNumber: S-1-5-21-1001
+
+# 3. Alice Developer (SID S-1-5-21-1002)
+dn: cn=Alice Developer,ou=users,dc=corp,dc=local
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Alice Developer
+sn: Developer
+givenName: Alice
+mail: alice@corp.local
+userPassword: AlicePassword2026!
+description: S-1-5-21-1002
+telephoneNumber: S-1-5-21-1002
+employeeNumber: S-1-5-21-1002
+
+# 4. Bob Operator (SID S-1-5-21-1003)
+dn: cn=Bob Operator,ou=users,dc=corp,dc=local
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Bob Operator
+sn: Operator
+givenName: Bob
+mail: bob@corp.local
+userPassword: BobPassword2026!
+description: S-1-5-21-1003
+telephoneNumber: S-1-5-21-1003
+employeeNumber: S-1-5-21-1003
+
+# ----------------------------------------------------
+# Enterprise Security Groups
+# ----------------------------------------------------
+
+# Group: MCP Administrators
+dn: cn=MCP Administrators,ou=groups,dc=corp,dc=local
+objectClass: top
+objectClass: groupOfNames
+cn: MCP Administrators
+member: cn=Administrator,ou=users,dc=corp,dc=local
+description: S-1-5-32-544
+
+# Group: MCP Developers
+dn: cn=MCP Developers,ou=groups,dc=corp,dc=local
+objectClass: top
+objectClass: groupOfNames
+cn: MCP Developers
+member: cn=Steve,ou=users,dc=corp,dc=local
+member: cn=Alice Developer,ou=users,dc=corp,dc=local
+description: S-1-5-21-2001
+
+# Group: Slack Users
+dn: cn=Slack Users,ou=groups,dc=corp,dc=local
+objectClass: top
+objectClass: groupOfNames
+cn: Slack Users
+member: cn=Steve,ou=users,dc=corp,dc=local
+member: cn=Alice Developer,ou=users,dc=corp,dc=local
+description: S-1-5-21-2002
+
+# Group: MCP Operators
+dn: cn=MCP Operators,ou=groups,dc=corp,dc=local
+objectClass: top
+objectClass: groupOfNames
+cn: MCP Operators
+member: cn=Bob Operator,ou=users,dc=corp,dc=local
+description: S-1-5-21-2003

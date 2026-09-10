@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-06T22:15:29.4567207Z",
-    "totalRequirements": 423,
-    "positiveCount": 336,
+    "generatedAt": "2026-09-10T04:10:43.5646963Z",
+    "totalRequirements": 425,
+    "positiveCount": 338,
     "guardrailCount": 87,
-    "totalProofs": 910
+    "totalProofs": 923
   },
   "requirements": [
     {
@@ -76,7 +76,7 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "AppKey scopes restrict access precisely across all MCP capabilities and backend targets",
-      "proofCount": 47,
+      "proofCount": 49,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -209,6 +209,20 @@
           "filePath": "ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
           "lineNumber": 189,
           "testName": "AppKeys_Sha256Hashing_VerificationWorks",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 338,
+          "testName": "ServiceCollection_Resolves_VaultUserSecretStore_WhenConfigured",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 388,
+          "testName": "ExternalJwtAuthenticationHandler_Authenticates_Valid_Bearer_Jwt",
           "details": null
         },
         {
@@ -598,7 +612,7 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP",
-      "proofCount": 14,
+      "proofCount": 16,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -640,6 +654,20 @@
           "filePath": "ModelContextGateway.Tests/ProvidersControllerTests.cs",
           "lineNumber": 298,
           "testName": "TestLdapConnection_ValidatesInputAndHandlesFailureGracefully",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 55,
+          "testName": "ActiveDirectoryIdentityProvider_Resolves_Steve_Identity_And_Sids",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 89,
+          "testName": "ActiveDirectoryIdentityProvider_Augments_Steve_With_LdapGroupSids",
           "details": null
         },
         {
@@ -834,6 +862,22 @@
           "filePath": "ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 333,
           "testName": "CleanupClients_CallsRepoAndReturnsCleanedCount",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-130",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Renders In-House IdP / External JWT Bearer card, toggles enable, fills authority, and saves configuration.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "lineNumber": 167,
+          "testName": "renders In-House IdP External JWT card, toggles on, and saves configuration",
           "details": null
         }
       ]
@@ -7388,7 +7432,7 @@
       "category": "SEC",
       "type": "Positive",
       "description": "VaultSecretRetriever dynamically loads, applies, and reloads Vault configurations from database repository.",
-      "proofCount": 25,
+      "proofCount": 29,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -7508,6 +7552,34 @@
           "lineNumber": 429,
           "testName": "StdioTransport_ShouldSanitizeAndMaskSecretsInLogs",
           "details": "Verifies that subprocess logs and stderr streams are actively sanitized to mask sensitive tokens and credentials."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 129,
+          "testName": "VaultUserSecretStore_SaveSecretAsync_WritesToVaultKv2",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 164,
+          "testName": "VaultUserSecretStore_DeleteSecretAsync_DeletesFromVaultKv2",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 187,
+          "testName": "VaultUserSecretStore_GetServerIdsAsync_ListsPathsFromVaultKv2",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 216,
+          "testName": "VaultUserSecretStore_Resolves_Enterprise_Path_Template_And_Discrete_KVs",
+          "details": null
         },
         {
           "suite": "Backend xUnit",
@@ -7695,6 +7767,22 @@
           "filePath": "frontend/src/test/components/GeneralTabLogoUpload.test.tsx",
           "lineNumber": 141,
           "testName": "saves settings with the updated logo URL when form is submitted after upload",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-30",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Renders User Secret Storage options and toggles Vault with warning when disabled.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "lineNumber": 136,
+          "testName": "renders User Secret Storage options and toggles Vault with warning when disabled",
           "details": null
         }
       ]
@@ -8449,9 +8537,30 @@
       "id": "TRANS-01",
       "category": "TRANS",
       "type": "Positive",
-      "description": "Register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench.",
-      "proofCount": 1,
+      "description": "HttpTransport formats X-API-Key header when downstream server AuthShape is \u0027x-api-key\u0027.",
+      "proofCount": 4,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 258,
+          "testName": "HttpTransport_Applies_XApiKey_AuthShape",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 280,
+          "testName": "HttpTransport_Applies_CustomHeader_AuthShape",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 303,
+          "testName": "HttpTransport_Applies_Slack_PerUser_Token_And_ForwardedUser",
+          "details": null
+        },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/full-ui-flow-http-direct.spec.ts",

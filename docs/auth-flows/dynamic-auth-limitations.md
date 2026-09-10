@@ -83,3 +83,19 @@ When the downstream MCP server receives the request, it verifies the Service Acc
 - **Enforce Fine-Grained RBAC**: Verify whether the user can run the requested tool.
 - **Audit Logging**: Record which human user or agent executed the action.
 - **Row-Level Security**: Filter database rows based on user identity before returning results.
+
+---
+
+## 4. Enterprise Dynamic Credential Architecture
+
+The gateway provides three mechanisms to manage dynamic credentials and personal secrets:
+
+### 4.1 Pluggable Vault User Secret Storage (BYOK)
+The `IUserSecretStore` interface supports personal credential storage. Set `Secrets:UserStore:Provider` to `"Vault"` to route user secret operations directly to HashiCorp Vault KV v2. Configurable path templates (such as `{Company}/mcgateway/{User}/{Server}`) isolate secrets by user and target service. The store supports discrete keys (`client_id`, `client_secret`, `access_token`) and structured JSON authentication blobs.
+
+### 4.2 RFC 8693 Downstream Token Exchange
+The gateway uses `TokenExchangeClient` to execute standard RFC 8693 OAuth 2.0 token exchanges. When a client calls a backend microservice, the gateway exchanges the inbound user token for a short-lived downstream token. The token is scoped to the target backend audience.
+
+### 4.3 In-House Identity Provider / External JWT Bearer
+Linux container environments validate incoming Bearer JWTs directly against enterprise Identity Providers. The `ExternalJwtAuthenticationHandler` queries standard OIDC discovery (`/.well-known/openid-configuration`) and JWKS endpoints. It validates token signatures and extracts user identity, SIDs, and groups into the `UserIdentityContext`.
+

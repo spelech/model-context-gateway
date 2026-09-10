@@ -132,4 +132,35 @@ describe('SecretProvidersTab Component', () => {
     });
     expect(screen.getByText('Network timeout')).toBeInTheDocument();
   });
+
+  /**
+   * @requirement SEC-30
+   * @category SEC
+   * @type PositiveFeature
+   * @description Renders User Secret Storage options and toggles Vault with warning when disabled.
+   */
+  it('renders User Secret Storage options and toggles Vault with warning when disabled', async () => {
+    const providers = [
+      { providerName: 'Vault', displayName: 'HashiCorp Vault', isEnabled: false, configJson: '{"address":"http://127.0.0.1:8200"}' },
+    ];
+
+    render(
+      <SecretProvidersTab
+        providers={providers}
+        saveSecretProvider={saveSecretProviderMock}
+      />
+    );
+
+    expect(screen.getByText('User Secret Storage (BYOK)')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Database \(Encrypted Storage\)/i)).toBeChecked();
+
+    // Select Vault
+    const vaultRadio = screen.getByLabelText(/HashiCorp Vault \(KV v2\)/i);
+    fireEvent.click(vaultRadio);
+    expect(vaultRadio).toBeChecked();
+
+    // Warning is visible because Vault is disabled
+    expect(screen.getByText(/HashiCorp Vault is selected for User Secret Storage, but Vault Secret Provider is disabled/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Vault Path Template:/i)).toBeInTheDocument();
+  });
 });

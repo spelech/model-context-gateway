@@ -186,13 +186,15 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
               <label htmlFor="server-secret-provider">Secret Provider</label>
               <select
                 id="server-secret-provider"
-                value={secretProvider}
+                value={authShape === 'impersonation' ? 'None' : secretProvider}
+                disabled={authShape === 'impersonation'}
                 onChange={(e) => setSecretProvider(e.target.value)}
               >
-                <option value="None">None (Static API Token)</option>
+                <option value="None">{authShape === 'impersonation' ? 'None (Windows Kerberos Identity)' : 'None (Static API Token)'}</option>
                 <option value="Vault">HashiCorp Vault (KV v2)</option>
                 <option value="WindowsRegistry">Windows Registry (DPAPI)</option>
                 <option value="Environment">Environment Variables</option>
+                <option value="TokenExchange">OAuth2 / OIDC Token Exchange (RFC 8693)</option>
                 <option value="UserProvided">User-Provided Authentication (PAT / Per-User)</option>
               </select>
             </div>
@@ -201,8 +203,19 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
               <input
                 type="text"
                 id="server-secret-key"
-                placeholder={secretProvider === 'Vault' ? 'e.g. secret:services/my-service:token' : 'e.g. NOTES_API_KEY'}
-                value={secretKey}
+                disabled={authShape === 'impersonation'}
+                placeholder={
+                  authShape === 'impersonation'
+                    ? 'Not applicable for Kerberos Impersonation'
+                    : secretProvider === 'Vault'
+                    ? 'e.g. secret:services/my-service:token or acme/mcgateway/steve/slack'
+                    : secretProvider === 'TokenExchange'
+                    ? 'e.g. downstream-service-audience or resource-uri'
+                    : secretProvider === 'UserProvided'
+                    ? 'Optional: JSON subkey (e.g. token, access_token) or blank'
+                    : 'e.g. NOTES_API_KEY'
+                }
+                value={authShape === 'impersonation' ? '' : secretKey}
                 onChange={(e) => setSecretKey(e.target.value)}
               />
             </div>
@@ -242,7 +255,21 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
           {authShape === 'impersonation' && (
             <div className="form-group" style={{ marginBottom: '12px', padding: '10px 12px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.3)', borderRadius: '6px', fontSize: '0.85rem' }}>
               <i className="fa-solid fa-triangle-exclamation" style={{ color: '#eab308', marginRight: '6px' }}></i>
-              <strong>Active Directory Impersonation:</strong> Outbound requests pass the caller's Windows identity via Kerberos S4U2Proxy. Requires AD Constrained Delegation and SPNs registered.
+              <strong>Active Directory Impersonation:</strong> Outbound requests pass the caller's Windows identity via Kerberos S4U2Proxy. Secret providers and static tokens are bypassed.
+            </div>
+          )}
+
+          {secretProvider === 'UserProvided' && authShape !== 'impersonation' && (
+            <div className="form-group" style={{ marginBottom: '12px', padding: '10px 12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '6px', fontSize: '0.85rem' }}>
+              <i className="fa-solid fa-user-lock" style={{ color: '#3b82f6', marginRight: '6px' }}></i>
+              <strong>User-Provided Authentication (BYOK):</strong> Credentials are resolved individually per authenticated user from their personal secret store (Database or HashiCorp Vault). Users manage their personal tokens in the <strong>My MCP Servers</strong> tab.
+            </div>
+          )}
+
+          {secretProvider === 'TokenExchange' && authShape !== 'impersonation' && (
+            <div className="form-group" style={{ marginBottom: '12px', padding: '10px 12px', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)', borderRadius: '6px', fontSize: '0.85rem' }}>
+              <i className="fa-solid fa-repeat" style={{ color: '#a855f7', marginRight: '6px' }}></i>
+              <strong>RFC 8693 Token Exchange:</strong> The gateway exchanges the client's incoming JWT for a downstream scoped service token asserted on behalf of the user.
             </div>
           )}
 
@@ -251,8 +278,17 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
             <input
               type="password"
               id="server-key"
-              placeholder="Fallback API token if secret provider is not used"
-              value={apiKey}
+              disabled={authShape === 'impersonation' || secretProvider === 'UserProvided'}
+              placeholder={
+                authShape === 'impersonation'
+                  ? 'Not applicable for Kerberos Impersonation'
+                  : secretProvider === 'UserProvided'
+                  ? 'Not applicable: resolved per user from Database or Vault'
+                  : secretProvider === 'None'
+                  ? 'Primary API token or secret'
+                  : 'Fallback API token if secret provider is unavailable'
+              }
+              value={authShape === 'impersonation' || secretProvider === 'UserProvided' ? '' : apiKey}
               onChange={(e) => setApiKey(e.target.value)}
             />
           </div>

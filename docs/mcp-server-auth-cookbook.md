@@ -20,9 +20,25 @@ Find the authentication type that your downstream server requires in the table b
 | **6. Local CLI Binary / Subprocess (`stdio`)** | `stdio` | `None`, `Environment`, or `Vault` | *(Auto-handled)* | Command and arguments. The gateway injects secrets into process environment variables. |
 | **7. HashiCorp Vault Secrets** (Enterprise Key Rotation) | `sse`, `http`, `stdio` | `Vault` | *(Matches backend)* | `SecretProvider: Vault`, `Vault Mount: secret`, `Path: <path>`, `Field: <key>`. |
 | **8. Windows DPAPI Registry Secrets** (Windows Server / IIS) | `sse`, `http`, `stdio` | `WindowsRegistry` | *(Matches backend)* | `SecretProvider: WindowsRegistry`, `Registry Path: SOFTWARE\McpRouter\Secrets`, `Key Name: <Key>`. |
-| **9. Per-User Personal Access Tokens (BYOK)** | `sse` / `http` | `UserProvided` | *(Matches backend)* | `SecretProvider: UserProvided`. Users save personal tokens in the **My MCP Servers** tab. |
+| **9. Per-User Personal Access Tokens (BYOK)** | `sse` / `http` | `UserProvided` | *(Matches backend)* | `SecretProvider: UserProvided`. Users save personal tokens in the **My MCP Servers** tab (backed by encrypted DB or Vault). |
 | **10. Pass-Through Dynamic JWTs** | `sse` / `http` | `AllowPassThroughAuth` | *(Matches backend)* | Set `AllowPassThroughAuth: true`. The client passes the token in the `X-Target-Auth` header. |
 | **11. Identity-Forwarding Gateway** (Downstream RLS) | `sse` / `http` | *(Any)* | *(Matches backend)* | The gateway sends a service account token and passes `X-Forwarded-User: <username>` for Row-Level Security. |
+| **12. RFC 8693 Downstream Token Exchange** | `sse` / `http` | `TokenExchange` | `bearer` | Exchanging caller identity/token with an In-House IdP for downstream audience tokens. |
+| **13. Windows Kerberos Impersonation** | `sse` / `http` | `None` *(Locked)* | `impersonation` | `AuthShape: impersonation`. Runs downstream request under caller's Windows token (S4U2Proxy / IIS). |
+
+---
+
+## 🚫 Incompatible Combinations & Configuration Guardrails
+
+The Model Context Gateway Web UI and API enforce strict validation rules to protect against conflicting, non-functional, or insecure configurations:
+
+| Combination | Status | Why It Is Disallowed & Gateway Behavior |
+| :--- | :--- | :--- |
+| **Kerberos Impersonation + External Secret Provider** (Vault / Env / DPAPI) | ❌ **Forbidden** | When `AuthShape: impersonation` is selected, outbound calls execute inside `WindowsIdentity.RunImpersonated` using the authenticated caller's Windows token. Fetching an external API key is irrelevant and contradictory. The UI disables and locks Secret Provider to `None`. |
+| **Kerberos Impersonation + Static API Key** | ❌ **Forbidden** | Impersonation authenticates using Windows credentials, not a hardcoded static bearer token. The UI disables and hides the API Key input. |
+| **User-Provided (BYOK) + Static Server API Key** | ❌ **Forbidden** | When `SecretProvider: UserProvided` is selected, credentials resolve dynamically on a per-user basis from the user secret store. Entering a global server API key creates ambiguity. The UI disables the static API Key input. |
+| **Token Exchange + Kerberos Impersonation** | ❌ **Forbidden** | Token Exchange mints an OAuth 2.0 / OIDC JWT for downstream HTTP/SSE endpoints. It cannot be combined with Windows Kerberos OS-level token impersonation. |
+| **Vault User Secret Store + Vault Provider Disabled** | ⚠️ **Warning** | If administrators configure User Secret Storage to use `HashiCorp Vault (KV v2)`, but the primary Vault secret provider is disabled or unconfigured, the UI displays a prominent warning banner and user credential lookups will fail closed. |
 
 ---
 
@@ -264,12 +280,16 @@ In **`Settings`** -> **`Secret Providers`** -> **HashiCorp Vault**:
 
 ### Recipe 9: Multi-Tenant / Bring-Your-Own-Key (BYOK / `UserProvided`)
 
-* **Common Use Cases**: Shared gateway deployments where users connect with their personal tokens (such as personal GitHub PATs or Notion API keys).
+* **Common Use Cases**: Shared gateway deployments where users connect with their personal tokens (such as personal GitHub PATs, Slack user tokens, or Notion API keys).
+* **Storage Backends**:
+  - **Database (Default)**: Credentials stored in `UserCredentialDto` table encrypted with AES-256-GCM.
+  - **HashiCorp Vault (KV v2)**: User credentials stored dynamically in Vault using configurable path templates (e.g. `{Company}/mcgateway/{User}/{Server}`).
 * **How It Works**: 
   1. The administrator registers the server with `SecretProvider: UserProvided`.
-  2. Users open the **`My MCP Servers`** tab in the dashboard.
-  3. Users enter their personal API token.
-  4. The gateway decrypts and injects the user's personal token when they run tool calls.
+  2. The UI automatically disables the static API Key field to prevent conflicts.
+  3. Users open the **`My MCP Servers`** tab in the dashboard.
+  4. Users enter their personal API token (or full JSON credential object).
+  5. The gateway decrypts and injects the user's personal token when they execute tool calls.
 
 #### Admin Server Registration:
 * **Secret Provider**: `UserProvided`
@@ -296,6 +316,39 @@ In **`Settings`** -> **`Secret Providers`** -> **HashiCorp Vault**:
   * `X-Mcp-Session-Id: <session_id>`
 
 The backend server trusts the gateway IP and applies Row-Level Security based on the forwarded identity.
+
+---
+
+### Recipe 12: RFC 8693 Downstream Token Exchange (In-House IdP / Microservices)
+
+* **Common Use Cases**: Downstream microservices that require audience-specific tokens from an enterprise Identity Provider.
+* **How It Works**:
+  1. The client sends a request authenticated with an External JWT Bearer or AppKey.
+  2. The `TokenExchangeClient` connects to the IdP token endpoint (`urn:ietf:params:oauth:grant-type:token-exchange`).
+  3. The gateway exchanges the user token for a downstream bearer token for the target audience.
+  4. The gateway sends `Authorization: Bearer <downstream_jwt>`.
+
+#### Admin Server Registration:
+* **Secret Provider**: `TokenExchange`
+* **Secret Key / Parameter**: Downstream audience or resource URL (such as `https://mcp-internal.corp.local/api/tools`).
+* **Auth Shape**: `bearer`
+
+---
+
+### Recipe 13: Windows Kerberos Impersonation (IIS / Windows Domain Services)
+
+* **Common Use Cases**: Downstream servers on Windows Server and IIS that require the caller's Windows domain identity.
+* **Operating System Requirement**: Windows Server and IIS only. This mode does not operate on Linux containers.
+* **How It Works**:
+  1. The user authenticates with Windows Integrated Authentication (Negotiate / Kerberos).
+  2. The gateway extracts the caller's `WindowsIdentity`.
+  3. The HTTP transport executes within `WindowsIdentity.RunImpersonated()`.
+  4. Outbound HTTP requests use the caller's Kerberos ticket.
+
+#### Admin Server Registration:
+* **Secret Provider**: `None` *(Locked)*
+* **Auth Shape**: `impersonation`
+* **API Key**: *(Disabled / Not Applicable)*
 
 ---
 

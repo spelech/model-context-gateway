@@ -15,7 +15,8 @@ This matrix evaluates the specific `SecretProvider` implementations available in
 | `Environment` | Loads key from Host OS Env (`$ENV_VAR`). | ✅ **Yes** | ✅ **Yes** | Global key. Secure, immutable infrastructure. |
 | `WindowsRegistry` | Loads key from DPAPI encrypted hive. | ✅ **Yes** | ✅ **Yes** | Global key. Secure Windows-native storage. |
 | `Vault` | Fetches dynamic/static key from HashiCorp. | ✅ **Yes** | ✅ **Yes** | Global key. Supports auto-renewal & TTL. |
-| `UserProvided` | Fetches PAT from `UserCredentialDto` table. | ✅ **Yes** | ✅ **Yes** | **User-Specific.** Router dynamically maps the current user's identity to their static backend key. |
+| `UserProvided` | Fetches PAT from user store (DB or Vault). | ✅ **Yes** | ✅ **Yes** | **User-Specific.** Router dynamically maps caller identity to personal credentials stored in database or HashiCorp Vault. |
+| `TokenExchange` | Exchanges inbound identity/token via RFC 8693. | ✅ **Yes** | ✅ **Yes** | **User-Specific.** Exchanges caller token/identity with IdP for a scoped downstream bearer token. |
 | `AllowPassThroughAuth`| Client sends dynamic JWT via `X-Target-Auth`. | ✅ **Yes** | ❌ **No** | **User-Specific.** Requires target-specific proxy route `/{serverId}`. Cannot be used in Meta-Routing because the client does not know which server will be invoked upfront. |
 
 ---
@@ -32,6 +33,7 @@ This matrix maps how the retrieved secret (from the providers above) is formatte
 | `http`, `streamable`, `sse` | `x-api-key` | `X-API-Key: <secret>` header. | ✅ **Yes** |
 | `http`, `streamable`, `sse` | `custom-header` | `<Custom-Name>: <secret>` header (using `SecretField`). | ✅ **Yes** |
 | `http`, `streamable`, `sse` | `query` | Appends `?token=<secret>` (or custom name) to the URL. | ✅ **Yes** |
+| `http`, `streamable`, `sse` | `impersonation` | Windows Kerberos identity delegation via `WindowsIdentity.RunImpersonated`. SecretProvider must be `None`. | ✅ **Yes** *(Windows Only)* |
 | `stdio` | *(Ignored)* | `AuthShape` is ignored. Secret is injected securely into the process `EnvironmentVariables` (e.g., `API_KEY`). | ✅ **Yes** |
 
 ---
@@ -43,10 +45,13 @@ This matrix maps how the *inbound* identity (Client ➔ Router) can be propagate
 | Inbound Identity Method | Outbound Downstream Method | Mechanism | Supported? |
 | :--- | :--- | :--- | :--- |
 | Active Directory / NTLM | Global API Key (Vault/Registry/Env) | Router trusts user, acts as Service Account. | ✅ **Yes** |
-| Active Directory / NTLM | NTLM / Kerberos Impersonation | S4U2Proxy / `RunImpersonated` | ✅ **Yes** |
+| Active Directory / NTLM | NTLM / Kerberos Impersonation | S4U2Proxy / `RunImpersonated` | ✅ **Yes** *(Windows Only)* |
+| In-House IdP (External JWT) | Global API Key (Vault/Registry/Env) | Router validates JWT via JWKS, acts as Service Account. | ✅ **Yes** |
+| In-House IdP (External JWT) | RFC 8693 Token Exchange | Router exchanges external JWT for scoped downstream JWT. | ✅ **Yes** |
+| In-House IdP (External JWT) | User-Provided Secrets (Vault / DB) | Router maps JWT subject to user secrets in Vault or DB. | ✅ **Yes** |
 | OIDC (HeaderProxy) | Global API Key (Vault/Registry/Env) | Router trusts SSO headers, acts as Service Account. | ✅ **Yes** |
 | OIDC (HeaderProxy) | OAuth2 On-Behalf-Of (OBO) | Router exchanges tokens with Okta/Azure. | ✅ **Yes** |
-| AppKey / OIDC / AD | HTTP Identity Header (`X-Forwarded-User`) | Router forwards resolved Username for RLS. | ✅ **Yes** |
+| AppKey / OIDC / AD / JWT | HTTP Identity Header (`X-Forwarded-User`) | Router forwards resolved Username for RLS. | ✅ **Yes** |
 | Interactive OAuth Consent | Any supported Outbound Method | Consent via React UI, Client calls via JWT, Router resolves subject. | ✅ **Yes** |
 
 ---
@@ -83,9 +88,21 @@ For complete specification, sequence diagrams, and integration guide, see:
 
 ---
 
+## 6. Downstream Authentication Mixing Guardrails
 
-## Technical Edge Cases Discovered
+To prevent invalid, conflicting, or non-functional configurations, the system enforces the following matrix rules across the Web UI and API:
 
-1. **Format Translation:** Pass-Through auth does not just blindly forward `X-Target-Auth`. The router translates it into the exact format the backend requires (e.g., standard `Authorization: Bearer <token>`) using the `AuthShape` configuration.
-2. **STDIO Zero-CLI Leakage:** When using Pass-Through auth or User-Provided secrets with a `stdio` server, the router translates the dynamic token into a secure Environment Variable (`API_KEY`) for the local subprocess, rather than exposing it in CLI arguments.
-3. **Docker vs Bare-Metal STDIO:** The UI natively supports configuring `stdio` targets. However, the official Docker image (`aspnet:10.0`) lacks runtimes like `node`, `python`, or `uv`. `stdio` works natively on Windows Server / bare-metal, but Docker users must use custom sidecar images or a "batteries-included" Docker tag.
+| Selection | Constraint / Enforced Behavior | Rationale |
+| :--- | :--- | :--- |
+| **`AuthShape: impersonation`** | Locks `SecretProvider` to `None`. Disables static `ApiKey` and `SecretKey`. | Outbound calls execute within `WindowsIdentity.RunImpersonated()` using the caller's Windows Kerberos ticket. External keys are redundant and invalid. |
+| **`SecretProvider: UserProvided`** | Disables static `ApiKey`. SecretKey remains optional identifier. | Credentials resolve dynamically per user from the configured user secret store (`Database` or `Vault`). A static global key contradicts BYOK. |
+| **`SecretProvider: TokenExchange`** | Requires `SecretKey` (downstream audience/scope). Incompatible with `impersonation`. | RFC 8693 token exchange mints an outbound Bearer JWT targeted for downstream microservices. |
+| **User Secret Storage: `Vault`** | Requires Vault secret provider to be enabled. | The user store delegates credential storage to Vault KV v2 paths using configured path templates. |
+
+---
+
+## 7. Operational Considerations
+
+1. **Format Translation**: Pass-Through authentication converts `X-Target-Auth` into the required backend format (`Authorization: Bearer <token>`) using `AuthShape`.
+2. **STDIO Process Security**: For `stdio` servers, the gateway injects tokens into environment variables (`API_KEY`) rather than process command arguments.
+3. **Container Runtimes for STDIO**: The `latest-full` container image contains Node.js, Python, `uv`, and `bun` for `stdio` MCP servers. Standard minimal images require external binaries.

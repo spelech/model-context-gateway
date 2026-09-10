@@ -105,7 +105,27 @@ The Vault retriever connects to HashiCorp Vault Key-Value Version 2 (`kv-v2`) se
   "mountPath": "secret",
   "token": "hvs.CAESIJ7...sampleVaultToken"
 }
-```
+#### User Secrets in HashiCorp Vault (`VaultUserSecretStore`)
+
+The gateway stores per-user credentials directly in HashiCorp Vault. This includes personal tokens for Slack, GitHub, or Jira.
+
+* **Configuration**:
+  Set `Secrets:UserStore:Provider` or `MCG_USER_SECRET_STORE` to `"Vault"`.
+* **Path Templating**:
+  Set `Secrets:UserStore:PathTemplate` or `VAULT_USER_SECRET_PATH_TEMPLATE` to customize the Vault secret path. Supported tokens are:
+  - `{Company}`: Configured enterprise or tenant name.
+  - `{User}`: Sanitized username of the caller.
+  - `{Server}`: Target backend MCP server identifier.
+
+  *Example Path Template*:
+  `{Company}/mcgateway/{User}/{Server}` resolves to `acme-corp/mcgateway/steve/slack` for user `steve` accessing `slack` in `acme-corp`.
+* **Credential Data Formats**:
+  `VaultUserSecretStore` reads individual secret keys (`secret`, `access_token`, `token`, `key`, `password`) or structured JSON credential objects.
+* **Web Dashboard Configuration**:
+  Configure user secret storage in **Settings &rarr; Secret Providers &rarr; User Secret Storage (BYOK)**:
+  - **Storage Provider**: Select `Database (Encrypted Storage)` or `HashiCorp Vault (KV v2)`.
+  - **Vault Path Template**: Enter the template path. The dashboard shows an immediate preview of the resolved path.
+  - **Guardrail Alert**: If you select `HashiCorp Vault` while Vault is disabled, an alert displays before save.
 
 ---
 
@@ -144,6 +164,19 @@ The Environment retriever reads operating system and container environment varia
   * `MY_SECRET_KEY`
   * `env:MY_SECRET_KEY`
   * `${MY_SECRET_KEY}`
+
+---
+
+### 4. RFC 8693 Downstream Token Exchange
+**Implementation**: [`TokenExchangeClient.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Identity/TokenExchangeClient.cs)  
+**Provider Identifiers**: `"TokenExchange"`
+
+The Token Exchange provider implements RFC 8693 OAuth 2.0 Token Exchange for downstream microservices.
+
+#### Features:
+* **Identity Delegation**: Exchanges the authenticated user's token or identity for a short-lived downstream bearer token issued specifically for the target server's audience.
+* **Audience / Resource Scoping**: Configured using the server's `SecretKey` or parameter field.
+* **In-Memory Caching**: Exchanged tokens are cached in memory for their token lifetime minus a 60-second safety margin.
 
 ---
 

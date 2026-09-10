@@ -54,6 +54,18 @@ graph TD
   - `admin`: Grants the administrator role (`ClaimTypes.Role: Administrator`).
   - `category:<name>`: Restricts access strictly to backend servers assigned that category tag.
 
+### 1.4 In-House IdP & External JWT Bearer (`ExternalJwtAuthenticationHandler`)
+- **Mechanism:** Validates external Bearer JWT tokens from an enterprise Identity Provider. It queries OIDC discovery endpoints (`Identity:Jwt:Authority` / `.well-known/openid-configuration`) and JSON Web Key Sets (JWKS).
+- **Validation Pipeline:**
+  - Retrieves and caches the public JWKS keys from the provider.
+  - Verifies cryptographic signatures with asymmetric algorithms (RS256, ES256).
+  - Enforces issuer (`Identity:Jwt:Issuer`) and audience (`Identity:Jwt:Audience`) constraints.
+  - Validates token expiration with clock skew tolerances.
+- **Identity & Role Extraction:**
+  - Extracts the username from token claims (`preferred_username`, `upn`, `email`, `sub`).
+  - Adds group memberships and Active Directory SIDs to the user context.
+- **Policy Integration:** Registers the `"ExternalJwt"` authentication scheme. The gateway evaluates this scheme in `DefaultPolicy` and `AdminPolicy`.
+
 ---
 
 ## 2. Standalone Mode & Local Network Authorization
@@ -169,6 +181,12 @@ AI assistants and LLM tools (Claude Desktop, Cursor, Cline, Windsurf) can manage
         "X-Forwarded-Groups",
         "sso_groups"
       ]
+    },
+    "Jwt": {
+      "Enabled": true,
+      "Authority": "https://idp.corp.internal/auth/realms/corp",
+      "Audience": "model-context-gateway",
+      "Issuer": "https://idp.corp.internal/auth/realms/corp"
     }
   }
 }
@@ -185,5 +203,10 @@ AI assistants and LLM tools (Claude Desktop, Cursor, Cline, Windsurf) can manage
 * `Admin__StandaloneAllowedNetworks__2="10.0.0.0/8"`
 * `Oidc__TrustedProxies="10.0.5.10,172.17.0.1"`
 * `Oidc__RequireTrustedProxy="true"`
+* `Identity__Jwt__Enabled="true"`
+* `Identity__Jwt__Authority="https://idp.corp.internal/auth/realms/corp"`
+* `Identity__Jwt__Audience="model-context-gateway"`
+* `Identity__Jwt__Issuer="https://idp.corp.internal/auth/realms/corp"`
+
 
 
