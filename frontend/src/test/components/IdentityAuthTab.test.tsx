@@ -163,4 +163,51 @@ describe('IdentityAuthTab Component', () => {
 
     expect(useToastStore.getState().toasts.some((t) => t.message.includes('Failed to save Auth Providers') && t.type === 'error')).toBe(true);
   });
+
+  /**
+   * @requirement AUTH-130
+   * @category AUTH
+   * @type PositiveFeature
+   * @description Renders In-House IdP / External JWT Bearer card, toggles enable, fills authority, and saves configuration.
+   */
+  it('renders In-House IdP External JWT card, toggles on, and saves configuration', async () => {
+    const saveSpy = vi.fn().mockResolvedValue(undefined);
+    render(
+      <IdentityAuthTab
+        providers={[
+          { providerName: 'ActiveDirectory', displayName: 'Active Directory', isEnabled: false },
+          { providerName: 'HeaderAuth', displayName: 'OIDC / Reverse Proxy Headers', isEnabled: true },
+          { providerName: 'ExternalJwt', displayName: 'In-House IdP / External JWT Bearer', isEnabled: false },
+        ]}
+        saveAuthProvider={saveSpy}
+      />
+    );
+
+    expect(screen.getByText('In-House IdP / External JWT Bearer')).toBeInTheDocument();
+    const jwtToggle = document.getElementById('auth-external-jwt-enabled') as HTMLInputElement;
+    expect(jwtToggle).not.toBeChecked();
+
+    await act(async () => {
+      fireEvent.click(jwtToggle);
+    });
+    expect(jwtToggle).toBeChecked();
+
+    const authInput = screen.getByLabelText(/Authority \/ Discovery URL/i);
+    const audInput = screen.getByLabelText(/Expected Audience/i);
+    fireEvent.change(authInput, { target: { value: 'https://idp.corp.local' } });
+    fireEvent.change(audInput, { target: { value: 'mcg-gateway' } });
+
+    const saveBtn = screen.getByRole('button', { name: /save auth config/i });
+    await act(async () => {
+      fireEvent.click(saveBtn);
+    });
+
+    expect(saveSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        providerName: 'ExternalJwt',
+        isEnabled: true,
+        configJson: expect.stringContaining('https://idp.corp.local'),
+      })
+    );
+  });
 });
