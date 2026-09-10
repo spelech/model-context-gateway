@@ -46,7 +46,7 @@ When you connect an AI assistant directly to many individual tools, you face com
 * **Modern Slash Tool Routing**: Use modern slash format (`{namespace}/{tool_name}`) with backwards-compatible format (`{serverId}__{toolName}`) and collision checks.
 * **Dynamic Docker Discovery**: Automatically discovers containers labeled `mcp.enabled=true` through `/var/run/docker.sock`. See [Features Guide](docs/features-guide.md).
 * **Identity and Single Sign-On**: Authenticate users through **Active Directory** (Windows SIDs) or **OIDC / Reverse Proxy Headers** (Authentik, Keycloak, Authelia). See [Authentication Architecture](docs/authentication-architecture.md).
-* **Enterprise Secret Storage**: Resolve credentials at runtime from **HashiCorp Vault (KV v2)**, **Windows Registry (DPAPI)**, or **Environment Variables**. See [Secret Providers Guide](docs/secret-providers.md).
+* **Enterprise Secret Storage**: Resolve credentials at runtime from **HashiCorp Vault (KV v2)**, **Windows Registry (DPAPI)**, **Environment Variables**, **RFC 8693 Token Exchange**, or **Per-User Secret Stores (Database / Vault)**. See [Secret Providers Guide](docs/secret-providers.md).
 * **Multi-Database Support**: Run on **SQLite (WAL)**, **Microsoft SQL Server**, or **MySQL**. See [Database Providers Guide](docs/database-providers.md) and [Data Model & ERD](docs/data-model.md).
 * **PII Sanitization & Audit Logs**: Redact tokens and passwords automatically while writing complete audit logs.
 * **Pre-Configured Docker Image**: The `ghcr.io/spelech/model-context-gateway:latest-full` image includes Node.js, Python 3, `uv`, and `bun` pre-installed for local scripts. See [Transports Guide](docs/transports.md).

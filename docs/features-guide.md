@@ -83,8 +83,8 @@ services:
 | `mcp.type` | No | `sse` | Transport type (`sse`, `http`, or `stdio`). |
 | `mcp.path` | No | `/sse` (or `/mcp`) | Message dispatch route. |
 | `mcp.categories` | No | `general` | Comma-separated category tags for access policies. |
-| `mcp.authType` | No | `none` | Header format (`bearer`, `x-api-key`, `custom-header`). |
-| `mcp.secretProvider`| No | `none` | Secret retriever backend (`vault`, `env`, `none`). |
+| `mcp.authType` | No | `none` | Header format (`bearer`, `x-api-key`, `custom-header`, `basic`, `query`, `raw`, `impersonation`). |
+| `mcp.secretProvider`| No | `none` | Secret retriever backend (`none`, `env`, `vault`, `userprovided`, `tokenexchange`). |
 | `mcp.secretKey` | No | — | Vault path or environment variable name for the API key. |
 
 ---
@@ -331,9 +331,32 @@ The `CompositeSecretRetriever` resolves credentials through:
 1. **HashiCorp Vault (KV v2)**: Reads secrets from paths (such as `/secret/data/mcp/plex`) with AppRole or Token authentication and automatic token renewal.
 2. **Windows Registry (DPAPI)**: Reads DPAPI-encrypted values from local machine registry hives (`HKLM`).
 3. **Environment Variables**: Reads credentials from container environment variables (such as `env:MY_SECRET`).
+4. **User-Provided (BYOK)**: Resolves user-specific credentials dynamically on per-request basis from encrypted database storage or HashiCorp Vault (`VaultUserSecretStore`).
+5. **RFC 8693 Token Exchange**: Dynamically exchanges the authenticated caller's identity (or external JWT) for a short-lived downstream bearer token scoped to the target backend resource.
 
 > [!TIP]
 > For configuration recipes, AppRole policies, and AES-256-GCM encryption architecture, read [**docs/secret-providers.md**](secret-providers.md).
+
+### Vault Path Templating for User Secrets
+When user secrets are stored in Vault (`Secrets:UserStore:Provider = "Vault"`), the gateway dynamically constructs secret paths using configurable templates (default: `{Company}/mcgateway/{User}/{Server}`):
+- `{Company}`: Organization or tenant identifier (e.g., `acme-corp`).
+- `{User}`: Sanitized username of the authenticated caller (e.g., `steve`).
+- `{Server}`: Target backend MCP server identifier (e.g., `slack`).
+
+This resolves to paths like `acme-corp/mcgateway/steve/slack`, supporting both discrete keys (`client_id`, `client_secret`, `access_token`) and structured JSON authentication blobs.
+
+### Downstream Auth Mixing Matrix & Guardrails
+
+To prevent invalid, conflicting, or insecure server setups, the gateway and UI enforce strict mixing rules:
+
+| Outbound Auth Mode / Shape | Secret Provider | Static API Key Allowed? | Secret Key / Path Required? | Valid Transports | Operational Guardrail & Behavior |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Kerberos Impersonation** (`impersonation`) | `None` *(Locked)* | ❌ **No** | ❌ **No** | `sse`, `http` | **Windows-Only.** Runs outbound call under caller's Windows token via `WindowsIdentity.RunImpersonated`. External secret providers and static keys are disabled in the UI. |
+| **Static Hardcoded Key** (`bearer`, `x-api-key`, etc.) | `None` | ✅ **Yes** | ❌ **No** | `sse`, `http`, `stdio` | Stored AES-256-GCM encrypted in the database. Simplest for single-tenant local servers. |
+| **Static Shared Secret** (`bearer`, `x-api-key`, etc.) | `Environment`, `Vault`, `WindowsRegistry` | ❌ **No** | ✅ **Yes** | `sse`, `http`, `stdio` | Shared service credentials fetched dynamically. The gateway manages TTL and caching. |
+| **Bring Your Own Key** (`UserProvided`) | `UserProvided` | ❌ **No** | ❌ **No** | `sse`, `http`, `stdio` | Static server API key is disabled. Gateway resolves caller's personal secret from user store (Database or Vault). |
+| **Token Exchange** (`TokenExchange`) | `TokenExchange` | ❌ **No** | ✅ **Yes** *(Audience / Scope)* | `sse`, `http` | Mints dynamic RFC 8693 downstream JWT asserting caller's identity. Incompatible with Kerberos impersonation. |
+| **Pass-Through JWT** (`AllowPassThroughAuth`) | *(Any)* | Optional | Optional | `sse`, `http` | Client sends dynamic token in `X-Target-Auth`. Requires direct proxy route (`/{serverId}`). |
 
 ### Configuration Steps
 1. Store the secret in your provider (for example, set `DOCKER_API_KEY=my-secret`).

@@ -182,6 +182,12 @@ AI assistants and LLM tools (Claude Desktop, Cursor, Cline, Windsurf) can manage
         "X-Forwarded-Groups",
         "sso_groups"
       ]
+    },
+    "Jwt": {
+      "Enabled": true,
+      "Authority": "https://idp.corp.internal/auth/realms/corp",
+      "Audience": "model-context-gateway",
+      "Issuer": "https://idp.corp.internal/auth/realms/corp"
     }
   }
 }
@@ -198,5 +204,10 @@ AI assistants and LLM tools (Claude Desktop, Cursor, Cline, Windsurf) can manage
 * `Admin__StandaloneAllowedNetworks__2="10.0.0.0/8"`
 * `Oidc__TrustedProxies="10.0.5.10,172.17.0.1"`
 * `Oidc__RequireTrustedProxy="true"`
+* `Identity__Jwt__Enabled="true"`
+* `Identity__Jwt__Authority="https://idp.corp.internal/auth/realms/corp"`
+* `Identity__Jwt__Audience="model-context-gateway"`
+* `Identity__Jwt__Issuer="https://idp.corp.internal/auth/realms/corp"`
+
 
 

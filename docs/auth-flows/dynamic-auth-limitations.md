@@ -83,3 +83,23 @@ When the downstream MCP server receives the request, it verifies the Service Acc
 - **Enforce Fine-Grained RBAC**: Verify whether the user can run the requested tool.
 - **Audit Logging**: Record which human user or agent executed the action.
 - **Row-Level Security**: Filter database rows based on user identity before returning results.
+
+---
+
+## 4. Enterprise Remediations (v5.12.0)
+
+Version 5.12.0 introduced three key architectural remediations to address dynamic authentication and self-service limitations:
+
+### 4.1 Pluggable Vault User Secret Storage (BYOK)
+- **Problem**: Previously, per-user Personal Access Tokens could only be saved in the local SQLite/SQL database, blocking enterprise setups where all credentials must reside in HashiCorp Vault.
+- **Remediation**: `IUserSecretStore` is now fully pluggable. Setting `Secrets:UserStore:Provider = "Vault"` routes all user secret reads, writes, and deletions to HashiCorp Vault KV v2.
+- **Path Templating**: Templates like `{Company}/mcgateway/{User}/{Server}` dynamically isolate secrets per user and service. Supports both discrete fields (`client_id`, `client_secret`, `access_token`) and full JSON auth blobs.
+
+### 4.2 RFC 8693 Downstream Token Exchange
+- **Problem**: Meta-routing could not dynamically mint tokens for multiple downstream microservices without requiring the client to guess the target server upfront.
+- **Remediation**: The gateway can now execute standard RFC 8693 OAuth 2.0 Token Exchange (`TokenExchangeClient`), exchanging the caller's inbound JWT or identity for a short-lived downstream token targeted at the backend service's required audience.
+
+### 4.3 In-House Identity Provider / External JWT Bearer
+- **Problem**: Enterprise Linux container deployments cannot use Windows Kerberos/NTLM authentication directly, but possess internal Identity Providers with OpenID Connect discovery (`/.well-known/openid-configuration`) and JWKS endpoints.
+- **Remediation**: `ExternalJwtAuthenticationHandler` validates incoming Bearer JWTs directly against enterprise IdP JWKS keys, extracting user identity, SIDs, and groups into the `UserIdentityContext` without requiring reverse proxy header spoofing risks.
+

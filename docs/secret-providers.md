@@ -123,8 +123,11 @@ MCG supports storing per-user MCP credentials (such as personal tokens for Slack
   `acme-corp/mcgateway/steve/slack`
 * **Discrete Key and JSON Storage**:
   `VaultUserSecretStore` supports reading both individual credential keys (`secret`, `access_token`, `token`, `key`, `password`) or structured JSON objects containing multi-field authentication blobs (`client_id`, `client_secret`, `access_token`).
-* **Full Self-Service CRUD**:
-  Users can save, update, list, and delete their backend secrets via the Web UI or API, which translates directly to Vault KV v2 `WriteSecretAsync` and `DeleteSecretAsync` operations.
+* **Web Dashboard Configuration**:
+  Administrators can toggle and configure this directly in **Settings &rarr; Secret Providers &rarr; User Secret Storage (BYOK)**:
+  - **Storage Provider**: Select between `Database (Encrypted Storage)` and `HashiCorp Vault (KV v2)`.
+  - **Vault Path Template**: Live input field with real-time template interpolation preview (e.g. previewing how `acme-corp/mcgateway/steve/slack` resolves).
+  - **Guardrail Alert**: If `HashiCorp Vault` is chosen while the Vault provider is disabled, an alert warns the administrator before saving.
 
 ---
 
@@ -163,6 +166,19 @@ The Environment retriever reads operating system and container environment varia
   * `MY_SECRET_KEY`
   * `env:MY_SECRET_KEY`
   * `${MY_SECRET_KEY}`
+
+---
+
+### 4. RFC 8693 Downstream Token Exchange
+**Implementation**: [`TokenExchangeClient.cs`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Identity/TokenExchangeClient.cs)  
+**Provider Identifiers**: `"TokenExchange"`
+
+The Token Exchange provider implements RFC 8693 OAuth 2.0 Token Exchange for downstream microservices.
+
+#### Features:
+* **Identity Delegation**: Exchanges the authenticated user's token or identity for a short-lived downstream bearer token issued specifically for the target server's audience.
+* **Audience / Resource Scoping**: Configured using the server's `SecretKey` or parameter field.
+* **In-Memory Caching**: Exchanged tokens are cached in memory for their token lifetime minus a 60-second safety margin.
 
 ---
 

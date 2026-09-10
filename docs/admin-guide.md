@@ -93,12 +93,30 @@ The gateway protects backend credentials so clients never handle plaintext secre
 
 | Provider | Storage Method | Best For |
 | :--- | :--- | :--- |
-| **Built-in Database** | Encrypted in SQLite using AES-256-GCM. | Standalone deployments and home labs. |
+| **Built-in Database** | Encrypted in SQLite/SQL using AES-256-GCM. | Standalone deployments and home labs. |
 | **Environment** | Loaded from host environment variables (`ENV:VAR_NAME`). | Containerized infrastructure (Docker Compose, Kubernetes). |
 | **HashiCorp Vault** | Retrieved dynamically from Vault KV v2 with token renewal. | Enterprise production environments. |
 | **Windows Registry** | Encrypted with Windows DPAPI machine keys (`HKLM`). | Windows Server IIS hosting. |
+| **UserProvided (BYOK)** | Stored per-user in encrypted DB or HashiCorp Vault. | Multi-user environments with personal tokens (Slack, GitHub, etc.). |
+| **TokenExchange** | Dynamic RFC 8693 token exchange via IdP. | Microservices requiring audience-scoped downstream JWTs. |
 
-For setup details, see the [Secret Providers Guide](secret-providers.md).
+### User Secret Storage (BYOK)
+In **Settings &rarr; Secret Providers &rarr; User Secret Storage (BYOK)**, administrators can select where end-user credentials are stored:
+- **Database (Encrypted Storage)**: Stored in the local database encrypted with AES-256-GCM.
+- **HashiCorp Vault (KV v2)**: Stored in Vault KV v2 using a customizable path template (e.g., `{Company}/mcgateway/{User}/{Server}`). Supported tokens: `{Company}`, `{User}`, `{Server}`.
+
+### In-House Identity Provider / External JWT Bearer
+In **Settings &rarr; Identity & Authentication &rarr; In-House IdP / External JWT Bearer**, administrators can enable direct validation of inbound Bearer JWTs:
+- **Authority / Discovery URL**: e.g., `https://idp.corp.internal/auth/realms/corp/.well-known/openid-configuration`
+- **Audience**: Expected JWT audience (e.g., `model-context-gateway`).
+- **Issuer**: Expected JWT issuer URL.
+
+### Configuration Guardrails Enforced in UI
+- **Kerberos Impersonation**: Outbound calls execute via `WindowsIdentity.RunImpersonated`. Secret Provider is locked to `None`, and static API keys are disabled.
+- **User-Provided (BYOK)**: Resolves user credentials dynamically; the static server API key field is disabled.
+- **Vault User Storage Dependency**: If Vault is selected for User Secret Storage while Vault is disabled, a visual alert is shown and user queries fail closed.
+
+For setup details, see the [Secret Providers Guide](secret-providers.md) and [Authentication Support Matrix](auth-flows/auth-support-matrix.md).
 
 ---
 
