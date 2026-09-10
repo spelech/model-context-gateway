@@ -40,6 +40,9 @@ export default withMermaid(
           items: [
             { text: 'System Architecture', link: '/architecture' },
             { text: 'Authentication Architecture', link: '/authentication-architecture' },
+            { text: 'Active Directory & Multi-Level RBAC', link: '/active-directory-and-rbac-guide' },
+            { text: 'OIDC & SSO Reverse Proxy', link: '/oidc-and-sso-guide' },
+            { text: 'Downstream Auth & Delegation', link: '/downstream-auth-and-delegation-guide' },
             { text: 'Transports & Subprocesses', link: '/transports' },
             { text: 'Data Model & ERD', link: '/data-model' },
             { text: 'Database Providers', link: '/database-providers' },
@@ -113,6 +116,9 @@ export default withMermaid(
           collapsed: true,
           items: [
             { text: 'Authentication Architecture', link: '/authentication-architecture' },
+            { text: 'Active Directory & Multi-Level RBAC', link: '/active-directory-and-rbac-guide' },
+            { text: 'OIDC & SSO Reverse Proxy', link: '/oidc-and-sso-guide' },
+            { text: 'Downstream Auth & Delegation', link: '/downstream-auth-and-delegation-guide' },
             { text: 'MCP Server Auth Cookbook', link: '/mcp-server-auth-cookbook' },
             { text: 'AppKey Scopes & RBAC', link: '/appkey-scopes' },
             { text: 'Secret Providers & Key Management', link: '/secret-providers' },
