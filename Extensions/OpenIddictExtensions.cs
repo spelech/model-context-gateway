@@ -18,13 +18,14 @@ namespace ModelContextGateway.Extensions
                 options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
             })
             .AddScheme<AuthenticationSchemeOptions, AppKeyAuthenticationHandler>("AppKey", null)
-            .AddScheme<AuthenticationSchemeOptions, OidcHeaderAuthenticationHandler>("OidcHeader", null);
+            .AddScheme<AuthenticationSchemeOptions, OidcHeaderAuthenticationHandler>("OidcHeader", null)
+            .AddScheme<AuthenticationSchemeOptions, ModelContextGateway.Middleware.ExternalJwtAuthenticationHandler>("ExternalJwt", null);
 
             services.AddAuthorization(options =>
             {
                 options.DefaultPolicy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme, "AppKey", "OidcHeader")
+                    .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme, "AppKey", "OidcHeader", "ExternalJwt")
                     .Build();
 
                 options.AddPolicy("AdminPolicy", policy =>
@@ -83,7 +84,7 @@ namespace ModelContextGateway.Extensions
                         return ctx.User.HasClaim("Sid", adminSid) ||
                                ctx.User.Claims.Any(c => c.Type == ClaimTypes.Role && configuredAdminGroups.Contains(c.Value));
                     })
-                    .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme, "AppKey", "OidcHeader");
+                    .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme, "AppKey", "OidcHeader", "ExternalJwt");
                 });
             });
 

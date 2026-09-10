@@ -17,6 +17,7 @@ namespace ModelContextGateway.Infrastructure.Secrets
         private string _defaultMountPoint = "secret";
 
         public string ProviderName => "HashiCorpVault";
+        public string DefaultMountPoint => _defaultMountPoint;
 
         public VaultSecretRetriever(IConfiguration config, IMemoryCache cache)
             : this(config, cache, null, null)

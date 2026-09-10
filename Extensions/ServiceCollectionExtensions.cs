@@ -122,12 +122,13 @@ namespace ModelContextGateway.Extensions
             // Register HttpContextAccessor and Secret Retrievers (HashiCorp Vault, Windows Registry, Environment & OAuth2 Token Exchange)
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddMemoryCache();
-            builder.Services.AddSingleton<ISecretRetriever>(sp =>
+            builder.Services.AddSingleton<VaultSecretRetriever>(sp =>
                 new VaultSecretRetriever(
                     sp.GetRequiredService<IConfiguration>(),
                     sp.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>(),
                     sp.GetService<ISecretProviderRepository>()
                 ));
+            builder.Services.AddSingleton<ISecretRetriever>(sp => sp.GetRequiredService<VaultSecretRetriever>());
             builder.Services.AddSingleton<ISecretRetriever, WindowsRegistrySecretRetriever>();
             builder.Services.AddSingleton<ISecretRetriever, EnvironmentSecretRetriever>();
             builder.Services.AddSingleton<ISecretRetriever>(sp =>
@@ -141,7 +142,24 @@ namespace ModelContextGateway.Extensions
                     sp.GetService<ILogger<TokenExchangeSecretRetriever>>()
                 ));
             builder.Services.AddSingleton<CompositeSecretRetriever>();
-            builder.Services.AddSingleton<ModelContextGateway.Infrastructure.Secrets.IUserSecretStore, ModelContextGateway.Infrastructure.Secrets.DatabaseUserSecretStore>();
+            builder.Services.AddSingleton<ModelContextGateway.Infrastructure.Secrets.DatabaseUserSecretStore>();
+            builder.Services.AddSingleton<ModelContextGateway.Infrastructure.Secrets.VaultUserSecretStore>();
+            builder.Services.AddSingleton<ModelContextGateway.Infrastructure.Secrets.IUserSecretStore>(sp =>
+            {
+                var cfg = sp.GetService<IConfiguration>();
+                var provider = cfg?["Secrets:UserStore:Provider"]
+                    ?? cfg?["MCG_USER_SECRET_STORE"]
+                    ?? cfg?["Secrets:UserStore"]
+                    ?? "Database";
+
+                if (string.Equals(provider, "Vault", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(provider, "HashiCorpVault", StringComparison.OrdinalIgnoreCase))
+                {
+                    return sp.GetRequiredService<ModelContextGateway.Infrastructure.Secrets.VaultUserSecretStore>();
+                }
+
+                return sp.GetRequiredService<ModelContextGateway.Infrastructure.Secrets.DatabaseUserSecretStore>();
+            });
 
             // Register Observability & Audit Logger
             builder.Services.AddSingleton<IAuditLogger, AuditLogger>();
