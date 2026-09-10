@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-06T22:15:29.4567207Z",
+    "generatedAt": "2026-09-10T03:26:52.9254026Z",
     "totalRequirements": 423,
-    "positiveCount": 336,
-    "guardrailCount": 87,
-    "totalProofs": 910
+    "positiveCount": 335,
+    "guardrailCount": 88,
+    "totalProofs": 919
   },
   "requirements": [
     {
@@ -598,7 +598,7 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP",
-      "proofCount": 14,
+      "proofCount": 16,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -640,6 +640,20 @@
           "filePath": "ModelContextGateway.Tests/ProvidersControllerTests.cs",
           "lineNumber": 298,
           "testName": "TestLdapConnection_ValidatesInputAndHandlesFailureGracefully",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 25,
+          "testName": "ActiveDirectoryIdentityProvider_Resolves_Steve_Identity_And_Sids",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 59,
+          "testName": "ActiveDirectoryIdentityProvider_Augments_Steve_With_LdapGroupSids",
           "details": null
         },
         {
@@ -7386,9 +7400,9 @@
     {
       "id": "SEC-02",
       "category": "SEC",
-      "type": "Positive",
+      "type": "Negative",
       "description": "VaultSecretRetriever dynamically loads, applies, and reloads Vault configurations from database repository.",
-      "proofCount": 25,
+      "proofCount": 29,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -7508,6 +7522,34 @@
           "lineNumber": 429,
           "testName": "StdioTransport_ShouldSanitizeAndMaskSecretsInLogs",
           "details": "Verifies that subprocess logs and stderr streams are actively sanitized to mask sensitive tokens and credentials."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 99,
+          "testName": "VaultUserSecretStore_GetSecretAsync_Uses_Hardcoded_Path",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 120,
+          "testName": "VaultUserSecretStore_SaveSecretAsync_Throws_NotImplementedException",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 130,
+          "testName": "VaultUserSecretStore_DeleteSecretAsync_Throws_NotImplementedException",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 140,
+          "testName": "VaultUserSecretStore_GetServerIdsAsync_Throws_NotImplementedException",
+          "details": null
         },
         {
           "suite": "Backend xUnit",
@@ -8449,9 +8491,30 @@
       "id": "TRANS-01",
       "category": "TRANS",
       "type": "Positive",
-      "description": "Register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench.",
-      "proofCount": 1,
+      "description": "HttpTransport formats X-API-Key header when downstream server AuthShape is \u0027x-api-key\u0027.",
+      "proofCount": 4,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 154,
+          "testName": "HttpTransport_Applies_XApiKey_AuthShape",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 176,
+          "testName": "HttpTransport_Applies_CustomHeader_AuthShape",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 199,
+          "testName": "HttpTransport_Applies_Slack_PerUser_Token_And_ForwardedUser",
+          "details": null
+        },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/full-ui-flow-http-direct.spec.ts",
