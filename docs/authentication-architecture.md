@@ -54,6 +54,19 @@ graph TD
   - `admin`: Grants the administrator role (`ClaimTypes.Role: Administrator`).
   - `category:<name>`: Restricts access strictly to backend servers assigned that category tag.
 
+### 1.4 In-House IdP & External JWT Bearer (`ExternalJwtAuthenticationHandler`)
+*(Introduced in v5.12.0)*
+- **Mechanism:** Validates external Bearer JWT tokens issued by an enterprise or in-house Identity Provider against standard OIDC discovery (`Identity:Jwt:Authority` / `.well-known/openid-configuration`) and JSON Web Key Sets (JWKS).
+- **Validation Pipeline:**
+  - Dynamically fetches and caches the provider's JWKS public keys.
+  - Verifies cryptographic signature using standard asymmetric algorithms (RS256, ES256, etc.).
+  - Enforces issuer (`Identity:Jwt:Issuer`) and audience (`Identity:Jwt:Audience`) constraints.
+  - Validates token lifetime with clock skew tolerances.
+- **Identity & Role Extraction:**
+  - Extracts subject/username from claims: `preferred_username`, `upn`, `email`, `sub`, or Windows domain account.
+  - Ingests group memberships and AD SIDs into the user context.
+- **Seamless Integration:** Registered as the `"ExternalJwt"` authentication scheme and integrated directly into `DefaultPolicy` and `AdminPolicy`.
+
 ---
 
 ## 2. Standalone Mode & Local Network Authorization

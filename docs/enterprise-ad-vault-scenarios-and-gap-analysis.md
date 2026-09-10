@@ -139,24 +139,27 @@ MCG proxies requests to downstream MCP servers via `HttpTransport` and `SseTrans
 
 ---
 
-## 5. Comprehensive Gap Analysis & Shortcomings Summary
+## 5. Comprehensive Gap Analysis & Remediation Status (v5.12.0)
 
 1. **Vault Path Templating Gap**:
-   - `VaultUserSecretStore` has hardcoded path formatting `users/{username}/{serverId}` and key `"secret"`.
-   - *Requirement for Enterprise*: Configurable path templates, such as `{Company}/mcgateway/{User}/{Server}` or `{User}/{Server}`, and field mapping options (raw JSON blob vs discrete fields `client_id`, `client_secret`, `access_token`).
+   - *Previous State*: `VaultUserSecretStore` had hardcoded path formatting `users/{username}/{serverId}` and key `"secret"`.
+   - *Remediation in v5.12.0 (`SEC-30`)*: Added configurable path templates via `Secrets:UserStore:PathTemplate` or `VAULT_USER_SECRET_PATH_TEMPLATE` (e.g. `{Company}/mcgateway/{User}/{Server}`). Tokens `{Company}`, `{company}`, `{User}`, `{user}`, `{username}`, `{Server}`, `{server}`, and `{app}` are dynamically interpolated. Supports discrete KV fields (`client_id`, `client_secret`, `access_token`) and raw JSON auth blobs.
+
 2. **Vault User Secret Mutation Gap**:
-   - `SaveSecretAsync`, `DeleteSecretAsync`, and `GetServerIdsAsync` in `VaultUserSecretStore` throw `NotImplementedException`.
-   - *Requirement for Enterprise*: Full CRUD support using Vault Sharp KV v2 `WriteSecretAsync` and `DeleteSecretAsync` to support interactive Slack OAuth callbacks.
+   - *Previous State*: `SaveSecretAsync`, `DeleteSecretAsync`, and `GetServerIdsAsync` threw `NotImplementedException`, preventing self-service user credential management and Slack OAuth callbacks.
+   - *Remediation in v5.12.0 (`SEC-30`)*: Implemented full CRUD mutations using VaultSharp KV v2 `WriteSecretAsync`, `DeleteSecretAsync`, and `GetSecretAsync`. Self-service user credential updates now persist directly into HashiCorp Vault.
+
 3. **`IUserSecretStore` DI Configuration Gap**:
-   - `DatabaseUserSecretStore` is hardcoded in `ServiceCollectionExtensions.cs`.
-   - *Requirement for Enterprise*: Dynamic DI binding based on configuration (e.g. `Secrets:UserStore = "Vault"` vs `"Database"`).
+   - *Previous State*: `DatabaseUserSecretStore` was hardcoded in `ServiceCollectionExtensions.cs`.
+   - *Remediation in v5.12.0 (`SEC-31`)*: Decoupled DI registration to read `Secrets:UserStore:Provider` (or `MCG_USER_SECRET_STORE`). When set to `"Vault"` or `"HashiCorpVault"`, `VaultUserSecretStore` is injected; otherwise defaults to `DatabaseUserSecretStore`.
+
 4. **External JWT Bearer Authentication Gap**:
-   - MCG lacks an external JWT Bearer authentication handler. OpenIddict validation is configured only for locally-issued tokens (`options.UseLocalServer()`).
-   - *Requirement for Enterprise*: `Microsoft.AspNetCore.Authentication.JwtBearer` integration configured to ingest OIDC metadata from `Identity:Jwt:Authority` / `.well-known/openid-configuration` with JWKS key caching and audience validation.
-5. **Windows Authentication Scheme Registration Gap on Linux vs Windows**:
-   - `ActiveDirectoryIdentityProvider` relies on `IWindowsIdentityAccessor` reading `HttpContext.User.Identity`.
-   - On Windows IIS, this works when IIS pre-authenticates.
-   - On Linux containers, Windows Kerberos/NTLM authentication cannot run natively without external ingress identity translation or SPNEGO Negotiate middleware.
+   - *Previous State*: MCG lacked an external JWT Bearer authentication handler. OpenIddict was configured only for locally-issued tokens (`options.UseLocalServer()`).
+   - *Remediation in v5.12.0 (`AUTH-130`, `AUTH-131`, `AUTH-132`)*: Added `ExternalJwtAuthenticationHandler` registered under scheme `"ExternalJwt"`. It dynamically discovers OIDC metadata and JWKS from `Identity:Jwt:Authority` / `.well-known/openid-configuration` with caching and validates signatures, issuer, and audience. Seamlessly included in `DefaultPolicy` and `AdminPolicy`.
+
+5. **Windows Authentication Scheme Registration on Linux vs Windows**:
+   - *Platform Characteristic*: Windows Kerberos/NTLM authentication cannot run natively inside Linux containers without external domain joins or Kerberos keytabs.
+   - *Enterprise Solution*: On Windows IIS hosts, native Windows Auth runs via `appsettings.environment.json`. On Linux containers, identity is resolved either via reverse proxy identity headers (`Remote-User`, `Remote-Groups`, `Remote-User-Sid` per `AUTH-134` and `GUARD-06`) or via In-House IdP JWT Bearer tokens (`AUTH-130`).
 
 ---
 

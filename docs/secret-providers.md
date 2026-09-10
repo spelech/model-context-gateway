@@ -105,7 +105,26 @@ The Vault retriever connects to HashiCorp Vault Key-Value Version 2 (`kv-v2`) se
   "mountPath": "secret",
   "token": "hvs.CAESIJ7...sampleVaultToken"
 }
-```
+#### User Secrets in HashiCorp Vault (`VaultUserSecretStore`)
+*(Introduced in v5.12.0)*
+
+MCG supports storing per-user MCP credentials (such as personal tokens for Slack, GitHub, or Jira) directly in HashiCorp Vault instead of the local encrypted SQLite/SQL database.
+
+* **Configuration**:
+  Set `Secrets:UserStore:Provider` (or environment variable `MCG_USER_SECRET_STORE`) to `"Vault"`.
+* **Path Templating**:
+  Configure `Secrets:UserStore:PathTemplate` (or `VAULT_USER_SECRET_PATH_TEMPLATE`) to customize the Vault secret path. Supported replacement tokens include:
+  * `{Company}` / `{company}`: Configured tenant or enterprise name (defaults to `MCG_COMPANY_NAME` or `"default"`).
+  * `{User}` / `{user}` / `{username}`: The sanitized username of the authenticated user.
+  * `{Server}` / `{server}` / `{app}`: The target backend MCP server identifier.
+
+  *Example Path Template*:
+  `{Company}/mcgateway/{User}/{Server}` resolves for user `steve` accessing `slack` in `acme-corp` to:
+  `acme-corp/mcgateway/steve/slack`
+* **Discrete Key and JSON Storage**:
+  `VaultUserSecretStore` supports reading both individual credential keys (`secret`, `access_token`, `token`, `key`, `password`) or structured JSON objects containing multi-field authentication blobs (`client_id`, `client_secret`, `access_token`).
+* **Full Self-Service CRUD**:
+  Users can save, update, list, and delete their backend secrets via the Web UI or API, which translates directly to Vault KV v2 `WriteSecretAsync` and `DeleteSecretAsync` operations.
 
 ---
 
