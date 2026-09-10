@@ -159,28 +159,12 @@ An organization deploys the Docker MCP server:
 ---
 
 ### Level 5: Downstream Identity Delegation
+After authorizing the request, the gateway connects to the target MCP server. For Active Directory callers, the gateway delegates identity using:
+1. **Trusted Gateway Pattern**: Forwards `X-Forwarded-User` and `X-Forwarded-Groups` headers for downstream Row-Level Security (RLS).
+2. **Windows Kerberos Impersonation**: Executes outbound calls inside `WindowsIdentity.RunImpersonated()` on Windows IIS.
+3. **Personal User Credentials (BYOK)**: Resolves user tokens from database or HashiCorp Vault.
 
-After authorizing the request, the gateway connects to the downstream MCP server using one of three delegation methods:
-
-#### Method A: Trusted Gateway Pattern (HTTP Identity Headers)
-- The gateway connects using a shared service account token.
-- It attaches standard identity headers to outbound HTTP and SSE requests:
-  - `X-Forwarded-User: steve` (or `CORP\steve`)
-  - `X-Forwarded-Groups: Domain Users,DevOps,Engineering`
-  - `X-Mcp-Session-Id: <guid>`
-- Downstream MCP servers verify the service account token and enforce Row-Level Security (RLS).
-
-#### Method B: Windows Kerberos Impersonation
-- Available on Windows Server and IIS deployments only.
-- The outbound HTTP transport runs within `WindowsIdentity.RunImpersonated()`.
-- The gateway forwards the caller's Kerberos ticket to downstream servers via S4U2Proxy.
-- External secret providers and static API keys are disabled.
-
-#### Method C: User-Provided Credentials (BYOK)
-- Used when backend MCP servers require personal tokens (such as personal GitHub or Slack tokens).
-- The administrator registers the server with `SecretProvider: UserProvided`.
-- Users save personal tokens in **My MCP Servers**.
-- The gateway resolves credentials from encrypted database storage or HashiCorp Vault.
+> For complete details on all downstream delegation modes and mixing guardrails, read the [**Downstream Authentication & Credential Delegation Guide**](downstream-auth-and-delegation-guide.md).
 
 ---
 

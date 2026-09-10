@@ -151,6 +151,7 @@ You can automate all administration tasks using AI agents or shell scripts:
 
 * [**Active Directory & RBAC Guide**](active-directory-and-rbac-guide.md) — Windows Kerberos, LDAPS `tokenGroups` recursive resolution, and multi-level group policies.
 * [**OIDC & SSO Reverse Proxy Guide**](oidc-and-sso-guide.md) — External JWT validation, header SSO, and downstream token exchange.
+* [**Downstream Auth & Delegation Guide**](downstream-auth-and-delegation-guide.md) — Six credential delegation patterns, RLS identity forwarding, and mixing guardrails.
 * [**Admin MCP Automation Guide**](admin-mcp-automation-guide.md) — Automation playbooks, JSON payloads, and AI agent skills.
 * [**Operations Runbook**](runbook.md) — Production operations, backups, and disaster recovery.
 * [**AppKey Scopes & Authorization Guide**](appkey-scopes.md) — Granular scope rules and personas.

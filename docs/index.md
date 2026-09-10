@@ -229,6 +229,15 @@ Inbound Windows Kerberos and LDAPS tokenGroups recursive resolution, multi-level
 External JWT validation, trusted proxy header SSO, multi-level claims authorization, and RFC 8693 token exchange.
 
 </li>
+<li>
+
+🎯 **[Downstream Auth & Delegation Guide](downstream-auth-and-delegation-guide.md)**
+
+---
+
+Six credential delegation patterns, RLS identity forwarding, token exchange, and mixing guardrails.
+
+</li>
 </ul>
 
 </div>

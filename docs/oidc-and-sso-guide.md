@@ -127,7 +127,7 @@ flowchart TD
 
 When an authorized client invokes a backend MCP server, the gateway delegates credentials using one of five patterns:
 
-| Delegation Pattern | How Credentials Are Sent | Use Case |
+| Delegation Pattern | How Credentials Are Sent | Primary Use Case |
 | :--- | :--- | :--- |
 | **1. Trusted Gateway Identity Propagation** | `X-Forwarded-User: <username>`<br>`X-Forwarded-Groups: <groups>` | Internal microservices that enforce Row-Level Security (RLS). |
 | **2. RFC 8693 Token Exchange** | `Authorization: Bearer <downstream_jwt>` | Zero-trust microservices requiring audience-scoped tokens. |
@@ -135,27 +135,7 @@ When an authorized client invokes a backend MCP server, the gateway delegates cr
 | **4. Pass-Through Dynamic JWT** | `Authorization: Bearer <target_jwt>` | Target-specific proxy routes (`/{serverId}`) with client tokens. |
 | **5. Shared Service Account** | `Authorization: Bearer <shared_key>`<br>`X-API-Key: <shared_key>` | Shared backend infrastructure (Docker, Home Assistant, Postgres). |
 
-### Pattern 1: Trusted Gateway Identity Forwarding
-The gateway connects to the downstream server using a shared service token. It attaches user identity headers to each outbound request:
-- `X-Forwarded-User: alice`
-- `X-Forwarded-Groups: engineering,data-science`
-- `X-Mcp-Session-Id: <session_id>`
-
-Downstream servers trust the gateway IP address and use the headers to enforce internal permissions and audit trails.
-
-### Pattern 2: RFC 8693 Downstream Token Exchange
-For zero-trust microservice meshes, the gateway acts as an OAuth 2.0 Token Exchange client:
-1. The client sends a request with an external user JWT.
-2. The gateway calls the Identity Provider token endpoint with grant type `urn:ietf:params:oauth:grant-type:token-exchange`.
-3. It exchanges the subject token for a downstream token scoped to the target service audience.
-4. The gateway attaches the exchanged token to the outbound request.
-
-### Pattern 3: Bring Your Own Key (BYOK / User-Provided)
-When services require personal credentials (such as Slack user tokens):
-1. The administrator registers the server with `SecretProvider: UserProvided`.
-2. The user enters their personal token in the **My MCP Servers** dashboard.
-3. The gateway stores the token in the encrypted database or HashiCorp Vault.
-4. The gateway retrieves and injects the user's personal token during tool execution.
+> For complete details on all downstream delegation modes, transport formatting, and mixing guardrails, read the [**Downstream Authentication & Credential Delegation Guide**](downstream-auth-and-delegation-guide.md).
 
 ---
 
