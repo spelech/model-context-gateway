@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **423 Requirements Verified** across **921 Test Proofs** (336 Functional Capabilities, 87 Safety Guardrails).
+> **Catalog Statistics:** **425 Requirements Verified** across **923 Test Proofs** (338 Functional Capabilities, 87 Safety Guardrails).
 
 ---
 
@@ -10,13 +10,13 @@
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
 | **`API`** | API | **2** | 2 | 0 | 2 proofs |
-| **`AUTH`** | Authentication, RBAC & Identity | **89** | 85 | 4 | 215 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **90** | 86 | 4 | 216 proofs |
 | **`CORE`** | CORE | **8** | 7 | 1 | 14 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **64** | 3 | 61 | 136 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **109** | 105 | 4 | 206 proofs |
-| **`SEC`** | Secrets Providers & Encryption | **63** | 54 | 9 | 136 proofs |
+| **`SEC`** | Secrets Providers & Encryption | **64** | 55 | 9 | 137 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **35** | 31 | 4 | 41 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **26** | 23 | 3 | 132 proofs |
 
@@ -194,6 +194,12 @@
 * **Verification Proofs (2):**
   - [Backend xUnit] [`ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237) (`CleanupDcrClients_PrunesDuplicateRegistrations_AndExpiredClients`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L333`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L333) (`CleanupClients_CallsRepoAndReturnsCleanedCount`)
+
+### `[AUTH-130]` Renders In-House IdP / External JWT Bearer card, toggles enable, fills authority, and saves configuration.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/IdentityAuthTab.test.tsx#L167`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/IdentityAuthTab.test.tsx#L167) (`renders In-House IdP External JWT card, toggles on, and saves configuration`)
 
 ### `[AUTH-14]` Tool execution catches 401 Unauthorized from downstream target servers and returns interactive auth remediation.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -1722,6 +1728,12 @@
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L88`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L88) (`updates dashboardIcon and live preview when a logo image file is uploaded`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L141`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L141) (`saves settings with the updated logo URL when form is submitted after upload`)
 
+### `[SEC-30]` Renders User Secret Storage options and toggles Vault with warning when disabled.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/SecretProvidersTab.test.tsx#L136`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SecretProvidersTab.test.tsx#L136) (`renders User Secret Storage options and toggles Vault with warning when disabled`)
+
 ### `[SEC-ADMIN-AUDIT-REDACTION]` AdminMcpServer redacts sensitive secrets from argument payloads before recording audit logs.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
@@ -3086,6 +3098,7 @@
 | `AUTH-110` | Positive | `AUTH` | CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0. | [`AppKeysControllerTests.cs:L343`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L343) | Backend xUnit |
 | `AUTH-118` | Positive | `AUTH` | FindDcrClientAsync resolves existing DCR client matching client name and type. | [`OAuthClientRepositoryTests.cs:L214`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214) | Backend xUnit |
 | `AUTH-119` | Positive | `AUTH` | CleanupDcrClientsAsync prunes duplicate and expired dynamic client registrations across all database providers. | [`OAuthClientRepositoryTests.cs:L237`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237) | Backend xUnit |
+| `AUTH-130` | Positive | `AUTH` | Renders In-House IdP / External JWT Bearer card, toggles enable, fills authority, and saves configuration. | [`IdentityAuthTab.test.tsx:L167`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/IdentityAuthTab.test.tsx#L167) | Frontend Vitest |
 | `AUTH-14` | Positive | `AUTH` | Tool execution catches 401 Unauthorized from downstream target servers and returns interactive auth remediation. | [`ToolRoutingManagerTests.cs:L211`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L211) | Backend xUnit |
 | `AUTH-15` | Positive | `AUTH` | OpenIddict initializes ephemeral development signing certificates in Development environment. | [`OpenIddictProductionTests.cs:L30`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenIddictProductionTests.cs#L30) | Backend xUnit |
 | `AUTH-35` | Positive | `AUTH` | Single-user homelab startup initializes SQLite, auto-generates Admin and Client AppKeys without PFX certificate requirements | [`SingleUserHomelabTests.cs:L30`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L30) | Backend xUnit |
@@ -3391,6 +3404,7 @@
 | `SEC-03` | Positive | `SEC` | EnvironmentSecretRetriever retrieves configured environment variable value. | [`SecretRetrieverTests.cs:L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecretRetrieverTests.cs#L5) | Backend xUnit |
 | `SEC-04` | Positive | `SEC` | WindowsRegistrySecretRetriever handles non-Windows platforms gracefully and returns null. | [`SecretRetrieverTests.cs:L34`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecretRetrieverTests.cs#L34) | Backend xUnit |
 | `SEC-05` | Positive | `SEC` | renders RPC message stream with formatted JSON | [`LogsTerminalCard.test.tsx:L61`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LogsTerminalCard.test.tsx#L61) | Frontend Vitest |
+| `SEC-30` | Positive | `SEC` | Renders User Secret Storage options and toggles Vault with warning when disabled. | [`SecretProvidersTab.test.tsx:L136`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SecretProvidersTab.test.tsx#L136) | Frontend Vitest |
 | `SEC-ADMIN-AUDIT-REDACTION` | Positive | `SEC` | AdminMcpServer redacts sensitive secrets from argument payloads before recording audit logs. | [`AdminMcpServerTests.cs:L613`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L613) | Backend xUnit |
 | `SEC-APPKEY-SANITIZE-METADATA-GET` | Positive | `SEC` | AppKeys API returns sanitized key metadata without leaking plaintext tokens. | [`AppKeysControllerTests.cs:L259`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L259) | Backend xUnit |
 | `SEC-AUDIT-LOG-ADMIN-ACTION-RECORD` | Positive | `SEC` | AuditLogger records administrative configuration changes and security events to AdminAuditLogs table. | [`AuditLoggerTests.cs:L75`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditLoggerTests.cs#L75) | Backend xUnit |

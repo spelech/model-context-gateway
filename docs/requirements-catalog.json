@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-10T03:49:08.1665669Z",
-    "totalRequirements": 423,
-    "positiveCount": 336,
+    "generatedAt": "2026-09-10T04:10:43.5646963Z",
+    "totalRequirements": 425,
+    "positiveCount": 338,
     "guardrailCount": 87,
-    "totalProofs": 921
+    "totalProofs": 923
   },
   "requirements": [
     {
@@ -862,6 +862,22 @@
           "filePath": "ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 333,
           "testName": "CleanupClients_CallsRepoAndReturnsCleanedCount",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-130",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Renders In-House IdP / External JWT Bearer card, toggles enable, fills authority, and saves configuration.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "lineNumber": 167,
+          "testName": "renders In-House IdP External JWT card, toggles on, and saves configuration",
           "details": null
         }
       ]
@@ -7751,6 +7767,22 @@
           "filePath": "frontend/src/test/components/GeneralTabLogoUpload.test.tsx",
           "lineNumber": 141,
           "testName": "saves settings with the updated logo URL when form is submitted after upload",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-30",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Renders User Secret Storage options and toggles Vault with warning when disabled.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "lineNumber": 136,
+          "testName": "renders User Secret Storage options and toggles Vault with warning when disabled",
           "details": null
         }
       ]
