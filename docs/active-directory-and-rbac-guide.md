@@ -6,7 +6,7 @@ This guide describes how Model Context Gateway (MCG) authenticates Active Direct
 
 The gateway supports two deployment environments:
 1. **Windows Server and IIS**: Uses Integrated Windows Authentication (Negotiate, Kerberos, NTLM).
-2. **Linux Containers**: Uses direct JSON Web Token (JWT) validation or reverse proxy identity headers. It augments user groups via secure LDAP (LDAPS).
+2. **Linux Containers**: Uses direct JSON Web Token (JWT) validation or reverse proxy identity headers. It augments user groups through secure LDAP (LDAPS).
 
 ---
 
@@ -58,7 +58,7 @@ flowchart TD
 
 ---
 
-### 2.2 Transitive Group Resolution via LDAPS (`tokenGroups`)
+### 2.2 Transitive Group Resolution Over LDAPS (`tokenGroups`)
 
 Active Directory environments commonly use nested groups. Direct token inspection reads only immediate groups.
 
@@ -137,7 +137,7 @@ Configure server policies in **Servers &rarr; Edit Server &rarr; Access Control*
 #### Evaluation Logic:
 1. **Explicit Deny**: If any caller group or SID matches `DeniedGroups`, the gateway rejects the request (`403 Forbidden`).
 2. **Explicit Allow**: If any caller group or SID matches `AllowedGroups`, the gateway permits server access.
-3. **Default Policy Fallback**: If no rule matches, the gateway evaluates server `DefaultAllow`. If `false`, access is denied.
+3. **Default Policy Fallback**: If no rule matches, the gateway evaluates server `DefaultAllow`. If `false`, the gateway denies access.
 
 ---
 

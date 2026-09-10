@@ -30,7 +30,7 @@ flowchart TD
 ```
 
 ### 2.1 Mode 1: In-House IdP / External JWT Bearer
-Used when AI clients (such as Cursor, Claude Desktop, or custom agent runners) send Bearer tokens directly to the gateway.
+Use this mode when AI clients (such as Cursor, Claude Desktop, or custom agent runners) send Bearer tokens directly to the gateway.
 
 - **Component**: `ExternalJwtAuthenticationHandler` (registered under authentication scheme `"ExternalJwt"`).
 - **Validation Flow**:
@@ -48,7 +48,7 @@ Used when AI clients (such as Cursor, Claude Desktop, or custom agent runners) s
 ---
 
 ### 2.2 Mode 2: Reverse Proxy Header SSO
-Used when an enterprise reverse proxy terminates TLS and authenticates users at the network edge.
+Use this mode when an enterprise reverse proxy terminates TLS and authenticates users at the network edge.
 
 - **Component**: `HeaderIdentityProvider` (registered under authentication scheme `"OidcHeader"`).
 - **Security & Trusted Proxies**:
@@ -64,10 +64,10 @@ Used when an enterprise reverse proxy terminates TLS and authenticates users at 
 ---
 
 ### 2.3 Mode 3: Built-in OAuth 2.0 Authorization Server (`OpenIddict`)
-Used when third-party applications or developer tools request scoped access on behalf of users.
+Use this mode when third-party applications or developer tools request scoped access on behalf of users.
 
 - **Dynamic Client Registration (RFC 7591)**:
-  - IDEs register client credentials via `POST /api/register` or `manage_clients`.
+  - IDEs register client credentials using `POST /api/register` or `manage_clients`.
   - The gateway issues a client identifier and secret with configured redirect URIs.
 - **Interactive User Consent**:
   - When an application requests access, the user visits `/connect/authorize`.
@@ -98,7 +98,7 @@ flowchart TD
 
 ### Level 1: Administrative Control (`AdminPolicy`)
 - Protects administrative APIs (`/api/*`) and the Admin MCP Server (`/admin`, `/mcg-admin`).
-- Compares caller groups against `Admin:Groups` (e.g., `["full_admin", "devops_leads"]`).
+- Compares caller groups against `Admin:Groups` (such as `["full_admin", "devops_leads"]`).
 - Matching users receive full gateway administration privileges.
 
 ### Level 2: Group Role Mappings (`GroupMappings` Table)
@@ -110,7 +110,7 @@ flowchart TD
 
 ### Level 3: Server-Level Access Control (`Policies` Table)
 - Restricts backend MCP servers using server `AllowedGroups` and `DeniedGroups`.
-- **Explicit Deny Precedence**: If a user belongs to any denied group, access is rejected immediately.
+- **Explicit Deny Precedence**: If a user belongs to any denied group, the gateway rejects access immediately.
 - Example:
   - Server `finance-mcp`: `AllowedGroups: ["finance-team", "accounting"]`.
   - Non-members receive `403 Forbidden`.

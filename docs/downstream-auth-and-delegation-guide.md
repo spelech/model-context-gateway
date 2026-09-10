@@ -32,7 +32,7 @@ flowchart TD
 ```
 
 ### Pattern 1: Trusted Gateway Pattern (Identity Header Propagation)
-Used when backend microservices trust the gateway IP address and enforce internal authorization or Row-Level Security (RLS).
+Use this pattern when backend microservices trust the gateway IP address and enforce internal authorization or Row-Level Security (RLS).
 
 - **Outbound Transport**: HTTP or SSE.
 - **Injected Headers**:
@@ -44,7 +44,7 @@ Used when backend microservices trust the gateway IP address and enforce interna
 ---
 
 ### Pattern 2: RFC 8693 Downstream Token Exchange
-Used in zero-trust architectures where backend microservices require user-delegated tokens scoped specifically to their audience.
+Use this pattern in zero-trust architectures where backend microservices require user-delegated tokens scoped specifically to their audience.
 
 - **Component**: `TokenExchangeClient`.
 - **How It Works**:
@@ -60,7 +60,7 @@ Used in zero-trust architectures where backend microservices require user-delega
 ---
 
 ### Pattern 3: Bring Your Own Key (BYOK / User-Provided Secrets)
-Used when backend MCP servers require individual user tokens (such as personal GitHub Personal Access Tokens or Slack user tokens).
+Use this pattern when backend MCP servers require individual user tokens (such as personal GitHub Personal Access Tokens or Slack user tokens).
 
 - **Configuration**: Set `SecretProvider` to `UserProvided` in the server configuration.
 - **Storage Providers**:
@@ -72,20 +72,20 @@ Used when backend MCP servers require individual user tokens (such as personal G
 ---
 
 ### Pattern 4: Windows Kerberos Impersonation
-Used on Windows Server and IIS deployments where downstream servers require the caller's Active Directory domain identity.
+Use this pattern on Windows Server and IIS deployments where downstream servers require the caller's Active Directory domain identity.
 
 - **Operating System Requirement**: Windows Server and IIS only. This mode does not run on Linux containers.
 - **Configuration**: Set `AuthShape` to `impersonation`. The UI automatically locks `SecretProvider` to `None`.
 - **How It Works**:
-  1. The user authenticates to IIS via Negotiate or Kerberos.
+  1. The user authenticates to IIS with Negotiate or Kerberos.
   2. The gateway extracts the caller's `WindowsIdentity`.
   3. Outbound HTTP requests execute inside `WindowsIdentity.RunImpersonated()`.
-  4. Downstream servers receive the caller's Kerberos credentials via S4U2Proxy delegation.
+  4. Downstream servers receive the caller's Kerberos credentials through S4U2Proxy delegation.
 
 ---
 
 ### Pattern 5: Pass-Through Dynamic JWTs
-Used when clients obtain backend tokens directly and forward them through the gateway.
+Use this pattern when clients obtain backend tokens directly and forward them through the gateway.
 
 - **Configuration**: Set `AllowPassThroughAuth` to `true` on the server configuration.
 - **Routing Requirement**: Requires target-specific proxy routes (`/{serverId}`). Not supported in universal meta-mode (`/sse`) because the client must target a specific backend.
@@ -96,7 +96,7 @@ Used when clients obtain backend tokens directly and forward them through the ga
 ---
 
 ### Pattern 6: Shared Service Account Credentials
-Used when the gateway connects to shared infrastructure backends (such as Docker, Home Assistant, or Postgres).
+Use this pattern when the gateway connects to shared infrastructure backends (such as Docker, Home Assistant, or Postgres).
 
 - **Secret Providers**:
   - **HashiCorp Vault (KV v2)**: Reads credentials dynamically with JIT token renewal.
@@ -128,7 +128,7 @@ The gateway formats resolved credentials based on the target transport type:
 ### HTTP and SSE Transports (`HttpTransport`, `SseTransport`)
 Credentials inject into HTTP request headers or URL query parameters according to `AuthShape`:
 - `bearer`: Injects `Authorization: Bearer <token>`.
-- `custom-header`: Injects `<CustomHeaderName>: <token>` (e.g., `X-API-Key`, `X-Plex-Token`).
+- `custom-header`: Injects `<CustomHeaderName>: <token>` (such as `X-API-Key` or `X-Plex-Token`).
 - `basic`: Formats `username:password` into `Authorization: Basic <base64>`.
 - `query`: Appends credentials to the URL query string (`?token=<token>`).
 - `raw`: Injects `Authorization: <token>`.
