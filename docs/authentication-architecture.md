@@ -55,17 +55,16 @@ graph TD
   - `category:<name>`: Restricts access strictly to backend servers assigned that category tag.
 
 ### 1.4 In-House IdP & External JWT Bearer (`ExternalJwtAuthenticationHandler`)
-*(Introduced in v5.12.0)*
-- **Mechanism:** Validates external Bearer JWT tokens issued by an enterprise or in-house Identity Provider against standard OIDC discovery (`Identity:Jwt:Authority` / `.well-known/openid-configuration`) and JSON Web Key Sets (JWKS).
+- **Mechanism:** Validates external Bearer JWT tokens from an enterprise Identity Provider. It queries OIDC discovery endpoints (`Identity:Jwt:Authority` / `.well-known/openid-configuration`) and JSON Web Key Sets (JWKS).
 - **Validation Pipeline:**
-  - Dynamically fetches and caches the provider's JWKS public keys.
-  - Verifies cryptographic signature using standard asymmetric algorithms (RS256, ES256, etc.).
+  - Retrieves and caches the public JWKS keys from the provider.
+  - Verifies cryptographic signatures with asymmetric algorithms (RS256, ES256).
   - Enforces issuer (`Identity:Jwt:Issuer`) and audience (`Identity:Jwt:Audience`) constraints.
-  - Validates token lifetime with clock skew tolerances.
+  - Validates token expiration with clock skew tolerances.
 - **Identity & Role Extraction:**
-  - Extracts subject/username from claims: `preferred_username`, `upn`, `email`, `sub`, or Windows domain account.
-  - Ingests group memberships and AD SIDs into the user context.
-- **Seamless Integration:** Registered as the `"ExternalJwt"` authentication scheme and integrated directly into `DefaultPolicy` and `AdminPolicy`.
+  - Extracts the username from token claims (`preferred_username`, `upn`, `email`, `sub`).
+  - Adds group memberships and Active Directory SIDs to the user context.
+- **Policy Integration:** Registers the `"ExternalJwt"` authentication scheme. The gateway evaluates this scheme in `DefaultPolicy` and `AdminPolicy`.
 
 ---
 

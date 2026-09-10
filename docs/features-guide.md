@@ -338,12 +338,12 @@ The `CompositeSecretRetriever` resolves credentials through:
 > For configuration recipes, AppRole policies, and AES-256-GCM encryption architecture, read [**docs/secret-providers.md**](secret-providers.md).
 
 ### Vault Path Templating for User Secrets
-When user secrets are stored in Vault (`Secrets:UserStore:Provider = "Vault"`), the gateway dynamically constructs secret paths using configurable templates (default: `{Company}/mcgateway/{User}/{Server}`):
-- `{Company}`: Organization or tenant identifier (e.g., `acme-corp`).
-- `{User}`: Sanitized username of the authenticated caller (e.g., `steve`).
-- `{Server}`: Target backend MCP server identifier (e.g., `slack`).
+The gateway builds Vault paths from configurable templates when `Secrets:UserStore:Provider` is set to `"Vault"`.
+- `{Company}`: Organization or tenant identifier (such as `acme-corp`).
+- `{User}`: Sanitized username of the authenticated caller (such as `steve`).
+- `{Server}`: Target backend MCP server identifier (such as `slack`).
 
-This resolves to paths like `acme-corp/mcgateway/steve/slack`, supporting both discrete keys (`client_id`, `client_secret`, `access_token`) and structured JSON authentication blobs.
+This template resolves to paths such as `acme-corp/mcgateway/steve/slack`. The store supports discrete keys (`client_id`, `client_secret`, `access_token`) and structured JSON authentication blobs.
 
 ### Downstream Auth Mixing Matrix & Guardrails
 

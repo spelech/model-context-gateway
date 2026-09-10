@@ -321,28 +321,29 @@ The backend server trusts the gateway IP and applies Row-Level Security based on
 
 ### Recipe 12: RFC 8693 Downstream Token Exchange (In-House IdP / Microservices)
 
-* **Common Use Cases**: Enterprise architectures where downstream MCP microservices require user-delegated tokens issued specifically for their audience/resource, verified against an in-house Identity Provider.
+* **Common Use Cases**: Downstream microservices that require audience-specific tokens from an enterprise Identity Provider.
 * **How It Works**:
-  1. The gateway receives a request authenticated via External JWT Bearer or AppKey.
-  2. When dispatching to the downstream MCP server, `TokenExchangeClient` connects to the IdP's token endpoint (`urn:ietf:params:oauth:grant-type:token-exchange`).
-  3. It exchanges the subject token for a downstream bearer token targeted at `audience` / `resource`.
-  4. The exchanged token is attached as `Authorization: Bearer <downstream_jwt>`.
+  1. The client sends a request authenticated with an External JWT Bearer or AppKey.
+  2. The `TokenExchangeClient` connects to the IdP token endpoint (`urn:ietf:params:oauth:grant-type:token-exchange`).
+  3. The gateway exchanges the user token for a downstream bearer token for the target audience.
+  4. The gateway sends `Authorization: Bearer <downstream_jwt>`.
 
 #### Admin Server Registration:
 * **Secret Provider**: `TokenExchange`
-* **Secret Key / Parameter**: Downstream audience or resource identifier (e.g., `https://mcp-internal.corp.local/api/tools`).
+* **Secret Key / Parameter**: Downstream audience or resource URL (such as `https://mcp-internal.corp.local/api/tools`).
 * **Auth Shape**: `bearer`
 
 ---
 
 ### Recipe 13: Windows Kerberos Impersonation (IIS / Windows Domain Services)
 
-* **Common Use Cases**: On-premises enterprise deployments on Windows Server / IIS with Active Directory where downstream servers require the caller's Windows domain identity.
-* **Operating System Requirement**: Windows Server / IIS hosting only (requires `WindowsIdentity.RunImpersonated` / S4U2Proxy delegation). Non-functional on Linux containers.
+* **Common Use Cases**: Downstream servers on Windows Server and IIS that require the caller's Windows domain identity.
+* **Operating System Requirement**: Windows Server and IIS only. This mode does not operate on Linux containers.
 * **How It Works**:
-  1. User authenticates to the gateway via Windows Integrated Authentication (Negotiate / Kerberos).
-  2. Gateway extracts the caller's `WindowsIdentity`.
-  3. When invoking the downstream MCP server, the HTTP transport executes within `WindowsIdentity.RunImpersonated()`, sending outbound HTTP requests with the caller's Kerberos ticket.
+  1. The user authenticates with Windows Integrated Authentication (Negotiate / Kerberos).
+  2. The gateway extracts the caller's `WindowsIdentity`.
+  3. The HTTP transport executes within `WindowsIdentity.RunImpersonated()`.
+  4. Outbound HTTP requests use the caller's Kerberos ticket.
 
 #### Admin Server Registration:
 * **Secret Provider**: `None` *(Locked)*

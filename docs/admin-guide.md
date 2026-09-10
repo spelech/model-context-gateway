@@ -101,22 +101,22 @@ The gateway protects backend credentials so clients never handle plaintext secre
 | **TokenExchange** | Dynamic RFC 8693 token exchange via IdP. | Microservices requiring audience-scoped downstream JWTs. |
 
 ### User Secret Storage (BYOK)
-In **Settings &rarr; Secret Providers &rarr; User Secret Storage (BYOK)**, administrators can select where end-user credentials are stored:
-- **Database (Encrypted Storage)**: Stored in the local database encrypted with AES-256-GCM.
-- **HashiCorp Vault (KV v2)**: Stored in Vault KV v2 using a customizable path template (e.g., `{Company}/mcgateway/{User}/{Server}`). Supported tokens: `{Company}`, `{User}`, `{Server}`.
+Configure user secret storage in **Settings &rarr; Secret Providers &rarr; User Secret Storage (BYOK)**:
+- **Database (Encrypted Storage)**: Saves secrets in the local database encrypted with AES-256-GCM.
+- **HashiCorp Vault (KV v2)**: Saves secrets in Vault KV v2 using a customizable path template (such as `{Company}/mcgateway/{User}/{Server}`). Supported tokens: `{Company}`, `{User}`, `{Server}`.
 
 ### In-House Identity Provider / External JWT Bearer
-In **Settings &rarr; Identity & Authentication &rarr; In-House IdP / External JWT Bearer**, administrators can enable direct validation of inbound Bearer JWTs:
-- **Authority / Discovery URL**: e.g., `https://idp.corp.internal/auth/realms/corp/.well-known/openid-configuration`
-- **Audience**: Expected JWT audience (e.g., `model-context-gateway`).
+Configure inbound Bearer JWT validation in **Settings &rarr; Identity & Authentication &rarr; In-House IdP / External JWT Bearer**:
+- **Authority / Discovery URL**: Provider discovery URL (such as `https://idp.corp.internal/auth/realms/corp/.well-known/openid-configuration`).
+- **Audience**: Expected JWT audience (such as `model-context-gateway`).
 - **Issuer**: Expected JWT issuer URL.
 
-### Configuration Guardrails Enforced in UI
-- **Kerberos Impersonation**: Outbound calls execute via `WindowsIdentity.RunImpersonated`. Secret Provider is locked to `None`, and static API keys are disabled.
-- **User-Provided (BYOK)**: Resolves user credentials dynamically; the static server API key field is disabled.
-- **Vault User Storage Dependency**: If Vault is selected for User Secret Storage while Vault is disabled, a visual alert is shown and user queries fail closed.
+### Configuration Guardrails
+- **Kerberos Impersonation**: Outbound calls execute via `WindowsIdentity.RunImpersonated`. The UI locks Secret Provider to `None` and disables static API keys.
+- **User-Provided (BYOK)**: The gateway resolves user credentials dynamically. The UI disables static server API keys.
+- **Vault User Storage Dependency**: The user store requires an active Vault provider. If Vault is disabled, user queries fail closed.
 
-For setup details, see the [Secret Providers Guide](secret-providers.md) and [Authentication Support Matrix](auth-flows/auth-support-matrix.md).
+For setup details, read the [Secret Providers Guide](secret-providers.md) and [Authentication Support Matrix](auth-flows/auth-support-matrix.md).
 
 ---
 

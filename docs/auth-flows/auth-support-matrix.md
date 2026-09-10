@@ -101,8 +101,8 @@ To prevent invalid, conflicting, or non-functional configurations, the system en
 
 ---
 
-## Technical Edge Cases Discovered
+## 7. Operational Considerations
 
-1. **Format Translation:** Pass-Through auth does not just blindly forward `X-Target-Auth`. The router translates it into the exact format the backend requires (e.g., standard `Authorization: Bearer <token>`) using the `AuthShape` configuration.
-2. **STDIO Zero-CLI Leakage:** When using Pass-Through auth or User-Provided secrets with a `stdio` server, the router translates the dynamic token into a secure Environment Variable (`API_KEY`) for the local subprocess, rather than exposing it in CLI arguments.
-3. **Docker vs Bare-Metal STDIO:** The UI natively supports configuring `stdio` targets. However, the official Docker image (`aspnet:10.0`) lacks runtimes like `node`, `python`, or `uv`. `stdio` works natively on Windows Server / bare-metal, but Docker users must use custom sidecar images or a "batteries-included" Docker tag.
+1. **Format Translation**: Pass-Through authentication converts `X-Target-Auth` into the required backend format (`Authorization: Bearer <token>`) using `AuthShape`.
+2. **STDIO Process Security**: For `stdio` servers, the gateway injects tokens into environment variables (`API_KEY`) rather than process command arguments.
+3. **Container Runtimes for STDIO**: The `latest-full` container image contains Node.js, Python, `uv`, and `bun` for `stdio` MCP servers. Standard minimal images require external binaries.
