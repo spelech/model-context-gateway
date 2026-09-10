@@ -1,12 +1,26 @@
+using System.Net;
 using System.Reflection;
 using System.Security.Claims;
 using System.Security.Principal;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using Moq;
+using VaultSharp;
+using VaultSharp.V1;
+using VaultSharp.V1.Commons;
+using VaultSharp.V1.SecretsEngines;
+using VaultSharp.V1.SecretsEngines.KeyValue;
+using VaultSharp.V1.SecretsEngines.KeyValue.V2;
 
 namespace ModelContextGateway.Tests
 {
@@ -18,6 +32,22 @@ namespace ModelContextGateway.Tests
             Assert.NotNull(method);
             var task = (Task)method.Invoke(transport, new object[] { request })!;
             await task;
+        }
+
+        private static (Mock<IVaultClient> client, Mock<IKeyValueSecretsEngineV2> kv2) CreateMockVault()
+        {
+            var mockVaultClient = new Mock<IVaultClient>();
+            var mockV1 = new Mock<IVaultClientV1>();
+            var mockSecrets = new Mock<ISecretsEngine>();
+            var mockKv = new Mock<IKeyValueSecretsEngine>();
+            var mockKv2 = new Mock<IKeyValueSecretsEngineV2>();
+
+            mockKv.Setup(k => k.V2).Returns(mockKv2.Object);
+            mockSecrets.Setup(s => s.KeyValue).Returns(mockKv.Object);
+            mockV1.Setup(v => v.Secrets).Returns(mockSecrets.Object);
+            mockVaultClient.Setup(c => c.V1).Returns(mockV1.Object);
+
+            return (mockVaultClient, mockKv2);
         }
 
         #region 1. Active Directory & LDAP SID Resolution (Scenario A & B)
@@ -94,57 +124,131 @@ namespace ModelContextGateway.Tests
 
         #endregion
 
-        #region 2. HashiCorp Vault Path & Store Shortcomings
+        #region 2. HashiCorp Vault Path Templating & Full CRUD Support
 
         [Fact]
-        [Requirement("SEC-02", "SEC", RequirementType.Positive, "VaultUserSecretStore queries hardcoded path 'users/{username}/{serverId}' with key 'secret'.")]
-        public async Task VaultUserSecretStore_GetSecretAsync_Uses_Hardcoded_Path()
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "VaultUserSecretStore saves user secret to Vault KV v2 with unpacked JSON properties.")]
+        public async Task VaultUserSecretStore_SaveSecretAsync_WritesToVaultKv2()
         {
+            var (mockClient, mockKv2) = CreateMockVault();
+            IDictionary<string, object>? capturedData = null;
+            string? capturedPath = null;
+
+            mockKv2.Setup(k => k.WriteSecretAsync(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>(), null, "secret"))
+                .Callback<string, IDictionary<string, object>, int?, string>((path, data, cas, mount) =>
+                {
+                    capturedPath = path;
+                    capturedData = data;
+                })
+                .ReturnsAsync(new Secret<CurrentSecretMetadata>());
+
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "Vault:Address", "http://vault.local:8200" }
+            }).Build();
+
+            var retriever = new VaultSecretRetriever(config, new MemoryCache(new MemoryCacheOptions()), () => mockClient.Object);
+            var store = new VaultUserSecretStore(retriever, config);
+
+            var payload = "{\"client_id\":\"slack-123\",\"client_secret\":\"slack-secret-456\",\"access_token\":\"xoxp-steve\"}";
+            await store.SaveSecretAsync("steve", "slack", payload);
+
+            capturedPath.Should().Be("users/steve/slack");
+            capturedData.Should().NotBeNull();
+            capturedData!["client_id"].Should().Be("slack-123");
+            capturedData["client_secret"].Should().Be("slack-secret-456");
+            capturedData["access_token"].Should().Be("xoxp-steve");
+            capturedData["secret"].Should().Be(payload);
+        }
+
+        [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "VaultUserSecretStore deletes user secret from Vault KV v2.")]
+        public async Task VaultUserSecretStore_DeleteSecretAsync_DeletesFromVaultKv2()
+        {
+            var (mockClient, mockKv2) = CreateMockVault();
+            string? deletedPath = null;
+
+            mockKv2.Setup(k => k.DeleteSecretAsync(It.IsAny<string>(), "secret"))
+                .Callback<string, string>((path, mount) => { deletedPath = path; })
+                .Returns(Task.CompletedTask);
+
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "Vault:Address", "http://vault.local:8200" }
+            }).Build();
+
+            var retriever = new VaultSecretRetriever(config, new MemoryCache(new MemoryCacheOptions()), () => mockClient.Object);
+            var store = new VaultUserSecretStore(retriever, config);
+
+            await store.DeleteSecretAsync("steve", "slack");
+            deletedPath.Should().Be("users/steve/slack");
+        }
+
+        [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "VaultUserSecretStore lists user server IDs from Vault KV v2 paths.")]
+        public async Task VaultUserSecretStore_GetServerIdsAsync_ListsPathsFromVaultKv2()
+        {
+            var (mockClient, mockKv2) = CreateMockVault();
+
+            var pathData = new Secret<ListInfo>
+            {
+                Data = new ListInfo
+                {
+                    Keys = new List<string> { "slack", "github", "jira/" }
+                }
+            };
+
+            mockKv2.Setup(k => k.ReadSecretPathsAsync("users/steve", "secret", null))
+                .ReturnsAsync(pathData);
+
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "Vault:Address", "http://vault.local:8200" }
+            }).Build();
+
+            var retriever = new VaultSecretRetriever(config, new MemoryCache(new MemoryCacheOptions()), () => mockClient.Object);
+            var store = new VaultUserSecretStore(retriever, config);
+
+            var serverIds = await store.GetServerIdsAsync("steve");
+            serverIds.Should().Contain(new[] { "slack", "github", "jira" });
+        }
+
+        [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "VaultUserSecretStore resolves enterprise multi-tenant path template '{company}/mcgateway/{user}/{app}'.")]
+        public async Task VaultUserSecretStore_Resolves_Enterprise_Path_Template_And_Discrete_KVs()
+        {
+            var (mockClient, mockKv2) = CreateMockVault();
+
+            var secretData = new Secret<SecretData>
+            {
+                Data = new SecretData
+                {
+                    Data = new Dictionary<string, object>
+                    {
+                        { "client_id", "slack-id-99" },
+                        { "client_secret", "slack-sec-99" },
+                        { "access_token", "xoxp-steve-enterprise" }
+                    }
+                }
+            };
+
+            mockKv2.Setup(k => k.ReadSecretAsync("acme/mcgateway/steve/slack", null, "secret", null))
+                .ReturnsAsync(secretData);
+
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "Vault:Address", "http://vault.local:8200" },
-                { "Vault:Token", "test-token" }
+                { "Vault:UserSecretPathTemplate", "{company}/mcgateway/{user}/{app}" },
+                { "Vault:Company", "acme" }
             }).Build();
 
-            var cache = new MemoryCache(new MemoryCacheOptions());
-            // Pre-seed cache with expected hardcoded key: "vault:secret:users/steve/slack:secret"
-            cache.Set("vault:secret:users/steve/slack:secret", "xoxp-steve-slack-token-999");
-
-            var retriever = new VaultSecretRetriever(config, cache);
-            var store = new VaultUserSecretStore(retriever);
+            var retriever = new VaultSecretRetriever(config, new MemoryCache(new MemoryCacheOptions()), () => mockClient.Object);
+            var store = new VaultUserSecretStore(retriever, config);
 
             var secret = await store.GetSecretAsync("steve", "slack");
-            secret.Should().Be("xoxp-steve-slack-token-999");
-        }
-
-        [Fact]
-        [Requirement("SEC-02", "SEC", RequirementType.Negative, "VaultUserSecretStore throws NotImplementedException on SaveSecretAsync confirming Vault write limitation.")]
-        public async Task VaultUserSecretStore_SaveSecretAsync_Throws_NotImplementedException()
-        {
-            var retriever = new VaultSecretRetriever(new ConfigurationBuilder().Build(), new MemoryCache(new MemoryCacheOptions()));
-            var store = new VaultUserSecretStore(retriever);
-
-            await Assert.ThrowsAsync<NotImplementedException>(() => store.SaveSecretAsync("steve", "slack", "{}"));
-        }
-
-        [Fact]
-        [Requirement("SEC-02", "SEC", RequirementType.Negative, "VaultUserSecretStore throws NotImplementedException on DeleteSecretAsync confirming Vault delete limitation.")]
-        public async Task VaultUserSecretStore_DeleteSecretAsync_Throws_NotImplementedException()
-        {
-            var retriever = new VaultSecretRetriever(new ConfigurationBuilder().Build(), new MemoryCache(new MemoryCacheOptions()));
-            var store = new VaultUserSecretStore(retriever);
-
-            await Assert.ThrowsAsync<NotImplementedException>(() => store.DeleteSecretAsync("steve", "slack"));
-        }
-
-        [Fact]
-        [Requirement("SEC-02", "SEC", RequirementType.Negative, "VaultUserSecretStore throws NotImplementedException on GetServerIdsAsync confirming Vault list limitation.")]
-        public async Task VaultUserSecretStore_GetServerIdsAsync_Throws_NotImplementedException()
-        {
-            var retriever = new VaultSecretRetriever(new ConfigurationBuilder().Build(), new MemoryCache(new MemoryCacheOptions()));
-            var store = new VaultUserSecretStore(retriever);
-
-            await Assert.ThrowsAsync<NotImplementedException>(() => store.GetServerIdsAsync("steve"));
+            secret.Should().NotBeNull();
+            // Discrete KVs containing access_token return access_token or full serialized json
+            secret.Should().Be("xoxp-steve-enterprise");
         }
 
         #endregion
@@ -208,7 +312,6 @@ namespace ModelContextGateway.Tests
                 AuthShape = "bearer"
             };
 
-            // Simulating ClientSession passing Steve's resolved token and forwarded user identity
             var transport = new HttpTransport(
                 server,
                 new HttpClient(),
@@ -226,6 +329,124 @@ namespace ModelContextGateway.Tests
             req.Headers.Authorization!.Parameter.Should().Be("xoxp-steve-slack-token-999");
             req.Headers.Contains("X-Forwarded-User").Should().BeTrue();
             req.Headers.GetValues("X-Forwarded-User").First().Should().Be("steve");
+        }
+
+        #endregion
+
+        #region 4. Pluggable IUserSecretStore DI & External JWT Authentication
+
+        [Fact]
+        [Requirement("AUTH-02", "AUTH", RequirementType.Positive, "ServiceCollection dynamically resolves VaultUserSecretStore when Secrets:UserStore:Provider is 'Vault'.")]
+        public void ServiceCollection_Resolves_VaultUserSecretStore_WhenConfigured()
+        {
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "Secrets:UserStore:Provider", "Vault" },
+                { "Vault:Address", "http://vault.local:8200" },
+                { "Vault:Token", "test-token" }
+            }).Build();
+
+            var services = new ServiceCollection();
+            services.AddSingleton<IConfiguration>(config);
+            services.AddMemoryCache();
+            services.AddLogging();
+            services.AddSingleton<VaultSecretRetriever>();
+            services.AddSingleton<VaultUserSecretStore>();
+            services.AddSingleton<DatabaseUserSecretStore>(sp => new DatabaseUserSecretStore(null!, config));
+            services.AddSingleton<IUserSecretStore>(sp =>
+            {
+                var cfg = sp.GetService<IConfiguration>();
+                var provider = cfg?["Secrets:UserStore:Provider"] ?? "Database";
+                if (string.Equals(provider, "Vault", StringComparison.OrdinalIgnoreCase))
+                {
+                    return sp.GetRequiredService<VaultUserSecretStore>();
+                }
+                return sp.GetRequiredService<DatabaseUserSecretStore>();
+            });
+
+            var provider = services.BuildServiceProvider();
+            var resolvedStore = provider.GetRequiredService<IUserSecretStore>();
+
+            resolvedStore.Should().BeOfType<VaultUserSecretStore>();
+        }
+
+        private class MockHttpMessageHandler : HttpMessageHandler
+        {
+            private readonly string _responseContent;
+            public MockHttpMessageHandler(string responseContent) => _responseContent = responseContent;
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                var resp = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(_responseContent, System.Text.Encoding.UTF8, "application/json")
+                };
+                return Task.FromResult(resp);
+            }
+        }
+
+        [Fact]
+        [Requirement("AUTH-02", "AUTH", RequirementType.Positive, "ExternalJwtAuthenticationHandler validates RS256 Bearer JWT and establishes authenticated user principal.")]
+        public async Task ExternalJwtAuthenticationHandler_Authenticates_Valid_Bearer_Jwt()
+        {
+            using var rsa = System.Security.Cryptography.RSA.Create(2048);
+            var securityKey = new RsaSecurityKey(rsa) { KeyId = "test-key-1" };
+            var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
+
+            var jwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(securityKey);
+            var jwks = new JsonWebKeySet();
+            jwks.Keys.Add(jwk);
+            var jwksJson = JsonSerializer.Serialize(jwks);
+
+            var tokenHandler = new JsonWebTokenHandler();
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Issuer = "http://mock-idp.corp.local",
+                Audience = "internal-mcp",
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim("preferred_username", "steve"),
+                    new Claim("roles", "MCP Developers"),
+                    new Claim("sid", "S-1-5-21-1001")
+                }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = signingCredentials
+            };
+            var jwt = tokenHandler.CreateToken(descriptor);
+
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "Identity:Jwt:Authority", "http://mock-idp.corp.local" },
+                { "Identity:Jwt:Audience", "internal-mcp" }
+            }).Build();
+
+            var mockHttpFactory = new Mock<IHttpClientFactory>();
+            mockHttpFactory.Setup(f => f.CreateClient("McpClient"))
+                .Returns(new HttpClient(new MockHttpMessageHandler(jwksJson)));
+
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var optionsMonitor = new Mock<IOptionsMonitor<AuthenticationSchemeOptions>>();
+            optionsMonitor.Setup(o => o.Get(It.IsAny<string>())).Returns(new AuthenticationSchemeOptions());
+
+            var handler = new ExternalJwtAuthenticationHandler(
+                optionsMonitor.Object,
+                NullLoggerFactory.Instance,
+                UrlEncoder.Default,
+                config,
+                mockHttpFactory.Object,
+                memoryCache);
+
+            var context = new DefaultHttpContext();
+            context.Request.Headers.Authorization = $"Bearer {jwt}";
+
+            await handler.InitializeAsync(new AuthenticationScheme("ExternalJwt", "ExternalJwt", typeof(ExternalJwtAuthenticationHandler)), context);
+            var result = await handler.AuthenticateAsync();
+
+            result.Succeeded.Should().BeTrue();
+            result.Principal.Should().NotBeNull();
+            result.Principal!.Identity!.Name.Should().Be("steve");
+            result.Principal.HasClaim(ClaimTypes.Role, "MCP Developers").Should().BeTrue();
+            result.Principal.HasClaim(ClaimTypes.PrimarySid, "S-1-5-21-1001").Should().BeTrue();
         }
 
         #endregion

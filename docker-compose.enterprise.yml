@@ -51,13 +51,14 @@ services:
       LDAP_ADMIN_PASSWORD: "AdminPassword2026!"
       LDAP_TLS: "true"
       LDAP_TLS_VERIFY_CLIENT: "never"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
     volumes:
-      - ./tests/enterprise/ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom:ro
+      - ./tests/enterprise/ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
     ports:
       - "13389:389"
       - "16636:636"
     healthcheck:
-      test: ["CMD", "ldapsearch", "-x", "-H", "ldap://localhost", "-b", "dc=corp,dc=local", "-s", "base"]
+      test: ["CMD", "ldapsearch", "-x", "-H", "ldap://localhost", "-b", "", "-s", "base"]
       interval: 4s
       timeout: 3s
       retries: 5
