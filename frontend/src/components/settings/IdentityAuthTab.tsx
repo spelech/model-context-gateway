@@ -13,6 +13,22 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
   const oidc = providers.find(
     (p) => p.providerName === 'HeaderAuth' || p.providerName === 'Oidc' || p.providerName === 'PocketID_TinyAuth' || p.providerName === 'PocketID'
   );
+  const extJwt = providers.find((p) => p.providerName === 'ExternalJwt' || p.providerName === 'InHouseIdP');
+
+  const parsedExtJwt = extJwt?.configJson
+    ? (() => {
+        try {
+          return JSON.parse(extJwt.configJson);
+        } catch {
+          return {};
+        }
+      })()
+    : {};
+
+  const [authExtJwtEnabled, setAuthExtJwtEnabled] = useState(extJwt ? extJwt.isEnabled : false);
+  const [authExtJwtAuthority, setAuthExtJwtAuthority] = useState(parsedExtJwt.authority || '');
+  const [authExtJwtAudience, setAuthExtJwtAudience] = useState(parsedExtJwt.audience || '');
+  const [authExtJwtIssuer, setAuthExtJwtIssuer] = useState(parsedExtJwt.issuer || '');
 
   const parsedAd = ad?.configJson
     ? (() => {
@@ -97,6 +113,21 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
         isEnabled: authOidcEnabled,
       });
 
+      if (extJwt || authExtJwtEnabled || authExtJwtAuthority) {
+        await saveAuthProvider({
+          providerName: extJwt?.providerName || 'ExternalJwt',
+          displayName: extJwt?.displayName || 'In-House IdP / External JWT Bearer',
+          userHeader: '',
+          groupsHeader: '',
+          configJson: JSON.stringify({
+            authority: authExtJwtAuthority,
+            audience: authExtJwtAudience,
+            issuer: authExtJwtIssuer,
+          }),
+          isEnabled: authExtJwtEnabled,
+        });
+      }
+
       showToast('Auth Provider configurations saved successfully!', 'success');
     } catch {
       showToast('Failed to save Auth Providers', 'error');
@@ -130,9 +161,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                   <span className="slider"></span>
                 </label>
               </div>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                Query Windows SIDs (`objectSid`, `tokenGroups`) via LDAPS for enterprise role policies.
-              </p>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Authenticate users via Active Directory Kerberos/NTLM or LDAP service binds.</p>
 
               {adDecryptionFailed && (
                 <div className="alert alert-warning mb-4">
@@ -150,7 +179,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                         type="text"
                         id="ad-server"
                         disabled={adDecryptionFailed}
-                        placeholder="e.g. ldap.corp.local or ldap-test"
+                        placeholder="ad.corp.local"
                         value={authAdServer}
                         onChange={(e) => setAuthAdServer(e.target.value)}
                         style={{ fontSize: '12px' }}
@@ -159,7 +188,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                     <div className="form-group" style={{ margin: 0 }}>
                       <label htmlFor="ad-port" style={{ fontSize: '11px' }}>Port</label>
                       <input
-                        type="number"
+                        type="text"
                         id="ad-port"
                         disabled={adDecryptionFailed}
                         placeholder="636"
@@ -310,6 +339,64 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                   style={{ fontSize: '12px' }}
                 />
               </div>
+            </div>
+
+            {/* In-House IdP / External JWT Bearer */}
+            <div style={{ padding: '15px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px', gridColumn: 'span 2' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <h4 style={{ margin: 0 }}>
+                  <i className="fa-solid fa-shield-halved"></i> In-House IdP / External JWT Bearer
+                </h4>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    id="auth-external-jwt-enabled"
+                    checked={authExtJwtEnabled}
+                    onChange={(e) => setAuthExtJwtEnabled(e.target.checked)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                Validate incoming client Bearer JWTs against an enterprise Identity Provider using standard OIDC discovery (<code>.well-known/openid-configuration</code>) and JWKS public keys.
+              </p>
+              {authExtJwtEnabled && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr', gap: '10px', marginTop: '10px' }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label htmlFor="auth-jwt-authority" style={{ fontSize: '11px' }}>Authority / Discovery URL</label>
+                    <input
+                      type="text"
+                      id="auth-jwt-authority"
+                      placeholder="https://idp.corp.local"
+                      value={authExtJwtAuthority}
+                      onChange={(e) => setAuthExtJwtAuthority(e.target.value)}
+                      style={{ fontSize: '12px' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label htmlFor="auth-jwt-audience" style={{ fontSize: '11px' }}>Expected Audience</label>
+                    <input
+                      type="text"
+                      id="auth-jwt-audience"
+                      placeholder="mcg-gateway"
+                      value={authExtJwtAudience}
+                      onChange={(e) => setAuthExtJwtAudience(e.target.value)}
+                      style={{ fontSize: '12px' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label htmlFor="auth-jwt-issuer" style={{ fontSize: '11px' }}>Expected Issuer (Optional)</label>
+                    <input
+                      type="text"
+                      id="auth-jwt-issuer"
+                      placeholder="https://idp.corp.local"
+                      value={authExtJwtIssuer}
+                      onChange={(e) => setAuthExtJwtIssuer(e.target.value)}
+                      style={{ fontSize: '12px' }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <div style={{ marginTop: '15px', textAlign: 'right' }}>

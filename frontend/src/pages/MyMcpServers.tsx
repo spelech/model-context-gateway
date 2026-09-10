@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { McpServer } from '../shared/types';
 import { fetchServersApi } from '../api/serverApi';
-import { fetchUserCredentialsApi, saveUserCredentialApi, UserCredential } from '../api/userCredentialsApi';
+import { fetchUserCredentialsApi, saveUserCredentialApi, deleteUserCredentialApi, UserCredential } from '../api/userCredentialsApi';
 import { showToast } from '../stores/useToastStore';
 import { ClientSetupGuide } from '../components/clients/ClientSetupGuide';
 
@@ -39,14 +39,28 @@ export const MyMcpServers: React.FC = () => {
     setSecretJson('{\n  "apiKey": ""\n}'); // default template
   };
 
+  const handleDelete = async (server: McpServer) => {
+    try {
+      await deleteUserCredentialApi(server.id);
+      showToast(`Credentials removed for ${server.displayName || server.id}.`, 'success');
+      await loadData();
+    } catch {
+      showToast('Failed to delete credentials.', 'error');
+    }
+  };
+
   const handleSave = async () => {
     if (!editingServer) return;
     try {
-      // Validate JSON
-      JSON.parse(secretJson);
+      const trimmed = secretJson.trim();
+      // If starts with { or [, validate JSON syntax
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        JSON.parse(trimmed);
+      }
       
-      await saveUserCredentialApi(editingServer.id, secretJson);
+      await saveUserCredentialApi(editingServer.id, trimmed);
       setEditingServer(null);
+      showToast('Credential saved successfully.', 'success');
       await loadData();
     } catch {
       showToast('Invalid JSON or failed to save.', 'error');
@@ -86,10 +100,15 @@ export const MyMcpServers: React.FC = () => {
                         <span style={{ color: 'var(--danger-color)' }}>Auth Missing</span>
                       )}
                     </td>
-                    <td>
+                    <td style={{ display: 'flex', gap: '8px' }}>
                       <button className="btn-icon" onClick={() => handleEdit(server)}>
                         <i className="fa-solid fa-pen"></i> Edit Auth
                       </button>
+                      {isConfigured && (
+                        <button className="btn-icon" style={{ color: 'var(--danger-color)' }} onClick={() => handleDelete(server)}>
+                          <i className="fa-solid fa-trash"></i> Remove
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );
@@ -108,13 +127,17 @@ export const MyMcpServers: React.FC = () => {
           <div className="glass-card modal-card" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header"><h2><i className="fa-solid fa-lock"></i> Edit Auth for {editingServer.displayName}</h2><button className="btn-close" onClick={() => setEditingServer(null)}>&times;</button></div>
             <div className="form-group">
-              <label>Credentials (JSON format)</label>
+              <label>Credentials (JSON format or raw token string)</label>
               <textarea 
                 className="form-control" 
                 style={{ height: '150px', fontFamily: 'monospace' }}
+                placeholder='Paste raw token (e.g. xoxp-...) or JSON object: {"apiKey": "..."}'
                 value={secretJson}
                 onChange={e => setSecretJson(e.target.value)}
               />
+              <small style={{ color: 'var(--text-muted)', fontSize: '11px', marginTop: '4px', display: 'block' }}>
+                Credentials are securely encrypted at rest or persisted directly into HashiCorp Vault.
+              </small>
             </div>
             <div className="modal-actions">
               <button className="btn btn-secondary" onClick={() => setEditingServer(null)}>Cancel</button>

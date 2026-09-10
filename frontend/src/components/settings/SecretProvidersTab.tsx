@@ -64,6 +64,12 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
   const [secVaultRoleId, setSecVaultRoleId] = useState(parsedVault.roleId || parsedVault.role_id || '');
   const [secVaultSecretId, setSecVaultSecretId] = useState(parsedVault.secretId || parsedVault.secret_id || '');
   const [secVaultPath, setSecVaultPath] = useState(parsedVault.mountPath || '');
+  const [userSecretStore, setUserSecretStore] = useState<'Database' | 'Vault'>(
+    parsedVault.userSecretStore || 'Database'
+  );
+  const [vaultPathTemplate, setVaultPathTemplate] = useState<string>(
+    parsedVault.userSecretPathTemplate || '{Company}/mcgateway/{User}/{Server}'
+  );
 
   const [vaultTestStatus, setVaultTestStatus] = useState<{
     type: 'idle' | 'testing' | 'success' | 'error';
@@ -113,6 +119,11 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
         token: secVaultToken,
         mountPath: secVaultPath,
       };
+
+      if (userSecretStore === 'Vault' || parsedVault.userSecretStore) {
+        vaultConfig.userSecretStore = userSecretStore;
+        vaultConfig.userSecretPathTemplate = vaultPathTemplate;
+      }
 
       if (secVaultAuthMethod === 'approle') {
         delete vaultConfig.token;
@@ -428,6 +439,70 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
                   style={{ fontSize: '11px', padding: '4px 8px', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)', gridColumn: 'span 2' }}
                 />
               </div>
+            </div>
+
+            {/* User Secret Store (BYOK) */}
+            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px', gridColumn: 'span 2' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <h4 style={{ margin: 0, fontSize: '13px' }}>
+                  <i className="fa-solid fa-user-lock"></i> User Secret Storage (BYOK)
+                </h4>
+                <span className="badge badge-secondary" style={{ fontSize: '10px' }}>
+                  v5.12.0
+                </span>
+              </div>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                Choose where personal user tokens (e.g. personal Slack, GitHub, Jira PATs) are persisted and managed.
+              </p>
+
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '8px' }}>
+                <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="user-secret-store"
+                    value="Database"
+                    checked={userSecretStore === 'Database'}
+                    onChange={() => setUserSecretStore('Database')}
+                  />
+                  Database (Encrypted Storage)
+                </label>
+                <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="user-secret-store"
+                    value="Vault"
+                    checked={userSecretStore === 'Vault'}
+                    onChange={() => setUserSecretStore('Vault')}
+                  />
+                  HashiCorp Vault (KV v2)
+                </label>
+              </div>
+
+              {userSecretStore === 'Vault' && !secVaultEnabled && (
+                <div className="alert alert-warning mb-2" style={{ fontSize: '11px', padding: '6px 10px' }}>
+                  <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: '6px' }}></i>
+                  <strong>Warning:</strong> HashiCorp Vault is selected for User Secret Storage, but Vault Secret Provider is disabled above. Vault must be enabled and reachable to persist user credentials.
+                </div>
+              )}
+
+              {userSecretStore === 'Vault' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '6px' }}>
+                  <label htmlFor="vault-path-template" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                    Vault Path Template:
+                  </label>
+                  <input
+                    type="text"
+                    id="vault-path-template"
+                    placeholder="{Company}/mcgateway/{User}/{Server}"
+                    value={vaultPathTemplate}
+                    onChange={(e) => setVaultPathTemplate(e.target.value)}
+                    style={{ fontSize: '11px', padding: '4px 8px', width: '100%', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
+                  />
+                  <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                    Available tokens: <code>{'{Company}'}</code>, <code>{'{User}'}</code>, <code>{'{Server}'}</code>. Preview: <code>{vaultPathTemplate.replace('{Company}', 'acme-corp').replace('{User}', 'steve').replace('{Server}', 'slack')}</code>
+                  </span>
+                </div>
+              )}
             </div>
           </div>
           <div style={{ marginTop: '15px', textAlign: 'right' }}>
