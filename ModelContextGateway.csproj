@@ -26,18 +26,18 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="OpenIddict.AspNetCore" Version="7.6.1" />
-    <PackageReference Include="OpenIddict.Quartz" Version="7.6.1" />
-    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.11" />
+    <PackageReference Include="OpenIddict.AspNetCore" Version="7.7.0" />
+    <PackageReference Include="OpenIddict.Quartz" Version="7.7.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.12" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.11" />
-    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.29.0" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.30.0" />
     <PackageReference Include="Microsoft.ML.Tokenizers" Version="2.0.0" />
     <PackageReference Include="Dapper" Version="2.1.79" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.3" />
     <PackageReference Include="Azure.Identity" Version="1.21.0" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.88.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.89.0" />
     <PackageReference Include="MySqlConnector" Version="2.6.2" />
-    <PackageReference Include="System.DirectoryServices.Protocols" Version="10.0.11" />
+    <PackageReference Include="System.DirectoryServices.Protocols" Version="10.0.12" />
     <PackageReference Include="VaultSharp" Version="1.17.5.1" />
   </ItemGroup>
 
