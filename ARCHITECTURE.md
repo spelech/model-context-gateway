@@ -2,7 +2,7 @@
 
 This document summarizes the internal architecture, security boundaries, and execution flows of **Model Context Gateway (MCG)**.
 
-> **Full Specification**: For complete architectural specifications, Mermaid sequence diagrams, component models, ERDs, and cryptographic pipelines, see the [**Complete Architecture Guide (`docs/architecture.md`)**](docs/architecture.md).
+> **Full Specification**: For complete architectural specifications, Mermaid sequence diagrams, component models, ERDs, and cryptographic pipelines, see the [**Complete Architecture Guide (`docs/architecture/index.md`)**](docs/architecture/index.md).
 
 ---
 

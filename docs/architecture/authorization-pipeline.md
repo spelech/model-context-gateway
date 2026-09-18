@@ -10,7 +10,7 @@ This document details the multi-stage authorization pipeline, scope resolution g
 2. [Scope Grammar & Resolution](#2-scope-grammar-resolution)
 3. [Admin SID Bypass & Database-Backed RBAC Evaluation](#3-admin-sid-bypass-database-backed-rbac-evaluation)
    - [Administrator SID Verification](#administrator-sid-verification)
-   - [Database Stored Procedure Evaluation (`sp_EvaluateUserAccess`)](#database-stored-procedure-evaluation-sp-evaluateuseraccess)
+   - [Database Stored Procedure Evaluation (`sp_EvaluateUserAccess`)](#database-stored-procedure-evaluation-sp_evaluateuseraccess)
    - [Evaluation Precedence Rules](#evaluation-precedence-rules)
 4. [Mermaid Authorization Decision Flowchart](#4-mermaid-authorization-decision-flowchart)
 
