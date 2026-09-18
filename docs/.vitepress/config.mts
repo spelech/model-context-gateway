@@ -34,16 +34,22 @@ export default withMermaid(
       nav: [
         { text: 'Home', link: '/' },
         { text: 'Getting Started', link: '/features-guide' },
-        { text: 'User Guide', link: '/user-guide' },
+        { text: 'Deployments', link: '/deployment/' },
+        { text: 'User Guide', link: '/user-guide/' },
         {
           text: 'Architecture & Security',
           items: [
-            { text: 'System Architecture', link: '/architecture' },
+            { text: 'Architecture Overview', link: '/architecture/' },
+            { text: 'Component & Boundary Model', link: '/architecture/components' },
+            { text: 'Routing & Meta-Mode', link: '/architecture/routing-and-meta-mode' },
+            { text: 'Authorization Pipeline', link: '/architecture/authorization-pipeline' },
+            { text: 'Transports & Subprocesses', link: '/architecture/transports-and-subprocesses' },
+            { text: 'Database & Envelope Encryption', link: '/architecture/database-and-encryption' },
             { text: 'Authentication Architecture', link: '/authentication-architecture' },
             { text: 'Active Directory & Multi-Level RBAC', link: '/active-directory-and-rbac-guide' },
             { text: 'OIDC & SSO Reverse Proxy', link: '/oidc-and-sso-guide' },
             { text: 'Downstream Auth & Delegation', link: '/downstream-auth-and-delegation-guide' },
-            { text: 'Transports & Subprocesses', link: '/transports' },
+            { text: 'Transports (Detailed Guide)', link: '/transports' },
             { text: 'Data Model & ERD', link: '/data-model' },
             { text: 'Database Providers', link: '/database-providers' },
             { text: 'Secret Providers & Key Management', link: '/secret-providers' },
@@ -81,23 +87,58 @@ export default withMermaid(
           collapsed: false,
           items: [
             { text: 'Features Overview', link: '/features-guide' },
-            { text: 'Single-User & Home-Lab Setup', link: '/single-user-and-homelab-guide' },
-            { text: 'Docker & Container Deployment', link: '/deployment-guide' },
-            { text: 'Windows & IIS Deployment', link: '/windows-deployment-and-validation-guide' },
+            { text: 'Deployment Overview', link: '/deployment/' },
+            { text: 'Single-User & Home-Lab Setup', link: '/deployment/homelab' },
+            { text: 'Docker & Container Deployment', link: '/deployment/docker' },
+            { text: 'Windows & IIS Deployment', link: '/deployment/windows-iis' },
             { text: 'Support Matrix', link: '/support-matrix' }
+          ]
+        },
+        {
+          text: 'Deployment & Hosting',
+          collapsed: false,
+          items: [
+            { text: 'Overview & Topologies', link: '/deployment/' },
+            { text: 'Docker & Containers', link: '/deployment/docker' },
+            { text: 'Windows IIS In-Process', link: '/deployment/windows-iis' },
+            { text: 'Windows Service (SCM) & DPAPI', link: '/deployment/windows-service' },
+            { text: 'Multi-Provider Database Setup', link: '/deployment/database-setup' },
+            { text: 'Single-User & Home-Lab Setup', link: '/deployment/homelab' },
+            { text: 'Validation Runbook & Troubleshooting', link: '/deployment/validation-and-runbook' }
           ]
         },
         {
           text: 'User Guide',
           collapsed: false,
           items: [
-            { text: 'User Guide Overview', link: '/user-guide' },
-            { text: '01. Dashboard & Navigation', link: '/user-guide/01-dashboard-and-navigation' },
-            { text: '02. Server Management & Secrets', link: '/user-guide/02-server-management-and-secrets' },
-            { text: '03. RBAC & Security', link: '/user-guide/03-rbac-and-security' },
-            { text: '04. Client Setup & AppKeys', link: '/user-guide/04-client-setup-and-app-keys' },
-            { text: '05. Interactive Test Bench', link: '/user-guide/05-interactive-test-bench' },
-            { text: '06. Settings & Embeddings', link: '/user-guide/06-settings-and-embeddings' }
+            { text: 'User Guide Overview', link: '/user-guide/' },
+            { text: 'Dashboard & Navigation', link: '/user-guide/dashboard' },
+            { text: 'Server Management & Secrets', link: '/user-guide/servers' },
+            { text: 'RBAC, Security & Policies', link: '/user-guide/rbac-and-policies' },
+            { text: 'AppKey Management & Scopes', link: '/user-guide/app-keys' },
+            {
+              text: 'Client Setup & Integration',
+              collapsed: true,
+              items: [
+                { text: 'Client Setup Overview', link: '/user-guide/clients/' },
+                { text: 'Cursor IDE', link: '/user-guide/clients/cursor' },
+                { text: 'Claude Desktop', link: '/user-guide/clients/claude-desktop' },
+                { text: 'Cline & VS Code', link: '/user-guide/clients/cline-and-vscode' },
+                { text: 'Antigravity CLI & Agents', link: '/user-guide/clients/antigravity' }
+              ]
+            },
+            {
+              text: 'Interactive Test Bench',
+              collapsed: true,
+              items: [
+                { text: 'Test Bench Overview', link: '/user-guide/test-bench/' },
+                { text: 'Tool Execution Tester', link: '/user-guide/test-bench/tool-tester' },
+                { text: 'Virtual Resources & Prompts', link: '/user-guide/test-bench/resources-and-prompts' },
+                { text: 'Semantic Router Simulator', link: '/user-guide/test-bench/semantic-search' },
+                { text: 'Raw Console & Live Logs', link: '/user-guide/test-bench/console-and-logs' }
+              ]
+            },
+            { text: 'System Settings & Embeddings', link: '/user-guide/settings' }
           ]
         },
         {
@@ -141,10 +182,15 @@ export default withMermaid(
           text: 'Architecture & Internals',
           collapsed: true,
           items: [
-            { text: 'System Architecture', link: '/architecture' },
-            { text: 'Transports & Subprocesses', link: '/transports' },
+            { text: 'Architecture Overview', link: '/architecture/' },
+            { text: 'Component & Boundary Model', link: '/architecture/components' },
+            { text: 'Routing & Meta-Mode Engine', link: '/architecture/routing-and-meta-mode' },
+            { text: 'Authorization Pipeline', link: '/architecture/authorization-pipeline' },
+            { text: 'Transports & Subprocesses', link: '/architecture/transports-and-subprocesses' },
+            { text: 'Database & Envelope Encryption', link: '/architecture/database-and-encryption' },
+            { text: 'Transports (Detailed Guide)', link: '/transports' },
             { text: 'Data Model & ERD', link: '/data-model' },
-            { text: 'Database Providers', link: '/database-providers' },
+            { text: 'Database Providers Matrix', link: '/database-providers' },
             { text: 'ID Mapping Blueprint', link: '/id-mapping-blueprint' }
           ]
         },
