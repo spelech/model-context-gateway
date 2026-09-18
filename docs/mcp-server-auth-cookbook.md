@@ -373,5 +373,5 @@ The backend server trusts the gateway IP and applies Row-Level Security based on
 
 * 🔐 [**Enterprise Secret Providers Guide**](secret-providers.md) — Guides for Vault, DPAPI, and AES-256-GCM.
 * 🚦 [**Authentication Support Matrix**](auth-flows/auth-support-matrix.md) — Technical transport and delegation matrix.
-* 🛡️ [**RBAC & Security Policies Guide**](user-guide/03-rbac-and-security.md) — 4-Stage authorization pipeline and group access controls.
+* 🛡️ [**RBAC & Security Policies Guide**](user-guide/rbac-and-policies.md) — 4-Stage authorization pipeline and group access controls.
 * 🤖 [**Admin MCP Automation Guide**](admin-mcp-automation-guide.md) — Automated server provisioning with AI agent skills.

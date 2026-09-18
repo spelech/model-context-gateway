@@ -12,7 +12,7 @@ export default withMermaid(
     lastUpdated: true,
     appearance: 'dark',
     ignoreDeadLinks: 'localhostLinks',
-    srcExclude: ['superpowers/**', 'user-guide/README.md'],
+    srcExclude: ['superpowers/**'],
 
     head: [
       ['link', { rel: 'icon', href: '/model-context-gateway/favicon.ico' }],

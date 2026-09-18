@@ -211,7 +211,7 @@ graph TD
 | **Pairwise Integration Matrix & E2E Tests** | [**Testing Matrix & Integration Guide**](../testing-matrix.md) |
 | **Living Software Requirements (SRS) & Test Catalog** | [**Software Requirements & Test Verification Catalog**](../software-requirements-and-test-catalog.md) |
 | **Test Catalog Architecture & Annotation Guide** | [**Test Catalog & Annotation Guide**](../test-catalog-guide.md) |
-| **End-User Guides & Interactive UI Manual** | [**Official User Guide**](../user-guide.md) |
+| **End-User Guides & Interactive UI Manual** | [**Official User Guide**](../user-guide/index.md) |
 | **Developer Environment & Coding Guidelines** | [**Developer Guide & Local Setup**](../developer-guide.md) |
 | **Operations, Deployment & Disaster Recovery** | [**Operations & Production Runbook**](../runbook.md) |
 | **Contributor Workflow & PR Standards** | [**Contributing Guide**](../developer-guide.md) |

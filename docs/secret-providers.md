@@ -478,7 +478,7 @@ echo "Vault Secret ID: $SECRET_ID"
 
 ## 🔗 Related Documentation and Links
 
-- [Official User Guide: Server Management & Secrets](user-guide/02-server-management-and-secrets.md)
-- [Architecture & Domain Model](architecture.md)
+- [Official User Guide: Server Management & Secrets](user-guide/servers.md)
+- [Architecture & Domain Model](architecture/index.md)
 - [Features & Usage Guide](features-guide.md)
-- [Security & Access Control (RBAC)](user-guide/03-rbac-and-security.md)
+- [Security & Access Control (RBAC)](user-guide/rbac-and-policies.md)

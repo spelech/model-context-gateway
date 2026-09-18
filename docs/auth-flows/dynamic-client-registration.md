@@ -290,4 +290,4 @@ Administrators can view and manage registered OAuth applications in the Web Dash
 - [Multi-Tenant OAuth Consent Flow](multi-tenant-oauth-consent.md): User authorization and consent screen architecture.
 - [Canonical Data Model & Database ERD](../data-model.md): Database schema and entity relationships for `OAuthClients`.
 - [Database Provider Support Matrix](../database-providers.md): Dialect-specific DDL and stored procedures across SQLite, MSSQL, and MySQL.
-- [RBAC & Access Control Policies](../user-guide/03-rbac-and-security.md): 4-Stage authorization pipeline and identity providers.
+- [RBAC & Access Control Policies](../user-guide/rbac-and-policies.md): 4-Stage authorization pipeline and identity providers.

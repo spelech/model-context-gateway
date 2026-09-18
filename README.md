@@ -41,7 +41,7 @@ When you connect an AI assistant directly to many individual tools, you face com
 ## Key Capabilities
 
 * **Admin MCP Control Plane (`/admin`, `/mcg-admin`)**: Control the gateway programmatically through standard MCP tools (`manage_servers`, `manage_appkeys`, `manage_clients`, `manage_policies`, `manage_group_mappings`, `manage_providers`, `manage_settings`, `manage_custom_files`, `manage_system`, `test_tool_call`). See [Admin Guide](docs/admin-guide.md).
-* **Autonomous Setup & Administration**: Built-in agent skills (`mcg-setup` and `mcg-admin`) let AI agents configure servers, secret stores, and access policies automatically. See [User Guide](docs/user-guide.md).
+* **Autonomous Setup & Administration**: Built-in agent skills (`mcg-setup` and `mcg-admin`) let AI agents configure servers, secret stores, and access policies automatically. See [User Guide](docs/user-guide/index.md).
 * **Meta-Mode Context Saving**: Hides tool schemas during startup to prevent context memory exhaustion and model hallucinations.
 * **Modern Slash Tool Routing**: Use modern slash format (`{namespace}/{tool_name}`) with backwards-compatible format (`{serverId}__{toolName}`) and collision checks.
 * **Dynamic Docker Discovery**: Automatically discovers containers labeled `mcp.enabled=true` through `/var/run/docker.sock`. See [Features Guide](docs/features-guide.md).
@@ -74,7 +74,7 @@ docker run -d \
 * **Admin Key**: Generates a compact admin key (`mcp-adm-...`) saved to `./data/.admin.key` for remote AI agents.
 * **Docker Discovery**: Automatically connects to any containers labeled `mcp.enabled=true`.
 
-For homelab instructions, see the [Single-User & Home-Lab Setup Guide](docs/single-user-and-homelab-guide.md).
+For homelab instructions, see the [Single-User & Home-Lab Setup Guide](docs/deployment/homelab.md).
 
 ---
 
@@ -146,14 +146,14 @@ For complete credential flow diagrams, see the [Authentication Support Matrix](d
 
 | Guide | Description |
 | :--- | :--- |
-| [**Single-User & Home-Lab Setup Guide**](docs/single-user-and-homelab-guide.md) | Fast setup for personal use, home labs, and local AI clients. |
-| [**Official User Guide**](docs/user-guide.md) | Web dashboard, server management, AppKeys, and test bench. |
+| [**Single-User & Home-Lab Setup Guide**](docs/deployment/homelab.md) | Fast setup for personal use, home labs, and local AI clients. |
+| [**Official User Guide**](docs/user-guide/index.md) | Web dashboard, server management, AppKeys, and test bench. |
 | [**Administrator Guide**](docs/admin-guide.md) | Server management, 10 Admin MCP tools, RBAC policies, and providers. |
 | [**Admin MCP Automation Guide**](docs/admin-mcp-automation-guide.md) | AI agent automation with `mcg-admin` and configuration playbooks. |
-| [**Architecture Specification**](docs/architecture.md) | System components, request flow diagrams, and encryption pipelines. |
-| [**Container Deployment Guide**](docs/deployment-guide.md) | Production Docker, Docker Compose, and environment settings. |
+| [**Architecture Specification**](docs/architecture/index.md) | System components, request flow diagrams, and encryption pipelines. |
+| [**Container Deployment Guide**](docs/deployment/docker.md) | Production Docker, Docker Compose, and environment settings. |
 | [**Operations Runbook**](docs/runbook.md) | Health checks, database backups, key rotation, and disaster recovery. |
-| [**Windows & IIS Deployment Guide**](docs/windows-deployment-and-validation-guide.md) | Windows Server IIS hosting, Windows services, and DPAPI keys. |
+| [**Windows & IIS Deployment Guide**](docs/deployment/windows-iis.md) | Windows Server IIS hosting, Windows services, and DPAPI keys. |
 | [**MCP Server Auth Cookbook**](docs/mcp-server-auth-cookbook.md) | Setup recipes for Bearer auth, custom headers, Vault, and BYOK. |
 | [**Canonical Data Model & Database ERD**](docs/data-model.md) | Complete 12-table entity-relationship diagram and schema details. |
 | [**Database Providers Guide**](docs/database-providers.md) | SQLite, Microsoft SQL Server, and MySQL database setup. |

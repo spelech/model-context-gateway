@@ -160,10 +160,10 @@ graph TD
 
 ## Related Technical Documentation
 
-* [Single-User & Home-Lab Setup Guide](../single-user-and-homelab-guide.md) — Fast bootstrapping for local development.
+* [Single-User & Home-Lab Setup Guide](../deployment/homelab.md) — Fast bootstrapping for local development.
 * [Administrator Guide](../admin-guide.md) — Operational commands and admin MCP server reference.
 * [AppKey Scopes & Authorization Guide](../appkey-scopes.md) — Formal scope grammar and evaluation matrix.
 * [MCP Server Auth Cookbook](../mcp-server-auth-cookbook.md) — Integration recipes for common backend servers.
-* [Comprehensive Enterprise Architecture Guide](../architecture.md) — Deep architectural deep-dive and component lifecycle.
+* [Comprehensive Enterprise Architecture Guide](../architecture/index.md) — Deep architectural deep-dive and component lifecycle.
 * [Secret Providers & Key Management](../secret-providers.md) — Enterprise HashiCorp Vault, DPAPI, and AES-256 envelope encryption.
 * [Troubleshooting & RCA Guide](../mcp-routing-and-admin-issues.md) — Common operational issues and diagnostic procedures.

@@ -243,8 +243,8 @@ Incoming requests undergo a 4-stage evaluation pipeline:
 
 To explore architecture, configuration, and implementation guides, proceed to:
 
-* [**Architecture Guide**](architecture.md)
-* [**Official User Guide**](user-guide.md)
+* [**Architecture Guide**](architecture/index.md)
+* [**Official User Guide**](user-guide/index.md)
 * [**Enterprise Secret Providers Guide**](secret-providers.md)
 * 🔑 [**AppKey Scopes & Authorization Guide**](appkey-scopes.md)
 * 🚀 [**Transport Capability & Configuration Guide**](transports.md)

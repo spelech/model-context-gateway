@@ -649,8 +649,8 @@ volumes:
 
 ## Related Documentation and References
 
-* [Production Deployment & Database Migration Guide](deployment-guide.md)
-* [System Architecture & Dependency Injection](architecture.md)
+* [Production Deployment & Database Migration Guide](deployment/database-setup.md)
+* [System Architecture & Dependency Injection](architecture/index.md)
 * [Pairwise Testing Matrix & Integration Suites](testing-matrix.md)
-* [Pluggable Secret Providers & Server Management](user-guide/02-server-management-and-secrets.md)
+* [Pluggable Secret Providers & Server Management](user-guide/servers.md)
 * [Features & Connection Guidelines](features-guide.md)
