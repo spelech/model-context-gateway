@@ -2,7 +2,7 @@
 
 This document summarizes the internal architecture, security boundaries, and execution flows of **Model Context Gateway (MCG)**.
 
-> **Full Specification**: For complete architectural specifications, Mermaid sequence diagrams, component models, ERDs, and cryptographic pipelines, see the [**Complete Architecture Guide (`docs/architecture.md`)**](docs/architecture.md).
+> **Full Specification**: For complete architectural specifications, Mermaid sequence diagrams, component models, ERDs, and cryptographic pipelines, see the [**Complete Architecture Guide (`docs/architecture/index.md`)**](docs/architecture/index.md).
 
 ---
 
@@ -268,9 +268,9 @@ For comprehensive guides covering each individual subsystem in depth, refer to t
 
 | Document | Focus Area |
 | :--- | :--- |
-| [**`docs/architecture.md`**](docs/architecture.md) | **Master Architectural Specification & Comprehensive Deep-Dive** |
+| [**`docs/architecture/index.md`**](docs/architecture/index.md) | **Master Architectural Specification & Comprehensive Deep-Dive** |
 | [**`docs/data-model.md`**](docs/data-model.md) | **Canonical Data Model & Database Entity-Relationship Diagram (ERD)** |
-| [**`docs/single-user-and-homelab-guide.md`**](docs/single-user-and-homelab-guide.md) | **Single-User & Home-Lab Setup, Granular AppKeys & Envelope Encryption** |
+| [**`docs/deployment/homelab.md`**](docs/deployment/homelab.md) | **Single-User & Home-Lab Setup, Granular AppKeys & Envelope Encryption** |
 | [**`docs/transports.md`**](docs/transports.md) | Downstream Transports, Concurrency & Subprocess STDIO Lifecycle |
 | [**`docs/appkey-scopes.md`**](docs/appkey-scopes.md) | AppKey Scopes, Granular Permissions & Multi-Stage Authorization |
 | [**`docs/database-providers.md`**](docs/database-providers.md) | SQLite WAL, MS SQL Server & MySQL Stored Procedure Dialects |

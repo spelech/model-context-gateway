@@ -2,7 +2,7 @@
 
 This document provides the complete, canonical data model and Entity-Relationship Diagram (ERD) for the **C# Model Context Gateway (MCG) & Semantic Proxy**. It documents all 12 core database entities, relationship cardinalities, column constraints, indexing strategies, multi-dialect support (SQLite SQLCipher, MS SQL Server, MySQL), and data protection models.
 
-For dialect-specific SQL migrations and connection string setups, see [database-providers.md](database-providers.md). For end-to-end system architecture and data flow sequences, see [architecture.md](architecture.md).
+For dialect-specific SQL migrations and connection string setups, see [database-providers.md](database-providers.md). For end-to-end system architecture and data flow sequences, see [architecture/index.md](architecture/index.md).
 
 ---
 
@@ -382,6 +382,6 @@ graph TD
 ## Related Documentation
 
 - [database-providers.md](database-providers.md): Dialect-specific DDL, stored procedure definitions, and connection configuration.
-- [architecture.md](architecture.md): End-to-end system context, component diagrams, and runtime sequence diagrams.
+- [architecture/index.md](architecture/index.md): End-to-end system context, component diagrams, and runtime sequence diagrams.
 - [secret-providers.md](secret-providers.md): Pluggable secret retriever architecture and HashiCorp Vault integration.
 - [appkey-scopes.md](appkey-scopes.md): AppKey scoping, life cycle, and authorization logic.

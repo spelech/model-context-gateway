@@ -87,7 +87,7 @@ flowchart LR
 <ul>
 <li>
 
-🚀 **[Container Deployment Guide](deployment-guide.md)**
+🚀 **[Container Deployment Guide](deployment/docker.md)**
 
 ---
 
@@ -96,7 +96,7 @@ Production Docker, Docker Compose, environment settings, and database configurat
 </li>
 <li>
 
-🏠 **[Single-User & Home-Lab Setup](single-user-and-homelab-guide.md)**
+🏠 **[Single-User & Home-Lab Setup](deployment/homelab.md)**
 
 ---
 
@@ -132,7 +132,7 @@ Autonomous agent administration via the `mcg-admin` skill, control plane tools, 
 </li>
 <li>
 
-📖 **[Official User Guide](user-guide.md)**
+📖 **[Official User Guide](user-guide/index.md)**
 
 ---
 
@@ -150,7 +150,7 @@ Scenario-driven integration recipes for Bearer auth, Custom Headers, Vault, BYOK
 </li>
 <li>
 
-🗺️ **[Comprehensive Architecture](architecture.md)**
+🗺️ **[Comprehensive Architecture](architecture/index.md)**
 
 ---
 

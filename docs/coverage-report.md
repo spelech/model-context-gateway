@@ -67,4 +67,4 @@ reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coveragereport"
 - Detailed Evaluation & Methodology: [`docs/test-coverage-evaluation.md`](test-coverage-evaluation.md)
 - Integration Matrix & Requirements: [`docs/testing-matrix.md`](testing-matrix.md)
 - CI Quality Gate Pipeline: [`docs/ci-quality-gates.md`](ci-quality-gates.md)
-- Windows Deployment & Validation Guide: [`docs/windows-deployment-and-validation-guide.md`](windows-deployment-and-validation-guide.md)
+- Windows Deployment & Validation Guide: [`docs/deployment/windows-iis.md`](deployment/windows-iis.md)

@@ -117,7 +117,7 @@ sudo systemctl status mcg
 
 For Windows Server deployments, the repository supplies automated scripts and documentation:
 
-- **Comprehensive Guide**: [**Windows Deployment, Enterprise Hosting & Validation Guide (`docs/windows-deployment-and-validation-guide.md`)**](windows-deployment-and-validation-guide.md)
+- **Comprehensive Guide**: [**Windows Deployment, Enterprise Hosting & Validation Guide (`docs/deployment/windows-iis.md`)**](deployment/windows-iis.md)
 - **IIS In-Process Automation**: `scripts/windows/Deploy-IIS.ps1` (configures Internet Information Services [IIS] with `No Managed Code`, `AlwaysRunning`, unbuffered Server-Sent Events [SSE] streaming with `responseBufferLimit="0"`, and Windows Authentication).
 - **Windows Service Automation**: `scripts/windows/Setup-WindowsService.ps1` (registers Service Control Manager [SCM] restart triggers and service lifecycles).
 - **Secret Management**: `scripts/windows/Set-RegistrySecrets.ps1` (uses Data Protection API [DPAPI] machine encryption for registry keys).

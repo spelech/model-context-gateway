@@ -131,7 +131,7 @@ Select the identity and network access tier based on deployment scope:
   - Supports multiple individualized AppKeys with custom granular scopes (`all`, `server:<name>`, `category:<group>`, `tool:<id>`) declared via `MCG_CLIENT_APP_KEYS` or generated in the Web UI.
 - **Zero OpenSSL / Certificate Overhead**: Standalone mode auto-generates `.openiddict.pfx` or uses development signing certs without manual OpenSSL commands.
 - **Network Restriction**: Restrict admin UI to loopback or local LAN CIDR subnets using `STANDALONE_ALLOWED_NETWORKS` (`Admin:StandaloneAllowedNetworks`). Example: `STANDALONE_ALLOWED_NETWORKS=127.0.0.1,::1,192.168.0.0/16,10.0.0.0/8`.
-- **Deployment Template**: Use [templates/docker-compose.homelab.yml](templates/docker-compose.homelab.yml) for copy-paste Docker Compose scaffolding and see the Single-User & Home-Lab Setup Guide (`docs/single-user-and-homelab-guide.md`).
+- **Deployment Template**: Use [templates/docker-compose.homelab.yml](templates/docker-compose.homelab.yml) for copy-paste Docker Compose scaffolding and see the Single-User & Home-Lab Setup Guide (`docs/deployment/homelab.md`).
 
 ### Option B: Enterprise Mode
 - **Database**: Microsoft SQL Server (`mssql`), MySQL (`mysql`), or SQLite (`sqlite`).
