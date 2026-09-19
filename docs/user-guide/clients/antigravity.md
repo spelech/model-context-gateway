@@ -61,7 +61,14 @@ To configure MCG persistently for autonomous agent sessions, register it in your
 
 ---
 
-## 💡 Best Practices for Autonomous Agents
+## 🔐 Zero-Config Discovery & Connected Accounts (3LO)
+
+* **RFC 9728 Handshake**: Unauthenticated calls to `/sse` automatically receive standard `WWW-Authenticate: Bearer realm="mcp", resource_metadata=".../.well-known/oauth-protected-resource"` headers, enabling compliant agents to perform automated OAuth discovery without pre-shared API keys.
+* **Per-User Egress Tokens**: When an agent invokes tools against third-party SaaS services (GitHub, Slack, Jira), the agent only passes its gateway credentials. MCG inspects the user session, resolves the user's vaulted 3LO OAuth token, strips the agent's ingress key, and injects the user's SaaS bearer token into outbound requests.
+
+---
+
+## 🛠️ Operational Tips for Autonomous Agents
 
 1. **Leverage Meta-Mode in Multi-Server Environments**:
    Autonomous agents perform best when prompt context is not flooded with irrelevant schemas. In Meta-Mode, agents use `search_tools` to find exactly what they need before calling `execute_tool`.

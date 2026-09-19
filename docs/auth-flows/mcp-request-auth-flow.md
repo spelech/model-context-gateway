@@ -18,7 +18,15 @@ sequenceDiagram
 
     Note over C, B: Phase 1: Client to Router Authentication
     
-    alt Uses AppKey (API Token)
+    alt Unauthenticated Request (RFC 9728 Discovery Handshake)
+        C->>R: Initial Connection (No Token)
+        R-->>C: 401 Unauthorized (WWW-Authenticate: Bearer realm="mcp", resource_metadata=".../.well-known/oauth-protected-resource")
+        C->>R: GET /.well-known/oauth-protected-resource
+        R-->>C: 200 OK (PRM: authorization_servers, scopes_supported)
+        C->>IDP: Acquire Token from IdP
+        IDP-->>C: Bearer JWT
+        C->>R: Reconnect with Authorization: Bearer <JWT>
+    else Uses AppKey (API Token)
         C->>R: HTTP Request (Header: Authorization / X-App-Key)
         R->>DB: Lookup AppKey by Prefix
         DB-->>R: AppKey Hash & Scopes
@@ -35,9 +43,19 @@ sequenceDiagram
     
     C->>R: Send MCP Protocol Message (e.g., tools/call)
     R->>DB: Fetch Backend Server Config
-    DB-->>R: Server Details (SecretProvider, AuthShape)
+    DB-->>R: Server Details (SecretProvider, AuthShape, OAuth3Lo)
     
-    alt SecretProvider == UserProvided
+    alt Server has OAuth 3LO (Connected Accounts) Enabled
+        R->>DB: Fetch Vaulted OAuth Token for (Username, ServerId)
+        DB-->>R: Encrypted Token JSON (access_token, refresh_token, expires_at)
+        R->>R: Check Expiration
+        opt Token Expired or Near Expiry
+            R->>B: Call OAuthTokenUrl (grant_type=refresh_token)
+            B-->>R: Fresh access_token & refresh_token
+            R->>DB: Re-encrypt & Vault Updated Tokens
+        end
+        R->>R: Strip Ingress Gateway Token & Inject User Bearer Token
+    else SecretProvider == UserProvided
         R->>DB: Fetch UserCredentialDto for (Username, ServerId)
         DB-->>R: Encrypted User Secret
         R->>R: Decrypt User Secret

@@ -139,6 +139,60 @@ Click **`Inspect`** on any server card on the Overview dashboard to examine down
 
 ---
 
+## 🔗 Connected Accounts & Personal Egress OAuth (3LO)
+
+When connecting downstream SaaS MCP servers (e.g. **GitHub**, **Slack**, **Jira / Atlassian**, **Linear**), organizations require users to execute actions as *themselves* rather than using a shared static service account.
+
+The **Personal Egress 3LO OAuth Engine ("Connected Accounts")** enables seamless user authorization without distributing API keys or Personal Access Tokens (PATs) across developer laptops:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev as Developer / Browser
+    participant UI as MCG Dashboard (My MCP Servers)
+    participant GW as Model Context Gateway
+    participant Cache as IMemoryCache (State Vault)
+    participant SaaS as Third-Party OAuth (GitHub / Jira)
+    participant Store as IUserSecretStore (AES-256-GCM)
+
+    Dev->>UI: Click "Connect Account" on GitHub Server
+    UI->>GW: GET /api/oauth/egress/authorize/{serverId}
+    GW->>Cache: Store cryptographic state (username, serverId, 15m TTL)
+    GW-->>Dev: 302 Redirect to SaaS Authorization URL (client_id, redirect_uri, scopes, state)
+    Dev->>SaaS: Complete Out-of-Band OAuth Consent
+    SaaS-->>GW: GET /api/oauth/egress/callback?code=...&state=...
+    GW->>Cache: Validate & Consume state parameter
+    GW->>SaaS: POST /login/oauth/access_token (grant_type=authorization_code)
+    SaaS-->>GW: Return access_token, refresh_token, expires_in
+    GW->>Store: Encrypt & Vault tokens for (username, serverId)
+    GW-->>Dev: 302 Redirect to /my-servers?connected={serverId}
+    Note over Dev,GW: On subsequent tool execution, MCG injects the user's vaulted token automatically
+```
+
+### Operator Setup: Enabling 3LO on an MCP Server
+1. In the Dashboard or Admin MCP, select your backend server and open the configuration modal.
+2. Enable **Enable OAuth (3LO)**.
+3. Configure the OAuth client credentials registered with your SaaS provider:
+   * **Client ID (`oauthClientId`)**: The OAuth Application Client ID.
+   * **Client Secret (`oauthClientSecret`)**: The OAuth Application Secret (encrypted at rest).
+   * **Authorization URL (`oauthAuthorizationUrl`)**: e.g. `https://github.com/login/oauth/authorize`.
+   * **Token URL (`oauthTokenUrl`)**: e.g. `https://github.com/login/oauth/access_token`.
+   * **Requested Scopes (`oauthScopes`)**: Comma/space-delimited scopes (e.g. `repo,read:org` or `read:jira-work,write:jira-work`).
+   * **Redirect URI (`oauthRedirectUri`)**: (Optional) Defaults to `{gateway}/api/oauth/egress/callback`.
+4. Click **Save Server**.
+
+### Developer Experience: Connecting Personal Accounts
+1. Log into the MCG Dashboard and open the **My MCP Servers** view.
+2. For any server with OAuth enabled, a **`Connect Account`** button is displayed.
+3. Click **Connect Account**. MCG initiates the third-party OAuth flow in your browser.
+4. After approval, the gateway vaults the access and refresh tokens. The status card updates to **`Connected (OAuth)`**.
+5. When your AI assistant (Claude Code, Cursor, Windsurf) invokes tools on this server:
+   * The assistant authenticates to the gateway using its gateway AppKey or corporate JWT.
+   * The gateway strips the incoming gateway credential and dynamically injects `Authorization: Bearer <user_saas_token>`.
+   * When tokens near expiry, MCG uses the stored `refresh_token` to automatically renew credentials in the background with zero user intervention.
+
+---
+
 ## 📄 Custom Tool JSON Specifications
 
 For services that do not natively support the MCP protocol, you can register virtual tools and resources using custom JSON definitions:

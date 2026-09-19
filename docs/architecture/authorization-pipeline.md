@@ -22,27 +22,33 @@ Every incoming capability invocation (`tools/call`, `prompts/get`, `resources/re
 
 ```mermaid
 flowchart TD
+    Stage0{"<b>STAGE 0: INGRESS RFC 9728 BOUNDARY</b><br><i>Valid Token Present?</i>"}
     Stage1["<b>STAGE 1: APPKEY SCOPE BOUNDARY</b><br><i>Fast-Path Key Filtering (*, server:{id}, category:{cat}, tool:{id})</i>"]
     Stage2["<b>STAGE 2: IDENTITY RESOLUTION & GROUP MAPPING</b><br><i>Resolve username, Active Directory SIDs & translate via GroupMappings</i>"]
     Stage3{"<b>STAGE 3: ADMIN SID BYPASS?</b><br><i>(S-1-5-32-544 / full_admin)</i>"}
     Stage4["<b>STAGE 4: DATABASE-BACKED RBAC</b><br><i>Explicit Deny overrides Allow<br>Category & Server inheritance<br>Fail-Closed Default</i>"]
+    Stage5["<b>STAGE 5: EGRESS TOKEN RESOLUTION</b><br><i>Inject Vault / Env secrets OR<br>User 3LO OAuth token with auto-refresh</i>"]
     AuthSuccess["<b>AUTHORIZED (200 OK)</b><br><i>Invocation Audit Logged</i>"]
+    AuthChallenge["<b>401 UNAUTHORIZED</b><br><i>WWW-Authenticate RFC 9728 PRM Handshake</i>"]
     AuthDenied["<b>ACCESS DENIED (403)</b><br><i>Security Violation Audit Logged</i>"]
 
+    Stage0 -- "No / Missing" --> AuthChallenge
+    Stage0 -- "Yes" --> Stage1
     Stage1 -- "Pass" --> Stage2
     Stage1 -- "Scope Mismatch" --> AuthDenied
     Stage2 --> Stage3
-    Stage3 -- "Yes (Admin Bypass)" --> AuthSuccess
+    Stage3 -- "Yes (Admin Bypass)" --> Stage5
     Stage3 -- "No" --> Stage4
-    Stage4 -- "Allowed" --> AuthSuccess
+    Stage4 -- "Allowed" --> Stage5
     Stage4 -- "Denied / Missing Policy" --> AuthDenied
+    Stage5 --> AuthSuccess
 
     classDef pass fill:#0f2e1b,stroke:#00c853,stroke-width:2px,color:#fff;
     classDef fail fill:#3a0f12,stroke:#f85149,stroke-width:2px,color:#fff;
     classDef stage fill:#161b22,stroke:#30363d,stroke-width:1px,color:#e6edf3;
-    class Stage1,Stage2,Stage3,Stage4 stage;
+    class Stage0,Stage1,Stage2,Stage3,Stage4,Stage5 stage;
     class AuthSuccess pass;
-    class AuthDenied fail;
+    class AuthDenied,AuthChallenge fail;
 ```
 
 ---

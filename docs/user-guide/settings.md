@@ -52,9 +52,15 @@ The vector embedding engine powers the **Meta-Mode** tool discovery function (`s
 * **Automatic Provisioning**: MCG downloads, validates SHA-256 checksums, and caches model weights in `/data/models` automatically.
 
 ### 2. External API Provider (OpenAI / Ollama / LiteLLM)
-* **Usage**: Offloads embedding generation to remote cloud APIs or self-hosted GPU inference clusters.
-* **Supported Backends**: OpenAI (`text-embedding-3-small`, `text-embedding-ada-002`), Azure OpenAI, Ollama, LiteLLM, Open WebUI, and vLLM.
+* **Usage**: Offloads embedding generation to remote cloud APIs or self-hosted GPU inference clusters via `IEmbeddingProvider`.
+* **Supported Backends**: OpenAI (`text-embedding-3-small`, `text-embedding-ada-002`), Azure OpenAI, Ollama (`/v1/embeddings`), LiteLLM, Open WebUI, and vLLM.
+* **SSRF Guardrails**: MCG validates custom provider URLs (`SecurityValidationHelper.IsPrivateOrLoopback`) to prevent Server-Side Request Forgery.
 * **Key Encryption**: API keys are encrypted at rest in the database using AES-256-GCM envelope encryption.
+
+### 3. In-Memory SIMD Vector Store & Reciprocal Rank Fusion (RRF)
+* **In-Memory SIMD Acceleration (`IToolVectorStore`)**: Tool vectors are indexed in memory. Cosine similarities are calculated using **.NET 10 hardware SIMD intrinsics** (`System.Numerics.Tensors.TensorPrimitives.CosineSimilarity`), providing sub-millisecond query evaluation without requiring external vector databases for catalogs up to 5,000+ tools.
+* **Reciprocal Rank Fusion (RRF, $k=60$)**: The search engine blends dense vector semantic similarity with multi-signal lexical matching across tool names, descriptions, tags, and JSON schemas.
+* **Graceful Degradation**: If embedding providers are disabled or offline, MCG seamlessly falls back to pure keyword ranking with zero downtime.
 
 ---
 

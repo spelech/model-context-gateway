@@ -10,7 +10,7 @@ The gateway decouples **inbound ingress authentication** (such as Active Directo
 
 ## 2. Downstream Delegation Patterns
 
-The gateway supports six downstream delegation patterns:
+The gateway supports seven downstream delegation patterns:
 
 ```mermaid
 flowchart TD
@@ -19,6 +19,7 @@ flowchart TD
     PatternCheck -->|Identity Forwarding| P1[1. Trusted Gateway Headers<br>X-Forwarded-User, X-Forwarded-Groups]
     PatternCheck -->|Token Exchange| P2[2. RFC 8693 Token Exchange<br>TokenExchangeClient mints scoped JWT]
     PatternCheck -->|BYOK| P3[3. User-Provided Secrets<br>Resolves personal token from Vault or DB]
+    PatternCheck -->|3LO OAuth| P7[7. Egress 3LO OAuth Engine<br>Vaults SaaS tokens with auto-refresh]
     PatternCheck -->|Impersonation| P4[4. Windows Kerberos Impersonation<br>WindowsIdentity.RunImpersonated]
     PatternCheck -->|Pass-Through| P5[5. Pass-Through Dynamic JWT<br>Maps X-Target-Auth to target header]
     PatternCheck -->|Service Account| P6[6. Shared Service Account<br>Vault KV v2, DPAPI, or Environment]
@@ -29,6 +30,7 @@ flowchart TD
     P4 --> Backend
     P5 --> Backend
     P6 --> Backend
+    P7 --> Backend
 ```
 
 ### Pattern 1: Trusted Gateway Pattern (Identity Header Propagation)
@@ -68,6 +70,16 @@ Use this pattern when backend MCP servers require individual user tokens (such a
   - **HashiCorp Vault (KV v2)**: Stored in Vault KV v2 using path templates (such as `{Company}/mcgateway/{User}/{Server}`).
 - **User Self-Service**: Users add, update, and remove personal credentials in the **My MCP Servers** dashboard tab.
 - **Resolution**: During tool execution, the gateway retrieves the caller's credentials and injects them into the outbound request.
+
+---
+
+### Pattern 7: 3LO Egress OAuth (Connected Accounts)
+Use this pattern for SaaS MCP servers (such as GitHub, Atlassian Jira, Linear, or Slack) where users authorize interactively through OAuth rather than copying and pasting Personal Access Tokens (PATs).
+
+- **Operator Configuration**: Set `EnableOAuth3Lo: true` on the server and configure Client ID, Client Secret, Authorization URL, Token URL, and Scopes.
+- **Out-of-Band Consent**: The user clicks **Connect Account** in the **My MCP Servers** UI. MCG redirects the user's browser to the SaaS authorization endpoint and handles the authorization code callback at `/api/oauth/egress/callback`.
+- **Encrypted Token Vaulting**: MCG exchanges the code for `{ access_token, refresh_token, expires_at }` and encrypts the tokens with AES-256-GCM in the user secret store.
+- **Automated JIT Token Refresh**: When an AI client invokes tools on the server, MCG strips the client's gateway credential. If the vaulted user token is near expiration, MCG automatically uses the stored `refresh_token` to renew credentials in the background before injecting `Authorization: Bearer <access_token>` into the outbound request.
 
 ---
 
