@@ -5,7 +5,8 @@ namespace ModelContextGateway.Tests.Attributes
     public enum RequirementType
     {
         Positive,
-        Negative
+        Negative,
+        FailClosedGuardrail = Negative
     }
 
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]

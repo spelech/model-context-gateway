@@ -13,7 +13,7 @@ namespace ModelContextGateway.Core.Routing
             IEnumerable<McpServer> servers,
             ILogger logger,
             HttpClient httpClient,
-            IEmbeddingService embeddingService,
+            IEmbeddingService? embeddingService,
             Func<Task> ensureBackendsInitializedAsync,
             Func<string, string, string, string> rewriteRequestJson,
             CancellationToken cancellationToken = default,
@@ -51,7 +51,7 @@ namespace ModelContextGateway.Core.Routing
             IEnumerable<McpServer> servers,
             ILogger logger,
             HttpClient httpClient,
-            IEmbeddingService embeddingService,
+            IEmbeddingService? embeddingService,
             Func<Task> ensureBackendsInitializedAsync,
             Func<string, string, string, string> rewriteRequestJson,
             CancellationToken cancellationToken,
@@ -155,7 +155,9 @@ namespace ModelContextGateway.Core.Routing
                     tools = await filterAuthorizedToolsAsync(tools);
                 }
 
-                var results = await SemanticSearchService.SearchToolsSemanticAsync(query, tools, embeddingService, logger);
+                var effectiveProvider = _embeddingProvider ?? (embeddingService != null ? new ModelContextGateway.Core.VectorSearch.EmbeddingServiceAdapter(embeddingService) : null);
+                var effectiveStore = _vectorStore ?? new ModelContextGateway.Core.VectorSearch.InMemorySimdToolVectorStore();
+                var results = await SearchToolsAsync(query, tools, effectiveProvider, effectiveStore, logger, 15, cancellationToken);
                 var serialized = JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true });
                 return new
                 {

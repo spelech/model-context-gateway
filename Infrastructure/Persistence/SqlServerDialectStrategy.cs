@@ -18,10 +18,12 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         Alias = @Alias, DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
                         SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, SecretMount = @SecretMount,
                         SecretPath = @SecretPath, SecretField = @SecretField, AuthShape = @AuthShape, CustomHeaderName = @CustomHeaderName,
-                        Categories = @Categories, ApiKey = @ApiKey, HeadersJson = @HeadersJson
+                        Categories = @Categories, ApiKey = @ApiKey, HeadersJson = @HeadersJson,
+                        EnableOAuth3Lo = @EnableOAuth3Lo, OAuthClientId = @OAuthClientId, OAuthClientSecret = @OAuthClientSecret,
+                        OAuthAuthorizationUrl = @OAuthAuthorizationUrl, OAuthTokenUrl = @OAuthTokenUrl, OAuthScopes = @OAuthScopes, OAuthRedirectUri = @OAuthRedirectUri
                 WHEN NOT MATCHED THEN
-                    INSERT (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson)
-                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson);
+                    INSERT (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri)
+                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri);
             ", server);
         }
 

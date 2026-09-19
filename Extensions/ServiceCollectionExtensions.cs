@@ -192,9 +192,13 @@ namespace ModelContextGateway.Extensions
             builder.Services.AddSingleton<BackendHealthCheckService>();
             builder.Services.AddHostedService(sp => sp.GetRequiredService<BackendHealthCheckService>());
 
+            // Register Vector Search & In-Memory SIMD Tool Vector Store
+            builder.Services.AddSingleton<ModelContextGateway.Core.VectorSearch.IToolVectorStore, ModelContextGateway.Core.VectorSearch.InMemorySimdToolVectorStore>();
+
             // Register Dynamic Embedding Service (handles settings in encrypted DB)
             builder.Services.AddSingleton<DynamicEmbeddingService>();
             builder.Services.AddSingleton<IEmbeddingService>(sp => sp.GetRequiredService<DynamicEmbeddingService>());
+            builder.Services.AddSingleton<ModelContextGateway.Core.VectorSearch.IEmbeddingProvider>(sp => sp.GetRequiredService<DynamicEmbeddingService>());
 
             // Register In-Process Virtual Admin MCP Server
             builder.Services.AddSingleton<AdminMcpServer>(sp => new AdminMcpServer(

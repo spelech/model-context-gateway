@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { McpServer } from '../shared/types';
 import { fetchServersApi } from '../api/serverApi';
-import { fetchUserCredentialsApi, saveUserCredentialApi, deleteUserCredentialApi, UserCredential } from '../api/userCredentialsApi';
+import { fetchUserCredentialsApi, saveUserCredentialApi, deleteUserCredentialApi, disconnectOAuthAccountApi, UserCredential } from '../api/userCredentialsApi';
 import { showToast } from '../stores/useToastStore';
 import { ClientSetupGuide } from '../components/clients/ClientSetupGuide';
 
@@ -20,7 +20,7 @@ export const MyMcpServers: React.FC = () => {
         fetchServersApi(),
         fetchUserCredentialsApi()
       ]);
-      setServers(serversData.filter(s => s.secretProvider === 'UserProvided'));
+      setServers(serversData.filter(s => s.secretProvider === 'UserProvided' || s.enableOAuth3Lo));
       setCredentials(credsData);
     } catch (e) {
       console.error(e);
@@ -46,6 +46,20 @@ export const MyMcpServers: React.FC = () => {
       await loadData();
     } catch {
       showToast('Failed to delete credentials.', 'error');
+    }
+  };
+
+  const handleConnectOAuth = (server: McpServer) => {
+    window.location.assign(`/api/oauth/egress/authorize/${server.id}`);
+  };
+
+  const handleDisconnectOAuth = async (server: McpServer) => {
+    try {
+      await disconnectOAuthAccountApi(server.id);
+      showToast(`Disconnected account for ${server.displayName || server.id}.`, 'success');
+      await loadData();
+    } catch {
+      showToast('Failed to disconnect OAuth account.', 'error');
     }
   };
 
@@ -90,24 +104,46 @@ export const MyMcpServers: React.FC = () => {
               )}
               {servers.map(server => {
                 const isConfigured = credentials.some(c => (typeof c === 'string' ? c === server.id : c.serverId === server.id));
+                const isOAuth = !!server.enableOAuth3Lo;
+
                 return (
                   <tr key={server.id}>
                     <td>{server.displayName || server.id}</td>
                     <td>
-                      {isConfigured ? (
+                      {isOAuth ? (
+                        isConfigured ? (
+                          <span className="badge badge-success" style={{ color: 'var(--success-color)' }}>Connected (OAuth)</span>
+                        ) : (
+                          <span style={{ color: 'var(--text-muted)' }}>Not Connected</span>
+                        )
+                      ) : isConfigured ? (
                         <span style={{ color: 'var(--success-color)' }}>Auth Configured</span>
                       ) : (
                         <span style={{ color: 'var(--danger-color)' }}>Auth Missing</span>
                       )}
                     </td>
                     <td style={{ display: 'flex', gap: '8px' }}>
-                      <button className="btn-icon" onClick={() => handleEdit(server)}>
-                        <i className="fa-solid fa-pen"></i> Edit Auth
-                      </button>
-                      {isConfigured && (
-                        <button className="btn-icon" style={{ color: 'var(--danger-color)' }} onClick={() => handleDelete(server)}>
-                          <i className="fa-solid fa-trash"></i> Remove
-                        </button>
+                      {isOAuth ? (
+                        isConfigured ? (
+                          <button className="btn-icon" style={{ color: 'var(--danger-color)' }} onClick={() => handleDisconnectOAuth(server)}>
+                            <i className="fa-solid fa-unlink"></i> Disconnect
+                          </button>
+                        ) : (
+                          <button className="btn-icon btn-connect-oauth" onClick={() => handleConnectOAuth(server)}>
+                            <i className="fa-solid fa-link"></i> Connect Account
+                          </button>
+                        )
+                      ) : (
+                        <>
+                          <button className="btn-icon" onClick={() => handleEdit(server)}>
+                            <i className="fa-solid fa-pen"></i> Edit Auth
+                          </button>
+                          {isConfigured && (
+                            <button className="btn-icon" style={{ color: 'var(--danger-color)' }} onClick={() => handleDelete(server)}>
+                              <i className="fa-solid fa-trash"></i> Remove
+                            </button>
+                          )}
+                        </>
                       )}
                     </td>
                   </tr>

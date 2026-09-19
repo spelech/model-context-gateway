@@ -15,7 +15,7 @@ namespace ModelContextGateway.Core.Routing
         private readonly List<McpServer> _servers;
         private readonly ConcurrentDictionary<string, BackendConnection> _backendConnections = new();
         private readonly SemaphoreSlim _writeLock = new(1, 1);
-        private readonly IEmbeddingService _embeddingService;
+        private readonly IEmbeddingService? _embeddingService;
         private readonly IServiceProvider? _rootServices;
 
         private readonly Core.Routing.ToolRoutingManager _toolRoutingManager = new();
@@ -38,7 +38,7 @@ namespace ModelContextGateway.Core.Routing
 
         private readonly SessionManager? _sessionManager;
 
-        public ClientSession(string sessionId, HttpResponse? clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, SessionManager? sessionManager, Microsoft.Extensions.Logging.ILogger logger, IServiceProvider? rootServices = null)
+        public ClientSession(string sessionId, HttpResponse? clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService? embeddingService, SessionManager? sessionManager, Microsoft.Extensions.Logging.ILogger logger, IServiceProvider? rootServices = null)
         {
             _sessionId = sessionId;
             _clientResponse = clientResponse;
@@ -48,9 +48,24 @@ namespace ModelContextGateway.Core.Routing
             _sessionManager = sessionManager;
             _logger = logger;
             _rootServices = rootServices;
+
+            if (_embeddingService != null)
+            {
+                var provider = _embeddingService as ModelContextGateway.Core.VectorSearch.IEmbeddingProvider
+                    ?? new ModelContextGateway.Core.VectorSearch.EmbeddingServiceAdapter(_embeddingService);
+                _toolRoutingManager.EmbeddingProvider = provider;
+            }
+            if (_rootServices != null)
+            {
+                var store = _rootServices.GetService(typeof(ModelContextGateway.Core.VectorSearch.IToolVectorStore)) as ModelContextGateway.Core.VectorSearch.IToolVectorStore;
+                if (store != null)
+                {
+                    _toolRoutingManager.VectorStore = store;
+                }
+            }
         }
 
-        public ClientSession(string sessionId, HttpResponse? clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, Microsoft.Extensions.Logging.ILogger logger, IServiceProvider? rootServices = null)
+        public ClientSession(string sessionId, HttpResponse? clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService? embeddingService, Microsoft.Extensions.Logging.ILogger logger, IServiceProvider? rootServices = null)
             : this(sessionId, clientResponse, servers, httpClient, embeddingService, sessionManager: null, logger, rootServices)
         {
         }

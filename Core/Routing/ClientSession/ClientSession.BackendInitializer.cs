@@ -124,31 +124,37 @@ namespace ModelContextGateway.Core.Routing
                     }
                     string? forwardedUser = string.IsNullOrEmpty(identity.Username) ? null : identity.Username;
 
-                    if (server.SecretProvider == "UserProvided")
+                    IUserSecretStore? userSecretStore = _rootServices?.GetService<IUserSecretStore>();
+                    if (userSecretStore == null)
                     {
-                        var userSecretStore = _rootServices?.GetService<IUserSecretStore>();
-                        if (userSecretStore == null)
+                        try
                         {
-                            try
-                            {
-                                userSecretStore = _clientResponse?.HttpContext?.RequestServices?.GetService<IUserSecretStore>();
-                            }
-                            catch (ObjectDisposedException)
-                            {
-                                // Disposed HttpContext
-                            }
+                            userSecretStore = _clientResponse?.HttpContext?.RequestServices?.GetService<IUserSecretStore>();
                         }
+                        catch (ObjectDisposedException)
+                        {
+                            // Disposed HttpContext
+                        }
+                    }
+
+                    if (server.SecretProvider == "UserProvided" || server.EnableOAuth3Lo)
+                    {
                         if (userSecretStore != null)
                         {
                             var secretJson = await userSecretStore.GetSecretAsync(identity.Username, server.Id);
                             if (string.IsNullOrEmpty(secretJson))
                             {
-                                throw new Exception($"User credential required but not found for server '{server.Id}'");
+                                if (server.SecretProvider == "UserProvided" && !server.EnableOAuth3Lo)
+                                {
+                                    throw new Exception($"User credential required but not found for server '{server.Id}'");
+                                }
                             }
-
-                            passThroughToken = secretJson;
+                            else
+                            {
+                                passThroughToken = secretJson;
+                            }
                         }
-                        else
+                        else if (server.SecretProvider == "UserProvided")
                         {
                             throw new Exception("IUserSecretStore is not registered in DI.");
                         }
@@ -167,7 +173,7 @@ namespace ModelContextGateway.Core.Routing
                             // Disposed HttpContext
                         }
                     }
-                    conn = new BackendConnection(server, _httpClient, _logger, retriever, passThroughToken, forwardedUser);
+                    conn = new BackendConnection(server, _httpClient, _logger, retriever, passThroughToken, forwardedUser, userSecretStore);
                     if (server.Type != "http" && server.Type != "streamable")
                     {
                         using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));

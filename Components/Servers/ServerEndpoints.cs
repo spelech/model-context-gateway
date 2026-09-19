@@ -15,7 +15,8 @@ namespace ModelContextGateway.Components.Servers
                 try
                 {
                     using var conn = dbFactory.CreateConnection();
-                    var rawServers = (await conn.QueryAsync(@"SELECT Id, Alias, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson, AllowPassThroughAuth, DynamicAuthPrompt FROM Servers")).ToList();
+                    DatabaseInitializer.EnsureOAuthColumns(conn);
+                    var rawServers = (await conn.QueryAsync(@"SELECT Id, Alias, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson, AllowPassThroughAuth, DynamicAuthPrompt, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri FROM Servers")).ToList();
                     var statuses = sessionManager.BackendStatuses;
 
                     var sanitized = rawServers.Select(s =>
@@ -63,6 +64,20 @@ namespace ModelContextGateway.Components.Servers
                             isHidden = Convert.ToBoolean(s.Hidden);
                         }
 
+                        bool isOAuth3Lo = false;
+                        if (s.EnableOAuth3Lo is long longOAuth)
+                        {
+                            isOAuth3Lo = longOAuth != 0L;
+                        }
+                        else if (s.EnableOAuth3Lo is bool boolOAuth)
+                        {
+                            isOAuth3Lo = boolOAuth;
+                        }
+                        else if (s.EnableOAuth3Lo != null)
+                        {
+                            isOAuth3Lo = Convert.ToBoolean(s.EnableOAuth3Lo);
+                        }
+
                         var catStr = (string?)s.Categories ?? "[]";
                         List<string> categories;
                         try { categories = JsonSerializer.Deserialize<List<string>>(catStr) ?? new(); }
@@ -91,6 +106,13 @@ namespace ModelContextGateway.Components.Servers
                             HasApiKey = !string.IsNullOrEmpty((string?)s.ApiKey),
                             AllowPassThroughAuth = isAllowPass,
                             DynamicAuthPrompt = (string?)s.DynamicAuthPrompt,
+                            EnableOAuth3Lo = isOAuth3Lo,
+                            OAuthClientId = (string?)s.OAuthClientId,
+                            OAuthClientSecret = !string.IsNullOrEmpty((string?)s.OAuthClientSecret) ? "******" : null,
+                            OAuthAuthorizationUrl = (string?)s.OAuthAuthorizationUrl,
+                            OAuthTokenUrl = (string?)s.OAuthTokenUrl,
+                            OAuthScopes = (string?)s.OAuthScopes,
+                            OAuthRedirectUri = (string?)s.OAuthRedirectUri,
                             ConnectionStatus = isEnabled ? (status?.Status ?? "Disconnected") : "Disabled",
                             ConnectionAttempts = status?.Attempts ?? 0,
                             ConnectionError = status?.Error ?? string.Empty
@@ -234,10 +256,37 @@ namespace ModelContextGateway.Components.Servers
                     server.Alias = string.IsNullOrWhiteSpace(update.Alias) ? null : update.Alias.Trim();
                 }
 
+                server.EnableOAuth3Lo = update.EnableOAuth3Lo;
+                if (update.OAuthClientId != null)
+                {
+                    server.OAuthClientId = update.OAuthClientId;
+                }
+                if (!string.IsNullOrWhiteSpace(update.OAuthClientSecret) && update.OAuthClientSecret != "******")
+                {
+                    server.OAuthClientSecret = update.OAuthClientSecret;
+                }
+                if (update.OAuthAuthorizationUrl != null)
+                {
+                    server.OAuthAuthorizationUrl = update.OAuthAuthorizationUrl;
+                }
+                if (update.OAuthTokenUrl != null)
+                {
+                    server.OAuthTokenUrl = update.OAuthTokenUrl;
+                }
+                if (update.OAuthScopes != null)
+                {
+                    server.OAuthScopes = update.OAuthScopes;
+                }
+                if (update.OAuthRedirectUri != null)
+                {
+                    server.OAuthRedirectUri = update.OAuthRedirectUri;
+                }
+
                 var catJson = JsonSerializer.Serialize(server.Categories ?? new());
                 await conn.ExecuteAsync(@"UPDATE Servers SET Alias = @Alias, DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
                     SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, AuthShape = @AuthShape, CustomHeaderName = @CustomHeaderName,
-                    Categories = @Categories, ApiKey = @ApiKey, HeadersJson = @HeadersJson, AllowPassThroughAuth = @AllowPassThroughAuth, DynamicAuthPrompt = @DynamicAuthPrompt WHERE Id = @Id",
+                    Categories = @Categories, ApiKey = @ApiKey, HeadersJson = @HeadersJson, AllowPassThroughAuth = @AllowPassThroughAuth, DynamicAuthPrompt = @DynamicAuthPrompt,
+                    EnableOAuth3Lo = @EnableOAuth3Lo, OAuthClientId = @OAuthClientId, OAuthClientSecret = @OAuthClientSecret, OAuthAuthorizationUrl = @OAuthAuthorizationUrl, OAuthTokenUrl = @OAuthTokenUrl, OAuthScopes = @OAuthScopes, OAuthRedirectUri = @OAuthRedirectUri WHERE Id = @Id",
                     new
                     {
                         server.Alias,
@@ -255,6 +304,13 @@ namespace ModelContextGateway.Components.Servers
                         AllowPassThroughAuth = server.AllowPassThroughAuth ? 1 : 0,
                         server.DynamicAuthPrompt,
                         server.HeadersJson,
+                        EnableOAuth3Lo = server.EnableOAuth3Lo ? 1 : 0,
+                        server.OAuthClientId,
+                        server.OAuthClientSecret,
+                        server.OAuthAuthorizationUrl,
+                        server.OAuthTokenUrl,
+                        server.OAuthScopes,
+                        server.OAuthRedirectUri,
                         server.Id
                     });
 
@@ -323,8 +379,8 @@ namespace ModelContextGateway.Components.Servers
 
                 var catJson = JsonSerializer.Serialize(server.Categories ?? new());
                 var dbStart = sw.ElapsedMilliseconds;
-                await conn.ExecuteAsync(@"INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AllowPassThroughAuth, DynamicAuthPrompt)
-                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AllowPassThroughAuth, @DynamicAuthPrompt)",
+                await conn.ExecuteAsync(@"INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AllowPassThroughAuth, DynamicAuthPrompt, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri)
+                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AllowPassThroughAuth, @DynamicAuthPrompt, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri)",
                     new
                     {
                         server.Id,
@@ -342,7 +398,14 @@ namespace ModelContextGateway.Components.Servers
                         server.ApiKey,
                         AllowPassThroughAuth = server.AllowPassThroughAuth ? 1 : 0,
                         server.DynamicAuthPrompt,
-                        server.HeadersJson
+                        server.HeadersJson,
+                        EnableOAuth3Lo = server.EnableOAuth3Lo ? 1 : 0,
+                        server.OAuthClientId,
+                        server.OAuthClientSecret,
+                        server.OAuthAuthorizationUrl,
+                        server.OAuthTokenUrl,
+                        server.OAuthScopes,
+                        server.OAuthRedirectUri
                     });
                 logger.LogInformation("DB Insert finished after {ms}ms", sw.ElapsedMilliseconds - dbStart);
 

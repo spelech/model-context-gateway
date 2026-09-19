@@ -28,7 +28,14 @@ namespace ModelContextGateway.Infrastructure.Persistence
                     AutoDiscovered INTEGER DEFAULT 0,
                     AllowPassThroughAuth INTEGER DEFAULT 0,
                     DynamicAuthPrompt TEXT,
-                    Alias TEXT NULL
+                    Alias TEXT NULL,
+                    EnableOAuth3Lo INTEGER DEFAULT 0,
+                    OAuthClientId TEXT,
+                    OAuthClientSecret TEXT,
+                    OAuthAuthorizationUrl TEXT,
+                    OAuthTokenUrl TEXT,
+                    OAuthScopes TEXT,
+                    OAuthRedirectUri TEXT
                 );
 
                 CREATE TABLE IF NOT EXISTS Settings (
@@ -143,6 +150,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
             ");
 
             EnsureAliasColumn(conn);
+            EnsureOAuthColumns(conn);
         }
 
         public static void EnsureAliasColumn(IDbConnection conn)
@@ -154,6 +162,32 @@ namespace ModelContextGateway.Infrastructure.Persistence
             catch
             {
                 // Column already exists
+            }
+        }
+
+        public static void EnsureOAuthColumns(IDbConnection conn)
+        {
+            var columns = new[]
+            {
+                "ALTER TABLE Servers ADD COLUMN EnableOAuth3Lo INTEGER DEFAULT 0;",
+                "ALTER TABLE Servers ADD COLUMN OAuthClientId TEXT NULL;",
+                "ALTER TABLE Servers ADD COLUMN OAuthClientSecret TEXT NULL;",
+                "ALTER TABLE Servers ADD COLUMN OAuthAuthorizationUrl TEXT NULL;",
+                "ALTER TABLE Servers ADD COLUMN OAuthTokenUrl TEXT NULL;",
+                "ALTER TABLE Servers ADD COLUMN OAuthScopes TEXT NULL;",
+                "ALTER TABLE Servers ADD COLUMN OAuthRedirectUri TEXT NULL;"
+            };
+
+            foreach (var sql in columns)
+            {
+                try
+                {
+                    conn.Execute(sql);
+                }
+                catch
+                {
+                    // Column already exists
+                }
             }
         }
     }

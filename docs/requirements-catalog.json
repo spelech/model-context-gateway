@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-10T04:10:43.5646963Z",
-    "totalRequirements": 425,
-    "positiveCount": 338,
-    "guardrailCount": 87,
-    "totalProofs": 923
+    "generatedAt": "2026-09-19T01:18:21.3379410Z",
+    "totalRequirements": 437,
+    "positiveCount": 348,
+    "guardrailCount": 89,
+    "totalProofs": 954
   },
   "requirements": [
     {
@@ -878,6 +878,153 @@
           "filePath": "frontend/src/test/components/IdentityAuthTab.test.tsx",
           "lineNumber": 167,
           "testName": "renders In-House IdP External JWT card, toggles on, and saves configuration",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-131",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "RFC 9728 Protected Resource Metadata endpoint exposes discovery document with canonical resource URI, authorization servers, scopes, and documentation.",
+      "proofCount": 4,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 37,
+          "testName": "ProtectedResourceDiscovery_ReturnsValidMetadataDocument",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 58,
+          "testName": "ProtectedResourceDiscovery_TargetPath_ReturnsPathAwareMetadataDocument",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 75,
+          "testName": "ProtectedResourceDiscovery_CustomResourceQuery_OverridesResourceUri",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 91,
+          "testName": "ProtectedResourceDiscovery_ConfiguredExternalIdp_ReturnsConfiguredAuthorizationServer",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-132",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Unauthenticated client requests to /sse endpoint return 401 Unauthorized with RFC 9728 WWW-Authenticate header containing realm and resource_metadata.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 115,
+          "testName": "UnauthenticatedMcpRequest_SseEndpoint_Returns401WithRfc9728WwwAuthenticateHeader",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 131,
+          "testName": "UnauthenticatedMcpRequest_TargetServerEndpoint_Returns401WithTargetResourceMetadata",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 147,
+          "testName": "UnauthenticatedMcpRequest_MessageEndpoint_Returns401WithRfc9728WwwAuthenticateHeader",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-133",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Verify initiating OAuth 3LO egress flow generates secure state and authorization redirect URL.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EgressOAuthTests.cs",
+          "lineNumber": 72,
+          "testName": "Authorize_WithValidServer_Initiates3LoFlowWithSecureStateAndRedirectUrl",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-134",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Verify OAuth egress callback exchanges authorization code and stores credentials in user secret store.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EgressOAuthTests.cs",
+          "lineNumber": 146,
+          "testName": "Callback_WithValidStateAndCode_ExchangesTokenAndPersistsInUserSecretStore",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-135",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Verify upstream dispatch automatically refreshes expired OAuth egress token and updates user secret store.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EgressOAuthTests.cs",
+          "lineNumber": 260,
+          "testName": "UpstreamDispatch_WithExpiredOAuthToken_RefreshesTokenAutomatically",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-136",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Verify disconnect endpoint deletes stored user OAuth credentials.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EgressOAuthTests.cs",
+          "lineNumber": 361,
+          "testName": "Disconnect_DeletesUserSecretAndReturnsSuccess",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-137",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Verify GetOAuthServers returns servers with correct isConnected status.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EgressOAuthTests.cs",
+          "lineNumber": 406,
+          "testName": "GetOAuthServers_ReturnsConfiguredServersWithConnectionStatus",
           "details": null
         }
       ]
@@ -5760,6 +5907,152 @@
       ]
     },
     {
+      "id": "MCP-32",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "InMemorySimdToolVectorStore scores tool embeddings using .NET 10 hardware SIMD TensorPrimitives.",
+      "proofCount": 6,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 8,
+          "testName": "SearchSimilarAsync_ScoresIdenticalVectors_WithMaxSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 24,
+          "testName": "SearchSimilarAsync_ScoresOrthogonalVectors_WithZeroSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 38,
+          "testName": "SearchSimilarAsync_ScoresOppositeVectors_WithNegativeSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 52,
+          "testName": "SearchSimilarAsync_RanksDescendingByCosineSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 74,
+          "testName": "SearchSimilarAsync_HandlesDimensionMismatch_AndEmptyGracefully",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 94,
+          "testName": "UpsertAndRemove_ManagesToolEmbeddings_Correctly",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-33",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints.",
+      "proofCount": 5,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
+          "lineNumber": 26,
+          "testName": "GenerateEmbeddingAsync_SendsValidPayload_AndParsesResponse",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
+          "lineNumber": 75,
+          "testName": "GenerateEmbeddingsAsync_PreservesInputOrder_AcrossBatch",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 39,
+          "testName": "SearchToolsAsync_CombinesKeywordAndVectorRanks_UsingRRF",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 92,
+          "testName": "SearchToolsAsync_ScoresLexicalSignals_AcrossNameDescriptionTagsAndParameters",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 141,
+          "testName": "SearchTools_SynchronousMethod_ReturnsRankedCandidates",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-34",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "ToolRoutingManager gracefully falls back to keyword matching when NoOpEmbeddingProvider is active.",
+      "proofCount": 6,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 26,
+          "testName": "SearchToolsAsync_FallsBackToKeyword_WhenNoOpEmbeddingProviderUsed",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 44,
+          "testName": "SearchToolsAsync_FallsBackToKeyword_WhenEmbeddingProviderThrows",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 66,
+          "testName": "SearchToolsAsync_FallsBackToKeyword_WhenEmbeddingProviderIsNull",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 83,
+          "testName": "SearchToolsAsync_ReturnsDefaultCandidates_WhenQueryHasNoMatches",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 101,
+          "testName": "CallToolAsync_SearchTools_ExecutesHybridRrfSearch",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
+          "lineNumber": 108,
+          "testName": "GenerateEmbeddingAsync_ThrowsOnLoopbackIp_WhenPrivateIpsDisallowed",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-ADMIN-ENDPOINT-CALL-TOOL",
       "category": "MCP",
       "type": "Positive",
@@ -9830,7 +10123,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 102,
+          "lineNumber": 104,
           "testName": "renders client setup guide below credentials card",
           "details": null
         },
@@ -9999,6 +10292,38 @@
           "filePath": "frontend/e2e/testbench.spec.ts",
           "lineNumber": 1,
           "testName": "should navigate to Test Bench view and render tester cards",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-130",
+      "category": "UI",
+      "type": "Positive",
+      "description": "Renders Connect Account button for OAuth-enabled servers directing to authorization URL.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 121,
+          "testName": "renders connect account button for oauth-enabled servers and handles redirect",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-131",
+      "category": "UI",
+      "type": "Positive",
+      "description": "Renders Connected (OAuth) badge and supports account disconnection.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 157,
+          "testName": "renders connected (oauth) badge and disconnects account",
           "details": null
         }
       ]
@@ -10238,14 +10563,14 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 23,
+          "lineNumber": 25,
           "testName": "shows error toast when saving invalid JSON credentials",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 64,
+          "lineNumber": 66,
           "testName": "saves valid credentials successfully and closes modal",
           "details": null
         },
