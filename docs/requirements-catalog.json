@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-19T00:53:14.5980796Z",
-    "totalRequirements": 432,
-    "positiveCount": 345,
-    "guardrailCount": 87,
-    "totalProofs": 930
+    "generatedAt": "2026-09-19T01:14:25.2594271Z",
+    "totalRequirements": 437,
+    "positiveCount": 348,
+    "guardrailCount": 89,
+    "totalProofs": 954
   },
   "requirements": [
     {
@@ -878,6 +878,73 @@
           "filePath": "frontend/src/test/components/IdentityAuthTab.test.tsx",
           "lineNumber": 167,
           "testName": "renders In-House IdP External JWT card, toggles on, and saves configuration",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-131",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "RFC 9728 Protected Resource Metadata endpoint exposes discovery document with canonical resource URI, authorization servers, scopes, and documentation.",
+      "proofCount": 4,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 37,
+          "testName": "ProtectedResourceDiscovery_ReturnsValidMetadataDocument",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 58,
+          "testName": "ProtectedResourceDiscovery_TargetPath_ReturnsPathAwareMetadataDocument",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 75,
+          "testName": "ProtectedResourceDiscovery_CustomResourceQuery_OverridesResourceUri",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 91,
+          "testName": "ProtectedResourceDiscovery_ConfiguredExternalIdp_ReturnsConfiguredAuthorizationServer",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-132",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Unauthenticated client requests to /sse endpoint return 401 Unauthorized with RFC 9728 WWW-Authenticate header containing realm and resource_metadata.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 115,
+          "testName": "UnauthenticatedMcpRequest_SseEndpoint_Returns401WithRfc9728WwwAuthenticateHeader",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 131,
+          "testName": "UnauthenticatedMcpRequest_TargetServerEndpoint_Returns401WithTargetResourceMetadata",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 147,
+          "testName": "UnauthenticatedMcpRequest_MessageEndpoint_Returns401WithRfc9728WwwAuthenticateHeader",
           "details": null
         }
       ]
@@ -5835,6 +5902,152 @@
           "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
           "lineNumber": 261,
           "testName": "UpsertDiscoveredServers_PreservesExistingDbAlias_AndInsertsDiscoveredAlias",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-32",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "InMemorySimdToolVectorStore scores tool embeddings using .NET 10 hardware SIMD TensorPrimitives.",
+      "proofCount": 6,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 8,
+          "testName": "SearchSimilarAsync_ScoresIdenticalVectors_WithMaxSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 24,
+          "testName": "SearchSimilarAsync_ScoresOrthogonalVectors_WithZeroSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 38,
+          "testName": "SearchSimilarAsync_ScoresOppositeVectors_WithNegativeSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 52,
+          "testName": "SearchSimilarAsync_RanksDescendingByCosineSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 74,
+          "testName": "SearchSimilarAsync_HandlesDimensionMismatch_AndEmptyGracefully",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 94,
+          "testName": "UpsertAndRemove_ManagesToolEmbeddings_Correctly",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-33",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints.",
+      "proofCount": 5,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
+          "lineNumber": 26,
+          "testName": "GenerateEmbeddingAsync_SendsValidPayload_AndParsesResponse",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
+          "lineNumber": 75,
+          "testName": "GenerateEmbeddingsAsync_PreservesInputOrder_AcrossBatch",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 39,
+          "testName": "SearchToolsAsync_CombinesKeywordAndVectorRanks_UsingRRF",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 92,
+          "testName": "SearchToolsAsync_ScoresLexicalSignals_AcrossNameDescriptionTagsAndParameters",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 141,
+          "testName": "SearchTools_SynchronousMethod_ReturnsRankedCandidates",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-34",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "ToolRoutingManager gracefully falls back to keyword matching when NoOpEmbeddingProvider is active.",
+      "proofCount": 6,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 26,
+          "testName": "SearchToolsAsync_FallsBackToKeyword_WhenNoOpEmbeddingProviderUsed",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 44,
+          "testName": "SearchToolsAsync_FallsBackToKeyword_WhenEmbeddingProviderThrows",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 66,
+          "testName": "SearchToolsAsync_FallsBackToKeyword_WhenEmbeddingProviderIsNull",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 83,
+          "testName": "SearchToolsAsync_ReturnsDefaultCandidates_WhenQueryHasNoMatches",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 101,
+          "testName": "CallToolAsync_SearchTools_ExecutesHybridRrfSearch",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
+          "lineNumber": 108,
+          "testName": "GenerateEmbeddingAsync_ThrowsOnLoopbackIp_WhenPrivateIpsDisallowed",
           "details": null
         }
       ]

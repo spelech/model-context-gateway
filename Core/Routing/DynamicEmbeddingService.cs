@@ -1,8 +1,9 @@
 using Dapper;
+using ModelContextGateway.Core.VectorSearch;
 
 namespace ModelContextGateway.Core.Routing
 {
-    public class DynamicEmbeddingService : IEmbeddingService
+    public class DynamicEmbeddingService : IEmbeddingService, IEmbeddingProvider
     {
         private readonly ILogger<DynamicEmbeddingService> _logger;
         private readonly HttpClient _httpClient;
@@ -150,6 +151,23 @@ namespace ModelContextGateway.Core.Routing
         }
 
         public async Task<float[]> GenerateEmbeddingAsync(string text) => await GetEmbeddingAsync(text);
+        public async Task<float[]> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default) => await GetEmbeddingAsync(text);
+
+        public async Task<IReadOnlyList<float[]>> GenerateEmbeddingsAsync(IReadOnlyList<string> texts, CancellationToken cancellationToken = default)
+        {
+            if (texts == null || texts.Count == 0)
+            {
+                return Array.Empty<float[]>();
+            }
+
+            var list = new List<float[]>(texts.Count);
+            foreach (var text in texts)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                list.Add(await GetEmbeddingAsync(text));
+            }
+            return list;
+        }
 
         public double CosineSimilarity(float[] vector1, float[] vector2)
         {

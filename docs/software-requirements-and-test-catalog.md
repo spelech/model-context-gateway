@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **432 Requirements Verified** across **930 Test Proofs** (345 Functional Capabilities, 87 Safety Guardrails).
+> **Catalog Statistics:** **437 Requirements Verified** across **954 Test Proofs** (348 Functional Capabilities, 89 Safety Guardrails).
 
 ---
 
@@ -10,12 +10,12 @@
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
 | **`API`** | API | **2** | 2 | 0 | 2 proofs |
-| **`AUTH`** | Authentication, RBAC & Identity | **95** | 91 | 4 | 221 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **97** | 93 | 4 | 228 proofs |
 | **`CORE`** | CORE | **8** | 7 | 1 | 14 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **64** | 3 | 61 | 136 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **109** | 105 | 4 | 206 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **112** | 106 | 6 | 223 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **64** | 55 | 9 | 137 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **35** | 31 | 4 | 41 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **28** | 25 | 3 | 134 proofs |
@@ -200,6 +200,23 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Frontend Vitest] [`frontend/src/test/components/IdentityAuthTab.test.tsx#L167`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/IdentityAuthTab.test.tsx#L167) (`renders In-House IdP External JWT card, toggles on, and saves configuration`)
+
+### `[AUTH-131]` RFC 9728 Protected Resource Metadata endpoint exposes discovery document with canonical resource URI, authorization servers, scopes, and documentation.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (4):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L37`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L37) (`ProtectedResourceDiscovery_ReturnsValidMetadataDocument`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L58`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L58) (`ProtectedResourceDiscovery_TargetPath_ReturnsPathAwareMetadataDocument`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L75`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L75) (`ProtectedResourceDiscovery_CustomResourceQuery_OverridesResourceUri`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L91`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L91) (`ProtectedResourceDiscovery_ConfiguredExternalIdp_ReturnsConfiguredAuthorizationServer`)
+
+### `[AUTH-132]` Unauthenticated client requests to /sse endpoint return 401 Unauthorized with RFC 9728 WWW-Authenticate header containing realm and resource_metadata.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (3):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L115`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L115) (`UnauthenticatedMcpRequest_SseEndpoint_Returns401WithRfc9728WwwAuthenticateHeader`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L131`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L131) (`UnauthenticatedMcpRequest_TargetServerEndpoint_Returns401WithTargetResourceMetadata`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L147`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L147) (`UnauthenticatedMcpRequest_MessageEndpoint_Returns401WithRfc9728WwwAuthenticateHeader`)
 
 ### `[AUTH-133]` Verify initiating OAuth 3LO egress flow generates secure state and authorization redirect URL.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -1186,6 +1203,16 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L284`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L284) (`IsUserAuthorizedAsync_MatchesToolPolicy_AcrossDelimiters`)
   - [Backend xUnit] [`ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L300`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L300) (`IsUserAuthorizedAsync_ResolvesAliasesAndServerIds_ForServerPolicies`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L466`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L466) (`NormalizeTargetToolName_Resolves_Multiple_Delimiters_And_Aliases`)
+
+### `[MCP-33]` OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (5):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L26) (`GenerateEmbeddingAsync_SendsValidPayload_AndParsesResponse`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L75`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L75) (`GenerateEmbeddingsAsync_PreservesInputOrder_AcrossBatch`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39) (`SearchToolsAsync_CombinesKeywordAndVectorRanks_UsingRRF`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L92`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L92) (`SearchToolsAsync_ScoresLexicalSignals_AcrossNameDescriptionTagsAndParameters`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L141`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L141) (`SearchTools_SynchronousMethod_ReturnsRankedCandidates`)
 
 ### `[MCP-ADMIN-ENDPOINT-CALL-TOOL]` Admin endpoint /admin/message executes tools/call for manage_system diagnostics.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -2971,6 +2998,28 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L237`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L237) (`ParseDiscoveredServers_Ignores_Invalid_Alias_Characters`)
   - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L261`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L261) (`UpsertDiscoveredServers_PreservesExistingDbAlias_AndInsertsDiscoveredAlias`)
 
+### `[MCP-32]` InMemorySimdToolVectorStore scores tool embeddings using .NET 10 hardware SIMD TensorPrimitives.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (6):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L8) (`SearchSimilarAsync_ScoresIdenticalVectors_WithMaxSimilarity`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L24`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L24) (`SearchSimilarAsync_ScoresOrthogonalVectors_WithZeroSimilarity`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L38`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L38) (`SearchSimilarAsync_ScoresOppositeVectors_WithNegativeSimilarity`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L52`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L52) (`SearchSimilarAsync_RanksDescendingByCosineSimilarity`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L74`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L74) (`SearchSimilarAsync_HandlesDimensionMismatch_AndEmptyGracefully`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L94`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L94) (`UpsertAndRemove_ManagesToolEmbeddings_Correctly`)
+
+### `[MCP-34]` ToolRoutingManager gracefully falls back to keyword matching when NoOpEmbeddingProvider is active.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (6):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L26) (`SearchToolsAsync_FallsBackToKeyword_WhenNoOpEmbeddingProviderUsed`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L44`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L44) (`SearchToolsAsync_FallsBackToKeyword_WhenEmbeddingProviderThrows`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L66`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L66) (`SearchToolsAsync_FallsBackToKeyword_WhenEmbeddingProviderIsNull`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L83`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L83) (`SearchToolsAsync_ReturnsDefaultCandidates_WhenQueryHasNoMatches`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L101`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L101) (`CallToolAsync_SearchTools_ExecutesHybridRrfSearch`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L108`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L108) (`GenerateEmbeddingAsync_ThrowsOnLoopbackIp_WhenPrivateIpsDisallowed`)
+
 ### `[AUTH-106]` Exchange throws InvalidOperationException when request is null.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
@@ -3141,6 +3190,8 @@
 | `AUTH-118` | Positive | `AUTH` | FindDcrClientAsync resolves existing DCR client matching client name and type. | [`OAuthClientRepositoryTests.cs:L214`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214) | Backend xUnit |
 | `AUTH-119` | Positive | `AUTH` | CleanupDcrClientsAsync prunes duplicate and expired dynamic client registrations across all database providers. | [`OAuthClientRepositoryTests.cs:L237`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237) | Backend xUnit |
 | `AUTH-130` | Positive | `AUTH` | Renders In-House IdP / External JWT Bearer card, toggles enable, fills authority, and saves configuration. | [`IdentityAuthTab.test.tsx:L167`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/IdentityAuthTab.test.tsx#L167) | Frontend Vitest |
+| `AUTH-131` | Positive | `AUTH` | RFC 9728 Protected Resource Metadata endpoint exposes discovery document with canonical resource URI, authorization servers, scopes, and documentation. | [`Rfc9728ProtectedResourceDiscoveryTests.cs:L37`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L37) | Backend xUnit |
+| `AUTH-132` | Positive | `AUTH` | Unauthenticated client requests to /sse endpoint return 401 Unauthorized with RFC 9728 WWW-Authenticate header containing realm and resource_metadata. | [`Rfc9728ProtectedResourceDiscoveryTests.cs:L115`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L115) | Backend xUnit |
 | `AUTH-133` | Positive | `AUTH` | Verify initiating OAuth 3LO egress flow generates secure state and authorization redirect URL. | [`EgressOAuthTests.cs:L72`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EgressOAuthTests.cs#L72) | Backend xUnit |
 | `AUTH-134` | Positive | `AUTH` | Verify OAuth egress callback exchanges authorization code and stores credentials in user secret store. | [`EgressOAuthTests.cs:L146`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EgressOAuthTests.cs#L146) | Backend xUnit |
 | `AUTH-135` | Positive | `AUTH` | Verify upstream dispatch automatically refreshes expired OAuth egress token and updates user secret store. | [`EgressOAuthTests.cs:L260`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EgressOAuthTests.cs#L260) | Backend xUnit |
@@ -3355,6 +3406,9 @@
 | `MCP-29` | **Guardrail** | `MCP` | ServerValidationHelper rejects invalid characters in Alias. | [`ServerEndpointsValidationTests.cs:L72`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L72) | Backend xUnit |
 | `MCP-30` | Positive | `MCP` | IsUserAuthorizedAsync matches granular tool policies across /, :, and __ delimiters. | [`UnifiedMcpAuthorizationTests.cs:L284`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L284) | Backend xUnit |
 | `MCP-31` | **Guardrail** | `MCP` | DockerAutoDiscoveryService parses mcp.alias from Docker container labels | [`DockerAutoDiscoveryServiceTests.cs:L188`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L188) | Backend xUnit |
+| `MCP-32` | **Guardrail** | `MCP` | InMemorySimdToolVectorStore scores tool embeddings using .NET 10 hardware SIMD TensorPrimitives. | [`InMemorySimdToolVectorStoreTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L8) | Backend xUnit |
+| `MCP-33` | Positive | `MCP` | OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints. | [`OpenAiEmbeddingProviderTests.cs:L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L26) | Backend xUnit |
+| `MCP-34` | **Guardrail** | `MCP` | ToolRoutingManager gracefully falls back to keyword matching when NoOpEmbeddingProvider is active. | [`ToolRoutingManagerFallbackTests.cs:L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L26) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-CALL-TOOL` | Positive | `MCP` | Admin endpoint /admin/message executes tools/call for manage_system diagnostics. | [`AdminEndpointsTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L294) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-HEAD-REQUEST` | Positive | `MCP` | Admin endpoint /admin handles HEAD request returning text/event-stream headers. | [`AdminEndpointsTests.cs:L212`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L212) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-LIST-TOOLS` | Positive | `MCP` | Admin endpoint /admin/message executes tools/list over active SSE session and returns 10 admin tools. | [`AdminEndpointsTests.cs:L224`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L224) | Backend xUnit |

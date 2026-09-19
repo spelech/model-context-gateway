@@ -86,7 +86,8 @@ The backend is organized into clear bounded modules across domain components, in
 │   └── Logging/         # Audit logger, PII sanitization & in-memory log providers
 └── Core/
     ├── Protocol/        # JSON-RPC protocol models & Polymorphic converter
-    └── Routing/         # ClientSession, SessionManager, BackendConnection & Semantic Search
+    ├── Routing/         # ClientSession, SessionManager, BackendConnection & Tool Routing
+    └── VectorSearch/    # IEmbeddingProvider, IToolVectorStore, InMemorySimdToolVectorStore & RRF
 ```
 
 ---
@@ -117,6 +118,27 @@ sequenceDiagram
     Note over Client,Router: Client gets bootstrap tools (search_tools, execute_tool)
 ```
 
+### 1a. RFC 9728 MCP Client Discovery Handshake
+When an unauthenticated MCP client connects:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as MCP Client / AI Assistant
+    participant Router as Model Context Gateway (MCG)
+    participant IdP as Identity Provider (Authentik/Entra/Keycloak)
+
+    Client->>Router: GET /sse (No Token)
+    Router-->>Client: 401 Unauthorized (WWW-Authenticate: Bearer realm="mcp", resource_metadata=".../.well-known/oauth-protected-resource")
+    Client->>Router: GET /.well-known/oauth-protected-resource
+    Router-->>Client: 200 OK (PRM Document: authorization_servers, scopes)
+    Client->>IdP: Authenticate & Acquire Bearer JWT
+    IdP-->>Client: Return JWT Token
+    Client->>Router: GET /sse (Authorization: Bearer <JWT>)
+    Router->>Router: Authenticate & Register Session
+    Router-->>Client: 200 OK (text/event-stream)
+```
+
 ---
 
 ### 2. Request Routing and Execution Flow (Meta-Mode)
@@ -127,16 +149,19 @@ sequenceDiagram
     autonumber
     actor Client as LLM / Agent
     participant Router as Model Context Gateway (MCG)
-    participant SemanticSvc as SemanticSearchService
+    participant RoutingMgr as ToolRoutingManager
+    participant VectorStore as InMemorySimdToolVectorStore
     participant DB as SQL Database
     participant BackendConn as BackendConnection
     participant Downstream as MCP Backend
 
     Client->>Router: POST /message?sessionId=1 (search_tools)
-    Router->>SemanticSvc: Evaluate "restart container" query
-    SemanticSvc->>SemanticSvc: Fetch ONNX / OpenAI Embeddings
-    SemanticSvc->>SemanticSvc: Evaluate Hybrid Keyword + Semantic Weights
-    SemanticSvc-->>Router: Return tool "docker/restart_container"
+    Router->>RoutingMgr: SearchToolsAsync("restart container")
+    RoutingMgr->>RoutingMgr: Compute Lexical Keyword Scoring (name, desc, tags, params)
+    RoutingMgr->>VectorStore: SearchSimilarAsync(queryEmbedding) via .NET 10 SIMD
+    VectorStore-->>RoutingMgr: Return Ranked Vector Similarities
+    RoutingMgr->>RoutingMgr: Fuse Ranks via Reciprocal Rank Fusion (RRF, k=60)
+    RoutingMgr-->>Router: Return Top Ranked Tools
     Router-->>Client: Return namespaced search result JSON
 
     Client->>Router: POST /message?sessionId=1 (execute_tool: docker/restart_container)

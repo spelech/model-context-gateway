@@ -202,21 +202,30 @@ The **Admin MCP Server** (`/admin`, `/admin/sse`, `/mcg-admin`) runs as an in-pr
 
 ---
 
-## 4. Semantic Search
+## 4. Hybrid Semantic Search and Vector Store
 
-In **Meta-Mode**, clients search for relevant tools before calling them.
+In **Meta-Mode**, clients search across all aggregated tools dynamically using natural language intent before invoking them:
 
-### Search Flow:
+### Hybrid Search Architecture:
 1. **Tool Query**: The client calls `search_tools(query: "restart actual budget container")`.
-2. **Hybrid Scoring Engine**:
-   - Evaluates tool similarity with a **local ONNX model** (`all-MiniLM-L6-v2`) or **LiteLLM / OpenAI APIs**. ONNX stands for Open Neural Network Exchange.
-   - Adds **Keyword Boosting** (+2.0 for exact phrase matches, +1.0 or +0.5 for word matches).
-3. **Execution**: The client runs the selected tool (such as `docker__restart_container`) through `execute_tool`.
+2. **Lexical Keyword Engine**:
+   - Scores exact query phrase matches and token substrings across tool **names**, **descriptions**, **tags**, and **inputSchema parameter names and descriptions**.
+   - Produces a ranked candidate list sorted by lexical relevance (`Rank_keyword`).
+3. **In-Memory SIMD Vector Store (`IToolVectorStore`)**:
+   - Indexes tool vector embeddings in memory.
+   - Computes query-tool vector cosine similarities using **.NET 10 hardware SIMD intrinsics** (`TensorPrimitives.CosineSimilarity(ReadOnlySpan<float>, ReadOnlySpan<float>)`).
+   - Produces a ranked candidate list sorted by dense vector similarity (`Rank_vector`).
+4. **Reciprocal Rank Fusion (RRF, k=60)**:
+   - Combines lexical and semantic ranks using Reciprocal Rank Fusion:
+     $$\text{RRF\_Score}(tool) = \frac{1.0}{60 + \text{Rank}_{\text{keyword}}(tool)} + \frac{1.0}{60 + \text{Rank}_{\text{vector}}(tool)}$$
+   - Tools exhibiting both high keyword relevance and strong vector semantics achieve top rank.
+   - If embedding providers are disabled, unconfigured, or offline, the engine **gracefully falls back** to pure keyword ranking with zero failures.
 
-### Embeddings Configuration:
+### Embeddings Configuration (`IEmbeddingProvider`):
 Configure embedding providers in the Settings view:
-* **Local ONNX (In-Process)**: Offline calculations using `Microsoft.ML.OnnxRuntime`. Downloads weights to `/app/data/` on first use.
-* **OpenAI API or LiteLLM Provider**: Uses remote inference APIs. The gateway encrypts API keys at rest in the database.
+* **OpenAI / Ollama / Azure / LiteLLM Provider (`OpenAiEmbeddingProvider`)**: Supports standard `/v1/embeddings` endpoints for remote inference. The gateway validates loopback/private IPs against SSRF rules and encrypts API keys at rest.
+* **Local ONNX Provider (`OnnxEmbeddingService`)**: Offline in-process calculations using `Microsoft.ML.OnnxRuntime` (`all-MiniLM-L6-v2`). Downloads weights to `/app/data/` on first use.
+* **No-Op Fallback Provider (`NoOpEmbeddingProvider`)**: Automatically activated when vector embeddings are disabled, ensuring lightweight pure lexical search operation.
 
 ---
 
@@ -238,6 +247,19 @@ Every request moves through this pipeline:
 ### Identity Providers
 - **Active Directory (Kerberos / NTLM)**: Identifies callers by Active Directory SIDs using `WindowsIdentity`.
 - **OIDC Header Proxy**: Reads OpenID Connect (OIDC) headers (such as `Remote-User` and `Remote-Groups`) passed by reverse proxies.
+
+### RFC 9728 MCP Client Discovery Handshake & Protected Resource Metadata
+Model Context Gateway strictly implements the RFC 9728 Protected Resource Metadata (PRM) specification to enable zero-configuration onboarding of AI coding assistants (such as Claude Code, Cursor, Windsurf):
+1. **Protected Resource Metadata Endpoint (`/.well-known/oauth-protected-resource`)**:
+   - Exposes PRM documents with `resource`, `authorization_servers`, `scopes_supported` (`openid`, `profile`, `email`, `mcp:access`), `bearer_methods_supported`, and `resource_documentation`.
+   - Supports path-aware target server endpoints: `/.well-known/oauth-protected-resource/{targetServerId}`.
+   - Respects explicit `?resource=` query overrides per RFC 9728 §3.3.
+2. **Standard 401 `WWW-Authenticate` Handshake (RFC 9728 §5.1)**:
+   - When an unauthenticated client connects to an MCP endpoint (`/sse`, `/{targetServerId}`, `/message`), the gateway returns `401 Unauthorized` with:
+     ```http
+     WWW-Authenticate: Bearer realm="mcp", resource_metadata="https://mcg.example.com/.well-known/oauth-protected-resource"
+     ```
+   - Compliant clients automatically query the PRM URI to discover the corporate IdP (Authentik, Keycloak, Entra ID) and execute standard token acquisition.
 
 ### Group and SID Mapping Policies
 Map external groups to internal roles in the `GroupMappings` table (Settings -> Identity & Auth):
