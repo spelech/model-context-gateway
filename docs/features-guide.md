@@ -542,4 +542,17 @@ The built-in OAuth 2.0 and 2.1 authorization server complies with RFC 7591 and O
 - **One-Way Secret Hashing**: Client secrets are hashed with SHA-256 before storage across SQLite, MSSQL, and MySQL databases.
 - **Resource Metadata**: RFC 9728 discovery endpoints expose `authorization_servers` and `resource` parameters automatically.
 
+---
+
+## 17. Personal Egress 3LO OAuth Engine & Connected Accounts
+
+For upstream MCP servers that require per-user authentication (such as Google Drive, Slack, GitHub, Notion, or Jira), Model Context Gateway provides a **Personal Egress 3LO OAuth Engine ("Connected Accounts")**:
+
+- **MCG as OAuth Callback & Vault**: MCG acts as the OAuth2 client and callback orchestrator. The user clicks "Connect Account" in the dashboard, completes authorization with the upstream identity provider, and MCG captures the authorization code via `GET /api/oauth/egress/callback`.
+- **Encrypted Credential Storage**: Upon code exchange, the resulting access and refresh tokens are securely persisted in `IUserSecretStore` (Database or HashiCorp Vault) scoped to `(Username, ServerId)`.
+- **Automated Background Refresh**: During upstream tool execution (`tools/call` in `HttpTransport` and `SseTransport`), `OAuthEgressTokenManager` checks the token's `expires_at` timestamp. If expired or near expiration, it seamlessly performs a background `refresh_token` grant against the upstream `OAuthTokenUrl`, updates `IUserSecretStore`, and injects the new Bearer token without user interruption.
+- **CSRF & State Protection**: State tokens generated during `GET /api/oauth/egress/authorize/{serverId}` use 256-bit cryptographically secure random bytes stored in `IMemoryCache` with a 15-minute TTL.
+- **Disconnect & Management**: Users can disconnect connected accounts via `POST /api/oauth/egress/disconnect/{serverId}`, immediately deleting the stored credentials from the vault.
+- **UI Experience**: The **My MCP Servers** page displays "Connect Account" or a glowing "Connected (OAuth)" badge with an integrated "Disconnect" action.
+
 
