@@ -116,6 +116,27 @@ sequenceDiagram
     Note over Client,Router: Client gets bootstrap tools (search_tools, execute_tool)
 ```
 
+### 1a. RFC 9728 MCP Client Discovery Handshake
+When an unauthenticated MCP client connects:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as MCP Client / AI Assistant
+    participant Router as Model Context Gateway (MCG)
+    participant IdP as Identity Provider (Authentik/Entra/Keycloak)
+
+    Client->>Router: GET /sse (No Token)
+    Router-->>Client: 401 Unauthorized (WWW-Authenticate: Bearer realm="mcp", resource_metadata=".../.well-known/oauth-protected-resource")
+    Client->>Router: GET /.well-known/oauth-protected-resource
+    Router-->>Client: 200 OK (PRM Document: authorization_servers, scopes)
+    Client->>IdP: Authenticate & Acquire Bearer JWT
+    IdP-->>Client: Return JWT Token
+    Client->>Router: GET /sse (Authorization: Bearer <JWT>)
+    Router->>Router: Authenticate & Register Session
+    Router-->>Client: 200 OK (text/event-stream)
+```
+
 ---
 
 ### 2. Request Routing and Execution Flow (Meta-Mode)

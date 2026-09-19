@@ -146,33 +146,42 @@ namespace ModelContextGateway.Extensions
             // ----------------------------------------------------
             // OAUTH & OIDC PROTECTED RESOURCE DISCOVERY (RFC 9728)
             // ----------------------------------------------------
-            app.MapGet("/.well-known/oauth-protected-resource", (HttpContext context) =>
+            app.MapGet("/.well-known/oauth-protected-resource", async (HttpContext context, Microsoft.Extensions.Configuration.IConfiguration config, IServiceProvider sp) =>
             {
-                var host = context.Request.Host;
-                var scheme = context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) ? proto.ToString() : context.Request.Scheme;
+                var canonicalUrl = ModelContextGateway.Components.Authorization.ProtectedResourceHelper.GetCanonicalUrl(context, config);
                 var requestedResource = context.Request.Query["resource"].FirstOrDefault();
                 var resourceUri = !string.IsNullOrEmpty(requestedResource)
                     ? requestedResource
-                    : $"{scheme}://{host}/sse";
-                return Results.Json(new
+                    : canonicalUrl;
+
+                var authRepo = sp.GetService<ModelContextGateway.Infrastructure.Persistence.IAuthProviderRepository>();
+                var authServers = await ModelContextGateway.Components.Authorization.ProtectedResourceHelper.GetAuthorizationServersAsync(context, config, authRepo);
+
+                return Results.Json(new ModelContextGateway.Components.Authorization.ProtectedResourceMetadata
                 {
-                    resource = resourceUri,
-                    authorization_servers = new[] { $"{scheme}://{host}" },
-                    bearer_methods_supported = new[] { "header" },
-                    scopes_supported = new[] { "mcp_client", "openid", "offline_access", "api" }
+                    Resource = resourceUri,
+                    AuthorizationServers = authServers,
+                    ScopesSupported = ModelContextGateway.Components.Authorization.ProtectedResourceHelper.DefaultScopesSupported,
+                    BearerMethodsSupported = ModelContextGateway.Components.Authorization.ProtectedResourceHelper.DefaultBearerMethodsSupported,
+                    ResourceDocumentation = $"{canonicalUrl}/docs"
                 });
             });
 
-            app.MapGet("/.well-known/oauth-protected-resource/{**path}", (HttpContext context, string path) =>
+            app.MapGet("/.well-known/oauth-protected-resource/{**path}", async (HttpContext context, string path, Microsoft.Extensions.Configuration.IConfiguration config, IServiceProvider sp) =>
             {
-                var host = context.Request.Host;
-                var scheme = context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) ? proto.ToString() : context.Request.Scheme;
-                return Results.Json(new
+                var canonicalUrl = ModelContextGateway.Components.Authorization.ProtectedResourceHelper.GetCanonicalUrl(context, config);
+                var resourceUri = $"{canonicalUrl}/{path.TrimStart('/')}";
+
+                var authRepo = sp.GetService<ModelContextGateway.Infrastructure.Persistence.IAuthProviderRepository>();
+                var authServers = await ModelContextGateway.Components.Authorization.ProtectedResourceHelper.GetAuthorizationServersAsync(context, config, authRepo);
+
+                return Results.Json(new ModelContextGateway.Components.Authorization.ProtectedResourceMetadata
                 {
-                    resource = $"{scheme}://{host}/{path}",
-                    authorization_servers = new[] { $"{scheme}://{host}" },
-                    bearer_methods_supported = new[] { "header" },
-                    scopes_supported = new[] { "mcp_client", "openid", "offline_access", "api" }
+                    Resource = resourceUri,
+                    AuthorizationServers = authServers,
+                    ScopesSupported = ModelContextGateway.Components.Authorization.ProtectedResourceHelper.DefaultScopesSupported,
+                    BearerMethodsSupported = ModelContextGateway.Components.Authorization.ProtectedResourceHelper.DefaultBearerMethodsSupported,
+                    ResourceDocumentation = $"{canonicalUrl}/docs"
                 });
             });
 
