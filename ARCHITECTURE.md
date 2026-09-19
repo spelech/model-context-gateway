@@ -73,6 +73,7 @@ The backend is organized into clear bounded modules across domain components, in
 ├── Components/
 │   ├── Servers/         # Upstream server models, validation, health checks, discovery & MapServerEndpoints
 │   ├── Clients/         # Client models, credential services, OAuth & MapClientEndpoints
+│   ├── OAuth/           # Personal Egress 3LO OAuth engine, callback handler, credential vaulting
 │   ├── AppKeys/         # AppKey models, authorization keys, hashing, scope validation & MapAppKeyEndpoints
 │   ├── Providers/       # Auth/secret provider settings, AES-256-GCM crypto & MapProviderEndpoints
 │   ├── Authorization/   # Access policies, group mappings, RBAC evaluation & MapPolicyEndpoints
@@ -216,6 +217,41 @@ sequenceDiagram
 9. `manage_system`: Inspect diagnostics, memory logs, clear logs, and query audit trails.
 10. `test_tool_call`: Test execution of downstream backend tools via testbench engine.
 
+### 4. Personal Egress 3LO OAuth Flow & Automated Token Refresh
+When a user connects their personal third-party account (e.g. Google Drive, Slack, GitHub) and executes tools:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as User (Dashboard / Web UI)
+    participant MCG as Model Context Gateway
+    participant IdP as Third-Party OAuth Provider (Google / Slack)
+    participant Vault as IUserSecretStore (DB / Vault)
+    participant Downstream as Upstream MCP Backend
+
+    User->>MCG: GET /api/oauth/egress/authorize/{serverId}
+    MCG->>MCG: Store cryptographic state token in IMemoryCache
+    MCG-->>User: 302 Redirect to IdP Auth URL
+    User->>IdP: Authenticate & Authorize Scopes
+    IdP-->>User: 302 Redirect to /api/oauth/egress/callback?code=...&state=...
+    User->>MCG: GET /api/oauth/egress/callback?code=...&state=...
+    MCG->>MCG: Validate & evict state token from cache
+    MCG->>IdP: POST /token (grant_type=authorization_code)
+    IdP-->>MCG: { access_token, refresh_token, expires_in }
+    MCG->>Vault: SaveSecretAsync(user, serverId, encryptedJson)
+    MCG-->>User: 302 Redirect to /my-servers?connected={serverId}
+    
+    Note over MCG,Downstream: Upstream Dispatch with Automated Background Refresh
+    User->>MCG: tools/call via execute_tool
+    MCG->>MCG: Check token expires_at timestamp
+    opt Token is expired or expiring soon
+        MCG->>IdP: POST /token (grant_type=refresh_token)
+        IdP-->>MCG: { new access_token, refresh_token, expires_in }
+        MCG->>Vault: SaveSecretAsync(user, serverId, refreshedJson)
+    end
+    MCG->>Downstream: Dispatch tools/call with Authorization: Bearer <access_token>
+```
+
 ---
 
 ## Outbound Authentication & Identity Delegation
@@ -226,6 +262,7 @@ To support enterprise security and Row-Level Security (RLS) in downstream MCP ba
 2. **Dynamic Auth Pass-Through & Rewriting**: Downstream tools requiring interactive challenges (e.g., Jira, ServiceNow) can securely trigger a 401 Challenge. The gateway intercepts this, issues a `dynamic_auth` prompt to the client (IDE/LLM), and propagates the resulting user-provided credential via the `X-Target-Auth` header.
 3. **OAuth2 / OIDC Token Exchange (On-Behalf-Of)**: For upstream backends requiring strict bearer JWTs, the gateway functions as a Confidential Client, seamlessly exchanging inbound AppKeys or SSO headers for downstream JWTs via the standard OAuth2 On-Behalf-Of flow.
 4. **NTLM / Kerberos Impersonation**: On Windows IIS native deployments, the gateway utilizes `S4U2Proxy` (via `WindowsIdentity.RunImpersonatedAsync`) to assume the identity of the inbound Active Directory caller when invoking downstream enterprise endpoints.
+5. **Personal Egress 3LO OAuth Engine (Connected Accounts)**: For third-party services (Google Drive, Slack, GitHub, Notion), MCG acts as an OAuth2 client and credential vault. Users connect accounts through the UI via `GET /api/oauth/egress/authorize/{serverId}` and callback handler. Tokens are stored in `IUserSecretStore` (Database or Vault) and automatically refreshed in the background during upstream tool calls via `OAuthEgressTokenManager`.
 
 ---
 

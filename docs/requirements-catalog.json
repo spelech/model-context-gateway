@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-19T01:12:52.4812017Z",
-    "totalRequirements": 430,
-    "positiveCount": 341,
+    "generatedAt": "2026-09-19T01:18:21.3379410Z",
+    "totalRequirements": 437,
+    "positiveCount": 348,
     "guardrailCount": 89,
-    "totalProofs": 947
+    "totalProofs": 954
   },
   "requirements": [
     {
@@ -945,6 +945,86 @@
           "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
           "lineNumber": 147,
           "testName": "UnauthenticatedMcpRequest_MessageEndpoint_Returns401WithRfc9728WwwAuthenticateHeader",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-133",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Verify initiating OAuth 3LO egress flow generates secure state and authorization redirect URL.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EgressOAuthTests.cs",
+          "lineNumber": 72,
+          "testName": "Authorize_WithValidServer_Initiates3LoFlowWithSecureStateAndRedirectUrl",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-134",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Verify OAuth egress callback exchanges authorization code and stores credentials in user secret store.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EgressOAuthTests.cs",
+          "lineNumber": 146,
+          "testName": "Callback_WithValidStateAndCode_ExchangesTokenAndPersistsInUserSecretStore",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-135",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Verify upstream dispatch automatically refreshes expired OAuth egress token and updates user secret store.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EgressOAuthTests.cs",
+          "lineNumber": 260,
+          "testName": "UpstreamDispatch_WithExpiredOAuthToken_RefreshesTokenAutomatically",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-136",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Verify disconnect endpoint deletes stored user OAuth credentials.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EgressOAuthTests.cs",
+          "lineNumber": 361,
+          "testName": "Disconnect_DeletesUserSecretAndReturnsSuccess",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-137",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Verify GetOAuthServers returns servers with correct isConnected status.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EgressOAuthTests.cs",
+          "lineNumber": 406,
+          "testName": "GetOAuthServers_ReturnsConfiguredServersWithConnectionStatus",
           "details": null
         }
       ]
@@ -10043,7 +10123,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 102,
+          "lineNumber": 104,
           "testName": "renders client setup guide below credentials card",
           "details": null
         },
@@ -10212,6 +10292,38 @@
           "filePath": "frontend/e2e/testbench.spec.ts",
           "lineNumber": 1,
           "testName": "should navigate to Test Bench view and render tester cards",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-130",
+      "category": "UI",
+      "type": "Positive",
+      "description": "Renders Connect Account button for OAuth-enabled servers directing to authorization URL.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 121,
+          "testName": "renders connect account button for oauth-enabled servers and handles redirect",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-131",
+      "category": "UI",
+      "type": "Positive",
+      "description": "Renders Connected (OAuth) badge and supports account disconnection.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 157,
+          "testName": "renders connected (oauth) badge and disconnects account",
           "details": null
         }
       ]
@@ -10451,14 +10563,14 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 23,
+          "lineNumber": 25,
           "testName": "shows error toast when saving invalid JSON credentials",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 64,
+          "lineNumber": 66,
           "testName": "saves valid credentials successfully and closes modal",
           "details": null
         },

@@ -12,6 +12,8 @@ vi.mock('../../api/serverApi', () => ({
 vi.mock('../../api/userCredentialsApi', () => ({
   fetchUserCredentialsApi: vi.fn(),
   saveUserCredentialApi: vi.fn(),
+  deleteUserCredentialApi: vi.fn(),
+  disconnectOAuthAccountApi: vi.fn(),
 }));
 
 describe('MyMcpServers Page', () => {
@@ -114,5 +116,79 @@ describe('MyMcpServers Page', () => {
     });
 
     expect(screen.getByText('Client Connection Guide')).toBeInTheDocument();
+  });
+
+  /**
+   * @requirement UI-130
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders Connect Account button for OAuth-enabled servers directing to authorization URL.
+   */
+  it('renders connect account button for oauth-enabled servers and handles redirect', async () => {
+    vi.spyOn(serverApi, 'fetchServersApi').mockResolvedValue([
+      {
+        id: 'github-srv',
+        displayName: 'GitHub Integration',
+        enableOAuth3Lo: true,
+        secretProvider: 'None',
+        transportType: 'http',
+        targetUrl: 'http://localhost:4000',
+      } as any,
+    ]);
+    vi.spyOn(userCredentialsApi, 'fetchUserCredentialsApi').mockResolvedValue([]);
+
+    const assignSpy = vi.spyOn(window.location, 'assign').mockImplementation(() => {});
+
+    await act(async () => {
+      render(<MyMcpServers />);
+    });
+
+    expect(screen.getByText('GitHub Integration')).toBeInTheDocument();
+    expect(screen.getByText('Not Connected')).toBeInTheDocument();
+
+    const connectBtn = screen.getByRole('button', { name: /connect account/i });
+    expect(connectBtn).toBeInTheDocument();
+    fireEvent.click(connectBtn);
+
+    expect(assignSpy).toHaveBeenCalledWith('/api/oauth/egress/authorize/github-srv');
+    assignSpy.mockRestore();
+  });
+
+  /**
+   * @requirement UI-131
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders Connected (OAuth) badge and supports account disconnection.
+   */
+  it('renders connected (oauth) badge and disconnects account', async () => {
+    vi.spyOn(serverApi, 'fetchServersApi').mockResolvedValue([
+      {
+        id: 'github-srv',
+        displayName: 'GitHub Integration',
+        enableOAuth3Lo: true,
+        secretProvider: 'None',
+        transportType: 'http',
+        targetUrl: 'http://localhost:4000',
+      } as any,
+    ]);
+    vi.spyOn(userCredentialsApi, 'fetchUserCredentialsApi').mockResolvedValue(['github-srv']);
+    const disconnectSpy = vi.spyOn(userCredentialsApi, 'disconnectOAuthAccountApi').mockResolvedValue(undefined);
+
+    await act(async () => {
+      render(<MyMcpServers />);
+    });
+
+    expect(screen.getByText('GitHub Integration')).toBeInTheDocument();
+    expect(screen.getByText('Connected (OAuth)')).toBeInTheDocument();
+
+    const disconnectBtn = screen.getByRole('button', { name: /disconnect/i });
+    expect(disconnectBtn).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(disconnectBtn);
+    });
+
+    expect(disconnectSpy).toHaveBeenCalledWith('github-srv');
+    expect(useToastStore.getState().toasts.some((t) => t.message.includes('Disconnected account') && t.type === 'success')).toBe(true);
   });
 });
