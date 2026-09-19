@@ -60,6 +60,17 @@ To expose all tools from a specific server (e.g. `docker` or `homeassistant`) di
 }
 ```
 
+### Option C: Direct SSE with RFC 9728 Handshake
+
+In environments using MCP clients supporting direct HTTP/SSE transports and RFC 9728 Protected Resource Metadata (such as Claude Code or Cursor), unauthenticated connections to `/sse` or `/{targetServerId}` return:
+
+```http
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer realm="mcp", resource_metadata="http://localhost:8080/.well-known/oauth-protected-resource"
+```
+
+The client queries `/.well-known/oauth-protected-resource` to discover corporate IdP endpoints (`authorization_servers`) and scopes (`mcp:access`) for automatic token negotiation.
+
 ---
 
 ## 🔄 Verification & Testing

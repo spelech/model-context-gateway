@@ -25,6 +25,7 @@ Find the authentication type that your downstream server requires in the table b
 | **11. Identity-Forwarding Gateway** (Downstream RLS) | `sse` / `http` | *(Any)* | *(Matches backend)* | The gateway sends a service account token and passes `X-Forwarded-User: <username>` for Row-Level Security. |
 | **12. RFC 8693 Downstream Token Exchange** | `sse` / `http` | `TokenExchange` | `bearer` | Exchanging caller identity/token with an In-House IdP for downstream audience tokens. |
 | **13. Windows Kerberos Impersonation** | `sse` / `http` | `None` *(Locked)* | `impersonation` | `AuthShape: impersonation`. Runs downstream request under caller's Windows token (S4U2Proxy / IIS). |
+| **14. 3LO Egress OAuth (Connected Accounts)** | `sse` / `http` | *(OAuth 3LO Enabled)* | `bearer` | Downstream SaaS requiring user login (GitHub, Slack, Jira). MCG handles the OAuth redirect and callback, vaults user tokens in DB/Vault with AES-256-GCM, and automatically handles token refresh. |
 
 ---
 
@@ -349,6 +350,30 @@ The backend server trusts the gateway IP and applies Row-Level Security based on
 * **Secret Provider**: `None` *(Locked)*
 * **Auth Shape**: `impersonation`
 * **API Key**: *(Disabled / Not Applicable)*
+
+---
+
+### Recipe 14: Personal 3LO Egress OAuth (Connected Accounts)
+
+* **Common Use Cases**: SaaS MCP servers where every developer must execute operations as themselves (e.g. GitHub Copilot/Issues, Atlassian Jira, Slack, Linear, Salesforce).
+* **How It Works**:
+  1. The administrator registers the server with `EnableOAuth3Lo: true` and configures the OAuth Client ID and Secret.
+  2. Developers open the **My MCP Servers** dashboard tab and click **`Connect Account`**.
+  3. The gateway manages the browser OAuth flow out-of-band and receives the callback at `/api/oauth/egress/callback`.
+  4. Access and refresh tokens are encrypted at rest with AES-256-GCM.
+  5. When AI agents call tools, the gateway strips the developer's gateway key, verifies expiration, auto-refreshes tokens via `refresh_token` if needed, and injects `Authorization: Bearer <user_token>`.
+
+#### Web UI Configuration:
+1. Open the server configuration modal.
+2. Check **Enable OAuth (3LO)**.
+3. Fill in the OAuth Client parameters:
+   * **OAuth Client ID**: SaaS Application Client ID.
+   * **OAuth Client Secret**: SaaS Application Secret (stored encrypted).
+   * **Authorization URL**: e.g. `https://github.com/login/oauth/authorize`.
+   * **Token URL**: e.g. `https://github.com/login/oauth/access_token`.
+   * **Scopes**: e.g. `repo,read:org,write:discussion`.
+4. Click **Save Server**.
+5. Users can now click **Connect Account** under **My MCP Servers**.
 
 ---
 

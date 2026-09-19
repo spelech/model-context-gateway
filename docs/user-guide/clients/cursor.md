@@ -56,7 +56,21 @@ If you want Cursor to access a specific backend server directly (exposing all it
     }
   }
 }
+### Option C: Automatic OAuth Discovery (RFC 9728)
+
+If your organization secures MCG using an Identity Provider (Authentik, Keycloak, Microsoft Entra ID), modern Cursor versions support automatic OAuth Protected Resource Metadata (RFC 9728) discovery:
+
+```json
+{
+  "mcpServers": {
+    "mcg": {
+      "url": "http://localhost:8080/sse"
+    }
+  }
+}
 ```
+
+When connecting without a hardcoded AppKey, Cursor receives a `401 Unauthorized` challenge with `WWW-Authenticate: Bearer realm="mcp", resource_metadata=".../.well-known/oauth-protected-resource"`. Cursor automatically resolves the corporate IdP metadata and initiates standard browser authentication.
 
 ---
 

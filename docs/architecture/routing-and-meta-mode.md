@@ -46,12 +46,16 @@ flowchart LR
 2. **Background Cache Pre-Warming**:
    Simultaneously in the background, [`ClientSession.BackendInitializer.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession/ClientSession.BackendInitializer.cs) concurrently initializes all enabled downstream transports and caches their tool, prompt, and resource schemas. This ensures zero latency during subsequent user requests.
 
-3. **Semantic Scoring & Ranking**:
+3. **Semantic Scoring & Ranking (Hybrid RRF & SIMD)**:
    When the client invokes `search_tools`:
-   - The query string is vectorized using [`DynamicEmbeddingService`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/DynamicEmbeddingService.cs) (supporting local CPU ONNX runtime using `all-MiniLM-L6-v2` or remote OpenAI-compatible embedding APIs).
-   - [`SemanticSearchService`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/SemanticSearchService.cs) scores cached tools against the query using a hybrid ranking formula:
-     $$\text{Score} = (0.4 \times \text{KeywordScore}_{\text{BM25}}) + (0.6 \times \text{CosineSimilarity}_{\text{Vector}})$$
-   - Tools exceeding the relevance threshold are formatted as `{serverId}__{toolName}` along with their input schemas and returned to the client.
+   - The query string is vectorized using `IEmbeddingProvider` (supporting local CPU ONNX runtime with `all-MiniLM-L6-v2` or remote OpenAI/Ollama/LiteLLM embedding APIs via `OpenAiEmbeddingProvider`).
+   - The tool candidate list is retrieved through two independent ranking passes:
+     1. **Lexical Keyword Matcher**: Tokenizes query phrases and evaluates exact matches across tool names, descriptions, categories, and JSON input schemas.
+     2. **SIMD Vector Store (`IToolVectorStore`)**: Computes dense vector cosine similarities using **.NET 10 hardware SIMD intrinsics** (`TensorPrimitives.CosineSimilarity`) directly in memory.
+   - Rankings are fused using **Reciprocal Rank Fusion (RRF, $k=60$)**:
+     $$\text{RRF\_Score}(tool) = \frac{1.0}{60 + \text{Rank}_{\text{keyword}}(tool)} + \frac{1.0}{60 + \text{Rank}_{\text{vector}}(tool)}$$
+   - Tools are formatted as `{serverId}__{toolName}` along with their input schemas and returned to the client.
+   - If vector search is unconfigured or unavailable, the engine gracefully falls back to pure keyword rankings.
 
 4. **Execution Dispatch**:
    When the client invokes `execute_tool`:
