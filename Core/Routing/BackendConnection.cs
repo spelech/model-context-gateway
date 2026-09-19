@@ -16,17 +16,17 @@ namespace ModelContextGateway.Core.Routing
         public ConcurrentDictionary<string, TaskCompletionSource<JsonRpcResponse>> PendingRequests => _stateManager.PendingRequests;
         public TimeSpan RequestTimeout { get => _transport.RequestTimeout; set => _transport.RequestTimeout = value; }
 
-        public BackendConnection(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null, string? forwardedUser = null)
+        public BackendConnection(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null, string? forwardedUser = null, IUserSecretStore? userSecretStore = null)
         {
             _stateManager = new JsonRpcStateManager();
 
             if (server.Type == "http" || server.Type == "custom" || server.Type == "streamable")
             {
-                _transport = new HttpTransport(server, httpClient, logger, secretRetriever, passThroughToken, null, forwardedUser);
+                _transport = new HttpTransport(server, httpClient, logger, secretRetriever, passThroughToken, null, forwardedUser, userSecretStore);
             }
             else if (server.Type == "sse")
             {
-                _transport = new SseTransport(server, httpClient, logger, _stateManager, secretRetriever, passThroughToken, forwardedUser);
+                _transport = new SseTransport(server, httpClient, logger, _stateManager, secretRetriever, passThroughToken, forwardedUser, userSecretStore);
             }
             else if (server.Type == "stdio")
             {

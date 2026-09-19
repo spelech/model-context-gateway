@@ -24,3 +24,22 @@ export async function deleteUserCredentialApi(serverId: string): Promise<void> {
     method: 'DELETE'
   });
 }
+
+export interface OAuthServerInfo {
+  id: string;
+  alias?: string;
+  displayName: string;
+  enableOAuth3Lo: boolean;
+  isConnected: boolean;
+}
+
+export async function fetchOAuthServersApi(): Promise<OAuthServerInfo[]> {
+  const data = await apiRequest<OAuthServerInfo[]>('/api/oauth/egress/servers');
+  return data || [];
+}
+
+export async function disconnectOAuthAccountApi(serverId: string): Promise<void> {
+  await apiRequest(`/api/oauth/egress/disconnect/${serverId}`, {
+    method: 'POST'
+  });
+}

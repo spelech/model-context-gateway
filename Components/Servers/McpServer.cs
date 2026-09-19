@@ -22,6 +22,13 @@ namespace ModelContextGateway.Components.Servers
         public bool AutoDiscovered { get; set; } = false;
         public bool AllowPassThroughAuth { get; set; } = false;
         public string? DynamicAuthPrompt { get; set; }
+        public bool EnableOAuth3Lo { get; set; } = false;
+        public string? OAuthClientId { get; set; }
+        public string? OAuthClientSecret { get; set; }
+        public string? OAuthAuthorizationUrl { get; set; }
+        public string? OAuthTokenUrl { get; set; }
+        public string? OAuthScopes { get; set; }
+        public string? OAuthRedirectUri { get; set; }
     }
 
     public class BackendStatus

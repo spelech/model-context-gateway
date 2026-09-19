@@ -144,22 +144,28 @@ namespace ModelContextGateway.Infrastructure.Persistence
         {
             using var conn = _dbFactory.CreateConnection();
             DatabaseInitializer.EnsureAliasColumn(conn);
+            DatabaseInitializer.EnsureOAuthColumns(conn);
             return await conn.QueryAsync<McpServer>(@"
                 SELECT Id, Alias, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider,
                        SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape,
-                       CustomHeaderName, ApiKey, HeadersJson, AutoDiscovered
+                       CustomHeaderName, ApiKey, HeadersJson, AutoDiscovered,
+                       EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri
                 FROM Servers;");
         }
 
         public async Task<IEnumerable<McpServer>> GetEnabledServersAsync()
         {
             using var conn = _dbFactory.CreateConnection();
+            DatabaseInitializer.EnsureAliasColumn(conn);
+            DatabaseInitializer.EnsureOAuthColumns(conn);
             return await conn.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = @Enabled;", new { Enabled = 1 });
         }
 
         public async Task<McpServer?> GetServerByIdAsync(string id)
         {
             using var conn = _dbFactory.CreateConnection();
+            DatabaseInitializer.EnsureAliasColumn(conn);
+            DatabaseInitializer.EnsureOAuthColumns(conn);
             return await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @Id;", new { Id = id });
         }
 
@@ -167,19 +173,22 @@ namespace ModelContextGateway.Infrastructure.Persistence
         {
             using var conn = _dbFactory.CreateConnection();
             DatabaseInitializer.EnsureAliasColumn(conn);
+            DatabaseInitializer.EnsureOAuthColumns(conn);
             var provider = _dbFactory.ProviderName.ToLower();
 
             if (provider == "sqlite")
             {
                 const string sql = @"
-                    INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered)
-                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered)
+                    INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri)
+                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri)
                     ON CONFLICT(Id) DO UPDATE SET
                         Alias = @Alias, DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
                         SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, SecretMount = @SecretMount,
                         SecretPath = @SecretPath, SecretField = @SecretField, AuthShape = @AuthShape,
                         CustomHeaderName = @CustomHeaderName, Categories = @Categories, ApiKey = @ApiKey,
-                        HeadersJson = @HeadersJson, AutoDiscovered = @AutoDiscovered;";
+                        HeadersJson = @HeadersJson, AutoDiscovered = @AutoDiscovered,
+                        EnableOAuth3Lo = @EnableOAuth3Lo, OAuthClientId = @OAuthClientId, OAuthClientSecret = @OAuthClientSecret,
+                        OAuthAuthorizationUrl = @OAuthAuthorizationUrl, OAuthTokenUrl = @OAuthTokenUrl, OAuthScopes = @OAuthScopes, OAuthRedirectUri = @OAuthRedirectUri;";
                 await conn.ExecuteAsync(sql, server);
             }
             else if (provider == "mssql")
@@ -191,26 +200,30 @@ namespace ModelContextGateway.Infrastructure.Persistence
                             SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, SecretMount = @SecretMount,
                             SecretPath = @SecretPath, SecretField = @SecretField, AuthShape = @AuthShape,
                             CustomHeaderName = @CustomHeaderName, Categories = @Categories, ApiKey = @ApiKey,
-                            HeadersJson = @HeadersJson, AutoDiscovered = @AutoDiscovered WHERE Id = @Id;
+                            HeadersJson = @HeadersJson, AutoDiscovered = @AutoDiscovered,
+                            EnableOAuth3Lo = @EnableOAuth3Lo, OAuthClientId = @OAuthClientId, OAuthClientSecret = @OAuthClientSecret,
+                            OAuthAuthorizationUrl = @OAuthAuthorizationUrl, OAuthTokenUrl = @OAuthTokenUrl, OAuthScopes = @OAuthScopes, OAuthRedirectUri = @OAuthRedirectUri WHERE Id = @Id;
                     END
                     ELSE
                     BEGIN
-                        INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered)
-                        VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered);
+                        INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri)
+                        VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri);
                     END;";
                 await conn.ExecuteAsync(sql, server);
             }
             else if (provider == "mysql")
             {
                 const string sql = @"
-                    INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered)
-                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered)
+                    INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri)
+                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri)
                     ON DUPLICATE KEY UPDATE
                         Alias = @Alias, DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
                         SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, SecretMount = @SecretMount,
                         SecretPath = @SecretPath, SecretField = @SecretField, AuthShape = @AuthShape,
                         CustomHeaderName = @CustomHeaderName, Categories = @Categories, ApiKey = @ApiKey,
-                        HeadersJson = @HeadersJson, AutoDiscovered = @AutoDiscovered;";
+                        HeadersJson = @HeadersJson, AutoDiscovered = @AutoDiscovered,
+                        EnableOAuth3Lo = @EnableOAuth3Lo, OAuthClientId = @OAuthClientId, OAuthClientSecret = @OAuthClientSecret,
+                        OAuthAuthorizationUrl = @OAuthAuthorizationUrl, OAuthTokenUrl = @OAuthTokenUrl, OAuthScopes = @OAuthScopes, OAuthRedirectUri = @OAuthRedirectUri;";
                 await conn.ExecuteAsync(sql, server);
             }
         }

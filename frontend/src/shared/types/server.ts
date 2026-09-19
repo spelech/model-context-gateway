@@ -19,6 +19,13 @@ export interface McpServer {
   connectionError: string;
   allowPassThroughAuth: boolean;
   dynamicAuthPrompt?: string;
+  enableOAuth3Lo?: boolean;
+  oauthClientId?: string;
+  oauthClientSecret?: string;
+  oauthAuthorizationUrl?: string;
+  oauthTokenUrl?: string;
+  oauthScopes?: string;
+  oauthRedirectUri?: string;
 }
 
 export interface ServerPayload {
@@ -37,6 +44,13 @@ export interface ServerPayload {
   hidden: boolean;
   allowPassThroughAuth: boolean;
   dynamicAuthPrompt?: string;
+  enableOAuth3Lo?: boolean;
+  oauthClientId?: string;
+  oauthClientSecret?: string;
+  oauthAuthorizationUrl?: string;
+  oauthTokenUrl?: string;
+  oauthScopes?: string;
+  oauthRedirectUri?: string;
 }
 
 export interface InspectCapabilityData {

@@ -6,9 +6,10 @@ namespace ModelContextGateway.Infrastructure.Transports
 {
     public class HttpTransport : ITransport
     {
-        private readonly string? _passThroughToken;
+        private string? _passThroughToken;
         private readonly System.Security.Principal.WindowsIdentity? _callerWindowsIdentity;
         private readonly string? _forwardedUser;
+        private readonly IUserSecretStore? _userSecretStore;
         public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(15);
         private readonly McpServer _server;
         private readonly HttpClient _httpClient;
@@ -18,11 +19,12 @@ namespace ModelContextGateway.Infrastructure.Transports
         private string _sessionId = string.Empty;
         private bool _disposed = false;
 
-        public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null, System.Security.Principal.WindowsIdentity? callerWindowsIdentity = null, string? forwardedUser = null)
+        public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null, System.Security.Principal.WindowsIdentity? callerWindowsIdentity = null, string? forwardedUser = null, IUserSecretStore? userSecretStore = null)
         {
             _passThroughToken = passThroughToken;
             _callerWindowsIdentity = callerWindowsIdentity;
             _forwardedUser = forwardedUser;
+            _userSecretStore = userSecretStore;
             _server = server;
             _httpClient = httpClient;
             _logger = logger;
@@ -53,66 +55,84 @@ namespace ModelContextGateway.Infrastructure.Transports
 
         public async Task<string?> ResolveTokenAsync(ISecretRetriever? secretRetriever = null)
         {
-            if (!string.IsNullOrEmpty(_passThroughToken) && (_server.AllowPassThroughAuth || _server.SecretProvider == "UserProvided"))
+            string? rawCandidate = null;
+            if (!string.IsNullOrEmpty(_passThroughToken) && (_server.AllowPassThroughAuth || _server.SecretProvider == "UserProvided" || _server.EnableOAuth3Lo))
             {
-                return _passThroughToken;
+                rawCandidate = _passThroughToken;
             }
-
-            var provider = _server.SecretProvider ?? "None";
-            if (provider.Equals("None", StringComparison.OrdinalIgnoreCase))
+            else if (_server.EnableOAuth3Lo && _userSecretStore != null && !string.IsNullOrEmpty(_forwardedUser))
             {
-                return !string.IsNullOrEmpty(_server.ApiKey) ? _server.ApiKey : null;
-            }
-
-            var retriever = secretRetriever ?? _secretRetriever;
-            if (retriever == null)
-            {
-                throw new InvalidOperationException($"SecretProvider is configured to '{provider}' for server '{_server.Id}', but no secret retriever is registered.");
-            }
-
-            string path = !string.IsNullOrWhiteSpace(_server.SecretPath) ? _server.SecretPath : _server.Url;
-            string field = !string.IsNullOrWhiteSpace(_server.SecretField)
-                ? _server.SecretField
-                : (!string.IsNullOrWhiteSpace(_server.SecretItemKey) ? _server.SecretItemKey : "ApiKey");
-
-            if (!string.IsNullOrWhiteSpace(_server.SecretMount))
-            {
-                path = $"{_server.SecretMount}:{path}";
-            }
-            else if (provider.Equals("Vault", StringComparison.OrdinalIgnoreCase) &&
-                     string.IsNullOrWhiteSpace(_server.SecretPath) &&
-                     !string.IsNullOrWhiteSpace(_server.SecretItemKey))
-            {
-                // Frontend passes 'mount:path:field' inside SecretItemKey
-                var parts = _server.SecretItemKey.Split(':', 3);
-                if (parts.Length == 3)
-                {
-                    path = $"{parts[0]}:{parts[1]}";
-                    field = parts[2];
-                }
-            }
-            else if (provider.Equals("WindowsRegistry", StringComparison.OrdinalIgnoreCase) &&
-                     (string.IsNullOrWhiteSpace(_server.SecretPath) || path.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || path.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
-            {
-                path = @"SOFTWARE\McpRouter\Secrets";
-            }
-
-            string? secret;
-            if (retriever is CompositeSecretRetriever composite)
-            {
-                secret = await composite.GetSecretForProviderAsync(provider, path, field);
+                rawCandidate = await _userSecretStore.GetSecretAsync(_forwardedUser, _server.Id);
             }
             else
             {
-                secret = await retriever.GetSecretAsync(path, field);
+                var provider = _server.SecretProvider ?? "None";
+                if (provider.Equals("None", StringComparison.OrdinalIgnoreCase))
+                {
+                    rawCandidate = !string.IsNullOrEmpty(_server.ApiKey) ? _server.ApiKey : null;
+                }
+                else
+                {
+                    var retriever = secretRetriever ?? _secretRetriever;
+                    if (retriever == null)
+                    {
+                        throw new InvalidOperationException($"SecretProvider is configured to '{provider}' for server '{_server.Id}', but no secret retriever is registered.");
+                    }
+
+                    string path = !string.IsNullOrWhiteSpace(_server.SecretPath) ? _server.SecretPath : _server.Url;
+                    string field = !string.IsNullOrWhiteSpace(_server.SecretField)
+                        ? _server.SecretField
+                        : (!string.IsNullOrWhiteSpace(_server.SecretItemKey) ? _server.SecretItemKey : "ApiKey");
+
+                    if (!string.IsNullOrWhiteSpace(_server.SecretMount))
+                    {
+                        path = $"{_server.SecretMount}:{path}";
+                    }
+                    else if (provider.Equals("Vault", StringComparison.OrdinalIgnoreCase) &&
+                             string.IsNullOrWhiteSpace(_server.SecretPath) &&
+                             !string.IsNullOrWhiteSpace(_server.SecretItemKey))
+                    {
+                        // Frontend passes 'mount:path:field' inside SecretItemKey
+                        var parts = _server.SecretItemKey.Split(':', 3);
+                        if (parts.Length == 3)
+                        {
+                            path = $"{parts[0]}:{parts[1]}";
+                            field = parts[2];
+                        }
+                    }
+                    else if (provider.Equals("WindowsRegistry", StringComparison.OrdinalIgnoreCase) &&
+                             (string.IsNullOrWhiteSpace(_server.SecretPath) || path.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || path.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        path = @"SOFTWARE\McpRouter\Secrets";
+                    }
+
+                    string? secret;
+                    if (retriever is CompositeSecretRetriever composite)
+                    {
+                        secret = await composite.GetSecretForProviderAsync(provider, path, field);
+                    }
+                    else
+                    {
+                        secret = await retriever.GetSecretAsync(path, field);
+                    }
+
+                    if (string.IsNullOrEmpty(secret))
+                    {
+                        throw new System.Security.SecurityException($"Failed to resolve secret from provider '{provider}' for server '{_server.Id}' (path: '{path}', field: '{field}'). Plaintext ApiKey fallback is disabled.");
+                    }
+
+                    rawCandidate = secret;
+                }
             }
 
-            if (string.IsNullOrEmpty(secret))
-            {
-                throw new System.Security.SecurityException($"Failed to resolve secret from provider '{provider}' for server '{_server.Id}' (path: '{path}', field: '{field}'). Plaintext ApiKey fallback is disabled.");
-            }
-
-            return secret;
+            return await OAuthEgressTokenManager.ExtractOrRefreshTokenAsync(
+                _server,
+                rawCandidate,
+                _forwardedUser,
+                _userSecretStore,
+                _httpClient,
+                _logger,
+                updatedToken => { _passThroughToken = updatedToken; });
         }
 
         private async Task ApplyAuthAndCustomHeadersAsync(HttpRequestMessage request)
@@ -122,35 +142,42 @@ namespace ModelContextGateway.Infrastructure.Transports
 
             if (!string.IsNullOrEmpty(token))
             {
-                switch (authShape)
+                if (_server.EnableOAuth3Lo)
                 {
-                    case "bearer":
-                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                        break;
-                    case "basic":
-                        request.Headers.Authorization = new AuthenticationHeaderValue("Basic", token);
-                        break;
-                    case "raw":
-                        request.Headers.TryAddWithoutValidation("Authorization", token);
-                        break;
-                    case "x-api-key":
-                        request.Headers.TryAddWithoutValidation("X-API-Key", token);
-                        break;
-                    case "custom-header":
-                        var headerName = !string.IsNullOrWhiteSpace(_server.CustomHeaderName) ? _server.CustomHeaderName : "X-Auth-Token";
-                        request.Headers.TryAddWithoutValidation(headerName, token);
-                        break;
-                    case "query":
-                        var paramName = !string.IsNullOrWhiteSpace(_server.CustomHeaderName) ? _server.CustomHeaderName : "token";
-                        var uriBuilder = new UriBuilder(request.RequestUri!);
-                        var query = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
-                        query[paramName] = token;
-                        uriBuilder.Query = query.ToString();
-                        request.RequestUri = uriBuilder.Uri;
-                        break;
-                    default:
-                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                        break;
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
+                else
+                {
+                    switch (authShape)
+                    {
+                        case "bearer":
+                            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                            break;
+                        case "basic":
+                            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", token);
+                            break;
+                        case "raw":
+                            request.Headers.TryAddWithoutValidation("Authorization", token);
+                            break;
+                        case "x-api-key":
+                            request.Headers.TryAddWithoutValidation("X-API-Key", token);
+                            break;
+                        case "custom-header":
+                            var headerName = !string.IsNullOrWhiteSpace(_server.CustomHeaderName) ? _server.CustomHeaderName : "X-Auth-Token";
+                            request.Headers.TryAddWithoutValidation(headerName, token);
+                            break;
+                        case "query":
+                            var paramName = !string.IsNullOrWhiteSpace(_server.CustomHeaderName) ? _server.CustomHeaderName : "token";
+                            var uriBuilder = new UriBuilder(request.RequestUri!);
+                            var query = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
+                            query[paramName] = token;
+                            uriBuilder.Query = query.ToString();
+                            request.RequestUri = uriBuilder.Uri;
+                            break;
+                        default:
+                            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                            break;
+                    }
                 }
             }
 
