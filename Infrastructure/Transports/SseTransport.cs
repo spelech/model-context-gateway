@@ -508,7 +508,14 @@ namespace ModelContextGateway.Infrastructure.Transports
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
                 using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
-                req.Headers.Host = "localhost";
+                if (req.RequestUri != null && !string.IsNullOrEmpty(req.RequestUri.Host) && !req.RequestUri.IsLoopback)
+                {
+                    req.Headers.Host = req.RequestUri.Authority;
+                }
+                else
+                {
+                    req.Headers.Host = "localhost";
+                }
                 req.Headers.Accept.Clear();
                 req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 if (!string.IsNullOrEmpty(_sessionId))
@@ -536,7 +543,14 @@ namespace ModelContextGateway.Infrastructure.Transports
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
                 using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
-                req.Headers.Host = "localhost";
+                if (req.RequestUri != null && !string.IsNullOrEmpty(req.RequestUri.Host) && !req.RequestUri.IsLoopback)
+                {
+                    req.Headers.Host = req.RequestUri.Authority;
+                }
+                else
+                {
+                    req.Headers.Host = "localhost";
+                }
                 req.Headers.Accept.Clear();
                 req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 if (!string.IsNullOrEmpty(_sessionId))
@@ -642,7 +656,14 @@ namespace ModelContextGateway.Infrastructure.Transports
             var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
-            req.Headers.Host = "localhost";
+            if (req.RequestUri != null && !string.IsNullOrEmpty(req.RequestUri.Host) && !req.RequestUri.IsLoopback)
+            {
+                req.Headers.Host = req.RequestUri.Authority;
+            }
+            else
+            {
+                req.Headers.Host = "localhost";
+            }
             await ApplyAuthAndCustomHeadersAsync(req);
             if (!string.IsNullOrEmpty(_sessionId))
             {
@@ -663,7 +684,14 @@ namespace ModelContextGateway.Infrastructure.Transports
             var content = new StringContent(responseJson, Encoding.UTF8, "application/json");
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
-            req.Headers.Host = "localhost";
+            if (req.RequestUri != null && !string.IsNullOrEmpty(req.RequestUri.Host) && !req.RequestUri.IsLoopback)
+            {
+                req.Headers.Host = req.RequestUri.Authority;
+            }
+            else
+            {
+                req.Headers.Host = "localhost";
+            }
             await ApplyAuthAndCustomHeadersAsync(req);
             if (!string.IsNullOrEmpty(_sessionId))
             {

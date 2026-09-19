@@ -305,8 +305,29 @@ namespace ModelContextGateway.Components.Capabilities
 
                 try
                 {
+                    var userSecretStore = httpContext.RequestServices.GetService<ModelContextGateway.Infrastructure.Secrets.IUserSecretStore>();
+                    string? targetUser = username;
+                    if (server.EnableOAuth3Lo || server.SecretProvider == "UserProvided")
+                    {
+                        if (string.IsNullOrEmpty(targetUser) || targetUser == "unknown" || targetUser.Equals("admin", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var dbFactory = httpContext.RequestServices.GetService<ModelContextGateway.Infrastructure.Persistence.IDbConnectionFactory>();
+                            if (dbFactory != null)
+                            {
+                                using var db = dbFactory.CreateConnection();
+                                var matchedUser = await db.QueryFirstOrDefaultAsync<string>(
+                                    "SELECT Username FROM UserServerCredentials WHERE ServerId = @ServerId ORDER BY Id DESC LIMIT 1;",
+                                    new { ServerId = serverId });
+                                if (!string.IsNullOrEmpty(matchedUser))
+                                {
+                                    targetUser = matchedUser;
+                                }
+                            }
+                        }
+                    }
+
                     // Direct routing to backend
-                    using var conn = new BackendConnection(server, httpClient, logger, secretRetriever);
+                    using var conn = new BackendConnection(server, httpClient, logger, secretRetriever, forwardedUser: targetUser, userSecretStore: userSecretStore);
                     if (server.Type != "http" && server.Type != "streamable")
                     {
                         using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));

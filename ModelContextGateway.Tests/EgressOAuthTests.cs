@@ -238,7 +238,7 @@ namespace ModelContextGateway.Tests
 
             // Assert
             var redirectResult = Assert.IsType<RedirectResult>(result);
-            Assert.Equal("/my-servers?connected=github-oauth", redirectResult.Url);
+            Assert.Equal("/?connected=github-oauth", redirectResult.Url);
 
             // Verify state was evicted from cache
             Assert.False(_memoryCache.TryGetValue($"oauth_egress_state:{state}", out _));

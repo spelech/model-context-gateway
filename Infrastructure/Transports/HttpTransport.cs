@@ -252,7 +252,14 @@ namespace ModelContextGateway.Infrastructure.Transports
             {
                 req.Headers.Add("X-Target-Auth", targetAuthToken);
             }
-            req.Headers.Host = "localhost";
+            if (req.RequestUri != null && !string.IsNullOrEmpty(req.RequestUri.Host) && !req.RequestUri.IsLoopback)
+            {
+                req.Headers.Host = req.RequestUri.Authority;
+            }
+            else
+            {
+                req.Headers.Host = "localhost";
+            }
             req.Headers.Accept.Clear();
             req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));

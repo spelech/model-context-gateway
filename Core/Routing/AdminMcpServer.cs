@@ -90,6 +90,7 @@ namespace ModelContextGateway.Core.Routing
         private readonly ILogger<AdminMcpServer>? _logger;
         private readonly IMasterKeyManager? _masterKeyManager;
         private readonly ISecretRetriever? _secretRetriever;
+        private readonly IUserSecretStore? _userSecretStore;
 
         private const string DefaultProtocolVersion = "2026-07-28";
         private const string LegacyProtocolVersion = "2024-11-05";
@@ -111,7 +112,8 @@ namespace ModelContextGateway.Core.Routing
             IConfiguration? configuration = null,
             ILogger<AdminMcpServer>? logger = null,
             IMasterKeyManager? masterKeyManager = null,
-            ISecretRetriever? secretRetriever = null)
+            ISecretRetriever? secretRetriever = null,
+            IUserSecretStore? userSecretStore = null)
         {
             _serverRepository = serverRepository;
             _appKeyRepository = appKeyRepository;
@@ -130,6 +132,7 @@ namespace ModelContextGateway.Core.Routing
             _logger = logger;
             _masterKeyManager = masterKeyManager;
             _secretRetriever = secretRetriever;
+            _userSecretStore = userSecretStore;
         }
 
         /// <summary>
@@ -1479,7 +1482,24 @@ namespace ModelContextGateway.Core.Routing
                 throw new KeyNotFoundException($"Server '{serverId}' not found.");
             }
 
-            using var conn = new BackendConnection(server, _httpClient, _logger ?? (ILogger)NullLogger.Instance, _secretRetriever);
+            string? targetUser = null;
+            if (args.TryGetProperty("username", out var uProp) && !string.IsNullOrWhiteSpace(uProp.GetString()))
+            {
+                targetUser = uProp.GetString();
+            }
+            else if (!string.IsNullOrWhiteSpace(callerUsername) && !callerUsername.Equals("admin", StringComparison.OrdinalIgnoreCase))
+            {
+                targetUser = callerUsername;
+            }
+            else if (server.EnableOAuth3Lo || server.SecretProvider == "UserProvided")
+            {
+                using var db = _dbFactory.CreateConnection();
+                targetUser = await db.QueryFirstOrDefaultAsync<string>(
+                    "SELECT Username FROM UserServerCredentials WHERE ServerId = @ServerId ORDER BY Id DESC LIMIT 1;",
+                    new { ServerId = serverId });
+            }
+
+            using var conn = new BackendConnection(server, _httpClient, _logger ?? (ILogger)NullLogger.Instance, _secretRetriever, forwardedUser: targetUser, userSecretStore: _userSecretStore);
             if (server.Type != "http" && server.Type != "streamable")
             {
                 using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -2013,6 +2033,7 @@ namespace ModelContextGateway.Core.Routing
                             action = new { type = "string", description = "Action name (default 'execute')" },
                             serverId = new { type = "string", description = "Backend server ID" },
                             toolName = new { type = "string", description = "Backend tool name" },
+                            username = new { type = "string", description = "Target username context (for 3LO OAuth or user-scoped credentials)" },
                             arguments = new { type = "object", description = "Tool argument payload" }
                         },
                         required = new[] { "serverId", "toolName" }
