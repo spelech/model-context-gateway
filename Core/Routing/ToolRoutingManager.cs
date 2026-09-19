@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using ModelContextGateway.Core.VectorSearch;
 
 namespace ModelContextGateway.Core.Routing
 {
@@ -11,6 +12,33 @@ namespace ModelContextGateway.Core.Routing
         private readonly List<object> _cachedTools = new();
         private readonly object _cacheLock = new();
         private bool _isCachePopulated = false;
+
+        private IEmbeddingProvider? _embeddingProvider;
+        private IToolVectorStore? _vectorStore;
+
+        public ToolRoutingManager(IEmbeddingProvider? embeddingProvider = null, IToolVectorStore? vectorStore = null)
+        {
+            _embeddingProvider = embeddingProvider;
+            _vectorStore = vectorStore ?? new InMemorySimdToolVectorStore();
+        }
+
+        /// <summary>
+        /// Gets or sets the active vector embedding provider.
+        /// </summary>
+        public IEmbeddingProvider? EmbeddingProvider
+        {
+            get => _embeddingProvider;
+            set => _embeddingProvider = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the active tool vector store.
+        /// </summary>
+        public IToolVectorStore? VectorStore
+        {
+            get => _vectorStore;
+            set => _vectorStore = value;
+        }
 
         /// <summary>
         /// Gets the active thread-safe namespaced tool-to-server routing map.

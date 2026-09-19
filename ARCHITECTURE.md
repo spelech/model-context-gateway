@@ -85,7 +85,8 @@ The backend is organized into clear bounded modules across domain components, in
 │   └── Logging/         # Audit logger, PII sanitization & in-memory log providers
 └── Core/
     ├── Protocol/        # JSON-RPC protocol models & Polymorphic converter
-    └── Routing/         # ClientSession, SessionManager, BackendConnection & Semantic Search
+    ├── Routing/         # ClientSession, SessionManager, BackendConnection & Tool Routing
+    └── VectorSearch/    # IEmbeddingProvider, IToolVectorStore, InMemorySimdToolVectorStore & RRF
 ```
 
 ---
@@ -147,16 +148,19 @@ sequenceDiagram
     autonumber
     actor Client as LLM / Agent
     participant Router as Model Context Gateway (MCG)
-    participant SemanticSvc as SemanticSearchService
+    participant RoutingMgr as ToolRoutingManager
+    participant VectorStore as InMemorySimdToolVectorStore
     participant DB as SQL Database
     participant BackendConn as BackendConnection
     participant Downstream as MCP Backend
 
     Client->>Router: POST /message?sessionId=1 (search_tools)
-    Router->>SemanticSvc: Evaluate "restart container" query
-    SemanticSvc->>SemanticSvc: Fetch ONNX / OpenAI Embeddings
-    SemanticSvc->>SemanticSvc: Evaluate Hybrid Keyword + Semantic Weights
-    SemanticSvc-->>Router: Return tool "docker/restart_container"
+    Router->>RoutingMgr: SearchToolsAsync("restart container")
+    RoutingMgr->>RoutingMgr: Compute Lexical Keyword Scoring (name, desc, tags, params)
+    RoutingMgr->>VectorStore: SearchSimilarAsync(queryEmbedding) via .NET 10 SIMD
+    VectorStore-->>RoutingMgr: Return Ranked Vector Similarities
+    RoutingMgr->>RoutingMgr: Fuse Ranks via Reciprocal Rank Fusion (RRF, k=60)
+    RoutingMgr-->>Router: Return Top Ranked Tools
     Router-->>Client: Return namespaced search result JSON
 
     Client->>Router: POST /message?sessionId=1 (execute_tool: docker/restart_container)
