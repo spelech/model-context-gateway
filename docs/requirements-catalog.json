@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-10T04:10:43.5646963Z",
-    "totalRequirements": 425,
-    "positiveCount": 338,
-    "guardrailCount": 87,
-    "totalProofs": 923
+    "generatedAt": "2026-09-19T00:35:40.3522362Z",
+    "totalRequirements": 428,
+    "positiveCount": 339,
+    "guardrailCount": 89,
+    "totalProofs": 940
   },
   "requirements": [
     {
@@ -5755,6 +5755,152 @@
           "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
           "lineNumber": 261,
           "testName": "UpsertDiscoveredServers_PreservesExistingDbAlias_AndInsertsDiscoveredAlias",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-32",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "InMemorySimdToolVectorStore scores tool embeddings using .NET 10 hardware SIMD TensorPrimitives.",
+      "proofCount": 6,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 8,
+          "testName": "SearchSimilarAsync_ScoresIdenticalVectors_WithMaxSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 24,
+          "testName": "SearchSimilarAsync_ScoresOrthogonalVectors_WithZeroSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 38,
+          "testName": "SearchSimilarAsync_ScoresOppositeVectors_WithNegativeSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 52,
+          "testName": "SearchSimilarAsync_RanksDescendingByCosineSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 74,
+          "testName": "SearchSimilarAsync_HandlesDimensionMismatch_AndEmptyGracefully",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs",
+          "lineNumber": 94,
+          "testName": "UpsertAndRemove_ManagesToolEmbeddings_Correctly",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-33",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints.",
+      "proofCount": 5,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
+          "lineNumber": 26,
+          "testName": "GenerateEmbeddingAsync_SendsValidPayload_AndParsesResponse",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
+          "lineNumber": 75,
+          "testName": "GenerateEmbeddingsAsync_PreservesInputOrder_AcrossBatch",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 39,
+          "testName": "SearchToolsAsync_CombinesKeywordAndVectorRanks_UsingRRF",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 92,
+          "testName": "SearchToolsAsync_ScoresLexicalSignals_AcrossNameDescriptionTagsAndParameters",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 141,
+          "testName": "SearchTools_SynchronousMethod_ReturnsRankedCandidates",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-34",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "ToolRoutingManager gracefully falls back to keyword matching when NoOpEmbeddingProvider is active.",
+      "proofCount": 6,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 26,
+          "testName": "SearchToolsAsync_FallsBackToKeyword_WhenNoOpEmbeddingProviderUsed",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 44,
+          "testName": "SearchToolsAsync_FallsBackToKeyword_WhenEmbeddingProviderThrows",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 66,
+          "testName": "SearchToolsAsync_FallsBackToKeyword_WhenEmbeddingProviderIsNull",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 83,
+          "testName": "SearchToolsAsync_ReturnsDefaultCandidates_WhenQueryHasNoMatches",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
+          "lineNumber": 101,
+          "testName": "CallToolAsync_SearchTools_ExecutesHybridRrfSearch",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
+          "lineNumber": 108,
+          "testName": "GenerateEmbeddingAsync_ThrowsOnLoopbackIp_WhenPrivateIpsDisallowed",
           "details": null
         }
       ]
