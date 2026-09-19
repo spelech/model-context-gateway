@@ -50,7 +50,7 @@ export const MyMcpServers: React.FC = () => {
   };
 
   const handleConnectOAuth = (server: McpServer) => {
-    window.location.href = `/api/oauth/egress/authorize/${server.id}`;
+    window.location.assign(`/api/oauth/egress/authorize/${server.id}`);
   };
 
   const handleDisconnectOAuth = async (server: McpServer) => {

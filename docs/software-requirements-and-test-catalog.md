@@ -2458,7 +2458,7 @@
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Frontend Vitest] [`frontend/src/test/pages/MyMcpServers.test.tsx#L160`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L160) (`renders connected (oauth) badge and disconnects account`)
+  - [Frontend Vitest] [`frontend/src/test/pages/MyMcpServers.test.tsx#L157`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L157) (`renders connected (oauth) badge and disconnects account`)
 
 ### `[UI-30]` Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -3607,7 +3607,7 @@
 | `UI-124` | Positive | `UI` | Renders main dashboard navigation tabs and layout headers | [`dashboard.spec.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/dashboard.spec.ts#L1) | Playwright E2E |
 | `UI-128` | Positive | `UI` | should navigate to Test Bench view and render tester cards | [`testbench.spec.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/testbench.spec.ts#L1) | Playwright E2E |
 | `UI-130` | Positive | `UI` | Renders Connect Account button for OAuth-enabled servers directing to authorization URL. | [`MyMcpServers.test.tsx:L121`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L121) | Frontend Vitest |
-| `UI-131` | Positive | `UI` | Renders Connected (OAuth) badge and supports account disconnection. | [`MyMcpServers.test.tsx:L160`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L160) | Frontend Vitest |
+| `UI-131` | Positive | `UI` | Renders Connected (OAuth) badge and supports account disconnection. | [`MyMcpServers.test.tsx:L157`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L157) | Frontend Vitest |
 | `UI-30` | Positive | `UI` | Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration. | [`ClientModal.test.tsx:L27`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientModal.test.tsx#L27) | Frontend Vitest |
 | `UI-31` | **Guardrail** | `UI` | Fetches registered OAuth clients and updates store state. | [`useClientStore.test.ts:L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L37) | Frontend Vitest |
 | `UI-32` | Positive | `UI` | Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials. | [`useClientStore.test.ts:L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L76) | Frontend Vitest |

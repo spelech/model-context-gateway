@@ -137,10 +137,7 @@ describe('MyMcpServers Page', () => {
     ]);
     vi.spyOn(userCredentialsApi, 'fetchUserCredentialsApi').mockResolvedValue([]);
 
-    const originalLocation = window.location;
-    // @ts-ignore
-    delete window.location;
-    window.location = { href: '' } as any;
+    const assignSpy = vi.spyOn(window.location, 'assign').mockImplementation(() => {});
 
     await act(async () => {
       render(<MyMcpServers />);
@@ -153,8 +150,8 @@ describe('MyMcpServers Page', () => {
     expect(connectBtn).toBeInTheDocument();
     fireEvent.click(connectBtn);
 
-    expect(window.location.href).toBe('/api/oauth/egress/authorize/github-srv');
-    window.location = originalLocation;
+    expect(assignSpy).toHaveBeenCalledWith('/api/oauth/egress/authorize/github-srv');
+    assignSpy.mockRestore();
   });
 
   /**

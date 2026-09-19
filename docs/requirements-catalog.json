@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-19T01:14:25.2594271Z",
+    "generatedAt": "2026-09-19T01:18:21.3379410Z",
     "totalRequirements": 437,
     "positiveCount": 348,
     "guardrailCount": 89,
@@ -10322,7 +10322,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 160,
+          "lineNumber": 157,
           "testName": "renders connected (oauth) badge and disconnects account",
           "details": null
         }
