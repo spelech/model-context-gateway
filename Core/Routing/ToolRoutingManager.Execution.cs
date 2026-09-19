@@ -119,11 +119,34 @@ namespace ModelContextGateway.Core.Routing
 
                                 if (!string.IsNullOrEmpty(fullName))
                                 {
-                                    var splitIdx = fullName.IndexOf("__", StringComparison.Ordinal);
-                                    if (splitIdx > 0)
+                                    string? srvId = null;
+                                    string? rawToolName = null;
+
+                                    if (fullName.Contains('/'))
                                     {
-                                        var srvId = fullName.Substring(0, splitIdx);
+                                        var idx = fullName.IndexOf('/');
+                                        srvId = fullName.Substring(0, idx);
+                                        rawToolName = fullName.Substring(idx + 1);
+                                    }
+                                    else if (fullName.Contains(':'))
+                                    {
+                                        var idx = fullName.IndexOf(':');
+                                        srvId = fullName.Substring(0, idx);
+                                        rawToolName = fullName.Substring(idx + 1);
+                                    }
+                                    else if (fullName.Contains("__"))
+                                    {
+                                        var idx = fullName.IndexOf("__", StringComparison.Ordinal);
+                                        srvId = fullName.Substring(0, idx);
+                                        rawToolName = fullName.Substring(idx + 2);
+                                    }
+
+                                    if (!string.IsNullOrEmpty(srvId) && !string.IsNullOrEmpty(rawToolName))
+                                    {
                                         _toolRoutingTable[fullName] = srvId;
+                                        _toolRoutingTable[$"{srvId}/{rawToolName}"] = srvId;
+                                        _toolRoutingTable[$"{srvId}__{rawToolName}"] = srvId;
+                                        _toolRoutingTable[$"{srvId}:{rawToolName}"] = srvId;
                                     }
                                 }
                             }
