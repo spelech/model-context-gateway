@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-19T00:35:40.3522362Z",
-    "totalRequirements": 428,
-    "positiveCount": 339,
+    "generatedAt": "2026-09-19T01:12:52.4812017Z",
+    "totalRequirements": 430,
+    "positiveCount": 341,
     "guardrailCount": 89,
-    "totalProofs": 940
+    "totalProofs": 947
   },
   "requirements": [
     {
@@ -878,6 +878,73 @@
           "filePath": "frontend/src/test/components/IdentityAuthTab.test.tsx",
           "lineNumber": 167,
           "testName": "renders In-House IdP External JWT card, toggles on, and saves configuration",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-131",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "RFC 9728 Protected Resource Metadata endpoint exposes discovery document with canonical resource URI, authorization servers, scopes, and documentation.",
+      "proofCount": 4,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 37,
+          "testName": "ProtectedResourceDiscovery_ReturnsValidMetadataDocument",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 58,
+          "testName": "ProtectedResourceDiscovery_TargetPath_ReturnsPathAwareMetadataDocument",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 75,
+          "testName": "ProtectedResourceDiscovery_CustomResourceQuery_OverridesResourceUri",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 91,
+          "testName": "ProtectedResourceDiscovery_ConfiguredExternalIdp_ReturnsConfiguredAuthorizationServer",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-132",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Unauthenticated client requests to /sse endpoint return 401 Unauthorized with RFC 9728 WWW-Authenticate header containing realm and resource_metadata.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 115,
+          "testName": "UnauthenticatedMcpRequest_SseEndpoint_Returns401WithRfc9728WwwAuthenticateHeader",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 131,
+          "testName": "UnauthenticatedMcpRequest_TargetServerEndpoint_Returns401WithTargetResourceMetadata",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs",
+          "lineNumber": 147,
+          "testName": "UnauthenticatedMcpRequest_MessageEndpoint_Returns401WithRfc9728WwwAuthenticateHeader",
           "details": null
         }
       ]

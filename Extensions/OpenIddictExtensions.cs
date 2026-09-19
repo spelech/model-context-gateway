@@ -104,6 +104,7 @@ namespace ModelContextGateway.Extensions
                         OpenIddict.Abstractions.OpenIddictConstants.Scopes.OfflineAccess,
                         "api",
                         "mcp_client",
+                        "mcp:access",
                         "tools:execute",
                         "resources:read",
                         "prompts:read"

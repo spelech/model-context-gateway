@@ -248,6 +248,19 @@ Every request moves through this pipeline:
 - **Active Directory (Kerberos / NTLM)**: Identifies callers by Active Directory SIDs using `WindowsIdentity`.
 - **OIDC Header Proxy**: Reads OpenID Connect (OIDC) headers (such as `Remote-User` and `Remote-Groups`) passed by reverse proxies.
 
+### RFC 9728 MCP Client Discovery Handshake & Protected Resource Metadata
+Model Context Gateway strictly implements the RFC 9728 Protected Resource Metadata (PRM) specification to enable zero-configuration onboarding of AI coding assistants (such as Claude Code, Cursor, Windsurf):
+1. **Protected Resource Metadata Endpoint (`/.well-known/oauth-protected-resource`)**:
+   - Exposes PRM documents with `resource`, `authorization_servers`, `scopes_supported` (`openid`, `profile`, `email`, `mcp:access`), `bearer_methods_supported`, and `resource_documentation`.
+   - Supports path-aware target server endpoints: `/.well-known/oauth-protected-resource/{targetServerId}`.
+   - Respects explicit `?resource=` query overrides per RFC 9728 §3.3.
+2. **Standard 401 `WWW-Authenticate` Handshake (RFC 9728 §5.1)**:
+   - When an unauthenticated client connects to an MCP endpoint (`/sse`, `/{targetServerId}`, `/message`), the gateway returns `401 Unauthorized` with:
+     ```http
+     WWW-Authenticate: Bearer realm="mcp", resource_metadata="https://mcg.example.com/.well-known/oauth-protected-resource"
+     ```
+   - Compliant clients automatically query the PRM URI to discover the corporate IdP (Authentik, Keycloak, Entra ID) and execute standard token acquisition.
+
 ### Group and SID Mapping Policies
 Map external groups to internal roles in the `GroupMappings` table (Settings -> Identity & Auth):
 1. **Create Mapping**: Link an AD SID or OIDC group to an internal security role (`admin`, `operator`, `readonly`).
