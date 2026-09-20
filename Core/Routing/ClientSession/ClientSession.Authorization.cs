@@ -554,10 +554,25 @@ namespace ModelContextGateway.Core.Routing
                 string? id = null;
                 try
                 {
-                    using var doc = JsonDocument.Parse(JsonSerializer.Serialize(item));
-                    if (doc.RootElement.TryGetProperty(idProp, out var p))
+                    if (item is IDictionary<string, object> dict && dict.TryGetValue(idProp, out var val))
+                    {
+                        id = val?.ToString();
+                    }
+                    else if (item is JsonElement je && je.ValueKind == JsonValueKind.Object && je.TryGetProperty(idProp, out var p))
                     {
                         id = p.GetString();
+                    }
+                    else if (item is System.Text.Json.Nodes.JsonObject jObj && jObj.TryGetPropertyValue(idProp, out var jNode))
+                    {
+                        id = jNode?.ToString();
+                    }
+                    else
+                    {
+                        using var doc = JsonDocument.Parse(JsonSerializer.Serialize(item));
+                        if (doc.RootElement.TryGetProperty(idProp, out var p2))
+                        {
+                            id = p2.GetString();
+                        }
                     }
                 }
                 catch { /* fall through to fail-closed exclude */ }
