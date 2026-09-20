@@ -758,6 +758,7 @@ namespace ModelContextGateway.Tests
             var tools = new List<object>
             {
                 new Dictionary<string, object> { ["name"] = "ha__dict_tool", ["description"] = "Dictionary tool" },
+                new Dictionary<string, object> { ["name"] = JsonDocument.Parse("\"ha__dict_tool\"").RootElement, ["description"] = "Dictionary with JsonElement string" },
                 JsonDocument.Parse("{\"name\":\"ha__element_tool\",\"description\":\"JsonElement tool\"}").RootElement,
                 new System.Text.Json.Nodes.JsonObject { ["name"] = "ha__node_tool", ["description"] = "JsonObject tool" },
                 new { name = "ha__fallback_tool", description = "Fallback object" },
@@ -766,7 +767,36 @@ namespace ModelContextGateway.Tests
 
             var allowed = await session.FilterAuthorizedToolsAsync(tools, context);
 
-            allowed.Should().HaveCount(4);
+            allowed.Should().HaveCount(5);
+        }
+
+        [Theory]
+        [InlineData("\"just a string\"")]
+        [InlineData("[1, 2, 3]")]
+        [InlineData("12345")]
+        [InlineData("true")]
+        [Requirement("MCP-02", "AuditInvocationAsync handles non-object JSON payloads safely without throwing InvalidOperationException", Type = RequirementType.Positive, Category = "MCP")]
+        public async Task CompleteAsync_AuditInvocation_HandlesNonObjectJsonPayloads_Gracefully(string payload)
+        {
+            var handler = new MockHttpMessageHandler
+            {
+                Handler = async (req) =>
+                {
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+                }
+            };
+
+            SeedPolicy("p1", "server:ha", "SmartHomeGroup", true);
+
+            var context = CreateHttpContext("userA", groups: new List<string> { "SmartHomeGroup" });
+            var session = CreateSession(context, handler);
+
+            // Passing non-object JSON payload triggers JSON extraction in AuditInvocationAsync and fails closed cleanly
+            var ex = await Assert.ThrowsAsync<UnauthorizedAccessException>(async () =>
+            {
+                await session.CompleteAsync(payload, context);
+            });
+            ex.Message.Should().Contain("Security Error");
         }
     }
 }

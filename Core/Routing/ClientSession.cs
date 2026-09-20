@@ -381,7 +381,7 @@ namespace ModelContextGateway.Core.Routing
             {
                 using var doc = JsonDocument.Parse(body);
                 var root = doc.RootElement;
-                if (!root.TryGetProperty("params", out var paramsProp) || !paramsProp.TryGetProperty("ref", out var refProp))
+                if (root.ValueKind != JsonValueKind.Object || !root.TryGetProperty("params", out var paramsProp) || !paramsProp.TryGetProperty("ref", out var refProp))
                 {
                     statusCode = 403;
                     errorMessage = "Security Error: Missing required completion parameters or reference.";

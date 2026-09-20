@@ -556,7 +556,14 @@ namespace ModelContextGateway.Core.Routing
                 {
                     if (item is IDictionary<string, object> dict && dict.TryGetValue(idProp, out var val))
                     {
-                        id = val?.ToString();
+                        if (val is JsonElement elem)
+                        {
+                            id = elem.ValueKind == JsonValueKind.String ? elem.GetString() : elem.ToString();
+                        }
+                        else
+                        {
+                            id = val?.ToString();
+                        }
                     }
                     else if (item is JsonElement je && je.ValueKind == JsonValueKind.Object && je.TryGetProperty(idProp, out var p))
                     {
@@ -635,37 +642,42 @@ namespace ModelContextGateway.Core.Routing
                     {
                         using var doc = JsonDocument.Parse(payload);
 
-                        if (itemName == "execute_tool")
+                        if (doc.RootElement.ValueKind == JsonValueKind.Object)
                         {
+                            if (itemName == "execute_tool")
+                            {
+                                try
+                                {
+                                    if (doc.RootElement.TryGetProperty("params", out var pProp) &&
+                                        pProp.ValueKind == JsonValueKind.Object &&
+                                        pProp.TryGetProperty("arguments", out var aProp) &&
+                                        aProp.ValueKind == JsonValueKind.Object &&
+                                        aProp.TryGetProperty("name", out var nProp))
+                                    {
+                                        var target = nProp.GetString();
+                                        if (!string.IsNullOrEmpty(target))
+                                        {
+                                            effectiveItemName = target;
+                                        }
+                                    }
+                                }
+                                catch { }
+                            }
+
+                            // Try to extract requestId from request payload
                             try
                             {
-                                if (doc.RootElement.TryGetProperty("params", out var pProp) &&
-                                    pProp.TryGetProperty("arguments", out var aProp) &&
-                                    aProp.TryGetProperty("name", out var nProp))
+                                if (doc.RootElement.TryGetProperty("id", out var idProp))
                                 {
-                                    var target = nProp.GetString();
-                                    if (!string.IsNullOrEmpty(target))
+                                    var extractedId = idProp.ValueKind == JsonValueKind.String ? idProp.GetString() : idProp.GetRawText();
+                                    if (!string.IsNullOrEmpty(extractedId))
                                     {
-                                        effectiveItemName = target;
+                                        requestId = $"{extractedId}_{Guid.NewGuid().ToString("N")[..6]}";
                                     }
                                 }
                             }
                             catch { }
                         }
-
-                        // Try to extract requestId from request payload
-                        try
-                        {
-                            if (doc.RootElement.TryGetProperty("id", out var idProp))
-                            {
-                                var extractedId = idProp.ValueKind == JsonValueKind.String ? idProp.GetString() : idProp.GetRawText();
-                                if (!string.IsNullOrEmpty(extractedId))
-                                {
-                                    requestId = $"{extractedId}_{Guid.NewGuid().ToString("N")[..6]}";
-                                }
-                            }
-                        }
-                        catch { }
                     }
                     catch (JsonException exJson)
                     {

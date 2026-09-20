@@ -377,6 +377,104 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-25", "ToolRoutingManager resolves server aliases to canonical server IDs during cold start routing table extraction from global cache", Type = RequirementType.Positive, Category = "MCP")]
+        public async Task CallToolAsync_SearchTools_PopulatesRoutingTable_ResolvingAliasesToCanonicalServerId()
+        {
+            var manager = new ToolRoutingManager();
+            var (conn, dbFactory) = CreateDbFactory();
+            var connections = new ConcurrentDictionary<string, BackendConnection>();
+            var servers = new List<McpServer>
+            {
+                new McpServer { Id = "postgres-mcp-homebox", Alias = "homebox_db", Enabled = true, Url = "http://homebox:8080/mcp", Type = "http" }
+            };
+
+            var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection().BuildServiceProvider();
+            var mockFactory = new Mock<IHttpClientFactory>();
+            var sessionManager = new SessionManager(services, mockFactory.Object, NullLogger<SessionManager>.Instance);
+
+            var globalTools = new List<object>
+            {
+                new Dictionary<string, object>
+                {
+                    ["name"] = "homebox_db/query_items",
+                    ["description"] = "Query homebox inventory items"
+                }
+            };
+            sessionManager.SetServerToolsCache("global", globalTools);
+
+            var mockEmbedding = new Mock<IEmbeddingService>();
+            mockEmbedding.Setup(e => e.GetEmbeddingAsync(It.IsAny<string>())).ReturnsAsync(new float[384]);
+            mockEmbedding.Setup(e => e.CosineSimilarity(It.IsAny<float[]>(), It.IsAny<float[]>())).Returns(0.85);
+
+            var body = "{\"params\":{\"arguments\":{\"query\":\"items\"}}}";
+            var result = await manager.CallToolAsync(
+                "search_tools",
+                body,
+                dbFactory,
+                connections,
+                servers,
+                NullLogger.Instance,
+                new HttpClient(),
+                mockEmbedding.Object,
+                () => Task.CompletedTask,
+                (b, k, v) => b,
+                sessionManager: sessionManager
+            );
+
+            Assert.NotNull(result);
+            // Verify all alias and canonical formats map to the canonical server ID
+            Assert.Equal("postgres-mcp-homebox", manager.ToolRoutingTable["homebox_db/query_items"]);
+            Assert.Equal("postgres-mcp-homebox", manager.ToolRoutingTable["homebox_db__query_items"]);
+            Assert.Equal("postgres-mcp-homebox", manager.ToolRoutingTable["homebox_db:query_items"]);
+            Assert.Equal("postgres-mcp-homebox", manager.ToolRoutingTable["postgres-mcp-homebox/query_items"]);
+            Assert.Equal("postgres-mcp-homebox", manager.ToolRoutingTable["postgres-mcp-homebox__query_items"]);
+            Assert.Equal("postgres-mcp-homebox", manager.ToolRoutingTable["postgres-mcp-homebox:query_items"]);
+        }
+
+        [Theory]
+        [InlineData("docker/list_containers")]
+        [InlineData("docker:list_containers")]
+        [InlineData("docker__list_containers")]
+        [Requirement("MCP-26", "ToolRoutingManager dynamically registers prefix routes for tools with slash, colon, and double underscore delimiters", Type = RequirementType.Positive, Category = "MCP")]
+        public async Task CallToolAsync_DynamicPrefixRoute_ResolvesAllDelimiters(string targetTool)
+        {
+            var manager = new ToolRoutingManager();
+            var (conn, dbFactory) = CreateDbFactory();
+            var server = new McpServer { Id = "docker", Enabled = true, Url = "http://docker:8080/mcp", Type = "http" };
+            var servers = new List<McpServer> { server };
+
+            var handler = new MockHttpMessageHandler
+            {
+                Handler = req => Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"success\"}]}}", System.Text.Encoding.UTF8, "application/json")
+                })
+            };
+            var httpClient = new HttpClient(handler);
+            var backendConn = new BackendConnection(server, httpClient, NullLogger.Instance);
+            var connections = new ConcurrentDictionary<string, BackendConnection>();
+            connections["docker"] = backendConn;
+
+            // Call with unpopulated routing table - triggers dynamic prefix fallback
+            var result = await manager.CallToolAsync(
+                targetTool,
+                "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"" + targetTool + "\"}}",
+                dbFactory,
+                connections,
+                servers,
+                NullLogger.Instance,
+                httpClient,
+                new Mock<IEmbeddingService>().Object,
+                () => Task.CompletedTask,
+                (b, k, v) => b
+            );
+
+            Assert.NotNull(result);
+            Assert.True(manager.ToolRoutingTable.ContainsKey(targetTool));
+            Assert.Equal("docker", manager.ToolRoutingTable[targetTool]);
+        }
+
+        [Fact]
         [Requirement("MCP-26", "MCP", RequirementType.Positive, "ToolRoutingManager normalizes tool name delimiters (slash and colon) to canonical double-underscore format.")]
         public void NormalizeTargetToolName_NormalizesSlashAndColonDelimiters()
         {

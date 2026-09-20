@@ -143,10 +143,23 @@ namespace ModelContextGateway.Core.Routing
 
                                     if (!string.IsNullOrEmpty(srvId) && !string.IsNullOrEmpty(rawToolName))
                                     {
-                                        _toolRoutingTable[fullName] = srvId;
-                                        _toolRoutingTable[$"{srvId}/{rawToolName}"] = srvId;
-                                        _toolRoutingTable[$"{srvId}__{rawToolName}"] = srvId;
-                                        _toolRoutingTable[$"{srvId}:{rawToolName}"] = srvId;
+                                        var matchedServer = servers?.FirstOrDefault(s =>
+                                            string.Equals(s.Id, srvId, StringComparison.OrdinalIgnoreCase) ||
+                                            string.Equals(s.Alias, srvId, StringComparison.OrdinalIgnoreCase));
+                                        var actualServerId = matchedServer?.Id ?? srvId;
+                                        var ns = !string.IsNullOrWhiteSpace(matchedServer?.Alias) ? matchedServer.Alias : actualServerId;
+
+                                        _toolRoutingTable[fullName] = actualServerId;
+                                        _toolRoutingTable[$"{actualServerId}/{rawToolName}"] = actualServerId;
+                                        _toolRoutingTable[$"{actualServerId}__{rawToolName}"] = actualServerId;
+                                        _toolRoutingTable[$"{actualServerId}:{rawToolName}"] = actualServerId;
+
+                                        if (!string.IsNullOrEmpty(ns) && !string.Equals(ns, actualServerId, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            _toolRoutingTable[$"{ns}/{rawToolName}"] = actualServerId;
+                                            _toolRoutingTable[$"{ns}__{rawToolName}"] = actualServerId;
+                                            _toolRoutingTable[$"{ns}:{rawToolName}"] = actualServerId;
+                                        }
                                     }
                                 }
                             }
@@ -160,7 +173,7 @@ namespace ModelContextGateway.Core.Routing
                 {
                     try
                     {
-                        await PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"ondemand-list\"}", backendConnections, logger, servers, sessionManager);
+                        await PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"ondemand-list\"}", backendConnections, logger, servers ?? Enumerable.Empty<McpServer>(), sessionManager);
                         lock (_cacheLock)
                         {
                             tools.Clear();
@@ -337,10 +350,22 @@ namespace ModelContextGateway.Core.Routing
 
             if (!_toolRoutingTable.ContainsKey(toolName))
             {
-                var sepIdx = toolName.IndexOf("__", StringComparison.Ordinal);
-                if (sepIdx > 0)
+                string? candidatePrefix = null;
+                if (toolName.Contains('/'))
                 {
-                    var candidatePrefix = toolName.Substring(0, sepIdx);
+                    candidatePrefix = toolName.Substring(0, toolName.IndexOf('/'));
+                }
+                else if (toolName.Contains(':'))
+                {
+                    candidatePrefix = toolName.Substring(0, toolName.IndexOf(':'));
+                }
+                else if (toolName.Contains("__"))
+                {
+                    candidatePrefix = toolName.Substring(0, toolName.IndexOf("__", StringComparison.Ordinal));
+                }
+
+                if (!string.IsNullOrEmpty(candidatePrefix))
+                {
                     var matchedServer = servers.FirstOrDefault(s => (string.Equals(s.Id, candidatePrefix, StringComparison.OrdinalIgnoreCase) || string.Equals(s.Alias, candidatePrefix, StringComparison.OrdinalIgnoreCase)) && s.Enabled);
                     if (matchedServer != null)
                     {
