@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-20T02:04:58.8387393Z",
+    "generatedAt": "2026-09-20T02:05:36.5112154Z",
     "totalRequirements": 439,
     "positiveCount": 349,
     "guardrailCount": 90,
-    "totalProofs": 957
+    "totalProofs": 958
   },
   "requirements": [
     {
@@ -5163,7 +5163,7 @@
       "category": "MCP",
       "type": "Positive",
       "description": "All MCP protocol capabilities enforce caller role authorizations consistently",
-      "proofCount": 4,
+      "proofCount": 5,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -5171,6 +5171,13 @@
           "lineNumber": 385,
           "testName": "Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly",
           "details": "Verifies that all 5 MCP capability methods enforce caller role authorizations consistently."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
+          "lineNumber": 698,
+          "testName": "CompleteAsync_AuditInvocation_ExtractsRequestIdAndItemName_InSinglePass",
+          "details": null
         },
         {
           "suite": "Backend xUnit",

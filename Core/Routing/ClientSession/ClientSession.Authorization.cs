@@ -612,23 +612,50 @@ namespace ModelContextGateway.Core.Routing
                 var identity = await ResolveUserIdentityAsync(httpContext);
 
                 var effectiveItemName = itemName;
-                if (itemName == "execute_tool" && !string.IsNullOrEmpty(payload))
+                string? requestId = null;
+
+                if (!string.IsNullOrEmpty(payload))
                 {
                     try
                     {
                         using var doc = JsonDocument.Parse(payload);
-                        if (doc.RootElement.TryGetProperty("params", out var pProp) &&
-                            pProp.TryGetProperty("arguments", out var aProp) &&
-                            aProp.TryGetProperty("name", out var nProp))
+
+                        if (itemName == "execute_tool")
                         {
-                            var target = nProp.GetString();
-                            if (!string.IsNullOrEmpty(target))
+                            try
                             {
-                                effectiveItemName = target;
+                                if (doc.RootElement.TryGetProperty("params", out var pProp) &&
+                                    pProp.TryGetProperty("arguments", out var aProp) &&
+                                    aProp.TryGetProperty("name", out var nProp))
+                                {
+                                    var target = nProp.GetString();
+                                    if (!string.IsNullOrEmpty(target))
+                                    {
+                                        effectiveItemName = target;
+                                    }
+                                }
+                            }
+                            catch { }
+                        }
+
+                        // Try to extract requestId from request payload
+                        try
+                        {
+                            if (doc.RootElement.TryGetProperty("id", out var idProp))
+                            {
+                                var extractedId = idProp.ValueKind == JsonValueKind.String ? idProp.GetString() : idProp.GetRawText();
+                                if (!string.IsNullOrEmpty(extractedId))
+                                {
+                                    requestId = $"{extractedId}_{Guid.NewGuid().ToString("N")[..6]}";
+                                }
                             }
                         }
+                        catch { }
                     }
-                    catch { }
+                    catch (JsonException exJson)
+                    {
+                        _logger.LogDebug(exJson, "Could not parse payload JSON to extract fields in audit log.");
+                    }
                 }
 
                 string serverId;
@@ -667,27 +694,6 @@ namespace ModelContextGateway.Core.Routing
                     serverId = effectiveItemName;
                 }
 
-                // Try to extract requestId from request payload
-                string? requestId = null;
-                if (!string.IsNullOrEmpty(payload))
-                {
-                    try
-                    {
-                        using var doc = JsonDocument.Parse(payload);
-                        if (doc.RootElement.TryGetProperty("id", out var idProp))
-                        {
-                            var extractedId = idProp.ValueKind == JsonValueKind.String ? idProp.GetString() : idProp.GetRawText();
-                            if (!string.IsNullOrEmpty(extractedId))
-                            {
-                                requestId = $"{extractedId}_{Guid.NewGuid().ToString("N")[..6]}";
-                            }
-                        }
-                    }
-                    catch (JsonException exJson)
-                    {
-                        _logger.LogDebug(exJson, "Could not parse payload JSON to extract requestId in audit log.");
-                    }
-                }
                 requestId ??= Guid.NewGuid().ToString("N");
 
                 await auditLogger.LogInvocationAsync(
