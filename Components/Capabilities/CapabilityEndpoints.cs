@@ -922,17 +922,6 @@ namespace ModelContextGateway.Components.Capabilities
                 return path;
             }
 
-            bool IsSafePath(string filePath, string dir)
-            {
-                var fullFilePath = Path.GetFullPath(filePath);
-                var fullDirPath = Path.GetFullPath(dir);
-                if (!fullDirPath.EndsWith(Path.DirectorySeparatorChar.ToString()) && !fullDirPath.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
-                {
-                    fullDirPath += Path.DirectorySeparatorChar;
-                }
-                return fullFilePath.StartsWith(fullDirPath, StringComparison.OrdinalIgnoreCase);
-            }
-
             api.MapGet("/api/custom-files", (ILogger<Program> logger) =>
             {
                 var result = new List<object>();
@@ -1094,6 +1083,17 @@ namespace ModelContextGateway.Components.Capabilities
             });
 
             return app;
+        }
+
+        public static bool IsSafePath(string filePath, string dir)
+        {
+            var fullFilePath = Path.GetFullPath(filePath);
+            var fullDirPath = Path.GetFullPath(dir);
+            if (!fullDirPath.EndsWith(Path.DirectorySeparatorChar.ToString()) && !fullDirPath.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
+            {
+                fullDirPath += Path.DirectorySeparatorChar;
+            }
+            return fullFilePath.StartsWith(fullDirPath, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-20T02:04:12.5327483Z",
-    "totalRequirements": 438,
+    "generatedAt": "2026-09-20T02:04:58.8387393Z",
+    "totalRequirements": 439,
     "positiveCount": 349,
-    "guardrailCount": 89,
-    "totalProofs": 956
+    "guardrailCount": 90,
+    "totalProofs": 957
   },
   "requirements": [
     {
@@ -3824,6 +3824,22 @@
           "filePath": "ModelContextGateway.Tests/OpenIddictProductionTests.cs",
           "lineNumber": 12,
           "testName": "Production_WithNoCert_Throws_InvalidOperationException",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "GUARD-07",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "Custom files endpoint validates file path ensuring sibling directory traversal and parent traversal fail closed.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CustomFilesSecurityTests.cs",
+          "lineNumber": 8,
+          "testName": "IsSafePath_BlocksSiblingDirectoryTraversal_AndAllowsLegitimateFiles",
           "details": null
         }
       ]
