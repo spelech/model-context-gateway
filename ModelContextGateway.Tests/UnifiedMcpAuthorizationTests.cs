@@ -742,5 +742,31 @@ namespace ModelContextGateway.Tests
                 null
             ), Times.Once);
         }
+
+        [Fact]
+        [Requirement("MCP-02", "FilterAuthorizedAsync extracts property names directly from Dictionary, JsonElement, JsonObject, and fallback objects", Type = RequirementType.Positive, Category = "MCP")]
+        public async Task FilterAuthorizedToolsAsync_ExtractsPropertyNames_FromMultipleObjectTypes()
+        {
+            SeedPolicy("p1", "tool:ha__dict_tool", "SmartHomeGroup", true);
+            SeedPolicy("p2", "tool:ha__element_tool", "SmartHomeGroup", true);
+            SeedPolicy("p3", "tool:ha__node_tool", "SmartHomeGroup", true);
+            SeedPolicy("p4", "tool:ha__fallback_tool", "SmartHomeGroup", true);
+
+            var context = CreateHttpContext("userA", groups: new List<string> { "SmartHomeGroup" });
+            var session = CreateSession(context);
+
+            var tools = new List<object>
+            {
+                new Dictionary<string, object> { ["name"] = "ha__dict_tool", ["description"] = "Dictionary tool" },
+                JsonDocument.Parse("{\"name\":\"ha__element_tool\",\"description\":\"JsonElement tool\"}").RootElement,
+                new System.Text.Json.Nodes.JsonObject { ["name"] = "ha__node_tool", ["description"] = "JsonObject tool" },
+                new { name = "ha__fallback_tool", description = "Fallback object" },
+                new Dictionary<string, object> { ["name"] = "ha__denied_tool", ["description"] = "Denied tool" }
+            };
+
+            var allowed = await session.FilterAuthorizedToolsAsync(tools, context);
+
+            allowed.Should().HaveCount(4);
+        }
     }
 }

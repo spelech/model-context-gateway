@@ -91,6 +91,11 @@ namespace ModelContextGateway.Core.Routing
             return await FilterAuthorizedAsync(tools, "tools/list", "name", httpContext);
         }
 
+        public async Task<List<object>> FilterAuthorizedToolsAsync(List<object> tools, HttpContext? httpContext = null)
+        {
+            return await FilterAuthorizedAsync(tools, "tools/list", "name", httpContext);
+        }
+
         public async Task<object?> CallToolAsync(string toolName, string body, IDbConnectionFactory dbFactory, HttpContext? httpContext = null)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
