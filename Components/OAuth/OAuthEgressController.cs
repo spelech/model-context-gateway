@@ -238,7 +238,7 @@ namespace ModelContextGateway.Components.OAuth
             await _userSecretStore.SaveSecretAsync(stateData.Username, stateData.ServerId, tokenJson);
             _logger.LogInformation("Successfully persisted egress OAuth credentials for user '{Username}' and server '{ServerId}'", stateData.Username, stateData.ServerId);
 
-            return Redirect($"/my-servers?connected={stateData.ServerId}");
+            return Redirect($"/?connected={stateData.ServerId}");
         }
 
         [HttpPost("disconnect/{serverId}")]

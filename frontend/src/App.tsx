@@ -10,7 +10,15 @@ import { ClientModal, AppKeyModal } from './components/clients';
 import { useUserStore } from './stores/useUserStore';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'dashboard' | 'security' | 'testbench' | 'settings' | 'my-mcp-servers'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'security' | 'testbench' | 'settings' | 'my-mcp-servers'>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('connected') || window.location.pathname.includes('my-servers')) {
+        return 'my-mcp-servers';
+      }
+    }
+    return 'dashboard';
+  });
   const { user } = useUserStore();
   const isAdmin = !!(user?.groups && user.groups.includes('full_admin'));
 

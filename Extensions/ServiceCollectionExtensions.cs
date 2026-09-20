@@ -218,7 +218,8 @@ namespace ModelContextGateway.Extensions
                 sp.GetService<IConfiguration>(),
                 sp.GetService<ILogger<AdminMcpServer>>(),
                 sp.GetService<IMasterKeyManager>(),
-                sp.GetService<CompositeSecretRetriever>() ?? (ISecretRetriever?)sp.GetService<ISecretRetriever>()
+                sp.GetService<CompositeSecretRetriever>() ?? (ISecretRetriever?)sp.GetService<ISecretRetriever>(),
+                sp.GetService<ModelContextGateway.Infrastructure.Secrets.IUserSecretStore>()
             ));
 
             // Configure CORS

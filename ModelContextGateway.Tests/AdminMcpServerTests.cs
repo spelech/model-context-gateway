@@ -853,6 +853,96 @@ namespace ModelContextGateway.Tests
             Assert.Equal("Bearer vault-token-xyz-123", capturedAuthHeader);
         }
 
+        [Fact]
+        [Requirement("MCP-ADMIN-TEST-TOOL-CALL-USER-SECRET-STORE", "SEC", RequirementType.Positive, "AdminMcpServer test_tool_call resolves user credentials via injected IUserSecretStore and caller context.")]
+        public async Task TestToolCall_ResolvesUserCredentialsViaInjectedUserSecretStore()
+        {
+            var server = new McpServer
+            {
+                Id = "oauth-backend-srv",
+                DisplayName = "OAuth Backend Server",
+                Url = "http://mock-oauth-backend:8080/mcp",
+                Type = "http",
+                Enabled = true,
+                EnableOAuth3Lo = true
+            };
+            await _dbRepo.SaveServerAsync(server);
+
+            var mockUserSecretStore = new Mock<IUserSecretStore>();
+            mockUserSecretStore
+                .Setup(s => s.GetSecretAsync("bob", "oauth-backend-srv"))
+                .ReturnsAsync("{\"access_token\":\"oauth-user-token-456\",\"token_type\":\"Bearer\"}");
+
+            string? capturedAuthHeader = null;
+            var mockHandler = new MockHttpMessageHandler
+            {
+                Handler = async (req) =>
+                {
+                    capturedAuthHeader = req.Headers.Authorization?.ToString();
+                    var body = req.Content != null ? await req.Content.ReadAsStringAsync() : "";
+                    if (body.Contains("\"initialize\""))
+                    {
+                        return new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                "{\"jsonrpc\":\"2.0\",\"id\":\"test-init\",\"result\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"serverInfo\":{\"name\":\"mock-oauth-backend\",\"version\":\"1.0\"}}}",
+                                Encoding.UTF8, "application/json")
+                        };
+                    }
+                    if (body.Contains("\"tools/call\""))
+                    {
+                        return new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                "{\"jsonrpc\":\"2.0\",\"id\":\"admin-test-call-id\",\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"OAuth execution succeeded\"}]}}",
+                                Encoding.UTF8, "application/json")
+                        };
+                    }
+                    return new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("{\"jsonrpc\":\"2.0\"}", Encoding.UTF8, "application/json")
+                    };
+                }
+            };
+
+            var testHttpClient = new HttpClient(mockHandler);
+            var serverWithSecrets = new AdminMcpServer(
+                _dbRepo,
+                _dbRepo,
+                _dbRepo,
+                _dbRepo,
+                _dbRepo,
+                _dbFactory,
+                _mockAuditLogger.Object,
+                _credentialService,
+                _healthCheckService,
+                _dynamicEmbeddingService,
+                _sessionManager,
+                ldapService: null,
+                httpClient: testHttpClient,
+                configuration: _config,
+                logger: NullLogger<AdminMcpServer>.Instance,
+                masterKeyManager: null,
+                secretRetriever: null,
+                userSecretStore: mockUserSecretStore.Object
+            );
+
+            var testArgs = JsonDocument.Parse(@"{
+                ""serverId"": ""oauth-backend-srv"",
+                ""toolName"": ""test_oauth_tool"",
+                ""username"": ""bob"",
+                ""arguments"": { ""input"": ""ping"" }
+            }").RootElement;
+
+            var res = await serverWithSecrets.CallToolAsync("test_tool_call", testArgs, "admin_user");
+            var json = JsonSerializer.Serialize(res);
+            using var doc = JsonDocument.Parse(json);
+
+            Assert.False(doc.RootElement.TryGetProperty("isError", out var isErr) && isErr.GetBoolean());
+            mockUserSecretStore.Verify(s => s.GetSecretAsync("bob", "oauth-backend-srv"), Times.AtLeastOnce);
+            Assert.Equal("Bearer oauth-user-token-456", capturedAuthHeader);
+        }
+
         private AdminMcpServer CreateTestAdminMcpServer() => _adminMcpServer;
 
         [Fact]
