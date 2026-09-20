@@ -694,5 +694,53 @@ namespace ModelContextGateway.Tests
 
             ex.Message.Should().Contain("Security Error");
         }
+
+        [Fact]
+        [Requirement("MCP-02", "AuditInvocationAsync consolidates JSON payload parsing to extract effective item name and request id in single pass", Type = RequirementType.Positive, Category = "MCP")]
+        public async Task CompleteAsync_AuditInvocation_ExtractsRequestIdAndItemName_InSinglePass()
+        {
+            var handler = new MockHttpMessageHandler
+            {
+                Handler = async (req) =>
+                {
+                    var body = await req.Content!.ReadAsStringAsync();
+                    if (body.Contains("initialize"))
+                    {
+                        return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                        {
+                            Content = new StringContent("{\"jsonrpc\":\"2.0\",\"id\":\"init\",\"result\":{\"protocolVersion\":\"2024-11-05\"}}", System.Text.Encoding.UTF8, "application/json")
+                        };
+                    }
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("{\"jsonrpc\":\"2.0\",\"id\":\"custom-req-777\",\"result\":{\"completion\":{\"values\":[\"val1\"],\"hasMore\":false}}}", System.Text.Encoding.UTF8, "application/json")
+                    };
+                }
+            };
+
+            SeedPolicy("p1", "server:ha", "SmartHomeGroup", true);
+
+            var context = CreateHttpContext("userA", groups: new List<string> { "SmartHomeGroup" });
+            var session = CreateSession(context, handler);
+
+            var requestBody = "{\"jsonrpc\":\"2.0\",\"id\":\"custom-req-777\",\"method\":\"completion/complete\",\"params\":{\"ref\":{\"type\":\"ref/prompt\",\"name\":\"ha__summarize\"},\"argument\":{\"name\":\"arg\",\"value\":\"test\"}}}";
+
+            var result = await session.CompleteAsync(requestBody, context);
+
+            result.Should().NotBeNull();
+            _mockAuditLogger.Verify(a => a.LogInvocationAsync(
+                It.Is<string>(id => id.StartsWith("custom-req-777_")),
+                "userA",
+                It.IsAny<string>(),
+                "ha",
+                "ha__summarize",
+                "completion/complete",
+                It.IsAny<int>(),
+                200,
+                It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                null
+            ), Times.Once);
+        }
     }
 }

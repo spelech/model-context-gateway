@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **439 Requirements Verified** across **957 Test Proofs** (349 Functional Capabilities, 90 Safety Guardrails).
+> **Catalog Statistics:** **439 Requirements Verified** across **958 Test Proofs** (349 Functional Capabilities, 90 Safety Guardrails).
 
 ---
 
@@ -15,7 +15,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **65** | 3 | 62 | 137 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **112** | 106 | 6 | 224 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **112** | 106 | 6 | 225 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **35** | 31 | 4 | 41 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **28** | 25 | 3 | 134 proofs |
@@ -1065,8 +1065,9 @@
 ### `[MCP-02]` All MCP protocol capabilities enforce caller role authorizations consistently
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (4):**
+* **Verification Proofs (5):**
   - [Backend xUnit] [`ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385) (`Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L698`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L698) (`CompleteAsync_AuditInvocation_ExtractsRequestIdAndItemName_InSinglePass`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L38`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L38) (`ListToolsAsync_ReturnsMetaTools_InMetaMode`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L59`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L59) (`InvalidateCache_ClearsPopulatedState`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L348`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L348) (`ToolListing_And_Remapping_Works_Correctly`)
