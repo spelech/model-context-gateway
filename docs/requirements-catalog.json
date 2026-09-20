@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-19T01:18:21.3379410Z",
-    "totalRequirements": 437,
-    "positiveCount": 348,
+    "generatedAt": "2026-09-20T00:55:32.2826793Z",
+    "totalRequirements": 438,
+    "positiveCount": 349,
     "guardrailCount": 89,
-    "totalProofs": 954
+    "totalProofs": 955
   },
   "requirements": [
     {
@@ -6270,7 +6270,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 858,
+          "lineNumber": 948,
           "testName": "AdminMcpServer_ManageServers_Supports_Alias",
           "details": null
         }
@@ -7588,6 +7588,22 @@
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 765,
           "testName": "TestToolCall_ResolvesSecretsViaInjectedSecretRetriever",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-TEST-TOOL-CALL-USER-SECRET-STORE",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "AdminMcpServer test_tool_call resolves user credentials via injected IUserSecretStore and caller context.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 856,
+          "testName": "TestToolCall_ResolvesUserCredentialsViaInjectedUserSecretStore",
           "details": null
         }
       ]

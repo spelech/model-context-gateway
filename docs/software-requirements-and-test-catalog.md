@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **437 Requirements Verified** across **954 Test Proofs** (348 Functional Capabilities, 89 Safety Guardrails).
+> **Catalog Statistics:** **438 Requirements Verified** across **955 Test Proofs** (349 Functional Capabilities, 89 Safety Guardrails).
 
 ---
 
@@ -16,7 +16,7 @@
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **64** | 3 | 61 | 136 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **112** | 106 | 6 | 223 proofs |
-| **`SEC`** | Secrets Providers & Encryption | **64** | 55 | 9 | 137 proofs |
+| **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **35** | 31 | 4 | 41 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **28** | 25 | 3 | 134 proofs |
 
@@ -1296,7 +1296,7 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L858`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L858) (`AdminMcpServer_ManageServers_Supports_Alias`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L948`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L948) (`AdminMcpServer_ManageServers_Supports_Alias`)
 
 ### `[MCP-ADMIN-PARITY-SERVERS]` Validates that the manage_servers tool provides comprehensive administrative capabilities including listing, retrieving, creating, updating, toggling, deleting, and reconnecting servers.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1720,6 +1720,12 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L765`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L765) (`TestToolCall_ResolvesSecretsViaInjectedSecretRetriever`)
+
+### `[MCP-ADMIN-TEST-TOOL-CALL-USER-SECRET-STORE]` AdminMcpServer test_tool_call resolves user credentials via injected IUserSecretStore and caller context.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L856`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L856) (`TestToolCall_ResolvesUserCredentialsViaInjectedUserSecretStore`)
 
 ### `[SEC-02]` VaultSecretRetriever dynamically loads, applies, and reloads Vault configurations from database repository.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -3422,7 +3428,7 @@
 | `MCP-ADMIN-PARITY-JSONRPC-DISPATCH` | Positive | `MCP` | AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, ping). | [`AdminToolsParityTests.cs:L873`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L873) | Backend xUnit |
 | `MCP-ADMIN-PARITY-POLICIES` | Positive | `MCP` | manage_policies supports full parity for list, save, and delete access control policies. | [`AdminToolsParityTests.cs:L464`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L464) | Backend xUnit |
 | `MCP-ADMIN-PARITY-PROVIDERS` | Positive | `MCP` | manage_providers supports full parity for list, save_secret, test_vault, save_auth, and test_ldap actions. | [`AdminToolsParityTests.cs:L577`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L577) | Backend xUnit |
-| `MCP-ADMIN-PARITY-SERVER-ALIAS` | Positive | `MCP` | AdminMcpServer manage_servers supports server alias for add, update, and list actions with collision validation. | [`AdminMcpServerTests.cs:L858`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L858) | Backend xUnit |
+| `MCP-ADMIN-PARITY-SERVER-ALIAS` | Positive | `MCP` | AdminMcpServer manage_servers supports server alias for add, update, and list actions with collision validation. | [`AdminMcpServerTests.cs:L948`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L948) | Backend xUnit |
 | `MCP-ADMIN-PARITY-SERVERS` | Positive | `MCP` | Validates that the manage_servers tool provides comprehensive administrative capabilities including listing, retrieving, creating, updating, toggling, deleting, and reconnecting servers. | [`AdminToolsParityTests.cs:L234`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L234) | Backend xUnit |
 | `MCP-ADMIN-PARITY-SETTINGS` | Positive | `MCP` | manage_settings supports full parity for get and update global router configurations. | [`AdminToolsParityTests.cs:L667`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L667) | Backend xUnit |
 | `MCP-ADMIN-PARITY-SYSTEM` | Positive | `MCP` | manage_system supports full parity for diagnostics, get_logs, clear_logs, and query_audit actions. | [`AdminToolsParityTests.cs:L816`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L816) | Backend xUnit |
@@ -3500,6 +3506,7 @@
 | `AUTH-116` | **Guardrail** | `SEC` | Exchange rejects client_credentials grant attempts by public clients with UnauthorizedClient error. | [`AuthorizationControllerTests.cs:L475`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L475) | Backend xUnit |
 | `AUTH-117` | **Guardrail** | `SEC` | RegisterClient returns 403 Forbidden with access_denied when open client registration is disabled and caller is unauthorized. | [`AuthorizationControllerTests.cs:L516`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L516) | Backend xUnit |
 | `MCP-ADMIN-TEST-TOOL-CALL-SECRET-RESOLUTION` | Positive | `SEC` | AdminMcpServer test_tool_call resolves server secrets via injected ISecretRetriever. | [`AdminMcpServerTests.cs:L765`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L765) | Backend xUnit |
+| `MCP-ADMIN-TEST-TOOL-CALL-USER-SECRET-STORE` | Positive | `SEC` | AdminMcpServer test_tool_call resolves user credentials via injected IUserSecretStore and caller context. | [`AdminMcpServerTests.cs:L856`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L856) | Backend xUnit |
 | `SEC-01` | **Guardrail** | `SEC` | SQLite database is encrypted at rest using SQLCipher with DB_ENCRYPTION_KEY. | [`DatabaseEncryptionTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8) | Backend xUnit |
 | `SEC-02` | Positive | `SEC` | VaultSecretRetriever dynamically loads, applies, and reloads Vault configurations from database repository. | [`ProviderSettingsEncryptionTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L294) | Backend xUnit |
 | `SEC-03` | Positive | `SEC` | EnvironmentSecretRetriever retrieves configured environment variable value. | [`SecretRetrieverTests.cs:L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecretRetrieverTests.cs#L5) | Backend xUnit |
