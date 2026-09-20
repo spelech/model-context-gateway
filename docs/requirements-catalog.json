@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-20T00:55:32.2826793Z",
+    "generatedAt": "2026-09-20T02:04:12.5327483Z",
     "totalRequirements": 438,
     "positiveCount": 349,
     "guardrailCount": 89,
-    "totalProofs": 955
+    "totalProofs": 956
   },
   "requirements": [
     {
@@ -5694,13 +5694,20 @@
       "category": "MCP",
       "type": "Positive",
       "description": "ToolRoutingManager falls back to SessionManager global server tools cache during cold-start search_tools execution",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
           "lineNumber": 264,
           "testName": "CallToolAsync_SearchTools_FallsBackToGlobalSessionManagerCache_WhenLocalCacheEmpty",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 319,
+          "testName": "CallToolAsync_SearchTools_PopulatesRoutingTable_FromGlobalCacheWithMultipleDelimiters",
           "details": null
         }
       ]
@@ -5715,28 +5722,28 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 319,
+          "lineNumber": 379,
           "testName": "NormalizeTargetToolName_NormalizesSlashAndColonDelimiters",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 335,
+          "lineNumber": 395,
           "testName": "NormalizeTargetToolName_ResolvesBareToolName_WhenUnambiguous",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 348,
+          "lineNumber": 408,
           "testName": "NormalizeTargetToolName_ReturnsAmbiguityError_WhenToolExistsAcrossMultipleServers",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 368,
+          "lineNumber": 428,
           "testName": "SearchTools_ReturnsValidJsonArray_WhenNoToolsMatch",
           "details": null
         }
@@ -5766,14 +5773,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 405,
+          "lineNumber": 465,
           "testName": "CacheTools_Exposes_Slash_Formatted_Name_With_Server_Alias",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 441,
+          "lineNumber": 501,
           "testName": "CacheTools_Exposes_Slash_Formatted_Name_With_Server_Id_When_Alias_Empty",
           "details": null
         }
@@ -5789,7 +5796,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 489,
+          "lineNumber": 549,
           "testName": "NormalizeTargetToolName_Returns_Ambiguity_Error_Listing_Aliases_For_Duplicates",
           "details": null
         }
@@ -5863,7 +5870,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 466,
+          "lineNumber": 526,
           "testName": "NormalizeTargetToolName_Resolves_Multiple_Delimiters_And_Aliases",
           "details": null
         }

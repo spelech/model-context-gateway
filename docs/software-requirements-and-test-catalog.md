@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **438 Requirements Verified** across **955 Test Proofs** (349 Functional Capabilities, 89 Safety Guardrails).
+> **Catalog Statistics:** **438 Requirements Verified** across **956 Test Proofs** (349 Functional Capabilities, 89 Safety Guardrails).
 
 ---
 
@@ -15,7 +15,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **64** | 3 | 61 | 136 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **112** | 106 | 6 | 223 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **112** | 106 | 6 | 224 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **35** | 31 | 4 | 41 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **28** | 25 | 3 | 134 proofs |
@@ -1175,17 +1175,18 @@
 ### `[MCP-25]` ToolRoutingManager falls back to SessionManager global server tools cache during cold-start search_tools execution
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (2):**
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L264`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L264) (`CallToolAsync_SearchTools_FallsBackToGlobalSessionManagerCache_WhenLocalCacheEmpty`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L319`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L319) (`CallToolAsync_SearchTools_PopulatesRoutingTable_FromGlobalCacheWithMultipleDelimiters`)
 
 ### `[MCP-26]` ToolRoutingManager normalizes tool name delimiters (slash and colon) to canonical double-underscore format.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (4):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L319`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L319) (`NormalizeTargetToolName_NormalizesSlashAndColonDelimiters`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L335`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L335) (`NormalizeTargetToolName_ResolvesBareToolName_WhenUnambiguous`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L348`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L348) (`NormalizeTargetToolName_ReturnsAmbiguityError_WhenToolExistsAcrossMultipleServers`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L368`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L368) (`SearchTools_ReturnsValidJsonArray_WhenNoToolsMatch`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L379`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L379) (`NormalizeTargetToolName_NormalizesSlashAndColonDelimiters`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L395`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L395) (`NormalizeTargetToolName_ResolvesBareToolName_WhenUnambiguous`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L408`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L408) (`NormalizeTargetToolName_ReturnsAmbiguityError_WhenToolExistsAcrossMultipleServers`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L428`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L428) (`SearchTools_ReturnsValidJsonArray_WhenNoToolsMatch`)
 
 ### `[MCP-27]` McpServer supports Alias property
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1193,8 +1194,8 @@
 * **Verification Proofs (4):**
   - [Backend xUnit] [`ModelContextGateway.Tests/McpServerTests.cs#L15`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpServerTests.cs#L15) (`McpServer_Supports_Alias_Property`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpServerTests.cs#L30`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpServerTests.cs#L30) (`DatabaseInitializer_EnsureAliasColumn_AddsColumnSuccessfully`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L405`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L405) (`CacheTools_Exposes_Slash_Formatted_Name_With_Server_Alias`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L441`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L441) (`CacheTools_Exposes_Slash_Formatted_Name_With_Server_Id_When_Alias_Empty`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L465`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L465) (`CacheTools_Exposes_Slash_Formatted_Name_With_Server_Alias`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L501`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L501) (`CacheTools_Exposes_Slash_Formatted_Name_With_Server_Id_When_Alias_Empty`)
 
 ### `[MCP-30]` IsUserAuthorizedAsync matches granular tool policies across /, :, and __ delimiters.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1202,7 +1203,7 @@
 * **Verification Proofs (3):**
   - [Backend xUnit] [`ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L284`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L284) (`IsUserAuthorizedAsync_MatchesToolPolicy_AcrossDelimiters`)
   - [Backend xUnit] [`ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L300`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L300) (`IsUserAuthorizedAsync_ResolvesAliasesAndServerIds_ForServerPolicies`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L466`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L466) (`NormalizeTargetToolName_Resolves_Multiple_Delimiters_And_Aliases`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L526`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L526) (`NormalizeTargetToolName_Resolves_Multiple_Delimiters_And_Aliases`)
 
 ### `[MCP-33]` OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -2983,7 +2984,7 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L489`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L489) (`NormalizeTargetToolName_Returns_Ambiguity_Error_Listing_Aliases_For_Duplicates`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L549`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L549) (`NormalizeTargetToolName_Returns_Ambiguity_Error_Listing_Aliases_For_Duplicates`)
 
 ### `[MCP-29]` ServerValidationHelper rejects invalid characters in Alias.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -3406,9 +3407,9 @@
 | `MCP-23` | Positive | `MCP` | AdminMcpServer HandleInitializeAsync includes subscriptions capability in capabilities object. | [`AdminMcpServerTests.cs:L655`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L655) | Backend xUnit |
 | `MCP-24` | Positive | `MCP` | McpSpecMiddleware extracts OpenTelemetry W3C traceparent, tracestate, and baggage from headers and _meta. | [`McpSpecMiddlewareTests.cs:L219`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs#L219) | Backend xUnit |
 | `MCP-25` | Positive | `MCP` | ToolRoutingManager falls back to SessionManager global server tools cache during cold-start search_tools execution | [`ToolRoutingManagerTests.cs:L264`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L264) | Backend xUnit |
-| `MCP-26` | Positive | `MCP` | ToolRoutingManager normalizes tool name delimiters (slash and colon) to canonical double-underscore format. | [`ToolRoutingManagerTests.cs:L319`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L319) | Backend xUnit |
+| `MCP-26` | Positive | `MCP` | ToolRoutingManager normalizes tool name delimiters (slash and colon) to canonical double-underscore format. | [`ToolRoutingManagerTests.cs:L379`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L379) | Backend xUnit |
 | `MCP-27` | Positive | `MCP` | McpServer supports Alias property | [`McpServerTests.cs:L15`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpServerTests.cs#L15) | Backend xUnit |
-| `MCP-28` | **Guardrail** | `MCP` | ToolRoutingManager rejects ambiguous bare tool calls when duplicate tool names exist across distinct servers, listing candidates with namespaces. | [`ToolRoutingManagerTests.cs:L489`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L489) | Backend xUnit |
+| `MCP-28` | **Guardrail** | `MCP` | ToolRoutingManager rejects ambiguous bare tool calls when duplicate tool names exist across distinct servers, listing candidates with namespaces. | [`ToolRoutingManagerTests.cs:L549`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L549) | Backend xUnit |
 | `MCP-29` | **Guardrail** | `MCP` | ServerValidationHelper rejects invalid characters in Alias. | [`ServerEndpointsValidationTests.cs:L72`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L72) | Backend xUnit |
 | `MCP-30` | Positive | `MCP` | IsUserAuthorizedAsync matches granular tool policies across /, :, and __ delimiters. | [`UnifiedMcpAuthorizationTests.cs:L284`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L284) | Backend xUnit |
 | `MCP-31` | **Guardrail** | `MCP` | DockerAutoDiscoveryService parses mcp.alias from Docker container labels | [`DockerAutoDiscoveryServiceTests.cs:L188`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L188) | Backend xUnit |

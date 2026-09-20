@@ -317,6 +317,66 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-25", "ToolRoutingManager extracts routing tables supporting slash, colon, and double-underscore delimiters from global tool cache during cold start", Type = RequirementType.Positive, Category = "MCP")]
+        public async Task CallToolAsync_SearchTools_PopulatesRoutingTable_FromGlobalCacheWithMultipleDelimiters()
+        {
+            var manager = new ToolRoutingManager();
+            var (conn, dbFactory) = CreateDbFactory();
+            var connections = new ConcurrentDictionary<string, BackendConnection>();
+            var servers = new List<McpServer>
+            {
+                new McpServer { Id = "ha", Enabled = true, Url = "http://ha:8086/mcp", Type = "http" },
+                new McpServer { Id = "docker", Enabled = true, Url = "http://docker:8080/mcp", Type = "http" }
+            };
+
+            var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection().BuildServiceProvider();
+            var mockFactory = new Mock<IHttpClientFactory>();
+            var sessionManager = new SessionManager(services, mockFactory.Object, NullLogger<SessionManager>.Instance);
+
+            var globalTools = new List<object>
+            {
+                new Dictionary<string, object>
+                {
+                    ["name"] = "ha/ha_search",
+                    ["description"] = "Search for entities"
+                },
+                new Dictionary<string, object>
+                {
+                    ["name"] = "docker:list_containers",
+                    ["description"] = "List active containers"
+                }
+            };
+            sessionManager.SetServerToolsCache("global", globalTools);
+
+            var mockEmbedding = new Mock<IEmbeddingService>();
+            mockEmbedding.Setup(e => e.GetEmbeddingAsync(It.IsAny<string>())).ReturnsAsync(new float[384]);
+            mockEmbedding.Setup(e => e.CosineSimilarity(It.IsAny<float[]>(), It.IsAny<float[]>())).Returns(0.85);
+
+            var body = "{\"params\":{\"arguments\":{\"query\":\"containers\"}}}";
+            var result = await manager.CallToolAsync(
+                "search_tools",
+                body,
+                dbFactory,
+                connections,
+                servers,
+                NullLogger.Instance,
+                new HttpClient(),
+                mockEmbedding.Object,
+                () => Task.CompletedTask,
+                (b, k, v) => b,
+                sessionManager: sessionManager
+            );
+
+            Assert.NotNull(result);
+            Assert.Equal("ha", manager.ToolRoutingTable["ha/ha_search"]);
+            Assert.Equal("ha", manager.ToolRoutingTable["ha__ha_search"]);
+            Assert.Equal("ha", manager.ToolRoutingTable["ha:ha_search"]);
+            Assert.Equal("docker", manager.ToolRoutingTable["docker:list_containers"]);
+            Assert.Equal("docker", manager.ToolRoutingTable["docker__list_containers"]);
+            Assert.Equal("docker", manager.ToolRoutingTable["docker/list_containers"]);
+        }
+
+        [Fact]
         [Requirement("MCP-26", "MCP", RequirementType.Positive, "ToolRoutingManager normalizes tool name delimiters (slash and colon) to canonical double-underscore format.")]
         public void NormalizeTargetToolName_NormalizesSlashAndColonDelimiters()
         {
