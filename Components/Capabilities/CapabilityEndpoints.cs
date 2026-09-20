@@ -966,7 +966,7 @@ namespace ModelContextGateway.Components.Capabilities
 
                 var dir = GetCustomFilesDirectory(type);
                 var filePath = Path.GetFullPath(Path.Combine(dir, Path.GetFileName(cleanName)));
-                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase))
+                if (!IsSafePath(filePath, dir))
                 {
                     return Results.BadRequest("Invalid file path");
                 }
@@ -1028,7 +1028,7 @@ namespace ModelContextGateway.Components.Capabilities
 
                 var dir = GetCustomFilesDirectory(type);
                 var filePath = Path.GetFullPath(Path.Combine(dir, Path.GetFileName(cleanName)));
-                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase))
+                if (!IsSafePath(filePath, dir))
                 {
                     return Results.BadRequest("Invalid file path");
                 }
@@ -1060,7 +1060,7 @@ namespace ModelContextGateway.Components.Capabilities
 
                 var dir = GetCustomFilesDirectory(type);
                 var filePath = Path.GetFullPath(Path.Combine(dir, Path.GetFileName(cleanName)));
-                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase))
+                if (!IsSafePath(filePath, dir))
                 {
                     return Results.BadRequest("Invalid file path");
                 }
@@ -1083,6 +1083,17 @@ namespace ModelContextGateway.Components.Capabilities
             });
 
             return app;
+        }
+
+        public static bool IsSafePath(string filePath, string dir)
+        {
+            var fullFilePath = Path.GetFullPath(filePath);
+            var fullDirPath = Path.GetFullPath(dir);
+            if (!fullDirPath.EndsWith(Path.DirectorySeparatorChar.ToString()) && !fullDirPath.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
+            {
+                fullDirPath += Path.DirectorySeparatorChar;
+            }
+            return fullFilePath.StartsWith(fullDirPath, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

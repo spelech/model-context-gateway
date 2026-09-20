@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **438 Requirements Verified** across **956 Test Proofs** (349 Functional Capabilities, 89 Safety Guardrails).
+> **Catalog Statistics:** **439 Requirements Verified** across **957 Test Proofs** (349 Functional Capabilities, 90 Safety Guardrails).
 
 ---
 
@@ -14,7 +14,7 @@
 | **`CORE`** | CORE | **8** | 7 | 1 | 14 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
-| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **64** | 3 | 61 | 136 proofs |
+| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **65** | 3 | 62 | 137 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **112** | 106 | 6 | 224 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **35** | 31 | 4 | 41 proofs |
@@ -2657,6 +2657,12 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/PermissionsControllerTests.cs#L243`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PermissionsControllerTests.cs#L243) (`SavePolicy_ReturnsBadRequest_WhenWildcardDenyPolicy`)
   - [Backend xUnit] [`ModelContextGateway.Tests/OpenIddictProductionTests.cs#L12`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenIddictProductionTests.cs#L12) (`Production_WithNoCert_Throws_InvalidOperationException`)
 
+### `[GUARD-07]` Custom files endpoint validates file path ensuring sibling directory traversal and parent traversal fail closed.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/CustomFilesSecurityTests.cs#L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CustomFilesSecurityTests.cs#L8) (`IsSafePath_BlocksSiblingDirectoryTraversal_AndAllowsLegitimateFiles`)
+
 ### `[GUARD-ADMIN-CUSTOM-FILES-VALIDATION]` manage_custom_files rejects invalid prompt JSON syntax and unsupported file categories.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
@@ -3326,6 +3332,7 @@
 | `GUARD-04` | **Guardrail** | `GUARD` | Malformed completion payloads or unmapped backends must fail closed safely | [`PairwiseIntegrationMatrixTests.cs:L508`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L508) | Backend xUnit |
 | `GUARD-05` | **Guardrail** | `GUARD` | Socket-level SSRF protection blocks private and loopback IP connections unless explicitly allowlisted. | [`ChallengerTests.cs:L712`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L712) | Backend xUnit |
 | `GUARD-06` | **Guardrail** | `GUARD` | Auth middleware enforces case-insensitive route matching preventing path bypass. | [`ChallengerTests.cs:L216`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L216) | Backend xUnit |
+| `GUARD-07` | **Guardrail** | `GUARD` | Custom files endpoint validates file path ensuring sibling directory traversal and parent traversal fail closed. | [`CustomFilesSecurityTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CustomFilesSecurityTests.cs#L8) | Backend xUnit |
 | `GUARD-ADMIN-CUSTOM-FILES-VALIDATION` | **Guardrail** | `GUARD` | manage_custom_files rejects invalid prompt JSON syntax and unsupported file categories. | [`AdminToolsParityTests.cs:L779`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L779) | Backend xUnit |
 | `GUARD-ADMIN-ENDPOINT-UNAUTHORIZED` | **Guardrail** | `GUARD` | Unauthenticated / non-admin client request to /admin receives 403 Forbidden. | [`AdminEndpointsTests.cs:L193`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L193) | Backend xUnit |
 | `GUARD-ADMIN-POLICIES-WILDCARD-DENY` | **Guardrail** | `GUARD` | manage_policies rejects wildcard deny policies to prevent global lockout. | [`AdminToolsParityTests.cs:L513`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L513) | Backend xUnit |
