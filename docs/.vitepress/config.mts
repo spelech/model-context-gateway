@@ -15,8 +15,9 @@ export default withMermaid(
     srcExclude: ['superpowers/**'],
 
     head: [
-      ['link', { rel: 'icon', href: '/model-context-gateway/favicon.ico' }],
-      ['meta', { name: 'theme-color', content: '#00c853' }],
+      ['link', { rel: 'icon', type: 'image/svg+xml', href: '/model-context-gateway/favicon.svg' }],
+      ['link', { rel: 'alternate icon', href: '/model-context-gateway/favicon.ico' }],
+      ['meta', { name: 'theme-color', content: '#f97316' }],
       ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
       ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
       [
@@ -30,6 +31,7 @@ export default withMermaid(
 
     themeConfig: {
       siteTitle: 'Model Context Gateway',
+      logo: '/logo.svg',
 
       nav: [
         { text: 'Home', link: '/' },
@@ -49,6 +51,7 @@ export default withMermaid(
             { text: 'Active Directory & Multi-Level RBAC', link: '/active-directory-and-rbac-guide' },
             { text: 'OIDC & SSO Reverse Proxy', link: '/oidc-and-sso-guide' },
             { text: 'Downstream Auth & Delegation', link: '/downstream-auth-and-delegation-guide' },
+            { text: 'Per-User OAuth Delegation', link: '/auth-flows/per-user-oauth-flow' },
             { text: 'Transports (Detailed Guide)', link: '/transports' },
             { text: 'Data Model & ERD', link: '/data-model' },
             { text: 'Database Providers', link: '/database-providers' },
@@ -173,6 +176,7 @@ export default withMermaid(
                 { text: 'MCP Server Config Flow', link: '/auth-flows/mcp-server-config-flow' },
                 { text: 'Multi-Tenant OAuth Consent', link: '/auth-flows/multi-tenant-oauth-consent' },
                 { text: 'Dynamic Client Registration (RFC 7591)', link: '/auth-flows/dynamic-client-registration' },
+                { text: 'Per-User OAuth & Connected Accounts', link: '/auth-flows/per-user-oauth-flow' },
                 { text: 'Dynamic Auth Limitations', link: '/auth-flows/dynamic-auth-limitations' }
               ]
             }
