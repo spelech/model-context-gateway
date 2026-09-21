@@ -73,13 +73,19 @@ Use this pattern when backend MCP servers require individual user tokens (such a
 
 ---
 
-### Pattern 7: 3LO Egress OAuth (Connected Accounts)
-Use this pattern for SaaS MCP servers (such as GitHub, Atlassian Jira, Linear, or Slack) where users authorize interactively through OAuth rather than copying and pasting Personal Access Tokens (PATs).
+### Pattern 7: 3LO Egress OAuth & Per-User Delegation (Google Home & Connected Accounts)
+Use this pattern when downstream tools require individual user authentication through standard OAuth 2.0 (such as Google Home, Google Workspace, GitHub, Slack, Jira, or Notion).
 
-- **Operator Configuration**: Set `EnableOAuth3Lo: true` on the server and configure Client ID, Client Secret, Authorization URL, Token URL, and Scopes.
-- **Out-of-Band Consent**: The user clicks **Connect Account** in the **My MCP Servers** UI. MCG redirects the user's browser to the SaaS authorization endpoint and handles the authorization code callback at `/api/oauth/egress/callback`.
-- **Encrypted Token Vaulting**: MCG exchanges the code for `{ access_token, refresh_token, expires_at }` and encrypts the tokens with AES-256-GCM in the user secret store.
-- **Automated JIT Token Refresh**: When an AI client invokes tools on the server, MCG strips the client's gateway credential. If the vaulted user token is near expiration, MCG automatically uses the stored `refresh_token` to renew credentials in the background before injecting `Authorization: Bearer <access_token>` into the outbound request.
+- **The Problem It Solves**: Multi-user environments (such as household smart homes or enterprise teams) cannot safely share a single static bot token. Shared tokens cause context bleed, lack individual user permissions, and create security hazards.
+- **Operator Configuration**: Set `EnableOAuth3Lo: true` on the server. Enter the OAuth Client ID, Client Secret, Authorization URL, Token URL, and requested Scopes.
+- **Out-of-Band User Consent**: The user clicks **Connect Account** in the **My MCP Servers** dashboard. MCG generates a 256-bit random state token bound to the caller, redirects the browser to the provider consent page, and processes the authorization callback at `/api/oauth/egress/callback`.
+- **Encrypted Per-User Vaulting**: MCG exchanges the authorization code for `{ access_token, refresh_token, expires_at }`. It encrypts the token bundle with AES-256-GCM in the user secret store (`IUserSecretStore`). Each user's tokens remain isolated from all other users.
+- **Automated JIT Background Token Refresh**: When an AI client invokes tools on the server:
+  1. MCG extracts the user's encrypted token bundle from storage.
+  2. If the token is near expiration (`expires_at - 10s`), MCG automatically uses the stored `refresh_token` to retrieve fresh tokens in the background.
+  3. MCG updates the user secret store and injects `Authorization: Bearer <access_token>` into the outbound HTTP or SSE request.
+  4. Outbound HTTP requests preserve target SNI authority (`req.Headers.Host = req.RequestUri.Authority`) to satisfy cloud TLS requirements.
+- **Complete Specification**: See the dedicated [**Per-User OAuth Delegation & Connected Accounts Flow Guide**](auth-flows/per-user-oauth-flow.md).
 
 ---
 
@@ -155,6 +161,7 @@ For local script subprocesses (such as Node.js, Python, or shell tools):
 
 ## 5. Related Documentation
 
+* [**Per-User OAuth Delegation & Connected Accounts Flow**](auth-flows/per-user-oauth-flow.md) — Detailed 3LO flow, Google Home pattern, diagrams, and token vaulting.
 * [**Active Directory & RBAC Guide**](active-directory-and-rbac-guide.md) — Inbound Windows Kerberos and LDAPS group resolution.
 * [**OIDC & SSO Reverse Proxy Guide**](oidc-and-sso-guide.md) — Inbound JWT validation and header SSO.
 * [**MCP Server Auth Cookbook**](mcp-server-auth-cookbook.md) — Setup recipes for common backend MCP servers.

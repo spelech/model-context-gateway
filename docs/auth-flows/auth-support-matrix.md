@@ -16,7 +16,7 @@ This matrix evaluates the specific `SecretProvider` implementations available in
 | `WindowsRegistry` | Loads key from DPAPI encrypted hive. | ✅ **Yes** | ✅ **Yes** | Global key. Secure Windows-native storage. |
 | `Vault` | Fetches dynamic/static key from HashiCorp. | ✅ **Yes** | ✅ **Yes** | Global key. Supports auto-renewal & TTL. |
 | `UserProvided` | Fetches PAT from user store (DB or Vault). | ✅ **Yes** | ✅ **Yes** | **User-Specific.** Router dynamically maps caller identity to personal credentials stored in database or HashiCorp Vault. |
-| `EgressOAuth3Lo` | Out-of-band 3LO OAuth token vaulting & auto-refresh. | ✅ **Yes** | ✅ **Yes** | **User-Specific.** MCG initiates OAuth flow with SaaS IdP (GitHub, Jira, Slack), vaults access/refresh tokens in encrypted DB/Vault, and injects user bearer tokens with automatic background refresh. |
+| `EgressOAuth3Lo` | Out-of-band 3LO OAuth token vaulting & auto-refresh. | ✅ **Yes** | ✅ **Yes** | **User-Specific.** MCG initiates OAuth flow with Token Providers (Google Home, GitHub, Slack), vaults access/refresh tokens in encrypted DB or HashiCorp Vault, and injects user bearer tokens with automatic background refresh. See [Per-User OAuth Flow](per-user-oauth-flow.md). |
 | `TokenExchange` | Exchanges inbound identity/token via RFC 8693. | ✅ **Yes** | ✅ **Yes** | **User-Specific.** Exchanges caller token/identity with IdP for a scoped downstream bearer token. |
 | `AllowPassThroughAuth`| Client sends dynamic JWT via `X-Target-Auth`. | ✅ **Yes** | ❌ **No** | **User-Specific.** Requires target-specific proxy route `/{serverId}`. Cannot be used in Meta-Routing because the client does not know which server will be invoked upfront. |
 
@@ -55,7 +55,7 @@ This matrix maps how the *inbound* identity (Client ➔ Router) can be propagate
 | AppKey / OIDC / AD / JWT | HTTP Identity Header (`X-Forwarded-User`) | Router forwards resolved Username for RLS. | ✅ **Yes** |
 | Interactive OAuth Consent | Any supported Outbound Method | Consent via React UI, Client calls via JWT, Router resolves subject. | ✅ **Yes** |
 | RFC 9728 Discovery (PRM) | Any supported Inbound / Outbound | Auto-discovers IdP via `/.well-known/oauth-protected-resource` and 401 challenge header. | ✅ **Yes** |
-| Gateway JWT / AppKey | SaaS 3LO Egress OAuth | Gateway resolves vaulted per-user OAuth tokens (GitHub, Slack, Jira) with auto-refresh. | ✅ **Yes** |
+| Gateway JWT / AppKey | Per-User 3LO OAuth (Google Home / SaaS) | Gateway resolves vaulted per-user OAuth tokens with auto-refresh. See [Per-User OAuth](per-user-oauth-flow.md). | ✅ **Yes** |
 
 ---
 
@@ -88,6 +88,14 @@ For complete specification, sequence diagrams, and integration guide, see:
 > **Interactive Per-User OAuth Consent Screen**: To support true multi-tenant scenarios (like the Slack MCP Server and Splunk MCP), the router natively supports standard `authorization_code` flows. When an AI IDE needs access to isolated backend resources on behalf of a user, it can trigger an interactive consent screen at `/connect/authorize`. This allows a user to explicitly grant the dynamically registered client access to their resources, returning an OIDC standard `authorization_code` to the IDE which can be exchanged for a short-lived access token, rather than relying strictly on static API Keys or proxy headers.
 
 👉 For detailed architecture documentation, see **[Multi-Tenant OAuth Consent Flow & Dynamic Client Registration](multi-tenant-oauth-consent.md)**.
+
+### Per-User OAuth Delegation & Connected Accounts (Google Home & SaaS 3LO)
+To support multi-user environments where individual callers authenticate separately (such as Google Home, Google Workspace, GitHub, or Slack):
+* The user links their account through the **My MCP Servers** dashboard tab via `GET /api/oauth/egress/authorize/{serverId}`.
+* The gateway vaults the resulting access and refresh tokens per user in `IUserSecretStore` (encrypted with AES-256-GCM or stored in HashiCorp Vault).
+* During tool calls, `OAuthEgressTokenManager` automatically checks expiration timestamps and refreshes expired tokens in the background before dispatching outbound requests.
+
+👉 For detailed architecture documentation and sequence diagrams, see **[Per-User OAuth Delegation & Connected Accounts Flow](per-user-oauth-flow.md)**.
 
 ---
 
