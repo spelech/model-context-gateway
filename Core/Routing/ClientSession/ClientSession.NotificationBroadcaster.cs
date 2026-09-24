@@ -44,12 +44,20 @@ namespace ModelContextGateway.Core.Routing
 
         public async Task BroadcastNotificationAsync(string method, string body)
         {
-            var tasks = new List<Task>();
-            foreach (var conn in _backendConnections.Values)
+            var tasks = _backendConnections.Select(async entry =>
             {
-                tasks.Add(conn.SendNotificationAsync(method, body));
-            }
+                try
+                {
+                    await entry.Value.SendNotificationAsync(method, body);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning("Upstream server '{ServerId}' failed to receive notification '{Method}': {Message}", entry.Key, method, ex.Message);
+                }
+            });
             await Task.WhenAll(tasks);
         }
     }
 }
+
+
