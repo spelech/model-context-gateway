@@ -156,5 +156,54 @@ namespace ModelContextGateway.Tests
             prompts.GetArrayLength().Should().Be(1);
             prompts[0].GetProperty("name").GetString().Should().Be("summarize");
         }
+
+        [Fact]
+        [Requirement("TRANS-03", "TRANS", RequirementType.Positive, "HttpTransport SendNotificationAsync gracefully handles 404 and 405 without throwing exceptions")]
+        public async Task HttpTransport_SendNotificationAsync_DoesNotThrow_On404Or405()
+        {
+            var server = new McpServer
+            {
+                Id = "http-test-405",
+                Url = "http://localhost:9999/messages",
+                SecretProvider = "None"
+            };
+
+            var handler = new MockHttpMessageHandler((req, token) =>
+            {
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.MethodNotAllowed));
+            });
+
+            using var httpClient = new HttpClient(handler);
+            using var transport = new HttpTransport(server, httpClient, NullLogger.Instance);
+
+            var act = () => transport.SendNotificationAsync("notifications/initialized", "{}");
+            await act.Should().NotThrowAsync();
+
+            var notFoundHandler = new MockHttpMessageHandler((req, token) =>
+            {
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
+            });
+            using var notFoundClient = new HttpClient(notFoundHandler);
+            using var notFoundTransport = new HttpTransport(server, notFoundClient, NullLogger.Instance);
+
+            var actNotFound = () => notFoundTransport.SendNotificationAsync("notifications/initialized", "{}");
+            await actNotFound.Should().NotThrowAsync();
+        }
+
+        private class MockHttpMessageHandler : HttpMessageHandler
+        {
+            private readonly Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> _handler;
+
+            public MockHttpMessageHandler(Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> handler)
+            {
+                _handler = handler;
+            }
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                return _handler(request, cancellationToken);
+            }
+        }
     }
 }
+

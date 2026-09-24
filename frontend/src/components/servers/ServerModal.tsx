@@ -97,12 +97,12 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
 
   return (
     <div className="modal-backdrop" id="server-modal" style={{ display: 'flex' }}>
-      <div className="glass-card modal-card">
+      <div className="glass-card modal-card" style={{ maxWidth: '600px', width: '90%' }}>
         <div className="modal-header">
           <h2>
             <i className="fa-solid fa-server"></i> {editingServer ? 'Edit MCP Server' : 'Add MCP Server'}
           </h2>
-          <button className="btn-close" onClick={closeAddEditModal}>
+          <button className="btn-close" onClick={closeAddEditModal} aria-label="Close modal">
             &times;
           </button>
         </div>
@@ -112,6 +112,7 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
             <input
               type="text"
               id="server-name"
+              aria-label="Display Name"
               placeholder="e.g. Notes RAG"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
@@ -124,6 +125,7 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
             <input
               type="text"
               id="server-alias"
+              aria-label="Alias or Namespace"
               placeholder="e.g. homebox_db"
               value={alias}
               onChange={(e) => handleAliasChange(e.target.value)}
@@ -159,6 +161,7 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
               <input
                 type="text"
                 id="server-category"
+                aria-label="Category"
                 placeholder="e.g. infrastructure"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -174,6 +177,7 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
             <input
               type="text"
               id="server-url"
+              aria-label={type === 'stdio' ? 'Connection Command' : 'Connection URL'}
               placeholder={type === 'stdio' ? 'e.g. node /app/mock_stdio.js' : 'e.g. http://notes-rag-mcp:3000/sse'}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
@@ -203,6 +207,7 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
               <input
                 type="text"
                 id="server-secret-key"
+                aria-label="Secret Key or Item Name"
                 disabled={authShape === 'impersonation'}
                 placeholder={
                   authShape === 'impersonation'
@@ -244,6 +249,7 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
                 <input
                   type="text"
                   id="server-custom-header-name"
+                  aria-label="Custom Header or Query Name"
                   placeholder="e.g. Slack-Bot-Token or token"
                   value={customHeaderName}
                   onChange={(e) => setCustomHeaderName(e.target.value)}
@@ -278,6 +284,7 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
             <input
               type="password"
               id="server-key"
+              aria-label="Static API Token or Secret"
               disabled={authShape === 'impersonation' || secretProvider === 'UserProvided'}
               placeholder={
                 authShape === 'impersonation'
@@ -320,11 +327,12 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
             </div>
           </div>
 
-                    <div className="form-group">
-            <div className="checkbox-group" style={{ marginBottom: "10px" }}>
+          <div className="form-group">
+            <div className="checkbox-group" style={{ marginBottom: '10px' }}>
               <label className="switch">
                 <input
                   type="checkbox"
+                  id="server-allow-passthrough"
                   checked={allowPassThroughAuth}
                   onChange={(e) => setAllowPassThroughAuth(e.target.checked)}
                 />
@@ -333,10 +341,11 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
               <span className="checkbox-label">Allow Dynamic Pass-Through Auth</span>
             </div>
             {allowPassThroughAuth && (
-              <div>
-                <label>Dynamic Auth Prompt Instructions</label>
+              <div className="form-group" style={{ marginTop: '10px', marginBottom: 0 }}>
+                <label htmlFor="server-dynamic-auth-prompt">Dynamic Auth Prompt Instructions</label>
                 <input
                   type="text"
+                  id="server-dynamic-auth-prompt"
                   placeholder="e.g. Provide a JWT token in target_auth_token parameter"
                   value={dynamicAuthPrompt}
                   onChange={(e) => setDynamicAuthPrompt(e.target.value)}

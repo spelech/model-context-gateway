@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -423,7 +424,18 @@ namespace ModelContextGateway.Infrastructure.Transports
 
         public async Task SendNotificationAsync(string method, string bodyJson)
         {
-            await SendRequestAsync(method, bodyJson);
+            try
+            {
+                await SendRequestAsync(method, bodyJson);
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound || ex.StatusCode == HttpStatusCode.MethodNotAllowed)
+            {
+                _logger.LogWarning("Upstream backend '{ServerId}' rejected notification '{Method}' with HTTP {StatusCode}", _server.Id, method, ex.StatusCode);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send notification '{Method}' to upstream backend '{ServerId}': {Message}", method, _server.Id, ex.Message);
+            }
         }
 
         public Task SendResponseAsync(string responseJson)

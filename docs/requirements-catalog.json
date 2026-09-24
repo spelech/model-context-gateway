@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-20T02:20:20.2937280Z",
-    "totalRequirements": 439,
-    "positiveCount": 349,
+    "generatedAt": "2026-09-24T15:06:49.3189044Z",
+    "totalRequirements": 440,
+    "positiveCount": 350,
     "guardrailCount": 90,
-    "totalProofs": 962
+    "totalProofs": 972
   },
   "requirements": [
     {
@@ -8954,6 +8954,22 @@
       ]
     },
     {
+      "id": "TRANS-03",
+      "category": "TRANS",
+      "type": "Positive",
+      "description": "HttpTransport SendNotificationAsync gracefully handles 404 and 405 without throwing exceptions",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/TransportResilienceTests.cs",
+          "lineNumber": 160,
+          "testName": "HttpTransport_SendNotificationAsync_DoesNotThrow_On404Or405",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "TRANS-04",
       "category": "TRANS",
       "type": "Positive",
@@ -10121,20 +10137,83 @@
       "category": "UI",
       "type": "Positive",
       "description": "Audits desktop viewport layout for zero horizontal overflow and high UX score.",
-      "proofCount": 2,
+      "proofCount": 11,
       "proofs": [
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 38,
+          "lineNumber": 96,
           "testName": "should pass layout audit on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 64,
+          "lineNumber": 117,
           "testName": "should pass layout audit on Samsung Galaxy S25\u002B mobile viewport",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 159,
+          "testName": "should pass layout audit on Samsung Galaxy Tab S10 Lite tablet viewport (portrait)",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 180,
+          "testName": "should pass layout audit on Samsung Galaxy Tab S10 Lite tablet viewport (landscape)",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 201,
+          "testName": "should pass layout audit for Add Server modal on Samsung Galaxy Tab S10 Lite tablet",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 242,
+          "testName": "should pass layout audit for Add Server modal on desktop 1080p",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 282,
+          "testName": "should pass layout audit for Add Server modal on Samsung Galaxy S25\u002B mobile",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 324,
+          "testName": "should pass layout audit across Capabilities Inspect modal tabs",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 380,
+          "testName": "should pass layout audit on App Keys \u0026 Security tab",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 408,
+          "testName": "should pass layout audit on Settings tab",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 436,
+          "testName": "should maintain layout stability during tab navigation",
           "details": null
         }
       ]
