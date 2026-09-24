@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-24T15:06:49.3189044Z",
-    "totalRequirements": 440,
-    "positiveCount": 350,
+    "generatedAt": "2026-09-24T16:06:05.9645395Z",
+    "totalRequirements": 442,
+    "positiveCount": 352,
     "guardrailCount": 90,
-    "totalProofs": 972
+    "totalProofs": 983
   },
   "requirements": [
     {
@@ -6111,6 +6111,22 @@
       ]
     },
     {
+      "id": "MCP-35",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Test call and prompt endpoints resolve server and strip prefix across slash, dunder, and colon delimiters.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
+          "lineNumber": 499,
+          "testName": "TestCall_ResolvesServerAndStripsPrefix_AcrossDelimiters",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-ADMIN-ENDPOINT-CALL-TOOL",
       "category": "MCP",
       "type": "Positive",
@@ -10477,6 +10493,85 @@
           "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
           "lineNumber": 157,
           "testName": "renders connected (oauth) badge and disconnects account",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-132",
+      "category": "UI",
+      "type": "Positive",
+      "description": "groups slash-namespaced tools into distinct backend servers without grouping under custom",
+      "proofCount": 10,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 198,
+          "testName": "groups slash-namespaced tools into distinct backend servers without grouping under custom",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 232,
+          "testName": "filters tools by selected server and displays clean tool names",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 269,
+          "testName": "displays tool hint banner with clean name, server badge, full description, and parameter badge when tool is selected",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 304,
+          "testName": "renders enum parameters as select dropdown with placeholder and options",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 349,
+          "testName": "populates argument values when Pre-fill Example button is clicked",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 421,
+          "testName": "groups slash and dunder namespaced prompts into servers and displays prompt hint banner",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/utils/mcpNaming.test.ts",
+          "lineNumber": 5,
+          "testName": "parses tool names with slash delimiter",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/utils/mcpNaming.test.ts",
+          "lineNumber": 18,
+          "testName": "parses tool names with dunder delimiter",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/utils/mcpNaming.test.ts",
+          "lineNumber": 31,
+          "testName": "parses tool names with colon delimiter",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/utils/mcpNaming.test.ts",
+          "lineNumber": 44,
+          "testName": "identifies un-namespaced custom tools",
           "details": null
         }
       ]

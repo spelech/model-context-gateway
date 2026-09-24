@@ -495,5 +495,40 @@ namespace ModelContextGateway.Tests
                 DbKeyHelper.ActiveKeySource = origKeySource;
             }
         }
+
+        [Fact]
+        [Requirement("MCP-35", "MCP", RequirementType.Positive, "Test call and prompt endpoints resolve server and strip prefix across slash, dunder, and colon delimiters.")]
+        public async Task TestCall_ResolvesServerAndStripsPrefix_AcrossDelimiters()
+        {
+            var client = CreateAuthenticatedClient();
+
+            // 1. Call with slash delimiter where serverId is omitted or custom
+            var slashRes = await client.PostAsJsonAsync("/api/test/call", new { serverId = "custom", toolName = "test-serv-1/arr_status", arguments = new { } });
+            Assert.Equal(HttpStatusCode.NotFound, slashRes.StatusCode);
+            var slashBody = await slashRes.Content.ReadAsStringAsync();
+            Assert.Contains("test-serv-1", slashBody);
+
+            // 2. Call with dunder delimiter
+            var dunderRes = await client.PostAsJsonAsync("/api/test/call", new { serverId = "", toolName = "test-serv-1__arr_status", arguments = new { } });
+            Assert.Equal(HttpStatusCode.NotFound, dunderRes.StatusCode);
+            var dunderBody = await dunderRes.Content.ReadAsStringAsync();
+            Assert.Contains("test-serv-1", dunderBody);
+
+            // 3. Call with colon delimiter
+            var colonRes = await client.PostAsJsonAsync("/api/test/call", new { serverId = "custom", toolName = "test-serv-1:arr_status", arguments = new { } });
+            Assert.Equal(HttpStatusCode.NotFound, colonRes.StatusCode);
+            var colonBody = await colonRes.Content.ReadAsStringAsync();
+            Assert.Contains("test-serv-1", colonBody);
+
+            // 4. Prompts get with slash, dunder, and colon
+            var promptSlashRes = await client.PostAsJsonAsync("/api/test/prompts/get", new { serverId = "custom", promptName = "router/diagnose_failure", arguments = new { } });
+            Assert.Equal(HttpStatusCode.OK, promptSlashRes.StatusCode);
+
+            var promptDunderRes = await client.PostAsJsonAsync("/api/test/prompts/get", new { serverId = "", promptName = "router__diagnose_failure", arguments = new { } });
+            Assert.Equal(HttpStatusCode.OK, promptDunderRes.StatusCode);
+
+            var promptColonRes = await client.PostAsJsonAsync("/api/test/prompts/get", new { serverId = "custom", promptName = "router:diagnose_failure", arguments = new { } });
+            Assert.Equal(HttpStatusCode.OK, promptColonRes.StatusCode);
+        }
     }
 }
