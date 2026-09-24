@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **440 Requirements Verified** across **972 Test Proofs** (350 Functional Capabilities, 90 Safety Guardrails).
+> **Catalog Statistics:** **442 Requirements Verified** across **983 Test Proofs** (352 Functional Capabilities, 90 Safety Guardrails).
 
 ---
 
@@ -15,10 +15,10 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **65** | 3 | 62 | 137 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **112** | 106 | 6 | 229 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **113** | 107 | 6 | 230 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **28** | 25 | 3 | 143 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **29** | 26 | 3 | 153 proofs |
 
 ---
 
@@ -1219,6 +1219,12 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39) (`SearchToolsAsync_CombinesKeywordAndVectorRanks_UsingRRF`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L92`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L92) (`SearchToolsAsync_ScoresLexicalSignals_AcrossNameDescriptionTagsAndParameters`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L141`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L141) (`SearchTools_SynchronousMethod_ReturnsRankedCandidates`)
+
+### `[MCP-35]` Test call and prompt endpoints resolve server and strip prefix across slash, dunder, and colon delimiters.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L499`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L499) (`TestCall_ResolvesServerAndStripsPrefix_AcrossDelimiters`)
 
 ### `[MCP-ADMIN-ENDPOINT-CALL-TOOL]` Admin endpoint /admin/message executes tools/call for manage_system diagnostics.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -2487,6 +2493,21 @@
 * **Verification Proofs (1):**
   - [Frontend Vitest] [`frontend/src/test/pages/MyMcpServers.test.tsx#L157`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L157) (`renders connected (oauth) badge and disconnects account`)
 
+### `[UI-132]` groups slash-namespaced tools into distinct backend servers without grouping under custom
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (10):**
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L198`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L198) (`groups slash-namespaced tools into distinct backend servers without grouping under custom`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L232`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L232) (`filters tools by selected server and displays clean tool names`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L269`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L269) (`displays tool hint banner with clean name, server badge, full description, and parameter badge when tool is selected`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L304`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L304) (`renders enum parameters as select dropdown with placeholder and options`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L349`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L349) (`populates argument values when Pre-fill Example button is clicked`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L421`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L421) (`groups slash and dunder namespaced prompts into servers and displays prompt hint banner`)
+  - [Frontend Vitest] [`frontend/src/test/utils/mcpNaming.test.ts#L5`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/utils/mcpNaming.test.ts#L5) (`parses tool names with slash delimiter`)
+  - [Frontend Vitest] [`frontend/src/test/utils/mcpNaming.test.ts#L18`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/utils/mcpNaming.test.ts#L18) (`parses tool names with dunder delimiter`)
+  - [Frontend Vitest] [`frontend/src/test/utils/mcpNaming.test.ts#L31`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/utils/mcpNaming.test.ts#L31) (`parses tool names with colon delimiter`)
+  - [Frontend Vitest] [`frontend/src/test/utils/mcpNaming.test.ts#L44`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/utils/mcpNaming.test.ts#L44) (`identifies un-namespaced custom tools`)
+
 ### `[UI-30]` Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
@@ -3443,6 +3464,7 @@
 | `MCP-32` | **Guardrail** | `MCP` | InMemorySimdToolVectorStore scores tool embeddings using .NET 10 hardware SIMD TensorPrimitives. | [`InMemorySimdToolVectorStoreTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L8) | Backend xUnit |
 | `MCP-33` | Positive | `MCP` | OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints. | [`OpenAiEmbeddingProviderTests.cs:L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L26) | Backend xUnit |
 | `MCP-34` | **Guardrail** | `MCP` | ToolRoutingManager gracefully falls back to keyword matching when NoOpEmbeddingProvider is active. | [`ToolRoutingManagerFallbackTests.cs:L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L26) | Backend xUnit |
+| `MCP-35` | Positive | `MCP` | Test call and prompt endpoints resolve server and strip prefix across slash, dunder, and colon delimiters. | [`PipelineIntegrationTests.cs:L499`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L499) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-CALL-TOOL` | Positive | `MCP` | Admin endpoint /admin/message executes tools/call for manage_system diagnostics. | [`AdminEndpointsTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L294) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-HEAD-REQUEST` | Positive | `MCP` | Admin endpoint /admin handles HEAD request returning text/event-stream headers. | [`AdminEndpointsTests.cs:L212`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L212) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-LIST-TOOLS` | Positive | `MCP` | Admin endpoint /admin/message executes tools/list over active SSE session and returns 10 admin tools. | [`AdminEndpointsTests.cs:L224`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L224) | Backend xUnit |
@@ -3644,6 +3666,7 @@
 | `UI-128` | Positive | `UI` | should navigate to Test Bench view and render tester cards | [`testbench.spec.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/testbench.spec.ts#L1) | Playwright E2E |
 | `UI-130` | Positive | `UI` | Renders Connect Account button for OAuth-enabled servers directing to authorization URL. | [`MyMcpServers.test.tsx:L121`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L121) | Frontend Vitest |
 | `UI-131` | Positive | `UI` | Renders Connected (OAuth) badge and supports account disconnection. | [`MyMcpServers.test.tsx:L157`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L157) | Frontend Vitest |
+| `UI-132` | Positive | `UI` | groups slash-namespaced tools into distinct backend servers without grouping under custom | [`TestBenchView.test.tsx:L198`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L198) | Frontend Vitest |
 | `UI-30` | Positive | `UI` | Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration. | [`ClientModal.test.tsx:L27`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientModal.test.tsx#L27) | Frontend Vitest |
 | `UI-31` | **Guardrail** | `UI` | Fetches registered OAuth clients and updates store state. | [`useClientStore.test.ts:L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L37) | Frontend Vitest |
 | `UI-32` | Positive | `UI` | Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials. | [`useClientStore.test.ts:L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L76) | Frontend Vitest |
