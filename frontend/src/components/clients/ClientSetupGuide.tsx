@@ -298,8 +298,8 @@ export const ClientSetupGuide: React.FC = () => {
       </div>
 
       <div className="guide-content" style={{ background: 'rgba(0,0,0,0.25)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-          <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
+          <span style={{ color: 'var(--text-muted)', fontSize: '12px', flex: '1', minWidth: '200px' }}>
             {selectedFormat === 'standard' && 'Add to your client configuration file (claude_desktop_config.json / agy settings / Cursor / Cline):'}
             {selectedFormat === 'vscode' && 'Add to your VS Code MCP configuration (mcp.json):'}
             {selectedFormat === 'generic' && 'Direct connection endpoints for custom SSE MCP clients:'}
@@ -308,6 +308,7 @@ export const ClientSetupGuide: React.FC = () => {
             type="button"
             className="btn btn-primary btn-sm"
             onClick={handleCopy}
+            style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
           >
             <i className="fa-solid fa-copy"></i> Copy Configuration
           </button>

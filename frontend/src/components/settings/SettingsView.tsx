@@ -48,7 +48,9 @@ export const SettingsView: React.FC = () => {
       <div
         className="tester-tabs settings-sub-nav"
         style={{
+          display: 'flex',
           justifyContent: 'center',
+          flexWrap: 'wrap',
           gap: '15px',
           marginBottom: '25px',
           borderBottom: '1px solid var(--border-color)',
@@ -108,8 +110,8 @@ export const SettingsView: React.FC = () => {
       {/* Subview 2: Identity & Auth */}
       {activeSubview === 'identity' && (
         <IdentityAuthTab
-          key={authProviders.map((p) => `${p.providerName}-${p.isEnabled}`).join(',')}
-          providers={authProviders}
+          key={(Array.isArray(authProviders) ? authProviders : []).map((p) => `${p.providerName}-${p.isEnabled}`).join(',')}
+          providers={Array.isArray(authProviders) ? authProviders : []}
           saveAuthProvider={saveAuthProvider}
         />
       )}
@@ -117,8 +119,8 @@ export const SettingsView: React.FC = () => {
       {/* Subview 3: Secret Providers */}
       {activeSubview === 'secrets' && (
         <SecretProvidersTab
-          key={secretProviders.map((p) => `${p.providerName}-${p.isEnabled}`).join(',')}
-          providers={secretProviders}
+          key={(Array.isArray(secretProviders) ? secretProviders : []).map((p) => `${p.providerName}-${p.isEnabled}`).join(',')}
+          providers={Array.isArray(secretProviders) ? secretProviders : []}
           saveSecretProvider={saveSecretProvider}
         />
       )}

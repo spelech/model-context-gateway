@@ -25,6 +25,8 @@ export const SemanticRouterCard: React.FC<SemanticRouterCardProps> = ({
         <input
           type="text"
           id="semantic-search-query"
+          name="semantic-search-query"
+          aria-label="Natural Language Prompt"
           placeholder="e.g. search matrix in plex"
           value={semanticQuery}
           onChange={(e) => onQueryChange(e.target.value)}

@@ -75,6 +75,15 @@
         gap: var(--space-3);
         margin: 15px 0;
     }
+
+    /* Responsive Tables */
+    table {
+        min-width: 0;
+    }
+
+    th, td {
+        padding: var(--space-2) 6px;
+    }
 }
 
 /* General Mobile Breakpoint (max-width: 600px) */
@@ -191,23 +200,48 @@
         box-sizing: border-box;
     }
 
-    /* Table reflow for clients table */
-    #clients-table {
-        display: block;
-    }
-
-    #clients-table thead {
-        display: none; /* Hide headers */
-    }
-
-    #clients-table tbody, 
-    #clients-table tr, 
-    #clients-table td {
+    /* Table reflow for mobile viewports */
+    #clients-table,
+    #appkeys-table,
+    #user-quotas-table,
+    .custom-files-table,
+    .data-table,
+    #policies-table,
+    #mappings-table {
         display: block;
         width: 100%;
+        min-width: 0;
     }
 
-    #clients-table tr {
+    #clients-table thead,
+    #appkeys-table thead,
+    #user-quotas-table thead,
+    .custom-files-table thead,
+    .data-table thead,
+    #policies-table thead,
+    #mappings-table thead {
+        display: none; /* Hide headers on mobile */
+    }
+
+    #clients-table tbody, #clients-table tr, #clients-table td,
+    #appkeys-table tbody, #appkeys-table tr, #appkeys-table td,
+    #user-quotas-table tbody, #user-quotas-table tr, #user-quotas-table td,
+    .custom-files-table tbody, .custom-files-table tr, .custom-files-table td,
+    .data-table tbody, .data-table tr, .data-table td,
+    #policies-table tbody, #policies-table tr, #policies-table td,
+    #mappings-table tbody, #mappings-table tr, #mappings-table td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #clients-table tr,
+    #appkeys-table tr,
+    #user-quotas-table tr,
+    .custom-files-table tr,
+    .data-table tr,
+    #policies-table tr,
+    #mappings-table tr {
         border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
         margin-bottom: var(--space-3);
@@ -215,39 +249,181 @@
         background: var(--bg-input);
     }
 
-    #clients-table td {
+    #clients-table td,
+    #appkeys-table td,
+    #user-quotas-table td,
+    .custom-files-table td,
+    .data-table td,
+    #policies-table td,
+    #mappings-table td {
         text-align: right;
         padding: var(--space-2) 6px;
         border-bottom: 1px solid var(--border-hover);
         position: relative;
-        padding-left: 45%;
-        word-break: break-all;
+        padding-left: 42%;
+        word-break: break-word;
         font-size: var(--font-size-xs);
     }
 
-    #clients-table td:last-child {
+    #clients-table td:last-child,
+    #appkeys-table td:last-child,
+    #user-quotas-table td:last-child,
+    .custom-files-table td:last-child,
+    .data-table td:last-child,
+    #policies-table td:last-child,
+    #mappings-table td:last-child {
         border-bottom: none;
         display: flex;
         justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
         gap: var(--space-2);
+        padding-left: 6px;
     }
 
+    /* Empty states in mobile table reflow */
+    #clients-table td.empty-state,
+    #appkeys-table td.empty-state,
+    #user-quotas-table td.empty-state,
+    .custom-files-table td.empty-state,
+    .data-table td[colspan],
+    #policies-table td.empty-state,
+    #mappings-table td.empty-state {
+        text-align: center;
+        padding: 20px 10px;
+        padding-left: 10px;
+    }
+
+    #clients-table td.empty-state::before,
+    #appkeys-table td.empty-state::before,
+    #user-quotas-table td.empty-state::before,
+    .custom-files-table td.empty-state::before,
+    .data-table td[colspan]::before,
+    #policies-table td.empty-state::before,
+    #mappings-table td.empty-state::before {
+        content: none;
+    }
+
+    /* Clients Table Labels */
     #clients-table td::before {
         position: absolute;
         left: 6px;
         top: var(--space-2);
-        width: 40%;
+        width: 38%;
         text-align: left;
         font-weight: var(--font-weight-semibold);
         color: var(--text-muted);
         text-transform: uppercase;
         font-size: 10px;
     }
-
     #clients-table td:nth-of-type(1)::before { content: "Client Name"; }
     #clients-table td:nth-of-type(2)::before { content: "Client ID"; }
     #clients-table td:nth-of-type(3)::before { content: "Type"; }
     #clients-table td:nth-of-type(4)::before { content: "Actions"; }
+
+    /* App Keys Table Labels */
+    #appkeys-table td::before {
+        position: absolute;
+        left: 6px;
+        top: var(--space-2);
+        width: 38%;
+        text-align: left;
+        font-weight: var(--font-weight-semibold);
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-size: 10px;
+    }
+    #appkeys-table td:nth-of-type(1)::before { content: "Key Name"; }
+    #appkeys-table td:nth-of-type(2)::before { content: "Prefix"; }
+    #appkeys-table td:nth-of-type(3)::before { content: "Owner"; }
+    #appkeys-table td:nth-of-type(4)::before { content: "Scopes"; }
+    #appkeys-table td:nth-of-type(5)::before { content: "Expires"; }
+    #appkeys-table td:nth-of-type(6)::before { content: "Created"; }
+    #appkeys-table td:nth-of-type(7)::before { content: "Actions"; }
+
+    /* User Quotas Table Labels */
+    #user-quotas-table td::before {
+        position: absolute;
+        left: 6px;
+        top: var(--space-2);
+        width: 38%;
+        text-align: left;
+        font-weight: var(--font-weight-semibold);
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-size: 10px;
+    }
+    #user-quotas-table td:nth-of-type(1)::before { content: "Username"; }
+    #user-quotas-table td:nth-of-type(2)::before { content: "Quota"; }
+    #user-quotas-table td:nth-of-type(3)::before { content: "Updated"; }
+    #user-quotas-table td:nth-of-type(4)::before { content: "Actions"; }
+
+    /* Custom Files Table Labels */
+    .custom-files-table td::before {
+        position: absolute;
+        left: 6px;
+        top: var(--space-2);
+        width: 38%;
+        text-align: left;
+        font-weight: var(--font-weight-semibold);
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-size: 10px;
+    }
+    .custom-files-table td:nth-of-type(1)::before { content: "Type"; }
+    .custom-files-table td:nth-of-type(2)::before { content: "Name"; }
+    .custom-files-table td:nth-of-type(3)::before { content: "Size"; }
+    .custom-files-table td:nth-of-type(4)::before { content: "Modified"; }
+    .custom-files-table td:nth-of-type(5)::before { content: "Actions"; }
+
+    /* My MCP Servers Data Table Labels */
+    .data-table td::before {
+        position: absolute;
+        left: 6px;
+        top: var(--space-2);
+        width: 38%;
+        text-align: left;
+        font-weight: var(--font-weight-semibold);
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-size: 10px;
+    }
+    .data-table td:nth-of-type(1)::before { content: "Name"; }
+    .data-table td:nth-of-type(2)::before { content: "Status"; }
+    .data-table td:nth-of-type(3)::before { content: "Actions"; }
+
+    /* Policies Table Labels */
+    #policies-table td::before {
+        position: absolute;
+        left: 6px;
+        top: var(--space-2);
+        width: 38%;
+        text-align: left;
+        font-weight: var(--font-weight-semibold);
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-size: 10px;
+    }
+    #policies-table td:nth-of-type(1)::before { content: "Target"; }
+    #policies-table td:nth-of-type(2)::before { content: "Group"; }
+    #policies-table td:nth-of-type(3)::before { content: "Access"; }
+    #policies-table td:nth-of-type(4)::before { content: "Actions"; }
+
+    /* Mappings Table Labels */
+    #mappings-table td::before {
+        position: absolute;
+        left: 6px;
+        top: var(--space-2);
+        width: 38%;
+        text-align: left;
+        font-weight: var(--font-weight-semibold);
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-size: 10px;
+    }
+    #mappings-table td:nth-of-type(1)::before { content: "External"; }
+    #mappings-table td:nth-of-type(2)::before { content: "Internal"; }
+    #mappings-table td:nth-of-type(3)::before { content: "Actions"; }
 
     /* Modals scaling */
     .modal-card {

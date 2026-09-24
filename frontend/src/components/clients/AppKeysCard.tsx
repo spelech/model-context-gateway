@@ -127,7 +127,7 @@ export const AppKeysCard: React.FC = () => {
       </div>
 
       {isAdmin && (
-        <div className="sub-tabs-nav" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '10px' }}>
+        <div className="sub-tabs-nav" style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '10px' }}>
           <button
             className={`tab-btn btn-sm ${activeTab === 'personal' ? 'active' : ''}`}
             onClick={() => handleTabSwitch('personal')}
@@ -234,7 +234,7 @@ export const AppKeysCard: React.FC = () => {
       ) : (
         <>
           {isAdmin && activeTab === 'personal' && (
-            <form onSubmit={handleFilter} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '16px' }}>
+            <form onSubmit={handleFilter} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap' }}>
               <input
                 type="text"
                 placeholder="Filter by username..."
