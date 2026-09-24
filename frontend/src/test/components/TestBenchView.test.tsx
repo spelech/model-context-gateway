@@ -393,6 +393,29 @@ describe('TestBenchView Component', () => {
 
     const modeSelect = screen.getByRole('combobox', { name: /mode/i }) as HTMLSelectElement;
     expect(modeSelect.value).toBe('host');
+
+    vi.spyOn(api, 'apiRequest').mockResolvedValue({
+      content: [{ type: 'text', text: '{"status":"container started"}' }],
+    });
+
+    const forms = document.querySelectorAll('form');
+    fireEvent.submit(forms[0]);
+
+    await waitFor(() => {
+      expect(api.apiRequest).toHaveBeenCalledWith('/api/test/call', {
+        method: 'POST',
+        body: {
+          serverId: 'docker',
+          toolName: 'docker__run',
+          name: 'docker__run',
+          arguments: {
+            image: 'alpine:latest',
+            instances: 3,
+            mode: 'host',
+          },
+        },
+      });
+    });
   });
 
   /**

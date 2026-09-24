@@ -462,7 +462,7 @@ input:checked + .slider:before {
 
 .btn-prefill:hover,
 .prefill-btn:hover {
-    background: rgba(234, 179, 8, 0.15);
+    background: rgba(var(--accent-rgb), 0.15);
     border-color: var(--accent);
     color: #fff;
 }

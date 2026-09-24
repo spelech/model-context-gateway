@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { parseNamespacedName } from '../../shared/utils/mcpNaming';
 
 interface ToolItem {
@@ -20,6 +20,7 @@ interface ToolTesterCardProps {
   onServerChange: (srv: string) => void;
   onToolChange: (name: string) => void;
   onArgChange: (key: string, type: string, val: any) => void;
+  onBulkArgsChange?: (args: Record<string, any>) => void;
   onRawJsonChange: (val: string) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
@@ -33,17 +34,11 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
   onServerChange,
   onToolChange,
   onArgChange,
+  onBulkArgsChange,
   onRawJsonChange,
   onSubmit,
 }) => {
   const [interactiveTab, setInteractiveTab] = useState<'form' | 'json'>('form');
-  const [localArgs, setLocalArgs] = useState<Record<string, any>>({});
-
-  useEffect(() => {
-    setLocalArgs({});
-  }, [selectedToolName]);
-
-  const effectiveArgs = { ...toolArguments, ...localArgs };
 
   const getToolServers = () => {
     const servers = new Set<string>();
@@ -75,11 +70,6 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
   const currentTool = tools.find((t) => t.name === selectedToolName);
   const parsedCurrentTool = currentTool ? parseNamespacedName(currentTool.name) : null;
 
-  const handleArgChange = (key: string, type: string, val: any) => {
-    setLocalArgs((prev) => ({ ...prev, [key]: val }));
-    onArgChange(key, type, val);
-  };
-
   const handlePrefillExample = () => {
     if (!currentTool?.inputSchema?.properties) return;
     const properties = currentTool.inputSchema.properties;
@@ -106,10 +96,13 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
       }
     }
 
-    setLocalArgs(prefilled);
-    onRawJsonChange(JSON.stringify(prefilled, null, 2));
-    for (const [key, prop] of Object.entries<any>(properties)) {
-      onArgChange(key, prop.type || 'string', prefilled[key]);
+    if (onBulkArgsChange) {
+      onBulkArgsChange(prefilled);
+    } else {
+      onRawJsonChange(JSON.stringify(prefilled, null, 2));
+      for (const [key, prop] of Object.entries<any>(properties)) {
+        onArgChange(key, prop.type || 'string', prefilled[key]);
+      }
     }
   };
 
@@ -218,7 +211,7 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
           <div className="tester-tab-content active">
             <div id="dynamic-form-fields">
               {selectedToolName && currentTool ? (
-                renderDynamicFields(currentTool, effectiveArgs, handleArgChange)
+                renderDynamicFields(currentTool, toolArguments, onArgChange)
               ) : (
                 <div className="empty-state">Select a tool to generate parameters.</div>
               )}
@@ -274,7 +267,7 @@ const renderDynamicFields = (
           <select
             id={`param-${key}`}
             value={args[key] !== undefined ? args[key] : (prop.default !== undefined ? prop.default : '')}
-            onChange={(e) => onChange(key, 'string', e.target.value)}
+            onChange={(e) => onChange(key, prop.type || 'string', e.target.value)}
             required={isRequired}
           >
             <option value="">-- Select {key} --</option>
