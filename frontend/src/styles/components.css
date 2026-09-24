@@ -432,7 +432,7 @@ input:checked + .slider:before {
 }
 
 .type-badge {
-    font-size: 10px;
+    font-size: 12px;
     font-family: var(--font-family-code);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -443,6 +443,14 @@ input:checked + .slider:before {
     margin-left: var(--space-2);
     display: inline-block;
     vertical-align: middle;
+}
+
+.header-title h1 {
+    text-wrap: balance;
+}
+
+.logs-filters .checkbox-label {
+    font-size: var(--font-size-xs) !important;
 }
 
 .btn-prefill,
@@ -466,4 +474,23 @@ input:checked + .slider:before {
     border-color: var(--accent);
     color: #fff;
 }
+
+/* Logs viewer filter select controls */
+.logs-filters select {
+    padding: 6px 12px;
+    min-height: 32px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.logs-filters select:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 1px;
+}
+
 

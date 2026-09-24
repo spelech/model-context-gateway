@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { LayoutInspector, getDevicePreset } from 'playwright-layout-inspector';
+import { LayoutInspector, getDevicePreset, DEVICE_PRESETS } from 'playwright-layout-inspector';
 
 test.describe('Dashboard Layout & UX Audit', () => {
 
@@ -56,8 +56,96 @@ test.describe('Dashboard Layout & UX Audit', () => {
           },
         });
       }
-      if (path.startsWith('/api/appkeys')) {
+      if (path === '/api/test/tools') {
+        return route.fulfill({
+          json: [
+            {
+              name: 'mock-docker/docker_ps',
+              description: 'List running docker containers with status and port mappings',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  all: { type: 'boolean', description: 'Show all containers' },
+                  format: { type: 'string', enum: ['table', 'json'], description: 'Output format' },
+                },
+                required: ['format'],
+              },
+            },
+          ],
+        });
+      }
+      if (path === '/api/test/prompts') {
+        return route.fulfill({
+          json: [
+            {
+              name: 'mock-docker/diagnose_container',
+              description: 'Diagnose unhealthy container issues',
+              arguments: [{ name: 'container_id', required: true, description: 'Target container ID' }],
+            },
+            {
+              name: 'router__diagnose_failure',
+              description: 'Diagnose router errors',
+              arguments: [{ name: 'error_log', required: true }],
+            },
+          ],
+        });
+      }
+      if (path === '/api/test/resources') {
+        return route.fulfill({
+          json: {
+            resources: [
+              { name: 'Docker Status', uri: 'mcp://mock-docker/status', description: 'Docker engine status' },
+            ],
+            templates: [
+              { name: 'Container Logs', uriTemplate: 'mcp://mock-docker/logs/{id}', description: 'Container log stream' },
+            ],
+          },
+        });
+      }
+      if (path === '/api/logs') {
         return route.fulfill({ json: [] });
+      }
+      if (path.startsWith('/api/my-mcp')) {
+        return route.fulfill({ json: [] });
+      }
+      if (path.startsWith('/api/appkeys')) {
+        if (path.includes('/limits')) {
+          return route.fulfill({
+            json: {
+              globalMax: 100,
+              userMax: 10,
+              totalActiveKeys: 2,
+              userActiveKeys: 1,
+              isLimitReached: false,
+              quotas: [],
+            },
+          });
+        }
+        if (path.includes('/quotas')) {
+          return route.fulfill({ json: { quotas: [] } });
+        }
+        return route.fulfill({
+          json: [
+            {
+              id: 'key-1',
+              name: 'CI/CD Token',
+              username: 'admin',
+              keyType: 'personal',
+              keyPrefix: 'mcg_live_1234',
+              scopes: ['tools:read', 'tools:execute'],
+              createdAt: '2026-01-01T00:00:00Z',
+            },
+            {
+              id: 'key-2',
+              name: 'System Agent Key',
+              username: 'system',
+              keyType: 'system',
+              keyPrefix: 'mcg_sys_5678',
+              scopes: ['*'],
+              createdAt: '2026-01-01T00:00:00Z',
+            },
+          ],
+        });
       }
       if (path.startsWith('/api/clients')) {
         return route.fulfill({ json: [] });
@@ -79,13 +167,19 @@ test.describe('Dashboard Layout & UX Audit', () => {
           },
         });
       }
-      if (path === '/api/custom-files') {
+      if (path.startsWith('/api/custom-files')) {
         return route.fulfill({ json: [] });
       }
-      if (path === '/api/policies') {
+      if (path === '/api/policies' || path.startsWith('/api/permissions/policies')) {
         return route.fulfill({ json: [] });
       }
-      if (path === '/api/group-mappings') {
+      if (path === '/api/group-mappings' || path.startsWith('/api/permissions/mappings')) {
+        return route.fulfill({ json: [] });
+      }
+      if (path.startsWith('/api/user/credentials')) {
+        return route.fulfill({ json: [] });
+      }
+      if (path.startsWith('/api/oauth/egress')) {
         return route.fulfill({ json: [] });
       }
 
@@ -137,7 +231,7 @@ test.describe('Dashboard Layout & UX Audit', () => {
   });
 
   const tabS10Lite = {
-    name: 'Samsung Galaxy Tab S10 Lite',
+    name: 'Samsung Galaxy Tab S10 Lite (Portrait)',
     width: 800,
     height: 1280,
     deviceScaleFactor: 2,
@@ -145,6 +239,8 @@ test.describe('Dashboard Layout & UX Audit', () => {
     hasTouch: true,
     category: 'tablet' as const,
   };
+  DEVICE_PRESETS['Samsung Galaxy Tab S10 Lite (Portrait)'] = tabS10Lite;
+  DEVICE_PRESETS['Samsung Galaxy Tab S10 Lite'] = tabS10Lite;
 
   const tabS10LiteLandscape = {
     name: 'Samsung Galaxy Tab S10 Lite (Landscape)',
@@ -155,6 +251,7 @@ test.describe('Dashboard Layout & UX Audit', () => {
     hasTouch: true,
     category: 'tablet' as const,
   };
+  DEVICE_PRESETS['Samsung Galaxy Tab S10 Lite (Landscape)'] = tabS10LiteLandscape;
 
   /**
    * @requirement UI-07
@@ -453,6 +550,162 @@ test.describe('Dashboard Layout & UX Audit', () => {
 
     // Verify layout stability score adheres to strict Core Web Vitals thresholds (CLS <= 0.05)
     expect(shiftResult.totalShiftScore).toBeLessThanOrEqual(0.05);
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits Test Bench layout on desktop 1080p viewport across interactive form and raw JSON tabs for zero overflow and high UX score.
+   */
+  test('should pass layout audit on Test Bench tab on desktop 1080p viewport', async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const testBenchNavBtn = page.locator('.tabs-nav button:has-text("Test Bench")');
+    await expect(testBenchNavBtn).toBeVisible();
+    await testBenchNavBtn.click();
+    await expect(page.locator('#view-testbench')).toBeVisible();
+
+    await page.locator('#tester-server').selectOption('mock-docker');
+    await page.locator('#tester-tool').selectOption('mock-docker/docker_ps');
+    await expect(page.locator('#view-testbench .tool-hint-banner')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: getDevicePreset('Desktop 1080p'),
+      includeScreenshot: false,
+    });
+
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
+
+    const rawJsonBtn = page.locator('button:has-text("Raw JSON Input")');
+    await expect(rawJsonBtn).toBeVisible();
+    await rawJsonBtn.click();
+
+    const rawResult = await inspector.audit({
+      device: getDevicePreset('Desktop 1080p'),
+      includeScreenshot: false,
+    });
+
+    expect(rawResult.overflowIssues.length).toBe(0);
+    expect(rawResult.uxScore.totalScore).toBeGreaterThanOrEqual(85);
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits Test Bench layout on Samsung Galaxy S25+ mobile viewport for zero horizontal overflow and acceptable UX score.
+   */
+  test('should pass layout audit on Test Bench tab on Samsung Galaxy S25+ mobile viewport', async ({ page }) => {
+    const s25plus = getDevicePreset('Samsung Galaxy S25+');
+    await page.setViewportSize({ width: s25plus.width, height: s25plus.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const testBenchNavBtn = page.locator('.tabs-nav button:has-text("Test Bench")');
+    await expect(testBenchNavBtn).toBeVisible();
+    await testBenchNavBtn.click();
+    await expect(page.locator('#view-testbench')).toBeVisible();
+
+    await page.locator('#tester-server').selectOption('mock-docker');
+    await page.locator('#tester-tool').selectOption('mock-docker/docker_ps');
+    await expect(page.locator('#view-testbench .tool-hint-banner')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+    });
+
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(80);
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits Test Bench layout on Samsung Galaxy Tab S10 Lite tablet viewport for zero horizontal overflow and high UX score.
+   */
+  test('should pass layout audit on Test Bench tab on Samsung Galaxy Tab S10 Lite tablet viewport', async ({ page }) => {
+    const tabDevice = getDevicePreset('Samsung Galaxy Tab S10 Lite (Portrait)');
+    await page.setViewportSize({ width: tabDevice.width, height: tabDevice.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const testBenchNavBtn = page.locator('.tabs-nav button:has-text("Test Bench")');
+    await expect(testBenchNavBtn).toBeVisible();
+    await testBenchNavBtn.click();
+    await expect(page.locator('#view-testbench')).toBeVisible();
+
+    await page.locator('#tester-server').selectOption('mock-docker');
+    await page.locator('#tester-tool').selectOption('mock-docker/docker_ps');
+    await expect(page.locator('#view-testbench .tool-hint-banner')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: tabDevice,
+      includeScreenshot: false,
+    });
+
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits Test Bench Prompts and Resources tabs on Desktop 1080p viewport for zero overflow and high UX score.
+   */
+  test('should pass layout audit on Test Bench Prompts and Resources tabs', async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const testBenchNavBtn = page.locator('.tabs-nav button:has-text("Test Bench")');
+    await expect(testBenchNavBtn).toBeVisible();
+    await testBenchNavBtn.click();
+    await expect(page.locator('#view-testbench')).toBeVisible();
+
+    // Switch to Prompts tab
+    const promptsTabBtn = page.locator('#view-testbench .tester-tabs button:has-text("Prompts")');
+    await expect(promptsTabBtn).toBeVisible();
+    await promptsTabBtn.click();
+
+    // Select prompt
+    await page.locator('#tester-prompt-server').selectOption('mock-docker');
+    await page.locator('#tester-prompt-name').selectOption('mock-docker/diagnose_container');
+    await expect(page.locator('#view-testbench .tool-hint-banner')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+    let result = await inspector.audit({
+      device: getDevicePreset('Desktop 1080p'),
+      includeScreenshot: false,
+    });
+
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
+
+    // Switch to Resources tab
+    const resourcesTabBtn = page.locator('#view-testbench .tester-tabs button:has-text("Resources")');
+    await expect(resourcesTabBtn).toBeVisible();
+    await resourcesTabBtn.click();
+
+    await page.locator('#tester-resource-server').selectOption('mock-docker');
+    await page.locator('#tester-resource-name').selectOption('mcp://mock-docker/status');
+
+    result = await inspector.audit({
+      device: getDevicePreset('Desktop 1080p'),
+      includeScreenshot: false,
+    });
+
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
   });
 
 });
