@@ -1,4 +1,5 @@
 import React from 'react';
+import { parseNamespacedName } from '../../shared/utils/mcpNaming';
 
 interface PromptItem {
   name: string;
@@ -33,32 +34,46 @@ export const PromptTesterCard: React.FC<PromptTesterCardProps> = ({
 }) => {
   const getPromptServers = () => {
     const servers = new Set<string>();
-    servers.add('router');
+    let hasRouter = false;
     prompts.forEach((p) => {
-      const parts = p.name.split('__');
-      if (parts.length > 1 && parts[0].startsWith('router')) {
-        servers.add('router');
-      } else if (parts.length > 1) {
-        servers.add(parts[0]);
+      const parsed = parseNamespacedName(p.name, 'router');
+      if (parsed.serverId === 'router' || parsed.isCustom) {
+        hasRouter = true;
       } else {
-        servers.add('router');
+        servers.add(parsed.serverId);
       }
     });
+    if (hasRouter) {
+      servers.add('router');
+    }
     return Array.from(servers).sort();
   };
 
   const getFilteredPrompts = () => {
     return prompts
-      .filter((p) => {
-        if (selectedServer === 'router') {
-          return !p.name.includes('__') || p.name.startsWith('router__');
-        }
-        return p.name.startsWith(selectedServer + '__');
-      })
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .filter((p) => parseNamespacedName(p.name, 'router').serverId === selectedServer)
+      .sort((a, b) => {
+        const nameA = parseNamespacedName(a.name, 'router').cleanName;
+        const nameB = parseNamespacedName(b.name, 'router').cleanName;
+        return nameA.localeCompare(nameB);
+      });
   };
 
   const currentPrompt = prompts.find((p) => p.name === selectedPromptName);
+  const parsedCurrentPrompt = currentPrompt ? parseNamespacedName(currentPrompt.name, 'router') : null;
+
+  const renderArgumentSummary = () => {
+    if (!currentPrompt) return null;
+    const args = currentPrompt.arguments;
+    if (!args || args.length === 0) {
+      return 'Takes no arguments — ready to execute';
+    }
+    const reqCount = args.filter((a) => a.required).length;
+    if (reqCount > 0) {
+      return `${reqCount} required argument${reqCount === 1 ? '' : 's'}`;
+    }
+    return `${args.length} optional argument${args.length === 1 ? '' : 's'}`;
+  };
 
   return (
     <div className="glass-card">
@@ -93,16 +108,31 @@ export const PromptTesterCard: React.FC<PromptTesterCardProps> = ({
             >
               <option value="">-- Choose Prompt --</option>
               {getFilteredPrompts().map((p) => {
-                const display = p.name.includes('__') ? p.name.split('__')[1] : p.name;
+                const parsed = parseNamespacedName(p.name, 'router');
                 return (
                   <option key={p.name} value={p.name}>
-                    {display}
+                    {parsed.cleanName}
                   </option>
                 );
               })}
             </select>
           </div>
         </div>
+
+        {currentPrompt && parsedCurrentPrompt && (
+          <div className="tool-hint-banner">
+            <div className="tool-hint-header">
+              <div className="tool-hint-title-group">
+                <span className="tool-hint-name">{parsedCurrentPrompt.cleanName}</span>
+                <span className="badge badge-primary">[{parsedCurrentPrompt.serverId.toUpperCase()}]</span>
+              </div>
+              <span className="badge">{renderArgumentSummary()}</span>
+            </div>
+            {currentPrompt.description && (
+              <p className="tool-hint-desc">{currentPrompt.description}</p>
+            )}
+          </div>
+        )}
 
         <div id="prompt-dynamic-fields" style={{ marginTop: '15px' }}>
           {selectedPromptName && currentPrompt ? (
@@ -135,11 +165,13 @@ const renderPromptFields = (
     const reqText = arg.required ? <span style={{ color: 'var(--status-offline)' }}>*</span> : null;
     return (
       <div key={arg.name} className="param-field">
-        <label>
-          {arg.name} {reqText}
+        <label htmlFor={`prompt-param-${arg.name}`}>
+          {arg.name} {reqText} <span className="type-badge">string</span>
         </label>
         <input
+          id={`prompt-param-${arg.name}`}
           type="text"
+          placeholder={arg.description || `Enter ${arg.name}...`}
           value={args[arg.name] || ''}
           onChange={(e) => onChange(arg.name, e.target.value)}
           required={arg.required}
