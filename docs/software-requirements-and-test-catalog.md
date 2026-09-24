@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **442 Requirements Verified** across **994 Test Proofs** (352 Functional Capabilities, 90 Safety Guardrails).
+> **Catalog Statistics:** **442 Requirements Verified** across **1006 Test Proofs** (352 Functional Capabilities, 90 Safety Guardrails).
 
 ---
 
@@ -18,7 +18,7 @@
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **113** | 107 | 6 | 230 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **29** | 26 | 3 | 164 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **29** | 26 | 3 | 176 proofs |
 
 ---
 
@@ -2383,7 +2383,7 @@
 ### `[UI-07]` Audits desktop viewport layout for zero horizontal overflow and high UX score.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (22):**
+* **Verification Proofs (34):**
   - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L255`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L255) (`should pass layout audit on desktop 1080p viewport`)
   - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L276`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L276) (`should pass layout audit on Samsung Galaxy S25+ mobile viewport`)
   - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L321`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L321) (`should pass layout audit on Samsung Galaxy Tab S10 Lite tablet viewport (portrait)`)
@@ -2406,6 +2406,18 @@
   - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1019`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1019) (`should pass layout audit on My MCP Servers tab on desktop 1080p viewport`)
   - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1046`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1046) (`should pass layout audit on My MCP Servers tab on Samsung Galaxy S25+ mobile viewport`)
   - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1074`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1074) (`should pass layout audit on My MCP Servers tab on Samsung Galaxy Tab S10 Lite tablet viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1101`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1101) (`should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1168`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1168) (`should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy Tab S10 Lite tablet viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1235`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1235) (`should pass layout audit for AppKey modal on desktop 1080p viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1279`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1279) (`should pass layout audit for AppKey modal on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1324`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1324) (`should pass layout audit for Client modal on desktop 1080p viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1368`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1368) (`should pass layout audit for Client modal on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1413`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1413) (`should pass layout audit for CustomFile modal on desktop 1080p viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1462`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1462) (`should pass layout audit for CustomFile modal on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1512`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1512) (`should pass layout audit for Policy modal on desktop 1080p viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1561`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1561) (`should pass layout audit for Policy modal on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1611`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1611) (`should pass layout audit for Mapping modal on desktop 1080p viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1660`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1660) (`should pass layout audit for Mapping modal on Samsung Galaxy S25+ mobile viewport`)
 
 ### `[UI-102]` Dashboard renders stats card, connected server list, and setup instructions
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)

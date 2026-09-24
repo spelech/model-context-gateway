@@ -1098,5 +1098,614 @@ test.describe('Dashboard Layout & UX Audit', () => {
     expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
   });
 
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits Capabilities Inspect Modal tabs (Tools, Resources, Prompts) on Samsung Galaxy S25+ mobile viewport for zero overflow.
+   */
+  test('should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy S25+ mobile viewport', async ({ page }) => {
+    const s25plus = getDevicePreset('Samsung Galaxy S25+');
+    await page.setViewportSize({ width: s25plus.width, height: s25plus.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const inspectBtn = page.locator('button:has-text("Inspect"), .btn-inspect').first();
+    await expect(inspectBtn).toBeVisible();
+    await inspectBtn.click();
+
+    const modal = page.locator('#inspect-modal');
+    await expect(modal).toBeVisible();
+    await page.waitForTimeout(300);
+
+    // Verify Tools tab content loaded
+    await expect(page.locator('#inspect-modal').getByText('docker_ps')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+    let result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    // Switch to Resources tab
+    const resourcesTabBtn = page.locator('#inspect-modal button.tester-tab-btn:has-text("Resources")');
+    await resourcesTabBtn.click();
+    await expect(page.locator('#inspect-modal').getByText('container_status')).toBeVisible();
+
+    result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    // Switch to Prompts tab
+    const promptsTabBtn = page.locator('#inspect-modal button.tester-tab-btn:has-text("Prompts")');
+    await promptsTabBtn.click();
+    await expect(page.locator('#inspect-modal').getByText('diagnose_container')).toBeVisible();
+
+    result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    // Close modal
+    const closeBtn = page.locator('#inspect-modal .btn-close');
+    await closeBtn.click();
+    await expect(modal).toBeHidden();
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits Capabilities Inspect Modal tabs (Tools, Resources, Prompts) on Samsung Galaxy Tab S10 Lite tablet viewport for zero overflow.
+   */
+  test('should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy Tab S10 Lite tablet viewport', async ({ page }) => {
+    const tabDevice = getDevicePreset('Samsung Galaxy Tab S10 Lite (Portrait)');
+    await page.setViewportSize({ width: tabDevice.width, height: tabDevice.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const inspectBtn = page.locator('button:has-text("Inspect"), .btn-inspect').first();
+    await expect(inspectBtn).toBeVisible();
+    await inspectBtn.click();
+
+    const modal = page.locator('#inspect-modal');
+    await expect(modal).toBeVisible();
+    await page.waitForTimeout(300);
+
+    // Verify Tools tab content loaded
+    await expect(page.locator('#inspect-modal').getByText('docker_ps')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+    let result = await inspector.audit({
+      device: tabDevice,
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    // Switch to Resources tab
+    const resourcesTabBtn = page.locator('#inspect-modal button.tester-tab-btn:has-text("Resources")');
+    await resourcesTabBtn.click();
+    await expect(page.locator('#inspect-modal').getByText('container_status')).toBeVisible();
+
+    result = await inspector.audit({
+      device: tabDevice,
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    // Switch to Prompts tab
+    const promptsTabBtn = page.locator('#inspect-modal button.tester-tab-btn:has-text("Prompts")');
+    await promptsTabBtn.click();
+    await expect(page.locator('#inspect-modal').getByText('diagnose_container')).toBeVisible();
+
+    result = await inspector.audit({
+      device: tabDevice,
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    // Close modal
+    const closeBtn = page.locator('#inspect-modal .btn-close');
+    await closeBtn.click();
+    await expect(modal).toBeHidden();
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits AppKeyModal on Desktop 1080p viewport for zero overflow and scrollability.
+   */
+  test('should pass layout audit for AppKey modal on desktop 1080p viewport', async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const securityNavBtn = page.locator('.tabs-nav button:has-text("App Keys & Security")');
+    await expect(securityNavBtn).toBeVisible();
+    await securityNavBtn.click();
+    await expect(page.locator('#view-security')).toBeVisible();
+
+    const createKeyBtn = page.locator('button:has-text("Create App Key"), button:has-text("New App Key"), button:has-text("Create Key")').first();
+    await expect(createKeyBtn).toBeVisible();
+    await createKeyBtn.click();
+
+    const modal = page.locator('#add-appkey-modal');
+    await expect(modal).toBeVisible();
+    await page.waitForTimeout(300);
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: getDevicePreset('Desktop 1080p'),
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    const isScrollable = await page.locator('#add-appkey-modal .modal-card').evaluate((el) => {
+      return el.scrollHeight >= el.clientHeight;
+    });
+    expect(isScrollable).toBe(true);
+
+    const closeBtn = page.locator('#add-appkey-modal .btn-close').first();
+    await closeBtn.click();
+    await expect(modal).toBeHidden();
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits AppKeyModal on Samsung Galaxy S25+ mobile viewport for zero overflow and scrollability.
+   */
+  test('should pass layout audit for AppKey modal on Samsung Galaxy S25+ mobile viewport', async ({ page }) => {
+    const s25plus = getDevicePreset('Samsung Galaxy S25+');
+    await page.setViewportSize({ width: s25plus.width, height: s25plus.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const securityNavBtn = page.locator('.tabs-nav button:has-text("App Keys & Security")');
+    await expect(securityNavBtn).toBeVisible();
+    await securityNavBtn.click();
+    await expect(page.locator('#view-security')).toBeVisible();
+
+    const createKeyBtn = page.locator('button:has-text("Create App Key"), button:has-text("New App Key"), button:has-text("Create Key")').first();
+    await expect(createKeyBtn).toBeVisible();
+    await createKeyBtn.click();
+
+    const modal = page.locator('#add-appkey-modal');
+    await expect(modal).toBeVisible();
+    await page.waitForTimeout(300);
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    const isScrollable = await page.locator('#add-appkey-modal .modal-card').evaluate((el) => {
+      return el.scrollHeight >= el.clientHeight;
+    });
+    expect(isScrollable).toBe(true);
+
+    const closeBtn = page.locator('#add-appkey-modal .btn-close').first();
+    await closeBtn.click();
+    await expect(modal).toBeHidden();
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits ClientModal on Desktop 1080p viewport for zero overflow and scrollability.
+   */
+  test('should pass layout audit for Client modal on desktop 1080p viewport', async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const securityNavBtn = page.locator('.tabs-nav button:has-text("App Keys & Security")');
+    await expect(securityNavBtn).toBeVisible();
+    await securityNavBtn.click();
+    await expect(page.locator('#view-security')).toBeVisible();
+
+    const addClientBtn = page.locator('#btn-add-client, button:has-text("Register Client"), button:has-text("New OAuth Client")').first();
+    await expect(addClientBtn).toBeVisible();
+    await addClientBtn.click();
+
+    const modal = page.locator('#add-client-modal');
+    await expect(modal).toBeVisible();
+    await page.waitForTimeout(300);
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: getDevicePreset('Desktop 1080p'),
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    const isScrollable = await page.locator('#add-client-modal .modal-card').evaluate((el) => {
+      return el.scrollHeight >= el.clientHeight;
+    });
+    expect(isScrollable).toBe(true);
+
+    const closeBtn = page.locator('#add-client-modal .btn-close').first();
+    await closeBtn.click();
+    await expect(modal).toBeHidden();
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits ClientModal on Samsung Galaxy S25+ mobile viewport for zero overflow and scrollability.
+   */
+  test('should pass layout audit for Client modal on Samsung Galaxy S25+ mobile viewport', async ({ page }) => {
+    const s25plus = getDevicePreset('Samsung Galaxy S25+');
+    await page.setViewportSize({ width: s25plus.width, height: s25plus.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const securityNavBtn = page.locator('.tabs-nav button:has-text("App Keys & Security")');
+    await expect(securityNavBtn).toBeVisible();
+    await securityNavBtn.click();
+    await expect(page.locator('#view-security')).toBeVisible();
+
+    const addClientBtn = page.locator('#btn-add-client, button:has-text("Register Client"), button:has-text("New OAuth Client")').first();
+    await expect(addClientBtn).toBeVisible();
+    await addClientBtn.click();
+
+    const modal = page.locator('#add-client-modal');
+    await expect(modal).toBeVisible();
+    await page.waitForTimeout(300);
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    const isScrollable = await page.locator('#add-client-modal .modal-card').evaluate((el) => {
+      return el.scrollHeight >= el.clientHeight;
+    });
+    expect(isScrollable).toBe(true);
+
+    const closeBtn = page.locator('#add-client-modal .btn-close').first();
+    await closeBtn.click();
+    await expect(modal).toBeHidden();
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits CustomFileModal on Desktop 1080p viewport for zero overflow and scrollability.
+   */
+  test('should pass layout audit for CustomFile modal on desktop 1080p viewport', async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const settingsNavBtn = page.locator('.tabs-nav button:has-text("Settings")');
+    await expect(settingsNavBtn).toBeVisible();
+    await settingsNavBtn.click();
+    await expect(page.locator('#view-settings')).toBeVisible();
+
+    const filesTabBtn = page.locator('.settings-sub-nav button:has-text("Prompts & Resources")');
+    await expect(filesTabBtn).toBeVisible();
+    await filesTabBtn.click();
+    await expect(page.locator('#subview-files')).toBeVisible();
+
+    const createFileBtn = page.locator('#subview-files button:has-text("Create File"), button:has-text("New File"), button:has-text("Create")').first();
+    await expect(createFileBtn).toBeVisible();
+    await createFileBtn.click();
+
+    const modal = page.locator('#custom-file-modal');
+    await expect(modal).toBeVisible();
+    await page.waitForTimeout(300);
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: getDevicePreset('Desktop 1080p'),
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    const isScrollable = await page.locator('#custom-file-modal .modal-card').evaluate((el) => {
+      return el.scrollHeight >= el.clientHeight;
+    });
+    expect(isScrollable).toBe(true);
+
+    const closeBtn = page.locator('#custom-file-modal .btn-close').first();
+    await closeBtn.click();
+    await expect(modal).toBeHidden();
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits CustomFileModal on Samsung Galaxy S25+ mobile viewport for zero overflow and scrollability.
+   */
+  test('should pass layout audit for CustomFile modal on Samsung Galaxy S25+ mobile viewport', async ({ page }) => {
+    const s25plus = getDevicePreset('Samsung Galaxy S25+');
+    await page.setViewportSize({ width: s25plus.width, height: s25plus.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const settingsNavBtn = page.locator('.tabs-nav button:has-text("Settings")');
+    await expect(settingsNavBtn).toBeVisible();
+    await settingsNavBtn.click();
+    await expect(page.locator('#view-settings')).toBeVisible();
+
+    const filesTabBtn = page.locator('.settings-sub-nav button:has-text("Prompts & Resources")');
+    await expect(filesTabBtn).toBeVisible();
+    await filesTabBtn.click();
+    await expect(page.locator('#subview-files')).toBeVisible();
+
+    const createFileBtn = page.locator('#subview-files button:has-text("Create File"), button:has-text("New File"), button:has-text("Create")').first();
+    await expect(createFileBtn).toBeVisible();
+    await createFileBtn.click();
+
+    const modal = page.locator('#custom-file-modal');
+    await expect(modal).toBeVisible();
+    await page.waitForTimeout(300);
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    const isScrollable = await page.locator('#custom-file-modal .modal-card').evaluate((el) => {
+      return el.scrollHeight >= el.clientHeight;
+    });
+    expect(isScrollable).toBe(true);
+
+    const closeBtn = page.locator('#custom-file-modal .btn-close').first();
+    await closeBtn.click();
+    await expect(modal).toBeHidden();
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits PolicyModal on Desktop 1080p viewport for zero overflow and scrollability.
+   */
+  test('should pass layout audit for Policy modal on desktop 1080p viewport', async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const settingsNavBtn = page.locator('.tabs-nav button:has-text("Settings")');
+    await expect(settingsNavBtn).toBeVisible();
+    await settingsNavBtn.click();
+    await expect(page.locator('#view-settings')).toBeVisible();
+
+    const accessTabBtn = page.locator('.settings-sub-nav button:has-text("Access Control")');
+    await expect(accessTabBtn).toBeVisible();
+    await accessTabBtn.click();
+    await expect(page.locator('#subview-permissions')).toBeVisible();
+
+    const addPolicyBtn = page.locator('#subview-permissions button:has-text("Create Policy"), button:has-text("Add Policy"), button:has-text("Add Rule")').first();
+    await expect(addPolicyBtn).toBeVisible();
+    await addPolicyBtn.click();
+
+    const modal = page.locator('#policy-modal');
+    await expect(modal).toBeVisible();
+    await page.waitForTimeout(300);
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: getDevicePreset('Desktop 1080p'),
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    const isScrollable = await page.locator('#policy-modal .modal-card').evaluate((el) => {
+      return el.scrollHeight >= el.clientHeight;
+    });
+    expect(isScrollable).toBe(true);
+
+    const closeBtn = page.locator('#policy-modal .btn-close').first();
+    await closeBtn.click();
+    await expect(modal).toBeHidden();
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits PolicyModal on Samsung Galaxy S25+ mobile viewport for zero overflow and scrollability.
+   */
+  test('should pass layout audit for Policy modal on Samsung Galaxy S25+ mobile viewport', async ({ page }) => {
+    const s25plus = getDevicePreset('Samsung Galaxy S25+');
+    await page.setViewportSize({ width: s25plus.width, height: s25plus.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const settingsNavBtn = page.locator('.tabs-nav button:has-text("Settings")');
+    await expect(settingsNavBtn).toBeVisible();
+    await settingsNavBtn.click();
+    await expect(page.locator('#view-settings')).toBeVisible();
+
+    const accessTabBtn = page.locator('.settings-sub-nav button:has-text("Access Control")');
+    await expect(accessTabBtn).toBeVisible();
+    await accessTabBtn.click();
+    await expect(page.locator('#subview-permissions')).toBeVisible();
+
+    const addPolicyBtn = page.locator('#subview-permissions button:has-text("Create Policy"), button:has-text("Add Policy"), button:has-text("Add Rule")').first();
+    await expect(addPolicyBtn).toBeVisible();
+    await addPolicyBtn.click();
+
+    const modal = page.locator('#policy-modal');
+    await expect(modal).toBeVisible();
+    await page.waitForTimeout(300);
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    const isScrollable = await page.locator('#policy-modal .modal-card').evaluate((el) => {
+      return el.scrollHeight >= el.clientHeight;
+    });
+    expect(isScrollable).toBe(true);
+
+    const closeBtn = page.locator('#policy-modal .btn-close').first();
+    await closeBtn.click();
+    await expect(modal).toBeHidden();
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits MappingModal on Desktop 1080p viewport for zero overflow and scrollability.
+   */
+  test('should pass layout audit for Mapping modal on desktop 1080p viewport', async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const settingsNavBtn = page.locator('.tabs-nav button:has-text("Settings")');
+    await expect(settingsNavBtn).toBeVisible();
+    await settingsNavBtn.click();
+    await expect(page.locator('#view-settings')).toBeVisible();
+
+    const accessTabBtn = page.locator('.settings-sub-nav button:has-text("Access Control")');
+    await expect(accessTabBtn).toBeVisible();
+    await accessTabBtn.click();
+    await expect(page.locator('#subview-permissions')).toBeVisible();
+
+    const addMappingBtn = page.locator('#subview-permissions button:has-text("Create Mapping"), button:has-text("Add Group Mapping"), button:has-text("Add Mapping")').first();
+    await expect(addMappingBtn).toBeVisible();
+    await addMappingBtn.click();
+
+    const modal = page.locator('#mapping-modal');
+    await expect(modal).toBeVisible();
+    await page.waitForTimeout(300);
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: getDevicePreset('Desktop 1080p'),
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    const isScrollable = await page.locator('#mapping-modal .modal-card').evaluate((el) => {
+      return el.scrollHeight >= el.clientHeight;
+    });
+    expect(isScrollable).toBe(true);
+
+    const closeBtn = page.locator('#mapping-modal .btn-close').first();
+    await closeBtn.click();
+    await expect(modal).toBeHidden();
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits MappingModal on Samsung Galaxy S25+ mobile viewport for zero overflow and scrollability.
+   */
+  test('should pass layout audit for Mapping modal on Samsung Galaxy S25+ mobile viewport', async ({ page }) => {
+    const s25plus = getDevicePreset('Samsung Galaxy S25+');
+    await page.setViewportSize({ width: s25plus.width, height: s25plus.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const settingsNavBtn = page.locator('.tabs-nav button:has-text("Settings")');
+    await expect(settingsNavBtn).toBeVisible();
+    await settingsNavBtn.click();
+    await expect(page.locator('#view-settings')).toBeVisible();
+
+    const accessTabBtn = page.locator('.settings-sub-nav button:has-text("Access Control")');
+    await expect(accessTabBtn).toBeVisible();
+    await accessTabBtn.click();
+    await expect(page.locator('#subview-permissions')).toBeVisible();
+
+    const addMappingBtn = page.locator('#subview-permissions button:has-text("Create Mapping"), button:has-text("Add Group Mapping"), button:has-text("Add Mapping")').first();
+    await expect(addMappingBtn).toBeVisible();
+    await addMappingBtn.click();
+
+    const modal = page.locator('#mapping-modal');
+    await expect(modal).toBeVisible();
+    await page.waitForTimeout(300);
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+      checkOcclusion: false,
+      checkCollisions: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    const isScrollable = await page.locator('#mapping-modal .modal-card').evaluate((el) => {
+      return el.scrollHeight >= el.clientHeight;
+    });
+    expect(isScrollable).toBe(true);
+
+    const closeBtn = page.locator('#mapping-modal .btn-close').first();
+    await closeBtn.click();
+    await expect(modal).toBeHidden();
+  });
+
 });
 

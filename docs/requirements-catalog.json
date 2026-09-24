@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-24T16:41:10.7090092Z",
+    "generatedAt": "2026-09-24T16:48:02.0205366Z",
     "totalRequirements": 442,
     "positiveCount": 352,
     "guardrailCount": 90,
-    "totalProofs": 994
+    "totalProofs": 1006
   },
   "requirements": [
     {
@@ -10153,7 +10153,7 @@
       "category": "UI",
       "type": "Positive",
       "description": "Audits desktop viewport layout for zero horizontal overflow and high UX score.",
-      "proofCount": 22,
+      "proofCount": 34,
       "proofs": [
         {
           "suite": "Playwright E2E",
@@ -10307,6 +10307,90 @@
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
           "lineNumber": 1074,
           "testName": "should pass layout audit on My MCP Servers tab on Samsung Galaxy Tab S10 Lite tablet viewport",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 1101,
+          "testName": "should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy S25\u002B mobile viewport",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 1168,
+          "testName": "should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy Tab S10 Lite tablet viewport",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 1235,
+          "testName": "should pass layout audit for AppKey modal on desktop 1080p viewport",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 1279,
+          "testName": "should pass layout audit for AppKey modal on Samsung Galaxy S25\u002B mobile viewport",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 1324,
+          "testName": "should pass layout audit for Client modal on desktop 1080p viewport",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 1368,
+          "testName": "should pass layout audit for Client modal on Samsung Galaxy S25\u002B mobile viewport",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 1413,
+          "testName": "should pass layout audit for CustomFile modal on desktop 1080p viewport",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 1462,
+          "testName": "should pass layout audit for CustomFile modal on Samsung Galaxy S25\u002B mobile viewport",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 1512,
+          "testName": "should pass layout audit for Policy modal on desktop 1080p viewport",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 1561,
+          "testName": "should pass layout audit for Policy modal on Samsung Galaxy S25\u002B mobile viewport",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 1611,
+          "testName": "should pass layout audit for Mapping modal on desktop 1080p viewport",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 1660,
+          "testName": "should pass layout audit for Mapping modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         }
       ]
