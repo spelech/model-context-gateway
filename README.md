@@ -1,10 +1,10 @@
 # Model Context Gateway (MCG)
 
-![Version](https://img.shields.io/badge/version-v5.17.1-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v5.17.2-orange?style=for-the-badge)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://spelech.github.io/model-context-gateway/)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
-![Tests](https://img.shields.io/badge/tests-1%2C131%20passing-2ea44f?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-1%2C166%20passing-2ea44f?style=for-the-badge)
 ![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
