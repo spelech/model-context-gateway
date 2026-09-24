@@ -233,17 +233,25 @@ input:checked + .slider:before {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: var(--space-5);
+    padding: var(--space-4);
     box-sizing: border-box;
+    overflow-y: auto;
 }
 
 /* Modal Card */
 .modal-card {
     width: 100%;
     max-width: 500px;
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
     padding: 30px;
     z-index: var(--z-modal);
     animation: modalSlideUp 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    overflow-y: auto;
+    box-sizing: border-box;
 }
 
 @keyframes modalSlideUp {
@@ -264,6 +272,7 @@ input:checked + .slider:before {
     margin-bottom: 25px;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: var(--space-4);
+    flex-shrink: 0;
 }
 .modal-header h2 {
     margin-bottom: 0;
@@ -345,6 +354,7 @@ input:checked + .slider:before {
     border-top: 1px solid var(--border-color);
     padding-top: var(--space-5);
     margin-top: 25px;
+    flex-shrink: 0;
 }
 
 /* Focus Ring Indicators */

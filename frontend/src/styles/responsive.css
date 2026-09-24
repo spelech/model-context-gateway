@@ -235,7 +235,10 @@
 
     /* Modals scaling */
     .modal-card {
-        padding: var(--space-5) 15px;
+        padding: var(--space-4) 15px;
+        max-height: calc(100vh - 20px);
+        max-height: calc(100dvh - 20px);
+        width: 95%;
     }
 
     .modal-footer {

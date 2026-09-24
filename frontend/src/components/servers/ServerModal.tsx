@@ -320,11 +320,12 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
             </div>
           </div>
 
-                    <div className="form-group">
-            <div className="checkbox-group" style={{ marginBottom: "10px" }}>
+          <div className="form-group">
+            <div className="checkbox-group" style={{ marginBottom: '10px' }}>
               <label className="switch">
                 <input
                   type="checkbox"
+                  id="server-allow-passthrough"
                   checked={allowPassThroughAuth}
                   onChange={(e) => setAllowPassThroughAuth(e.target.checked)}
                 />
@@ -333,10 +334,11 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
               <span className="checkbox-label">Allow Dynamic Pass-Through Auth</span>
             </div>
             {allowPassThroughAuth && (
-              <div>
-                <label>Dynamic Auth Prompt Instructions</label>
+              <div className="form-group" style={{ marginTop: '10px', marginBottom: 0 }}>
+                <label htmlFor="server-dynamic-auth-prompt">Dynamic Auth Prompt Instructions</label>
                 <input
                   type="text"
+                  id="server-dynamic-auth-prompt"
                   placeholder="e.g. Provide a JWT token in target_auth_token parameter"
                   value={dynamicAuthPrompt}
                   onChange={(e) => setDynamicAuthPrompt(e.target.value)}
