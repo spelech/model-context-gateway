@@ -275,11 +275,24 @@ namespace ModelContextGateway.Components.Capabilities
                 var toolName = model.ResolvedToolName;
                 var serverId = model.ServerId;
 
-                // If serverId is missing or "custom", check if toolName contains server prefix "serverId__tool"
-                if ((string.IsNullOrEmpty(serverId) || serverId == "custom") && toolName.Contains("__"))
+                if (string.IsNullOrEmpty(serverId) || serverId == "custom")
                 {
-                    var parts = toolName.Split("__", 2);
-                    serverId = parts[0];
+                    var slashIdx = toolName.IndexOf('/');
+                    var dunderIdx = toolName.IndexOf("__");
+                    var colonIdx = toolName.IndexOf(':');
+
+                    if (slashIdx > 0)
+                    {
+                        serverId = toolName.Substring(0, slashIdx);
+                    }
+                    else if (dunderIdx > 0)
+                    {
+                        serverId = toolName.Substring(0, dunderIdx);
+                    }
+                    else if (colonIdx > 0)
+                    {
+                        serverId = toolName.Substring(0, colonIdx);
+                    }
                 }
 
                 var server = await serverRepo.GetServerByIdAsync(serverId ?? "");
@@ -298,9 +311,20 @@ namespace ModelContextGateway.Components.Capabilities
                 }
 
                 var targetToolName = toolName;
-                if (!string.IsNullOrEmpty(serverId) && targetToolName.StartsWith(serverId + "__"))
+                if (!string.IsNullOrEmpty(serverId))
                 {
-                    targetToolName = targetToolName.Substring(serverId.Length + 2);
+                    if (targetToolName.StartsWith(serverId + "/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        targetToolName = targetToolName.Substring(serverId.Length + 1);
+                    }
+                    else if (targetToolName.StartsWith(serverId + "__", StringComparison.OrdinalIgnoreCase))
+                    {
+                        targetToolName = targetToolName.Substring(serverId.Length + 2);
+                    }
+                    else if (targetToolName.StartsWith(serverId + ":", StringComparison.OrdinalIgnoreCase))
+                    {
+                        targetToolName = targetToolName.Substring(serverId.Length + 1);
+                    }
                 }
 
                 try
@@ -745,10 +769,24 @@ namespace ModelContextGateway.Components.Capabilities
                 var promptName = model.ResolvedPromptName;
                 var serverId = model.ServerId;
 
-                if ((string.IsNullOrEmpty(serverId) || serverId == "custom") && promptName.Contains("__"))
+                if (string.IsNullOrEmpty(serverId) || serverId == "custom")
                 {
-                    var parts = promptName.Split("__", 2);
-                    serverId = parts[0];
+                    var slashIdx = promptName.IndexOf('/');
+                    var dunderIdx = promptName.IndexOf("__");
+                    var colonIdx = promptName.IndexOf(':');
+
+                    if (slashIdx > 0)
+                    {
+                        serverId = promptName.Substring(0, slashIdx);
+                    }
+                    else if (dunderIdx > 0)
+                    {
+                        serverId = promptName.Substring(0, dunderIdx);
+                    }
+                    else if (colonIdx > 0)
+                    {
+                        serverId = promptName.Substring(0, colonIdx);
+                    }
                 }
 
                 if (serverId != "router" && !servers.Any(s => s.Id == serverId))
@@ -757,9 +795,20 @@ namespace ModelContextGateway.Components.Capabilities
                 }
 
                 var targetPromptName = promptName;
-                if (!string.IsNullOrEmpty(serverId) && targetPromptName.StartsWith(serverId + "__"))
+                if (!string.IsNullOrEmpty(serverId))
                 {
-                    targetPromptName = targetPromptName.Substring(serverId.Length + 2);
+                    if (targetPromptName.StartsWith(serverId + "/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        targetPromptName = targetPromptName.Substring(serverId.Length + 1);
+                    }
+                    else if (targetPromptName.StartsWith(serverId + "__", StringComparison.OrdinalIgnoreCase))
+                    {
+                        targetPromptName = targetPromptName.Substring(serverId.Length + 2);
+                    }
+                    else if (targetPromptName.StartsWith(serverId + ":", StringComparison.OrdinalIgnoreCase))
+                    {
+                        targetPromptName = targetPromptName.Substring(serverId.Length + 1);
+                    }
                 }
 
                 var routing = new PromptRoutingManager();
@@ -805,7 +854,8 @@ namespace ModelContextGateway.Components.Capabilities
 
                 if (serverId == "router")
                 {
-                    var res = await routing.GetPromptAsync(targetPromptName, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson);
+                    var lookupName = targetPromptName.StartsWith("router__") ? targetPromptName : $"router__{targetPromptName}";
+                    var res = await routing.GetPromptAsync(lookupName, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson);
                     return Results.Ok(res);
                 }
 

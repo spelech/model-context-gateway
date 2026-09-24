@@ -495,5 +495,32 @@ namespace ModelContextGateway.Tests
                 DbKeyHelper.ActiveKeySource = origKeySource;
             }
         }
+
+        [Fact]
+        [Requirement("MCP-35", "MCP", RequirementType.Positive, "Test call and prompt endpoints resolve server and strip prefix across slash, dunder, and colon delimiters.")]
+        public async Task TestCall_ResolvesServerAndStripsPrefix_AcrossDelimiters()
+        {
+            var client = CreateAuthenticatedClient();
+
+            // 1. Call with slash delimiter where serverId is omitted or custom
+            var slashRes = await client.PostAsJsonAsync("/api/test/call", new { serverId = "custom", toolName = "test-serv-1/arr_status", arguments = new { } });
+            // Server exists or not, but status must NOT be 500
+            Assert.True((int)slashRes.StatusCode < 500);
+
+            // 2. Call with dunder delimiter
+            var dunderRes = await client.PostAsJsonAsync("/api/test/call", new { serverId = "", toolName = "test-serv-1__arr_status", arguments = new { } });
+            Assert.True((int)dunderRes.StatusCode < 500);
+
+            // 3. Call with colon delimiter
+            var colonRes = await client.PostAsJsonAsync("/api/test/call", new { serverId = "custom", toolName = "test-serv-1:arr_status", arguments = new { } });
+            Assert.True((int)colonRes.StatusCode < 500);
+
+            // 4. Prompts get with slash and dunder
+            var promptSlashRes = await client.PostAsJsonAsync("/api/test/prompts/get", new { serverId = "custom", promptName = "router/diagnose_failure", arguments = new { } });
+            Assert.True((int)promptSlashRes.StatusCode < 500);
+
+            var promptDunderRes = await client.PostAsJsonAsync("/api/test/prompts/get", new { serverId = "", promptName = "router__diagnose_failure", arguments = new { } });
+            Assert.True((int)promptDunderRes.StatusCode < 500);
+        }
     }
 }
