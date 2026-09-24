@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **439 Requirements Verified** across **962 Test Proofs** (349 Functional Capabilities, 90 Safety Guardrails).
+> **Catalog Statistics:** **439 Requirements Verified** across **969 Test Proofs** (349 Functional Capabilities, 90 Safety Guardrails).
 
 ---
 
@@ -17,8 +17,8 @@
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **65** | 3 | 62 | 137 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **112** | 106 | 6 | 229 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
-| **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **35** | 31 | 4 | 41 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **28** | 25 | 3 | 134 proofs |
+| **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **35** | 31 | 4 | 42 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **28** | 25 | 3 | 140 proofs |
 
 ---
 
@@ -2076,10 +2076,11 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L303`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L303) (`HttpTransport_Applies_Slack_PerUser_Token_And_ForwardedUser`)
   - [Playwright E2E] [`frontend/e2e/full-ui-flow-http-direct.spec.ts#L8`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/full-ui-flow-http-direct.spec.ts#L8) (`should register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench`)
 
-### `[TRANS-02]` Register STDIO server with Env provider, verify connection card, and execute tool via Test Bench.
+### `[TRANS-02]` HttpTransport SendNotificationAsync gracefully handles 404 and 405 without throwing exceptions
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (2):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/TransportResilienceTests.cs#L160`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportResilienceTests.cs#L160) (`HttpTransport_SendNotificationAsync_DoesNotThrow_On404Or405`)
   - [Playwright E2E] [`frontend/e2e/full-ui-flow-stdio-env.spec.ts#L8`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/full-ui-flow-stdio-env.spec.ts#L8) (`should register STDIO server, verify card, and execute echo tool via Test Bench`)
 
 ### `[TRANS-04]` HTTP stateless transport correctly accumulates multi-line SSE streams and skips intermediate notification events
@@ -2371,9 +2372,15 @@
 ### `[UI-07]` Audits desktop viewport layout for zero horizontal overflow and high UX score.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (2):**
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L38`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L38) (`should pass layout audit on desktop 1080p viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L64`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L64) (`should pass layout audit on Samsung Galaxy S25+ mobile viewport`)
+* **Verification Proofs (8):**
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L96`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L96) (`should pass layout audit on desktop 1080p viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L117`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L117) (`should pass layout audit on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L139`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L139) (`should pass layout audit for Add Server modal on desktop 1080p`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L179`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L179) (`should pass layout audit for Add Server modal on Samsung Galaxy S25+ mobile`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L221`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L221) (`should pass layout audit across Capabilities Inspect modal tabs`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L277`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L277) (`should pass layout audit on App Keys & Security tab`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L305`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L305) (`should pass layout audit on Settings tab`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L333`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L333) (`should maintain layout stability during tab navigation`)
 
 ### `[UI-102]` Dashboard renders stats card, connected server list, and setup instructions
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -3571,7 +3578,7 @@
 | `SEC-VAULT-CUSTOM-PATH` | Positive | `SEC` | Bootstraps master key from Vault using custom mount path and secret key name. | [`DbKeyHelperTests.cs:L236`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DbKeyHelperTests.cs#L236) | Backend xUnit |
 | `UI-105` | Positive | `SEC` | renders system logs and handles level filter | [`LogsTerminalCard.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LogsTerminalCard.test.tsx#L1) | Frontend Vitest |
 | `TRANS-01` | Positive | `TRANS` | HttpTransport formats X-API-Key header when downstream server AuthShape is 'x-api-key'. | [`EnterpriseAuthAndVaultScenarioTests.cs:L258`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L258) | Backend xUnit |
-| `TRANS-02` | Positive | `TRANS` | Register STDIO server with Env provider, verify connection card, and execute tool via Test Bench. | [`full-ui-flow-stdio-env.spec.ts:L8`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/full-ui-flow-stdio-env.spec.ts#L8) | Playwright E2E |
+| `TRANS-02` | Positive | `TRANS` | HttpTransport SendNotificationAsync gracefully handles 404 and 405 without throwing exceptions | [`TransportResilienceTests.cs:L160`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportResilienceTests.cs#L160) | Backend xUnit |
 | `TRANS-04` | Positive | `TRANS` | HTTP stateless transport correctly accumulates multi-line SSE streams and skips intermediate notification events | [`HttpTransportTests.cs:L72`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/HttpTransportTests.cs#L72) | Backend xUnit |
 | `TRANS-05` | Positive | `TRANS` | HTTP stateless transport reads entire multi-line and formatted JSON response bodies without premature truncation | [`HttpTransportTests.cs:L109`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/HttpTransportTests.cs#L109) | Backend xUnit |
 | `TRANS-06` | Positive | `TRANS` | HTTP stateless transport joins multi-line SSE data fields into complete JSON payloads | [`HttpTransportTests.cs:L146`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/HttpTransportTests.cs#L146) | Backend xUnit |
@@ -3611,7 +3618,7 @@
 | `UI-04` | Positive | `UI` | Tool selector filters available tools by selected backend server | [`ToolTesterCard.test.tsx:L77`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ToolTesterCard.test.tsx#L77) | Frontend Vitest |
 | `UI-05` | Positive | `UI` | Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API. | [`PipelineIntegrationTests.cs:L253`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L253) | Backend xUnit |
 | `UI-06` | Positive | `UI` | Router supports uploading and retrieving custom branding logo images via dedicated endpoints. | [`PipelineIntegrationTests.cs:L447`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L447) | Backend xUnit |
-| `UI-07` | Positive | `UI` | Audits desktop viewport layout for zero horizontal overflow and high UX score. | [`layout-inspector.spec.ts:L38`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L38) | Playwright E2E |
+| `UI-07` | Positive | `UI` | Audits desktop viewport layout for zero horizontal overflow and high UX score. | [`layout-inspector.spec.ts:L96`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L96) | Playwright E2E |
 | `UI-102` | Positive | `UI` | Dashboard renders stats card, connected server list, and setup instructions | [`DashboardView.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/DashboardView.test.tsx#L1) | Frontend Vitest |
 | `UI-103` | Positive | `UI` | Interactive tool tester renders server and tool selection dropdowns | [`ToolTesterCard.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ToolTesterCard.test.tsx#L1) | Frontend Vitest |
 | `UI-108` | Positive | `UI` | renders nothing when isMappingModalOpen is false | [`MappingModal.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/MappingModal.test.tsx#L1) | Frontend Vitest |

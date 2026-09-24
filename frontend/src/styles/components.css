@@ -235,7 +235,7 @@ input:checked + .slider:before {
     align-items: center;
     padding: var(--space-4);
     box-sizing: border-box;
-    overflow-y: auto;
+    overflow: hidden;
 }
 
 /* Modal Card */
@@ -251,6 +251,7 @@ input:checked + .slider:before {
     flex-direction: column;
     margin: auto;
     overflow-y: auto;
+    overscroll-behavior: contain;
     box-sizing: border-box;
 }
 
@@ -297,6 +298,10 @@ input:checked + .slider:before {
     flex-direction: column;
     gap: var(--space-2);
     margin-bottom: var(--space-5);
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 .form-group label {
     font-size: var(--font-size-xs);
@@ -316,6 +321,11 @@ input:checked + .slider:before {
     font-family: inherit;
     font-size: var(--font-size-md);
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    text-overflow: ellipsis;
 }
 .form-group input:focus,
 .form-group select:focus {
@@ -326,8 +336,11 @@ input:checked + .slider:before {
 }
 .form-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 15px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
 }
 
 /* Custom Checkbox Alignment */

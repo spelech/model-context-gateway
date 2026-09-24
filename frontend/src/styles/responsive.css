@@ -65,7 +65,7 @@
 
     /* Forms */
     .form-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 15px;
     }
 
@@ -236,9 +236,10 @@
     /* Modals scaling */
     .modal-card {
         padding: var(--space-4) 15px;
-        max-height: calc(100vh - 20px);
-        max-height: calc(100dvh - 20px);
+        max-height: calc(100vh - 48px);
+        max-height: calc(100dvh - 48px);
         width: 95%;
+        overscroll-behavior: contain;
     }
 
     .modal-footer {
