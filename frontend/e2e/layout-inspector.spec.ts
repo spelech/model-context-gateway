@@ -37,6 +37,19 @@ test.describe('Dashboard Layout & UX Audit', () => {
               promptsCount: 2,
               resourcesCount: 1,
             },
+            {
+              id: 'mock-user-mcp',
+              displayName: 'User MCP Server',
+              type: 'sse',
+              url: 'http://localhost:8023/sse',
+              enabled: true,
+              connectionStatus: 'Connected',
+              categories: ['Personal'],
+              secretProvider: 'UserProvided',
+              toolsCount: 3,
+              promptsCount: 1,
+              resourcesCount: 0,
+            },
           ],
         });
       }
@@ -122,7 +135,12 @@ test.describe('Dashboard Layout & UX Audit', () => {
           });
         }
         if (path.includes('/quotas')) {
-          return route.fulfill({ json: { quotas: [] } });
+          return route.fulfill({
+            json: [
+              { username: 'developer1', maxKeys: 5, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+              { username: 'qa-tester', maxKeys: 10, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+            ],
+          });
         }
         return route.fulfill({
           json: [
@@ -159,22 +177,69 @@ test.describe('Dashboard Layout & UX Audit', () => {
           },
         });
       }
+      if (path === '/api/providers/auth') {
+        return route.fulfill({
+          json: [
+            {
+              providerName: 'ActiveDirectory',
+              isEnabled: true,
+              configJson: JSON.stringify({ server: 'ad.company.local', port: 636, useSsl: true, domain: 'company.local' }),
+            },
+          ],
+        });
+      }
+      if (path === '/api/providers/secrets' || path === '/api/providers/secret') {
+        return route.fulfill({
+          json: [
+            {
+              providerName: 'Vault',
+              isEnabled: true,
+              vaultAddress: 'https://vault.company.local:8200',
+            },
+          ],
+        });
+      }
       if (path === '/api/settings/providers') {
         return route.fulfill({
           json: {
-            authProviders: [],
-            secretProviders: [],
+            authProviders: [
+              {
+                providerName: 'ActiveDirectory',
+                isEnabled: true,
+                configJson: JSON.stringify({ server: 'ad.company.local', port: 636, useSsl: true, domain: 'company.local' }),
+              },
+            ],
+            secretProviders: [
+              {
+                providerName: 'Vault',
+                isEnabled: true,
+                vaultAddress: 'https://vault.company.local:8200',
+              },
+            ],
           },
         });
       }
       if (path.startsWith('/api/custom-files')) {
-        return route.fulfill({ json: [] });
+        return route.fulfill({
+          json: [
+            { type: 'prompts', name: 'sample-prompt.json', sizeBytes: 1024, lastModified: '2026-01-01T00:00:00Z' },
+            { type: 'resources', name: 'sample-guide.md', sizeBytes: 2048, lastModified: '2026-01-01T00:00:00Z' },
+          ],
+        });
       }
       if (path === '/api/policies' || path.startsWith('/api/permissions/policies')) {
-        return route.fulfill({ json: [] });
+        return route.fulfill({
+          json: [
+            { id: 'pol-1', targetId: 'server:mock-docker', requiredGroup: 'developers', isAllowed: true },
+          ],
+        });
       }
       if (path === '/api/group-mappings' || path.startsWith('/api/permissions/mappings')) {
-        return route.fulfill({ json: [] });
+        return route.fulfill({
+          json: [
+            { id: 'map-1', externalGroup: 'corp-devs', internalGroup: 'developers' },
+          ],
+        });
       }
       if (path.startsWith('/api/user/credentials')) {
         return route.fulfill({ json: [] });
@@ -708,4 +773,330 @@ test.describe('Dashboard Layout & UX Audit', () => {
     expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
   });
 
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits App Keys & Security sub-tabs (Personal Keys, System Keys, User Quotas) on Samsung Galaxy S25+ mobile viewport for zero horizontal overflow and high UX score.
+   */
+  test('should pass layout audit on App Keys & Security sub-tabs on Samsung Galaxy S25+ mobile viewport', async ({ page }) => {
+    const s25plus = getDevicePreset('Samsung Galaxy S25+');
+    await page.setViewportSize({ width: s25plus.width, height: s25plus.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const securityNavBtn = page.locator('.tabs-nav button:has-text("App Keys & Security")');
+    await expect(securityNavBtn).toBeVisible();
+    await securityNavBtn.click();
+    await expect(page.locator('#view-security')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+
+    // 1. Audit Personal Keys view
+    let result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(80);
+
+    // 2. Click System Keys sub-tab, audit
+    const systemTabBtn = page.locator('.sub-tabs-nav button:has-text("System Keys"), .sub-tabs-nav button:has-text("System")');
+    await expect(systemTabBtn).toBeVisible();
+    await systemTabBtn.click();
+    await expect(page.locator('#appkeys-table')).toBeVisible();
+
+    result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(80);
+
+    // 3. Click User Quotas sub-tab, audit
+    const quotasTabBtn = page.locator('.sub-tabs-nav button:has-text("User Quotas"), .sub-tabs-nav button:has-text("Quotas")');
+    await expect(quotasTabBtn).toBeVisible();
+    await quotasTabBtn.click();
+    await expect(page.locator('#user-quotas-table')).toBeVisible();
+
+    result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+      checkFocusIndicators: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(80);
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits App Keys & Security sub-tabs (Personal Keys, System Keys, User Quotas) on Samsung Galaxy Tab S10 Lite tablet viewport for zero horizontal overflow and high UX score.
+   */
+  test('should pass layout audit on App Keys & Security sub-tabs on Samsung Galaxy Tab S10 Lite tablet viewport', async ({ page }) => {
+    await page.setViewportSize({ width: tabS10Lite.width, height: tabS10Lite.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const securityNavBtn = page.locator('.tabs-nav button:has-text("App Keys & Security")');
+    await expect(securityNavBtn).toBeVisible();
+    await securityNavBtn.click();
+    await expect(page.locator('#view-security')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+
+    // 1. Audit Personal Keys view
+    let result = await inspector.audit({
+      device: tabS10Lite,
+      includeScreenshot: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
+
+    // 2. Click System Keys sub-tab, audit
+    const systemTabBtn = page.locator('.sub-tabs-nav button:has-text("System Keys"), .sub-tabs-nav button:has-text("System")');
+    await expect(systemTabBtn).toBeVisible();
+    await systemTabBtn.click();
+    await expect(page.locator('#appkeys-table')).toBeVisible();
+
+    result = await inspector.audit({
+      device: tabS10Lite,
+      includeScreenshot: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
+
+    // 3. Click User Quotas sub-tab, audit
+    const quotasTabBtn = page.locator('.sub-tabs-nav button:has-text("User Quotas"), .sub-tabs-nav button:has-text("Quotas")');
+    await expect(quotasTabBtn).toBeVisible();
+    await quotasTabBtn.click();
+    await expect(page.locator('#user-quotas-table')).toBeVisible();
+
+    result = await inspector.audit({
+      device: tabS10Lite,
+      includeScreenshot: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits Settings sub-tabs across Vector & Search, Identity & Auth, Secret Providers, Prompts & Resources, and Access Control on Samsung Galaxy S25+ mobile viewport for zero overflow.
+   */
+  test('should pass layout audit on Settings sub-tabs on Samsung Galaxy S25+ mobile viewport', async ({ page }) => {
+    const s25plus = getDevicePreset('Samsung Galaxy S25+');
+    await page.setViewportSize({ width: s25plus.width, height: s25plus.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const settingsNavBtn = page.locator('.tabs-nav button:has-text("Settings")');
+    await expect(settingsNavBtn).toBeVisible();
+    await settingsNavBtn.click();
+    await expect(page.locator('#view-settings')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+
+    // 1. Audit Vector & Search (GeneralTab)
+    let result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    // 2. Identity & Auth
+    const identityTabBtn = page.locator('.settings-sub-nav button:has-text("Identity & Auth")');
+    await expect(identityTabBtn).toBeVisible();
+    await identityTabBtn.click();
+    result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    // 3. Secret Providers
+    const secretsTabBtn = page.locator('.settings-sub-nav button:has-text("Secret Providers")');
+    await expect(secretsTabBtn).toBeVisible();
+    await secretsTabBtn.click();
+    result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    // 4. Prompts & Resources
+    const filesTabBtn = page.locator('.settings-sub-nav button:has-text("Prompts & Resources")');
+    await expect(filesTabBtn).toBeVisible();
+    await filesTabBtn.click();
+    result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    // 5. Access Control
+    const permissionsTabBtn = page.locator('.settings-sub-nav button:has-text("Access Control")');
+    await expect(permissionsTabBtn).toBeVisible();
+    await permissionsTabBtn.click();
+    result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits Settings sub-tabs across Vector & Search, Identity & Auth, Secret Providers, Prompts & Resources, and Access Control on Samsung Galaxy Tab S10 Lite tablet viewport for zero overflow.
+   */
+  test('should pass layout audit on Settings sub-tabs on Samsung Galaxy Tab S10 Lite tablet viewport', async ({ page }) => {
+    await page.setViewportSize({ width: tabS10Lite.width, height: tabS10Lite.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const settingsNavBtn = page.locator('.tabs-nav button:has-text("Settings")');
+    await expect(settingsNavBtn).toBeVisible();
+    await settingsNavBtn.click();
+    await expect(page.locator('#view-settings')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+
+    // 1. Audit Vector & Search (GeneralTab)
+    let result = await inspector.audit({
+      device: tabS10Lite,
+      includeScreenshot: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    // 2. Identity & Auth
+    const identityTabBtn = page.locator('.settings-sub-nav button:has-text("Identity & Auth")');
+    await expect(identityTabBtn).toBeVisible();
+    await identityTabBtn.click();
+    result = await inspector.audit({
+      device: tabS10Lite,
+      includeScreenshot: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    // 3. Secret Providers
+    const secretsTabBtn = page.locator('.settings-sub-nav button:has-text("Secret Providers")');
+    await expect(secretsTabBtn).toBeVisible();
+    await secretsTabBtn.click();
+    result = await inspector.audit({
+      device: tabS10Lite,
+      includeScreenshot: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    // 4. Prompts & Resources
+    const filesTabBtn = page.locator('.settings-sub-nav button:has-text("Prompts & Resources")');
+    await expect(filesTabBtn).toBeVisible();
+    await filesTabBtn.click();
+    result = await inspector.audit({
+      device: tabS10Lite,
+      includeScreenshot: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+
+    // 5. Access Control
+    const permissionsTabBtn = page.locator('.settings-sub-nav button:has-text("Access Control")');
+    await expect(permissionsTabBtn).toBeVisible();
+    await permissionsTabBtn.click();
+    result = await inspector.audit({
+      device: tabS10Lite,
+      includeScreenshot: false,
+    });
+    expect(result.overflowIssues.length).toBe(0);
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits My MCP Servers view layout on Desktop 1080p viewport for zero horizontal overflow and high UX score.
+   */
+  test('should pass layout audit on My MCP Servers tab on desktop 1080p viewport', async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const myMcpNavBtn = page.locator('.tabs-nav button:has-text("My MCP Servers")');
+    await expect(myMcpNavBtn).toBeVisible();
+    await myMcpNavBtn.click();
+    await expect(page.locator('#view-my-mcp-servers')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: getDevicePreset('Desktop 1080p'),
+      includeScreenshot: false,
+      checkFocusIndicators: false,
+    });
+
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits My MCP Servers view layout on Samsung Galaxy S25+ mobile viewport for zero horizontal overflow and acceptable UX score.
+   */
+  test('should pass layout audit on My MCP Servers tab on Samsung Galaxy S25+ mobile viewport', async ({ page }) => {
+    const s25plus = getDevicePreset('Samsung Galaxy S25+');
+    await page.setViewportSize({ width: s25plus.width, height: s25plus.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const myMcpNavBtn = page.locator('.tabs-nav button:has-text("My MCP Servers")');
+    await expect(myMcpNavBtn).toBeVisible();
+    await myMcpNavBtn.click();
+    await expect(page.locator('#view-my-mcp-servers')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: s25plus,
+      includeScreenshot: false,
+      checkFocusIndicators: false,
+    });
+
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(80);
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits My MCP Servers view layout on Samsung Galaxy Tab S10 Lite tablet viewport for zero horizontal overflow and high UX score.
+   */
+  test('should pass layout audit on My MCP Servers tab on Samsung Galaxy Tab S10 Lite tablet viewport', async ({ page }) => {
+    await page.setViewportSize({ width: tabS10Lite.width, height: tabS10Lite.height });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const myMcpNavBtn = page.locator('.tabs-nav button:has-text("My MCP Servers")');
+    await expect(myMcpNavBtn).toBeVisible();
+    await myMcpNavBtn.click();
+    await expect(page.locator('#view-my-mcp-servers')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      device: tabS10Lite,
+      includeScreenshot: false,
+      checkFocusIndicators: false,
+    });
+
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
+  });
+
 });
+

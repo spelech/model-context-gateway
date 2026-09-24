@@ -34,7 +34,7 @@ export const AccessControlTab: React.FC<AccessControlTabProps> = ({
           Define target-specific allow/deny rules for users based on their active directory or OIDC groups. TargetId format: <code>server:&lt;id&gt;</code>, <code>tool:&lt;name&gt;</code>, <code>prompt:&lt;name&gt;</code>, <code>resource:&lt;uri&gt;</code>.
         </p>
         <div className="table-container" style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
+          <table id="policies-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
                 <th style={{ padding: '10px' }}>Target ID</th>
@@ -99,7 +99,7 @@ export const AccessControlTab: React.FC<AccessControlTabProps> = ({
           Map external Active Directory SIDs or OIDC / SSO groups to internal virtual groups for easier access control.
         </p>
         <div className="table-container" style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
+          <table id="mappings-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
                 <th style={{ padding: '10px' }}>External Group / SID</th>
