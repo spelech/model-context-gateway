@@ -175,6 +175,22 @@
         margin-top: 2px;
     }
 
+    /* Table container overflow containment */
+    .table-container {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .guide-content {
+        max-width: 100%;
+        overflow-wrap: break-word;
+        word-break: break-word;
+        box-sizing: border-box;
+    }
+
     /* Table reflow for clients table */
     #clients-table {
         display: block;

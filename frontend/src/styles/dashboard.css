@@ -175,12 +175,17 @@
 
 /* Tables styling */
 .table-container {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     overflow-x: auto;
-
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
 }
 
 table {
-
+    width: 100%;
+    min-width: 600px;
     border-collapse: collapse;
     font-size: var(--font-size-sm);
     text-align: left;
