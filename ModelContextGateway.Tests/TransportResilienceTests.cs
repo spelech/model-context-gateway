@@ -158,7 +158,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("TRANS-02", "TRANS", RequirementType.Positive, "HttpTransport SendNotificationAsync gracefully handles 404 and 405 without throwing exceptions")]
+        [Requirement("TRANS-03", "TRANS", RequirementType.Positive, "HttpTransport SendNotificationAsync gracefully handles 404 and 405 without throwing exceptions")]
         public async Task HttpTransport_SendNotificationAsync_DoesNotThrow_On404Or405()
         {
             var server = new McpServer

@@ -209,7 +209,7 @@ test.describe('Dashboard Layout & UX Audit', () => {
     expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(80);
 
     const isScrollable = await page.locator('#server-modal .modal-card').evaluate((el) => {
-      return el.scrollHeight >= el.clientHeight;
+      return el.scrollHeight > el.clientHeight;
     });
     expect(isScrollable).toBe(true);
 

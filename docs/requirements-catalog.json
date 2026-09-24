@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-24T00:48:34.8400969Z",
-    "totalRequirements": 439,
-    "positiveCount": 349,
+    "generatedAt": "2026-09-24T00:58:07.1039793Z",
+    "totalRequirements": 440,
+    "positiveCount": 350,
     "guardrailCount": 90,
     "totalProofs": 969
   },
@@ -8941,21 +8941,30 @@
       "id": "TRANS-02",
       "category": "TRANS",
       "type": "Positive",
+      "description": "Register STDIO server with Env provider, verify connection card, and execute tool via Test Bench.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/full-ui-flow-stdio-env.spec.ts",
+          "lineNumber": 8,
+          "testName": "should register STDIO server, verify card, and execute echo tool via Test Bench",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "TRANS-03",
+      "category": "TRANS",
+      "type": "Positive",
       "description": "HttpTransport SendNotificationAsync gracefully handles 404 and 405 without throwing exceptions",
-      "proofCount": 2,
+      "proofCount": 1,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/TransportResilienceTests.cs",
           "lineNumber": 160,
           "testName": "HttpTransport_SendNotificationAsync_DoesNotThrow_On404Or405",
-          "details": null
-        },
-        {
-          "suite": "Playwright E2E",
-          "filePath": "frontend/e2e/full-ui-flow-stdio-env.spec.ts",
-          "lineNumber": 8,
-          "testName": "should register STDIO server, verify card, and execute echo tool via Test Bench",
           "details": null
         }
       ]
