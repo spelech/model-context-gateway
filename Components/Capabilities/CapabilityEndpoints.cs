@@ -229,7 +229,7 @@ namespace ModelContextGateway.Components.Capabilities
                             catch (Exception ex)
                             {
                                 conn?.Dispose();
-                                logger.LogError(ex, "Failed to connect to server {ServerId} for tool listing", server.Id);
+                                logger.LogWarning("Could not connect to server {ServerId} for tool listing: {Message}", server.Id, ex.Message);
                             }
                         });
                         var allTasks = Task.WhenAll(tasks);
@@ -311,19 +311,36 @@ namespace ModelContextGateway.Components.Capabilities
                 }
 
                 var targetToolName = toolName;
+                var prefixesToStrip = new List<string>();
                 if (!string.IsNullOrEmpty(serverId))
                 {
-                    if (targetToolName.StartsWith(serverId + "/", StringComparison.OrdinalIgnoreCase))
+                    prefixesToStrip.Add(serverId);
+                }
+                if (!string.IsNullOrEmpty(server.Id))
+                {
+                    prefixesToStrip.Add(server.Id);
+                }
+                if (!string.IsNullOrEmpty(server.Alias))
+                {
+                    prefixesToStrip.Add(server.Alias);
+                }
+
+                foreach (var p in prefixesToStrip.Distinct(StringComparer.OrdinalIgnoreCase))
+                {
+                    if (targetToolName.StartsWith(p + "/", StringComparison.OrdinalIgnoreCase))
                     {
-                        targetToolName = targetToolName.Substring(serverId.Length + 1);
+                        targetToolName = targetToolName.Substring(p.Length + 1);
+                        break;
                     }
-                    else if (targetToolName.StartsWith(serverId + "__", StringComparison.OrdinalIgnoreCase))
+                    if (targetToolName.StartsWith(p + "__", StringComparison.OrdinalIgnoreCase))
                     {
-                        targetToolName = targetToolName.Substring(serverId.Length + 2);
+                        targetToolName = targetToolName.Substring(p.Length + 2);
+                        break;
                     }
-                    else if (targetToolName.StartsWith(serverId + ":", StringComparison.OrdinalIgnoreCase))
+                    if (targetToolName.StartsWith(p + ":", StringComparison.OrdinalIgnoreCase))
                     {
-                        targetToolName = targetToolName.Substring(serverId.Length + 1);
+                        targetToolName = targetToolName.Substring(p.Length + 1);
+                        break;
                     }
                 }
 
@@ -539,7 +556,7 @@ namespace ModelContextGateway.Components.Capabilities
                             catch (Exception ex)
                             {
                                 conn?.Dispose();
-                                logger.LogError(ex, "Failed to connect to server {ServerId} for prompt listing", server.Id);
+                                logger.LogWarning("Could not connect to server {ServerId} for prompt listing: {Message}", server.Id, ex.Message);
                             }
                         });
                         var allTasks = Task.WhenAll(tasks);
@@ -706,7 +723,7 @@ namespace ModelContextGateway.Components.Capabilities
                             catch (Exception ex)
                             {
                                 conn?.Dispose();
-                                logger.LogError(ex, "Failed to connect to server {ServerId} for resource listing", server.Id);
+                                logger.LogWarning("Could not connect to server {ServerId} for resource listing: {Message}", server.Id, ex.Message);
                             }
                         });
                         var allTasks = Task.WhenAll(tasks);
@@ -789,26 +806,9 @@ namespace ModelContextGateway.Components.Capabilities
                     }
                 }
 
-                if (serverId != "router" && !servers.Any(s => s.Id == serverId))
+                if (serverId != "router" && !servers.Any(s => s.Id == serverId || (s.Alias != null && s.Alias == serverId)))
                 {
                     return Results.NotFound($"Server {serverId} not found");
-                }
-
-                var targetPromptName = promptName;
-                if (!string.IsNullOrEmpty(serverId))
-                {
-                    if (targetPromptName.StartsWith(serverId + "/", StringComparison.OrdinalIgnoreCase))
-                    {
-                        targetPromptName = targetPromptName.Substring(serverId.Length + 1);
-                    }
-                    else if (targetPromptName.StartsWith(serverId + "__", StringComparison.OrdinalIgnoreCase))
-                    {
-                        targetPromptName = targetPromptName.Substring(serverId.Length + 2);
-                    }
-                    else if (targetPromptName.StartsWith(serverId + ":", StringComparison.OrdinalIgnoreCase))
-                    {
-                        targetPromptName = targetPromptName.Substring(serverId.Length + 1);
-                    }
                 }
 
                 var routing = new PromptRoutingManager();
@@ -839,42 +839,116 @@ namespace ModelContextGateway.Components.Capabilities
                     return json;
                 };
 
-                var payload = new
+                if (serverId == "router")
+                {
+                    var targetPromptName = promptName;
+                    var prefixesToStrip = new List<string> { "router" };
+                    foreach (var p in prefixesToStrip)
+                    {
+                        if (targetPromptName.StartsWith(p + "/", StringComparison.OrdinalIgnoreCase))
+                        {
+                            targetPromptName = targetPromptName.Substring(p.Length + 1);
+                            break;
+                        }
+                        if (targetPromptName.StartsWith(p + "__", StringComparison.OrdinalIgnoreCase))
+                        {
+                            targetPromptName = targetPromptName.Substring(p.Length + 2);
+                            break;
+                        }
+                        if (targetPromptName.StartsWith(p + ":", StringComparison.OrdinalIgnoreCase))
+                        {
+                            targetPromptName = targetPromptName.Substring(p.Length + 1);
+                            break;
+                        }
+                    }
+
+                    var payload = new
+                    {
+                        jsonrpc = "2.0",
+                        id = "test-prompt-id",
+                        method = "prompts/get",
+                        @params = new
+                        {
+                            name = targetPromptName,
+                            arguments = model.Arguments.ValueKind == JsonValueKind.Undefined ? (object)new Dictionary<string, object>() : model.Arguments
+                        }
+                    };
+                    var body = JsonSerializer.Serialize(payload);
+                    var lookupName = targetPromptName.StartsWith("router__") ? targetPromptName : $"router__{targetPromptName}";
+                    var res = await routing.GetPromptAsync(lookupName, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson);
+                    return Results.Ok(res);
+                }
+
+                var targetServer = servers.First(s => s.Id == serverId || (s.Alias != null && s.Alias == serverId));
+                var targetPromptNameBackend = promptName;
+                var prefixes = new List<string>();
+                if (!string.IsNullOrEmpty(serverId))
+                {
+                    prefixes.Add(serverId);
+                }
+                if (!string.IsNullOrEmpty(targetServer.Id))
+                {
+                    prefixes.Add(targetServer.Id);
+                }
+                if (!string.IsNullOrEmpty(targetServer.Alias))
+                {
+                    prefixes.Add(targetServer.Alias);
+                }
+
+                foreach (var p in prefixes.Distinct(StringComparer.OrdinalIgnoreCase))
+                {
+                    if (targetPromptNameBackend.StartsWith(p + "/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        targetPromptNameBackend = targetPromptNameBackend.Substring(p.Length + 1);
+                        break;
+                    }
+                    if (targetPromptNameBackend.StartsWith(p + "__", StringComparison.OrdinalIgnoreCase))
+                    {
+                        targetPromptNameBackend = targetPromptNameBackend.Substring(p.Length + 2);
+                        break;
+                    }
+                    if (targetPromptNameBackend.StartsWith(p + ":", StringComparison.OrdinalIgnoreCase))
+                    {
+                        targetPromptNameBackend = targetPromptNameBackend.Substring(p.Length + 1);
+                        break;
+                    }
+                }
+
+                var backendPayload = new
                 {
                     jsonrpc = "2.0",
                     id = "test-prompt-id",
                     method = "prompts/get",
                     @params = new
                     {
-                        name = targetPromptName,
+                        name = targetPromptNameBackend,
                         arguments = model.Arguments.ValueKind == JsonValueKind.Undefined ? (object)new Dictionary<string, object>() : model.Arguments
                     }
                 };
-                var body = JsonSerializer.Serialize(payload);
+                var backendBody = JsonSerializer.Serialize(backendPayload);
 
-                if (serverId == "router")
+                try
                 {
-                    var lookupName = targetPromptName.StartsWith("router__") ? targetPromptName : $"router__{targetPromptName}";
-                    var res = await routing.GetPromptAsync(lookupName, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson);
-                    return Results.Ok(res);
-                }
+                    using var conn = new BackendConnection(targetServer, httpClient, logger, secretRetriever);
+                    if (targetServer.Type != "http" && targetServer.Type != "streamable")
+                    {
+                        using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                        await conn.ConnectAsync().WaitAsync(ctsTimeout.Token);
+                        conn.StartReader(msg => Task.CompletedTask);
+                    }
+                    using var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                    var initReq = GatewayMetadata.BuildTestBenchInitializeRequest();
+                    await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
+                    await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
 
-                var targetServer = servers.First(s => s.Id == serverId);
-                using var conn = new BackendConnection(targetServer, httpClient, logger, secretRetriever);
-                if (targetServer.Type != "http" && targetServer.Type != "streamable")
+                    var promptRes = await conn.SendRequestAsync("prompts/get", backendBody);
+                    return Results.Ok(promptRes);
+                }
+                catch (Exception ex)
                 {
-                    using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                    await conn.ConnectAsync().WaitAsync(ctsTimeout.Token);
-                    conn.StartReader(msg => Task.CompletedTask);
+                    logger.LogWarning("Failed to execute prompts/get on server {ServerId}: {Message}", targetServer.Id, ex.Message);
+                    return Results.Problem("An unexpected error occurred.");
                 }
-                using var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                var initReq = GatewayMetadata.BuildTestBenchInitializeRequest();
-                await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
-                await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
-                backendConnections[targetServer.Id] = conn;
-
-                var promptRes = await routing.GetPromptAsync(targetPromptName, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson);
-                return Results.Ok(promptRes);
             };
 
             api.MapPost("/api/test/prompts/get", handleTestPromptGet);
@@ -921,27 +995,72 @@ namespace ModelContextGateway.Components.Capabilities
                     serverId = servers[0].Id;
                 }
 
-                if (string.IsNullOrEmpty(serverId) || !servers.Any(s => s.Id == serverId))
+                if (string.IsNullOrEmpty(serverId) || !servers.Any(s => s.Id == serverId || (s.Alias != null && s.Alias == serverId)))
                 {
                     return Results.BadRequest("Invalid resource URI or server not found");
                 }
 
-                var targetServer = servers.First(s => s.Id == serverId);
-                using var conn = new BackendConnection(targetServer, httpClient, logger, secretRetriever);
-                if (targetServer.Type != "http" && targetServer.Type != "streamable")
-                {
-                    using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                    await conn.ConnectAsync().WaitAsync(ctsTimeout.Token);
-                    conn.StartReader(msg => Task.CompletedTask);
-                }
-                using var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                var initReq = GatewayMetadata.BuildTestBenchInitializeRequest();
-                await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
-                await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
-                backendConnections[targetServer.Id] = conn;
+                var targetServer = servers.First(s => s.Id == serverId || (s.Alias != null && s.Alias == serverId));
 
-                var res = await routing.ReadResourceAsync(uri, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson, sessionManager);
-                return Results.Ok(res);
+                // Unescape / un-virtualize mcp://{serverId}/{rawUri}
+                var rawUri = uri;
+                var prefixes = new List<string>();
+                if (!string.IsNullOrEmpty(serverId))
+                {
+                    prefixes.Add($"mcp://{serverId}/");
+                }
+                if (!string.IsNullOrEmpty(targetServer.Id))
+                {
+                    prefixes.Add($"mcp://{targetServer.Id}/");
+                }
+                if (!string.IsNullOrEmpty(targetServer.Alias))
+                {
+                    prefixes.Add($"mcp://{targetServer.Alias}/");
+                }
+
+                foreach (var p in prefixes.Distinct(StringComparer.OrdinalIgnoreCase))
+                {
+                    if (rawUri.StartsWith(p, StringComparison.OrdinalIgnoreCase))
+                    {
+                        rawUri = Uri.UnescapeDataString(rawUri.Substring(p.Length));
+                        break;
+                    }
+                }
+
+                var backendPayload = new
+                {
+                    jsonrpc = "2.0",
+                    id = "test-resource-id",
+                    method = "resources/read",
+                    @params = new
+                    {
+                        uri = rawUri
+                    }
+                };
+                var backendBody = JsonSerializer.Serialize(backendPayload);
+
+                try
+                {
+                    using var conn = new BackendConnection(targetServer, httpClient, logger, secretRetriever);
+                    if (targetServer.Type != "http" && targetServer.Type != "streamable")
+                    {
+                        using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                        await conn.ConnectAsync().WaitAsync(ctsTimeout.Token);
+                        conn.StartReader(msg => Task.CompletedTask);
+                    }
+                    using var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                    var initReq = GatewayMetadata.BuildTestBenchInitializeRequest();
+                    await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
+                    await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
+
+                    var res = await conn.SendRequestAsync("resources/read", backendBody);
+                    return Results.Ok(res);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning("Failed to execute resources/read on server {ServerId}: {Message}", targetServer.Id, ex.Message);
+                    return Results.Problem("An unexpected error occurred.");
+                }
             };
 
             api.MapPost("/api/test/resources/read", handleTestResourceRead);

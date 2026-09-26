@@ -21,6 +21,7 @@ namespace ModelContextGateway.Infrastructure.Transports
         private string? _messageUrl;
         private TaskCompletionSource<string> _endpointTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private string _sessionId = Guid.NewGuid().ToString("N");
+        private volatile bool _disposed = false;
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -362,36 +363,71 @@ namespace ModelContextGateway.Infrastructure.Transports
                                 currentEvent = null;
                             }
                         }
+                        if (_disposed || _cts.IsCancellationRequested)
+                        {
+                            break;
+                        }
                         _logger.LogWarning("Disconnected from backend {ServerId} (clean EOF). Reconnecting in 5s...", _server.Id);
                         _messageUrl = null;
                         _stateManager.MarkDisconnected();
                         await Task.Delay(5000, _cts.Token);
                     }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        break;
+                    }
                     catch (Exception ex)
                     {
+                        if (_disposed || _cts.IsCancellationRequested)
+                        {
+                            break;
+                        }
                         _logger.LogWarning("Disconnected from backend {ServerId}. Reconnecting in 5s... Error: {Msg}", _server.Id, ex.Message);
                         _messageUrl = null;
                         _stateManager.MarkDisconnected();
-                        await Task.Delay(5000, _cts.Token);
+                        try
+                        {
+                            await Task.Delay(5000, _cts.Token);
+                        }
+                        catch
+                        {
+                            break;
+                        }
                     }
                 }
             });
 
             _ = Task.Run(async () =>
             {
-                while (!_cts.Token.IsCancellationRequested)
+                while (!_disposed && !_cts.IsCancellationRequested)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(30), _cts.Token);
                     try
                     {
+                        await Task.Delay(TimeSpan.FromSeconds(30), _cts.Token);
                         var resp = await CallMethodAsync("ping", new { });
                         if (resp.Error != null)
                         {
                             _logger.LogWarning("Ping failed for backend {ServerId}: {Code} {Message}", _server.Id, resp.Error.Code, resp.Error.Message);
                         }
                     }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        break;
+                    }
                     catch (Exception ex)
                     {
+                        if (_disposed || _cts.IsCancellationRequested)
+                        {
+                            break;
+                        }
                         _logger.LogWarning(ex, "Ping exception for backend {ServerId}", _server.Id);
                     }
                 }
@@ -704,7 +740,12 @@ namespace ModelContextGateway.Infrastructure.Transports
 
         public void Dispose()
         {
-            _cts.Cancel();
+            _disposed = true;
+            try
+            {
+                _cts.Cancel();
+            }
+            catch { }
             _stateManager.MarkDisconnected();
             _cts.Dispose();
         }
