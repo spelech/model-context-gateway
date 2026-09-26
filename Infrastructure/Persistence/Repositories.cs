@@ -166,7 +166,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
             using var conn = _dbFactory.CreateConnection();
             DatabaseInitializer.EnsureAliasColumn(conn);
             DatabaseInitializer.EnsureOAuthColumns(conn);
-            return await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @Id;", new { Id = id });
+            return await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @Id OR (Alias IS NOT NULL AND Alias = @Id) LIMIT 1;", new { Id = id });
         }
 
         public async Task SaveServerAsync(McpServer server)

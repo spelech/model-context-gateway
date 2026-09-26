@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ModelContextGateway.Tests
 {
@@ -529,6 +530,83 @@ namespace ModelContextGateway.Tests
 
             var promptColonRes = await client.PostAsJsonAsync("/api/test/prompts/get", new { serverId = "custom", promptName = "router:diagnose_failure", arguments = new { } });
             Assert.Equal(HttpStatusCode.OK, promptColonRes.StatusCode);
+        }
+
+        [Fact]
+        [Requirement("MCP-35", "MCP", RequirementType.Positive, "Test resource read endpoint executes local router resources and validates server presence.")]
+        public async Task TestResourceRead_LocalAndValidation_Behaviors()
+        {
+            var client = CreateAuthenticatedClient();
+
+            // 1. Local router status resource returns 200 OK
+            var localRes = await client.PostAsJsonAsync("/api/test/resources/read", new { uri = "router://status" });
+            Assert.Equal(HttpStatusCode.OK, localRes.StatusCode);
+            var localJson = await localRes.Content.ReadAsStringAsync();
+            Assert.Contains("router://status", localJson);
+
+            // 2. Non-existent server resource returns 400 Bad Request
+            var badServerRes = await client.PostAsJsonAsync("/api/test/resources/read", new { uri = "mcp://non-existent-server/status" });
+            Assert.Equal(HttpStatusCode.BadRequest, badServerRes.StatusCode);
+            var badBody = await badServerRes.Content.ReadAsStringAsync();
+            Assert.Contains("Invalid resource URI or server not found", badBody);
+        }
+
+        [Fact]
+        [Requirement("MCP-35", "MCP", RequirementType.Positive, "Test bench endpoints resolve server aliases and strip prefixes across delimiters without throwing routing exceptions.")]
+        public async Task TestBench_ResolvesServerAlias_AcrossCapabilities()
+        {
+            using var scope = _factory.Services.CreateScope();
+            var repo = scope.ServiceProvider.GetRequiredService<IServerRepository>();
+
+            var mockServer = new McpServer
+            {
+                Id = "backend-db-1",
+                Alias = "db_alias",
+                DisplayName = "Backend DB 1",
+                Url = "http://127.0.0.1:5999/mcp",
+                Type = "http",
+                Enabled = true
+            };
+            await repo.SaveServerAsync(mockServer);
+
+            // Verify repository resolves by both Id and Alias
+            var serverById = await repo.GetServerByIdAsync("backend-db-1");
+            Assert.NotNull(serverById);
+            Assert.Equal("backend-db-1", serverById.Id);
+            Assert.Equal("db_alias", serverById.Alias);
+
+            var serverByAlias = await repo.GetServerByIdAsync("db_alias");
+            Assert.NotNull(serverByAlias);
+            Assert.Equal("backend-db-1", serverByAlias.Id);
+            Assert.Equal("db_alias", serverByAlias.Alias);
+
+            var client = CreateAuthenticatedClient();
+
+            // 1. Tool call using alias in serverId - server is resolved (not 404)
+            var callRes = await client.PostAsJsonAsync("/api/test/call", new
+            {
+                serverId = "db_alias",
+                toolName = "db_alias/query_db",
+                arguments = new { }
+            });
+            Assert.NotEqual(HttpStatusCode.NotFound, callRes.StatusCode);
+
+            // 2. Prompts get using alias in serverId - server is resolved (not 404)
+            var promptRes = await client.PostAsJsonAsync("/api/test/prompts/get", new
+            {
+                serverId = "db_alias",
+                promptName = "db_alias:analyze_query",
+                arguments = new { }
+            });
+            Assert.NotEqual(HttpStatusCode.NotFound, promptRes.StatusCode);
+
+            // 3. Resource read using alias in mcp:// URI - server is resolved (not 400 Bad Request)
+            var resourceRes = await client.PostAsJsonAsync("/api/test/resources/read", new
+            {
+                serverId = "db_alias",
+                uri = "mcp://db_alias/schema"
+            });
+            Assert.NotEqual(HttpStatusCode.BadRequest, resourceRes.StatusCode);
         }
     }
 }
