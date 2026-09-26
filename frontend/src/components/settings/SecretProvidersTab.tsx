@@ -448,7 +448,7 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
                   <i className="fa-solid fa-user-lock"></i> User Secret Storage (BYOK)
                 </h4>
                 <span className="badge badge-secondary" style={{ fontSize: '10px' }}>
-                  v5.12.0
+                  Per-User Credentials
                 </span>
               </div>
               <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>
