@@ -76,7 +76,7 @@ export const PromptTesterCard: React.FC<PromptTesterCardProps> = ({
   };
 
   return (
-    <div className="glass-card">
+    <div className="glass-card" data-testid="prompt-tester-card">
       <h2>
         <i className="fa-solid fa-comments"></i> Interactive Prompt Tester
       </h2>
@@ -86,6 +86,7 @@ export const PromptTesterCard: React.FC<PromptTesterCardProps> = ({
             <label htmlFor="tester-prompt-server">Server</label>
             <select
               id="tester-prompt-server"
+              data-testid="prompt-server-select"
               value={selectedServer}
               onChange={(e) => onServerChange(e.target.value)}
               required
@@ -102,6 +103,7 @@ export const PromptTesterCard: React.FC<PromptTesterCardProps> = ({
             <label htmlFor="tester-prompt-name">Prompt</label>
             <select
               id="tester-prompt-name"
+              data-testid="prompt-name-select"
               value={selectedPromptName}
               onChange={(e) => onPromptChange(e.target.value)}
               required
@@ -143,7 +145,7 @@ export const PromptTesterCard: React.FC<PromptTesterCardProps> = ({
         </div>
 
         <div style={{ marginTop: '20px' }}>
-          <button type="submit" className="btn btn-primary" disabled={!selectedPromptName}>
+          <button type="submit" className="btn btn-primary" data-testid="prompt-execute-btn" disabled={!selectedPromptName}>
             <i className="fa-solid fa-play"></i> Get Prompt Messages
           </button>
         </div>
@@ -170,6 +172,7 @@ const renderPromptFields = (
         </label>
         <input
           id={`prompt-param-${arg.name}`}
+          data-testid={`prompt-param-input-${arg.name}`}
           type="text"
           placeholder={arg.description || `Enter ${arg.name}...`}
           value={args[arg.name] || ''}

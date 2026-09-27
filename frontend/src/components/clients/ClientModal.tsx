@@ -70,13 +70,13 @@ export const ClientModal: React.FC = () => {
   };
 
   return (
-    <div id="add-client-modal" className="modal-backdrop" style={{ display: 'flex' }}>
+    <div id="add-client-modal" data-testid="client-modal" className="modal-backdrop" style={{ display: 'flex' }}>
       <div className="glass-card modal-card" style={{ maxWidth: '560px' }}>
         <div className="modal-header">
           <h2>
             <i className="fa-solid fa-desktop"></i> Register New Client
           </h2>
-          <button className="btn-close" onClick={closeClientModal}>
+          <button className="btn-close" data-testid="client-close-btn" onClick={closeClientModal}>
             &times;
           </button>
         </div>
@@ -88,6 +88,7 @@ export const ClientModal: React.FC = () => {
               <input
                 type="text"
                 id="client-name"
+                data-testid="client-name-input"
                 placeholder="e.g. VSCode Extension, Postman Integration"
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
@@ -99,6 +100,7 @@ export const ClientModal: React.FC = () => {
               <label htmlFor="client-type">Client Type</label>
               <select
                 id="client-type"
+                data-testid="client-type-select"
                 value={clientType}
                 onChange={(e) => setClientType(e.target.value as 'confidential' | 'public')}
                 style={{
@@ -120,6 +122,7 @@ export const ClientModal: React.FC = () => {
               <input
                 type="text"
                 id="client-redirect-uris"
+                data-testid="client-redirect-input"
                 placeholder="e.g. https://oauth.pstmn.io/v1/callback, http://localhost:3000/callback"
                 value={redirectUris}
                 onChange={(e) => setRedirectUris(e.target.value)}
@@ -167,6 +170,7 @@ export const ClientModal: React.FC = () => {
               <input
                 type="text"
                 id="client-scopes"
+                data-testid="client-scopes-input"
                 placeholder="e.g. mcp_client, admin, category:smarthome"
                 value={clientScopes}
                 onChange={(e) => setClientScopes(e.target.value)}
@@ -180,6 +184,7 @@ export const ClientModal: React.FC = () => {
               <label htmlFor="client-expires">Expiration</label>
               <select
                 id="client-expires"
+                data-testid="client-expires-select"
                 value={expiresInDays === undefined ? 'never' : expiresInDays}
                 onChange={(e) => setExpiresInDays(e.target.value === 'never' ? undefined : Number(e.target.value))}
                 style={{
@@ -199,10 +204,10 @@ export const ClientModal: React.FC = () => {
             </div>
 
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={closeClientModal}>
+              <button type="button" className="btn btn-secondary" data-testid="client-cancel-btn" onClick={closeClientModal}>
                 Cancel
               </button>
-              <button type="submit" className="btn btn-primary" id="btn-save-client" disabled={isSubmitting}>
+              <button type="submit" className="btn btn-primary" id="btn-save-client" data-testid="client-save-btn" disabled={isSubmitting}>
                 {isSubmitting ? 'Generating...' : 'Generate Client'}
               </button>
             </div>
@@ -210,6 +215,7 @@ export const ClientModal: React.FC = () => {
         ) : (
           <div
             id="client-secret-result"
+            data-testid="client-secret-result"
             style={{
               padding: '14px',
               background: 'rgba(16, 185, 129, 0.1)',
@@ -266,6 +272,7 @@ export const ClientModal: React.FC = () => {
             <button
               type="button"
               className="btn btn-secondary btn-sm"
+              data-testid="client-done-btn"
               onClick={closeClientModal}
               style={{ marginTop: '15px', width: '100%' }}
             >

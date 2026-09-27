@@ -33,6 +33,7 @@ export const ConfirmModal: React.FC = () => {
         <button
           type="button"
           className="btn btn-secondary"
+          data-testid="confirm-modal-cancel-btn"
           onClick={handleCancel}
         >
           {options.cancelText || 'Cancel'}
@@ -40,6 +41,7 @@ export const ConfirmModal: React.FC = () => {
         <button
           type="button"
           className={`btn ${options.danger ? 'btn-danger' : 'btn-primary'}`}
+          data-testid="confirm-modal-ok-btn"
           onClick={handleConfirm}
           autoFocus
         >

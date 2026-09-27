@@ -35,8 +35,8 @@ export const Header: React.FC = () => {
   const groupText = isAdmin ? 'Admin' : 'User';
 
   return (
-    <header className="dashboard-header">
-      <div className="header-logo">
+    <header className="dashboard-header" data-testid="dashboard-header">
+      <div className="header-logo" data-testid="header-branding">
         {branding?.icon && isImageUrl(branding.icon) ? (
           <img src={branding.icon} alt="Logo" className="logo-icon logo-img" />
         ) : (
@@ -45,10 +45,10 @@ export const Header: React.FC = () => {
         <div className="header-title">
           <div className="header-title-main" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
             <h1>{branding?.title || 'Model Context Gateway'}</h1>
-            <span className="badge badge-secondary" id="mcg-badge">
+            <span className="badge badge-secondary" id="mcg-badge" data-testid="badge-mcg">
               MCG
             </span>
-            <span className="badge badge-primary" id="version-badge">
+            <span className="badge badge-primary" id="version-badge" data-testid="badge-version">
               v{version}
             </span>
           </div>
@@ -69,9 +69,9 @@ export const Header: React.FC = () => {
           <span className="value code">{window.location.origin}/sse</span>
         </div>
         {user?.authenticated && (
-          <div className="status-item" id="user-status-item">
+          <div className="status-item" id="user-status-item" data-testid="user-status-item">
             <span className="label">User Session</span>
-            <span className="value" id="user-display">
+            <span className="value" id="user-display" data-testid="user-display">
               {isAdmin ? (
                 <i className="fa-solid fa-user-shield" style={{ color: 'var(--accent)', marginRight: '4px' }}></i>
               ) : (
@@ -82,7 +82,7 @@ export const Header: React.FC = () => {
           </div>
         )}
         <div className="status-item" style={{ justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
-          <button id="theme-toggle" className="btn-icon" onClick={toggleTheme} title="Toggle Light/Dark Mode">
+          <button id="theme-toggle" data-testid="theme-toggle-btn" className="btn-icon" onClick={toggleTheme} title="Toggle Light/Dark Mode">
             <i className={`fa-solid ${theme === 'light' ? 'fa-sun' : 'fa-moon'}`}></i>
           </button>
         </div>

@@ -73,16 +73,17 @@ export const ServerCard: React.FC<ServerCardProps> = ({ server }) => {
   }
 
   return (
-    <div className={itemClass} data-server-id={server.id}>
+    <div className={itemClass} data-server-id={server.id} data-testid={`server-card-${server.id}`}>
       <div className="server-info">
         <div className="server-name-row">
-          <span className={nameClass}>{server.displayName}</span>
-          <span className="server-badge server-id-badge" title={`Server ID: ${server.id}`}>
+          <span className={nameClass} data-testid={`server-name-${server.id}`}>{server.displayName}</span>
+          <span className="server-badge server-id-badge" title={`Server ID: ${server.id}`} data-testid={`server-id-badge-${server.id}`}>
             {server.id}
           </span>
           {server.alias && (
             <span
               className="server-badge badge-alias"
+              data-testid={`server-alias-badge-${server.id}`}
               title={`Alias: ${server.alias}`}
               style={{
                 background: 'rgba(168, 85, 247, 0.15)',
@@ -106,7 +107,7 @@ export const ServerCard: React.FC<ServerCardProps> = ({ server }) => {
               <i className="fa-solid fa-eye-slash"></i> Hidden
             </span>
           )}
-          {statusBadge}
+          <span data-testid={`server-status-${server.id}`}>{statusBadge}</span>
         </div>
         <span className="server-url">{server.url}</span>
       </div>
@@ -114,6 +115,7 @@ export const ServerCard: React.FC<ServerCardProps> = ({ server }) => {
         {retryBtn}
         <button
           className="btn-icon btn-inspect"
+          data-testid={`server-inspect-btn-${server.id}`}
           title="Inspect Capabilities (Tools, Resources, Prompts)"
           onClick={() => openInspectModal(server)}
           style={{ color: 'var(--primary)' }}
@@ -122,6 +124,7 @@ export const ServerCard: React.FC<ServerCardProps> = ({ server }) => {
         </button>
         <button
           className="btn-icon btn-edit"
+          data-testid={`server-edit-btn-${server.id}`}
           title="Edit Server Config"
           onClick={() => openEditModal(server)}
         >
@@ -129,6 +132,7 @@ export const ServerCard: React.FC<ServerCardProps> = ({ server }) => {
         </button>
         <button
           className="btn-icon btn-delete"
+          data-testid={`server-delete-btn-${server.id}`}
           title="Delete Server"
           onClick={() => deleteServer(server.id, server.displayName)}
         >
@@ -137,6 +141,7 @@ export const ServerCard: React.FC<ServerCardProps> = ({ server }) => {
         <label className="switch" title={server.enabled ? 'Disable Server' : 'Enable Server'}>
           <input
             type="checkbox"
+            data-testid={`server-toggle-switch-${server.id}`}
             checked={server.enabled}
             onChange={(e) => toggleServerEnabled(server.id, e.target.checked)}
           />

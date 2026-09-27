@@ -184,7 +184,7 @@ describe('ServerModal component', () => {
   });
 
   /**
-   * @requirement UI-SERVERS-ALIAS-MANAGEMENT
+   * @requirement UI-112
    * @category MCP
    * @type Positive
    * @description renders alias input, validates characters, and submits alias
@@ -220,5 +220,28 @@ describe('ServerModal component', () => {
         alias: 'homebox_db',
       })
     );
+  });
+
+  /**
+   * @requirement UI-134
+   * @category UI
+   * @type Positive
+   * @description verifies server modal exposes deterministic data-testid attributes
+   */
+  it('exposes deterministic data-testid attributes for automation', () => {
+    useServerStore.setState({ isAddEditOpen: true, editingServer: null });
+    render(<ServerModal />);
+
+    expect(screen.getByTestId('server-modal')).toBeInTheDocument();
+    expect(screen.getByTestId('server-close-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('server-name-input')).toBeInTheDocument();
+    expect(screen.getByTestId('server-alias-input')).toBeInTheDocument();
+    expect(screen.getByTestId('server-type-select')).toBeInTheDocument();
+    expect(screen.getByTestId('server-category-input')).toBeInTheDocument();
+    expect(screen.getByTestId('server-url-input')).toBeInTheDocument();
+    expect(screen.getByTestId('server-secret-provider-select')).toBeInTheDocument();
+    expect(screen.getByTestId('server-secret-key-input')).toBeInTheDocument();
+    expect(screen.getByTestId('server-cancel-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('server-save-btn')).toBeInTheDocument();
   });
 });

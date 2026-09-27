@@ -14,12 +14,13 @@ export const ServerControlsToolbar: React.FC = () => {
   } = useServerStore();
 
   return (
-    <div className="server-controls-toolbar">
+    <div className="server-controls-toolbar" data-testid="server-controls-toolbar">
       <div className="search-box">
         <i className="fa-solid fa-magnifying-glass search-icon"></i>
         <input
           type="text"
           id="server-search"
+          data-testid="server-search-input"
           aria-label="Filter servers by name, url, or category"
           placeholder="Filter servers by name, url, or category..."
           value={searchQuery}
@@ -28,6 +29,7 @@ export const ServerControlsToolbar: React.FC = () => {
         {searchQuery && (
           <button
             className="btn-icon btn-clear-search"
+            data-testid="server-search-clear-btn"
             onClick={() => setSearchQuery('')}
             title="Clear search"
           >
@@ -41,6 +43,7 @@ export const ServerControlsToolbar: React.FC = () => {
           <label htmlFor="server-sort-by">Sort:</label>
           <select
             id="server-sort-by"
+            data-testid="server-sort-select"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
           >
@@ -56,6 +59,7 @@ export const ServerControlsToolbar: React.FC = () => {
           <label htmlFor="server-group-by">Group:</label>
           <select
             id="server-group-by"
+            data-testid="server-group-select"
             value={groupBy}
             onChange={(e) => setGroupBy(e.target.value)}
           >
@@ -69,6 +73,7 @@ export const ServerControlsToolbar: React.FC = () => {
         <button
           className="btn btn-secondary btn-sm"
           id="btn-refresh-all"
+          data-testid="btn-refresh-all"
           title="Reconnect and refresh all servers"
           onClick={() => fetchServers(true)}
         >
@@ -78,6 +83,7 @@ export const ServerControlsToolbar: React.FC = () => {
         <button
           className="btn btn-primary btn-sm"
           id="btn-add-server"
+          data-testid="btn-add-server"
           onClick={openAddModal}
         >
           <i className="fa-solid fa-plus"></i> Add Server

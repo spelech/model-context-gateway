@@ -31,20 +31,23 @@ const App: React.FC = () => {
       <div className="dashboard-container">
         <Header />
 
-        <nav className="tabs-nav">
+        <nav className="tabs-nav" data-testid="tabs-nav">
           <button
+            data-testid="tab-dashboard"
             className={`tab-btn ${currentView === 'dashboard' ? 'active' : ''}`}
             onClick={() => setCurrentView('dashboard')}
           >
             <i className="fa-solid fa-gauge"></i> Overview
           </button>
           <button
+            data-testid="tab-security"
             className={`tab-btn ${currentView === 'security' ? 'active' : ''}`}
             onClick={() => setCurrentView('security')}
           >
             <i className="fa-solid fa-key"></i> {isAdmin ? 'App Keys & Security' : 'My App Keys'}
           </button>
           <button
+            data-testid="tab-testbench"
             className={`tab-btn ${currentView === 'testbench' ? 'active' : ''}`}
             onClick={() => setCurrentView('testbench')}
           >
@@ -52,6 +55,7 @@ const App: React.FC = () => {
           </button>
           {isAdmin && (
             <button
+              data-testid="tab-settings"
               className={`tab-btn ${currentView === 'settings' ? 'active' : ''}`}
               onClick={() => setCurrentView('settings')}
             >
@@ -59,6 +63,7 @@ const App: React.FC = () => {
             </button>
           )}
           <button
+            data-testid="tab-my-mcp"
             className={`tab-btn ${currentView === 'my-mcp-servers' ? 'active' : ''}`}
             onClick={() => setCurrentView('my-mcp-servers')}
           >

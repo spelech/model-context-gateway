@@ -22,13 +22,13 @@ const PolicyModalDialog: React.FC = () => {
   };
 
   return (
-    <div className="modal-backdrop" id="policy-modal" style={{ display: 'flex' }}>
+    <div className="modal-backdrop" id="policy-modal" data-testid="policy-modal" style={{ display: 'flex' }}>
       <div className="glass-card modal-card" style={{ maxWidth: '500px', width: '90%' }}>
         <div className="modal-header">
           <h2>
             <i className="fa-solid fa-shield-halved"></i> {editingPolicy ? 'Edit Access Policy' : 'Create Access Policy'}
           </h2>
-          <button type="button" className="btn-close" onClick={closePolicyModal}>
+          <button type="button" className="btn-close" data-testid="policy-close-btn" onClick={closePolicyModal}>
             &times;
           </button>
         </div>
@@ -38,6 +38,7 @@ const PolicyModalDialog: React.FC = () => {
             <input
               type="text"
               id="policy-target"
+              data-testid="policy-target-input"
               placeholder="e.g. server:ha or tool:docker__list_containers"
               value={targetId}
               onChange={(e) => setTargetId(e.target.value)}
@@ -53,6 +54,7 @@ const PolicyModalDialog: React.FC = () => {
             <input
               type="text"
               id="policy-group"
+              data-testid="policy-group-input"
               placeholder="e.g. database_users or Administrators"
               value={requiredGroup}
               onChange={(e) => setRequiredGroup(e.target.value)}
@@ -64,6 +66,7 @@ const PolicyModalDialog: React.FC = () => {
             <label htmlFor="policy-allowed">Policy Mode</label>
             <select
               id="policy-allowed"
+              data-testid="policy-mode-select"
               value={isAllowed ? 'true' : 'false'}
               onChange={(e) => setIsAllowed(e.target.value === 'true')}
               required
@@ -74,10 +77,10 @@ const PolicyModalDialog: React.FC = () => {
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={closePolicyModal}>
+            <button type="button" className="btn btn-secondary" data-testid="policy-cancel-btn" onClick={closePolicyModal}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary" data-testid="policy-save-btn">
               Save Policy
             </button>
           </div>

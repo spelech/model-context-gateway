@@ -60,7 +60,7 @@ export const ResourceTesterCard: React.FC<ResourceTesterCardProps> = ({
   };
 
   return (
-    <div className="glass-card">
+    <div className="glass-card" data-testid="resource-tester-card">
       <h2>
         <i className="fa-solid fa-file-invoice"></i> Interactive Resource Tester
       </h2>
@@ -70,6 +70,7 @@ export const ResourceTesterCard: React.FC<ResourceTesterCardProps> = ({
             <label htmlFor="tester-resource-server">Server</label>
             <select
               id="tester-resource-server"
+              data-testid="resource-server-select"
               value={selectedServer}
               onChange={(e) => onServerChange(e.target.value)}
               required
@@ -86,6 +87,7 @@ export const ResourceTesterCard: React.FC<ResourceTesterCardProps> = ({
             <label htmlFor="tester-resource-name">Resource</label>
             <select
               id="tester-resource-name"
+              data-testid="resource-name-select"
               value={selectedResourceValue}
               onChange={(e) => {
                 const opt = e.target.selectedOptions[0];
@@ -126,6 +128,7 @@ export const ResourceTesterCard: React.FC<ResourceTesterCardProps> = ({
           <input
             type="text"
             id="tester-resource-uri"
+            data-testid="resource-uri-input"
             placeholder="e.g. mcp://plex/library/sections"
             value={selectedResourceUri}
             onChange={(e) => onUriChange(e.target.value)}
@@ -134,7 +137,7 @@ export const ResourceTesterCard: React.FC<ResourceTesterCardProps> = ({
         </div>
 
         <div style={{ marginTop: '20px' }}>
-          <button type="submit" className="btn btn-primary" disabled={!selectedResourceUri}>
+          <button type="submit" className="btn btn-primary" data-testid="resource-read-btn" disabled={!selectedResourceUri}>
             <i className="fa-solid fa-play"></i> Read Resource
           </button>
         </div>

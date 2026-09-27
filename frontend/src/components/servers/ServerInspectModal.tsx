@@ -34,13 +34,13 @@ export const ServerInspectModal: React.FC = () => {
   const filteredPrompts = prompts.filter(filterItem);
 
   return (
-    <div id="inspect-modal" className="modal-backdrop" style={{ display: 'flex' }}>
+    <div id="inspect-modal" className="modal-backdrop" data-testid="server-inspect-modal" style={{ display: 'flex' }}>
       <div className="glass-card modal-card" style={{ maxWidth: '800px', width: '90%' }}>
         <div className="modal-header">
           <h2>
             <i className="fa-solid fa-microchip"></i> Capabilities: {inspectServer.displayName}
           </h2>
-          <button className="btn-close" onClick={closeInspectModal}>
+          <button className="btn-close" data-testid="server-inspect-close-btn" onClick={closeInspectModal}>
             &times;
           </button>
         </div>
@@ -49,6 +49,7 @@ export const ServerInspectModal: React.FC = () => {
           <button
             type="button"
             className={`tester-tab-btn ${inspectActiveTab === 'tools' ? 'active' : ''}`}
+            data-testid="inspect-tab-tools"
             onClick={() => setInspectActiveTab('tools')}
           >
             <i className="fa-solid fa-wrench"></i> Tools ({tools.length})
@@ -56,6 +57,7 @@ export const ServerInspectModal: React.FC = () => {
           <button
             type="button"
             className={`tester-tab-btn ${inspectActiveTab === 'resources' ? 'active' : ''}`}
+            data-testid="inspect-tab-resources"
             onClick={() => setInspectActiveTab('resources')}
           >
             <i className="fa-solid fa-file-lines"></i> Resources ({resources.length})
@@ -63,6 +65,7 @@ export const ServerInspectModal: React.FC = () => {
           <button
             type="button"
             className={`tester-tab-btn ${inspectActiveTab === 'prompts' ? 'active' : ''}`}
+            data-testid="inspect-tab-prompts"
             onClick={() => setInspectActiveTab('prompts')}
           >
             <i className="fa-solid fa-comments"></i> Prompts ({prompts.length})
@@ -72,6 +75,7 @@ export const ServerInspectModal: React.FC = () => {
         <div className="inspect-search-box" style={{ marginBottom: '15px' }}>
           <input
             type="text"
+            data-testid="inspect-search-input"
             placeholder={`Filter ${inspectActiveTab}...`}
             value={inspectSearchQuery}
             onChange={(e) => setInspectSearchQuery(e.target.value)}
@@ -162,7 +166,7 @@ export const ServerInspectModal: React.FC = () => {
         </div>
 
         <div className="modal-footer" style={{ marginTop: '15px' }}>
-          <button type="button" className="btn btn-secondary" onClick={closeInspectModal}>
+          <button type="button" className="btn btn-secondary" data-testid="server-inspect-footer-close-btn" onClick={closeInspectModal}>
             Close
           </button>
         </div>
