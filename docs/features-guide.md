@@ -244,6 +244,15 @@ Every request moves through this pipeline:
 4. **Discovery Filtering**: Automatically hides unauthorized tools, prompts, and resources from list endpoints.
 5. **Fail-Closed Security**: Rejects unknown capabilities with an audited HTTP 403 Forbidden response.
 
+### Resilient Cold-Start Prompt & Resource Resolution
+To support autonomous LLM agents and clients that directly invoke `prompts/get` or `resources/read` without prior discovery (`prompts/list` or `resources/list`), the gateway implements dynamic capability routing:
+- **Delimiter Tolerance**: Resolves prompts namespaced with `__`, `/`, or `:` (e.g. `docker__diagnose`, `docker/diagnose`, `docker:diagnose`) directly to the backend server `docker` even when session routing caches are empty.
+- **URI Decomposition**: Virtualized resource URIs (`mcp://{serverId}/{rawUri}`) are parsed on-demand, resolving target backend servers without requiring pre-warmed resource tables.
+- **Safe Fallback**: Non-existent or offline servers return explicit protocol errors (`404 Not Found` or `400 Bad Request`) instead of unhandled server exceptions.
+
+### Deterministic UI Automation & Component Instrumentation
+All dashboard UI elements are instrumented with explicit `data-testid` attributes (`tab-testbench`, `tool-tester-card`, `prompt-tester-card`, `resource-tester-card`, `console-card`, etc.), enabling deterministic Playwright E2E and Vitest component verification without relying on fragile text locators or conditional assertion bypasses.
+
 ### Identity Providers
 - **Active Directory (Kerberos / NTLM)**: Identifies callers by Active Directory SIDs using `WindowsIdentity`.
 - **OIDC Header Proxy**: Reads OpenID Connect (OIDC) headers (such as `Remote-User` and `Remote-Groups`) passed by reverse proxies.

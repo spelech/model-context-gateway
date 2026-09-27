@@ -37,6 +37,7 @@ Model Context Gateway provides a central, secure gateway between AI clients and 
 
 ### 3. Reliability & Resilience
 - **Strategy Pattern Architecture**: Uses modular interfaces for transports (`ITransport`), identity providers (`IIdentityProvider`), secret managers (`ISecretRetriever`), and database providers (`IDbConnectionFactory`).
+- **Cold-Start Capability Routing**: Dynamically resolves prompt and resource requests (`prompts/get`, `resources/read`) on-demand across multiple delimiters (`__`, `/`, `:`) even without pre-warmed routing tables or preceding discovery calls.
 - **Request State Management**: Uses `JsonRpcStateManager` with unique request identifiers to match responses with original requests across concurrent connections.
 - **Clean Session Cleanup**: Handles connection drops cleanly and cancels pending tasks using standard cancellation tokens.
 
