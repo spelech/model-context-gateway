@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **442 Requirements Verified** across **1008 Test Proofs** (352 Functional Capabilities, 90 Safety Guardrails).
+> **Catalog Statistics:** **446 Requirements Verified** across **1013 Test Proofs** (356 Functional Capabilities, 90 Safety Guardrails).
 
 ---
 
@@ -15,7 +15,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **65** | 3 | 62 | 137 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **113** | 107 | 6 | 232 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **117** | 111 | 6 | 237 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **29** | 26 | 3 | 176 proofs |
@@ -1227,6 +1227,31 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L500`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L500) (`TestCall_ResolvesServerAndStripsPrefix_AcrossDelimiters`)
   - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L535`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L535) (`TestResourceRead_LocalAndValidation_Behaviors`)
   - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L554`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L554) (`TestBench_ResolvesServerAlias_AcrossCapabilities`)
+
+### `[MCP-36]` PromptRoutingManager resolves prompt directly on cold-start without requiring prior prompts/list call.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L11) (`PromptRoutingManager_GetPromptAsync_ResolvesDirectly_OnColdStart`)
+
+### `[MCP-37]` ResourceRoutingManager resolves mcp:// URIs directly on cold-start without prior resources/list.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L120`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L120) (`ResourceRoutingManager_ReadResourceAsync_ResolvesDirectly_OnColdStart`)
+
+### `[MCP-38]` PromptRoutingManager supports slash, colon, and double-underscore delimiters for prompts/get.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (2):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L56`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L56) (`PromptRoutingManager_GetPromptAsync_SupportsMultipleDelimiters`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L101`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L101) (`PromptRoutingManager_GetPromptAsync_ResolvesRouterLocalPrompts_AcrossDelimiters`)
+
+### `[MCP-39]` CapabilityEndpoints test bench APIs return 404 Not Found gracefully when target server is missing.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L165`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L165) (`CapabilityEndpoints_TestBench_HandlesMissingServer_GracefullyWith404`)
 
 ### `[MCP-ADMIN-ENDPOINT-CALL-TOOL]` Admin endpoint /admin/message executes tools/call for manage_system diagnostics.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -3490,6 +3515,10 @@
 | `MCP-33` | Positive | `MCP` | OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints. | [`OpenAiEmbeddingProviderTests.cs:L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L26) | Backend xUnit |
 | `MCP-34` | **Guardrail** | `MCP` | ToolRoutingManager gracefully falls back to keyword matching when NoOpEmbeddingProvider is active. | [`ToolRoutingManagerFallbackTests.cs:L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L26) | Backend xUnit |
 | `MCP-35` | Positive | `MCP` | Test call and prompt endpoints resolve server and strip prefix across slash, dunder, and colon delimiters. | [`PipelineIntegrationTests.cs:L500`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L500) | Backend xUnit |
+| `MCP-36` | Positive | `MCP` | PromptRoutingManager resolves prompt directly on cold-start without requiring prior prompts/list call. | [`PromptAndResourceResilienceTests.cs:L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L11) | Backend xUnit |
+| `MCP-37` | Positive | `MCP` | ResourceRoutingManager resolves mcp:// URIs directly on cold-start without prior resources/list. | [`PromptAndResourceResilienceTests.cs:L120`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L120) | Backend xUnit |
+| `MCP-38` | Positive | `MCP` | PromptRoutingManager supports slash, colon, and double-underscore delimiters for prompts/get. | [`PromptAndResourceResilienceTests.cs:L56`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L56) | Backend xUnit |
+| `MCP-39` | Positive | `MCP` | CapabilityEndpoints test bench APIs return 404 Not Found gracefully when target server is missing. | [`PromptAndResourceResilienceTests.cs:L165`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L165) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-CALL-TOOL` | Positive | `MCP` | Admin endpoint /admin/message executes tools/call for manage_system diagnostics. | [`AdminEndpointsTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L294) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-HEAD-REQUEST` | Positive | `MCP` | Admin endpoint /admin handles HEAD request returning text/event-stream headers. | [`AdminEndpointsTests.cs:L212`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L212) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-LIST-TOOLS` | Positive | `MCP` | Admin endpoint /admin/message executes tools/list over active SSE session and returns 10 admin tools. | [`AdminEndpointsTests.cs:L224`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L224) | Backend xUnit |
