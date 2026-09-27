@@ -19,7 +19,7 @@ export const CustomFilesTab: React.FC<CustomFilesTabProps> = ({
           <h2>
             <i className="fa-solid fa-folder-open"></i> Prompts &amp; Resources File Manager
           </h2>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => openCustomFileModal()}>
+          <button type="button" data-testid="btn-create-custom-file" className="btn btn-secondary btn-sm" onClick={() => openCustomFileModal()}>
             <i className="fa-solid fa-plus"></i> Create File
           </button>
         </div>
@@ -68,6 +68,7 @@ export const CustomFilesTab: React.FC<CustomFilesTabProps> = ({
                       <td style={{ padding: '12px 10px', textAlign: 'right' }}>
                         <button
                           className="btn btn-secondary btn-sm"
+                          data-testid="btn-edit-custom-file"
                           onClick={() => openCustomFileModal(file)}
                           style={{ marginRight: '5px' }}
                         >
@@ -75,6 +76,7 @@ export const CustomFilesTab: React.FC<CustomFilesTabProps> = ({
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
+                          data-testid="btn-delete-custom-file"
                           onClick={() => deleteCustomFile(file.type, file.name)}
                         >
                           <i className="fa-solid fa-trash"></i> Delete

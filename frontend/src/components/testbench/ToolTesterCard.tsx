@@ -319,6 +319,7 @@ const renderDynamicFields = (
           </label>
           <input
             id={`param-${key}`}
+            data-testid={`param-input-${key}`}
             type="number"
             step={prop.type === 'integer' ? '1' : 'any'}
             placeholder={placeholder}
@@ -345,7 +346,8 @@ const renderDynamicFields = (
           </label>
           <textarea
             id={`param-${key}`}
-            rows={2}
+            data-testid={`param-input-${key}`}
+            rows={4}
             placeholder={placeholder}
             value={displayVal}
             onChange={(e) => onChange(key, prop.type, e.target.value)}
@@ -366,6 +368,7 @@ const renderDynamicFields = (
         </label>
         <input
           id={`param-${key}`}
+          data-testid={`param-input-${key}`}
           type="text"
           placeholder={placeholder}
           value={args[key] !== undefined ? args[key] : ''}

@@ -151,14 +151,14 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L79`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L79) (`ActiveDirectoryIdentityProvider_ReturnsAnonymous_WhenUntrustedProxy`)
   - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L96`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L96) (`ActiveDirectoryIdentityProvider_ReturnsAnonymous_WhenNotWindowsAuth`)
   - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L112`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L112) (`ActiveDirectoryIdentityProvider_ResolvesLdapSids_WhenLdapServiceProvided`)
-  - [Playwright E2E] [`frontend/e2e/ldap-identity-and-auth-flow.spec.ts#L5`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/ldap-identity-and-auth-flow.spec.ts#L5) (`should configure LDAP identity provider, test connection, and save settings`)
+  - [Playwright E2E] [`frontend/e2e/ldap-identity-and-auth-flow.spec.ts#L10`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/ldap-identity-and-auth-flow.spec.ts#L10) (`should configure LDAP identity provider, test connection, and save settings`)
 
 ### `[AUTH-05]` McpServer supports AllowPassThroughAuth flag
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (2):**
   - [Backend xUnit] [`ModelContextGateway.Tests/McpServerTests.cs#L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpServerTests.cs#L5) (`McpServer_Should_Have_AllowPassThroughAuth`)
-  - [Playwright E2E] [`frontend/e2e/my-mcp-servers.spec.ts#L7`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/my-mcp-servers.spec.ts#L7) (`should render user provided servers and allow editing credentials with SQLite schema`)
+  - [Playwright E2E] [`frontend/e2e/my-mcp-servers.spec.ts#L12`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/my-mcp-servers.spec.ts#L12) (`should render user provided servers and allow editing credentials with SQLite schema`)
 
 ### `[AUTH-06]` Transports use passThroughToken when AllowPassThroughAuth is true
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -440,7 +440,7 @@
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L6) (`renders GeneralTab with security default quota inputs and triggers save`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L71`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L71) (`updates form state when settings prop changes`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L222`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L222) (`manages custom user quotas in admin quotas tab`)
-  - [Playwright E2E] [`frontend/e2e/personal-appkeys-and-quotas.spec.ts#L135`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L135) (`Admin Context: configures custom user quota override`)
+  - [Playwright E2E] [`frontend/e2e/personal-appkeys-and-quotas.spec.ts#L134`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L134) (`Admin Context: configures custom user quota override`)
 
 ### `[AUTH-PIPELINE-ADMIN-DASHBOARD]` Dashboard management API suite executes for authorized administrators.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -1794,7 +1794,7 @@
   - [Frontend Vitest] [`frontend/src/test/stores/useProviderStore.test.ts#L131`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useProviderStore.test.ts#L131) (`saves secret provider preserving Vault token and mount path`)
   - [Frontend Vitest] [`frontend/src/test/stores/useProviderStore.test.ts#L170`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useProviderStore.test.ts#L170) (`saves Windows Registry and Environment secret providers correctly`)
   - [Frontend Vitest] [`frontend/src/test/stores/useProviderStore.test.ts#L205`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useProviderStore.test.ts#L205) (`handles secret provider save error with toast and throws`)
-  - [Playwright E2E] [`frontend/e2e/vault-approle-config-flow.spec.ts#L5`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/vault-approle-config-flow.spec.ts#L5) (`should configure Vault AppRole credentials and test connection in settings`)
+  - [Playwright E2E] [`frontend/e2e/vault-approle-config-flow.spec.ts#L10`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/vault-approle-config-flow.spec.ts#L10) (`should configure Vault AppRole credentials and test connection in settings`)
 
 ### `[SEC-03]` EnvironmentSecretRetriever retrieves configured environment variable value.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -2103,13 +2103,13 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L258`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L258) (`HttpTransport_Applies_XApiKey_AuthShape`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L280`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L280) (`HttpTransport_Applies_CustomHeader_AuthShape`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L303`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L303) (`HttpTransport_Applies_Slack_PerUser_Token_And_ForwardedUser`)
-  - [Playwright E2E] [`frontend/e2e/full-ui-flow-http-direct.spec.ts#L8`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/full-ui-flow-http-direct.spec.ts#L8) (`should register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench`)
+  - [Playwright E2E] [`frontend/e2e/full-ui-flow-http-direct.spec.ts#L13`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/full-ui-flow-http-direct.spec.ts#L13) (`should register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench`)
 
 ### `[TRANS-02]` Register STDIO server with Env provider, verify connection card, and execute tool via Test Bench.
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Playwright E2E] [`frontend/e2e/full-ui-flow-stdio-env.spec.ts#L8`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/full-ui-flow-stdio-env.spec.ts#L8) (`should register STDIO server, verify card, and execute echo tool via Test Bench`)
+  - [Playwright E2E] [`frontend/e2e/full-ui-flow-stdio-env.spec.ts#L13`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/full-ui-flow-stdio-env.spec.ts#L13) (`should register STDIO server, verify card, and execute echo tool via Test Bench`)
 
 ### `[TRANS-03]` HttpTransport SendNotificationAsync gracefully handles 404 and 405 without throwing exceptions
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
@@ -2356,8 +2356,8 @@
   - [Frontend Vitest] [`frontend/src/test/api/typedApi.test.ts#L181`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/api/typedApi.test.ts#L181) (`calls settings, providers, custom files, approvals endpoints correctly`)
   - [Frontend Vitest] [`frontend/src/test/api/typedApi.test.ts#L237`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/api/typedApi.test.ts#L237) (`calls testbench tool, prompt, resource, log endpoints correctly`)
   - [Playwright E2E] [`frontend/e2e/prompts-resources-customfiles.spec.ts#L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/prompts-resources-customfiles.spec.ts#L37) (`should navigate to Custom Files and Prompts in Settings view`)
-  - [Playwright E2E] [`frontend/e2e/dashboard.spec.ts#L23`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/dashboard.spec.ts#L23) (`should display aggregate statistics cards`)
-  - [Playwright E2E] [`frontend/e2e/dashboard.spec.ts#L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/dashboard.spec.ts#L37) (`should filter servers using search input`)
+  - [Playwright E2E] [`frontend/e2e/dashboard.spec.ts#L28`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/dashboard.spec.ts#L28) (`should display aggregate statistics cards`)
+  - [Playwright E2E] [`frontend/e2e/dashboard.spec.ts#L42`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/dashboard.spec.ts#L42) (`should filter servers using search input`)
 
 ### `[UI-02]` Inspect modal displays spinner loading state while querying server capabilities
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -3209,7 +3209,7 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L70`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L70) (`Startup_MigratesLegacyKeysToHashedKeys`)
   - [Frontend Vitest] [`frontend/src/test/components/SecretProvidersTab.test.tsx#L19`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SecretProvidersTab.test.tsx#L19) (`renders provider inputs and submits updated configuration`)
   - [Frontend Vitest] [`frontend/src/test/components/SecretProvidersTab.test.tsx#L90`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SecretProvidersTab.test.tsx#L90) (`handles Test Vault connection button with success and failure responses`)
-  - [Playwright E2E] [`frontend/e2e/full-ui-flow-sse-vault.spec.ts#L8`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/full-ui-flow-sse-vault.spec.ts#L8) (`should register SSE server with Vault provider (Mount/Path/Field), verify badge, and run semantic search`)
+  - [Playwright E2E] [`frontend/e2e/full-ui-flow-sse-vault.spec.ts#L13`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/full-ui-flow-sse-vault.spec.ts#L13) (`should register SSE server with Vault provider (Mount/Path/Field), verify badge, and run semantic search`)
 
 ### `[SEC-PROVIDER-GUARD-CORRUPT-ENCRYPTED-FIELD]` Router must not overwrite corrupt encrypted database fields if an update occurs without user reset.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -3675,7 +3675,7 @@
 | `SEC-VAULT-CUSTOM-PATH` | Positive | `SEC` | Bootstraps master key from Vault using custom mount path and secret key name. | [`DbKeyHelperTests.cs:L236`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DbKeyHelperTests.cs#L236) | Backend xUnit |
 | `UI-105` | Positive | `SEC` | renders system logs and handles level filter | [`LogsTerminalCard.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LogsTerminalCard.test.tsx#L1) | Frontend Vitest |
 | `TRANS-01` | Positive | `TRANS` | HttpTransport formats X-API-Key header when downstream server AuthShape is 'x-api-key'. | [`EnterpriseAuthAndVaultScenarioTests.cs:L258`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L258) | Backend xUnit |
-| `TRANS-02` | Positive | `TRANS` | Register STDIO server with Env provider, verify connection card, and execute tool via Test Bench. | [`full-ui-flow-stdio-env.spec.ts:L8`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/full-ui-flow-stdio-env.spec.ts#L8) | Playwright E2E |
+| `TRANS-02` | Positive | `TRANS` | Register STDIO server with Env provider, verify connection card, and execute tool via Test Bench. | [`full-ui-flow-stdio-env.spec.ts:L13`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/full-ui-flow-stdio-env.spec.ts#L13) | Playwright E2E |
 | `TRANS-03` | Positive | `TRANS` | HttpTransport SendNotificationAsync gracefully handles 404 and 405 without throwing exceptions | [`TransportResilienceTests.cs:L160`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportResilienceTests.cs#L160) | Backend xUnit |
 | `TRANS-04` | Positive | `TRANS` | HTTP stateless transport correctly accumulates multi-line SSE streams and skips intermediate notification events | [`HttpTransportTests.cs:L72`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/HttpTransportTests.cs#L72) | Backend xUnit |
 | `TRANS-05` | Positive | `TRANS` | HTTP stateless transport reads entire multi-line and formatted JSON response bodies without premature truncation | [`HttpTransportTests.cs:L109`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/HttpTransportTests.cs#L109) | Backend xUnit |

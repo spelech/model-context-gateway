@@ -264,7 +264,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   fetchPolicies: async () => {
     try {
       const policies = await fetchPoliciesApi();
-      set({ policies: policies || [] });
+      set({ policies: Array.isArray(policies) ? policies : [] });
     } catch (err) {
       console.error('Failed to load policies:', err);
     }
@@ -301,7 +301,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   fetchMappings: async () => {
     try {
       const mappings = await fetchMappingsApi();
-      set({ mappings: mappings || [] });
+      set({ mappings: Array.isArray(mappings) ? mappings : [] });
     } catch (err) {
       console.error('Failed to load mappings:', err);
     }

@@ -1,9 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { setupMockApi } from './fixtures/mockApi';
 import { DashboardPage } from './pages/DashboardPage';
 import { ServerModalPage } from './pages/ServerModalPage';
 import { TestBenchPage } from './pages/TestBenchPage';
 
 test.describe('Full UI Flow: STDIO Transport + Env Variable Secret Provider', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await setupMockApi(page);
+  });
 
   /**
    * @requirement TRANS-02
@@ -24,13 +29,12 @@ test.describe('Full UI Flow: STDIO Transport + Env Variable Secret Provider', ()
     await dashboard.addServerBtn.click();
     await expect(serverModal.modal).toBeVisible();
 
-    // 3. Fill STDIO server details with Env provider pointing to real mock_stdio.js
-    const mockStdioPath = process.env.MOCK_STDIO_COMMAND || 'node /containers/dev/csharp-mcp-router/ModelContextGateway.Tests/mock_stdio.js';
+    // 3. Fill STDIO server details with Env provider
     await serverModal.fillServerForm({
       id: 'stdio_env_mock',
       name: 'STDIO Env Mock',
       type: 'stdio',
-      url: mockStdioPath,
+      url: 'node mock_stdio.js',
       secretProvider: 'Environment',
       secretKey: 'TEST_API_KEY'
     });
@@ -38,36 +42,28 @@ test.describe('Full UI Flow: STDIO Transport + Env Variable Secret Provider', ()
     // 4. Save server
     await serverModal.save();
 
-    // 5. Assert server card appears on dashboard and becomes Connected
+    // 5. Assert server card appears on dashboard
     await dashboard.searchServer('STDIO Env Mock');
-    const serverItem = page.locator('.server-item:has-text("STDIO Env Mock"), .server-card:has-text("STDIO Env Mock")').first();
+    const serverItem = page.locator('.server-item, .server-card').filter({ hasText: 'STDIO Env Mock' }).first();
     await expect(serverItem).toBeVisible({ timeout: 15000 });
-    await page.waitForTimeout(3000);
-
-    // Reload the page to ensure TestBenchView remounts and fetches the latest tools
-    await page.reload();
 
     // 6. Navigate to Test Bench
     await dashboard.navigateToTestbench();
-
-    // 7. Verify Test Bench view is displayed
     await expect(page.locator('#view-testbench')).toBeVisible();
 
-    // 8. Select our STDIO Env Mock server and call the echo tool
+    // 7. Select our STDIO Env Mock server and call the echo tool
     await testbench.selectServerAndTool('stdio_env_mock', 'echo');
 
-    // 9. Fill in the message argument dynamically generated in the form
-    const messageInput = page.locator('#dynamic-form-fields input, #dynamic-form-fields textarea').first();
-    if (await messageInput.isVisible()) {
-      await messageInput.fill('hello stdio from e2e');
-    }
+    // 8. Fill in the message argument dynamically generated in the form
+    const messageInput = page.locator('[data-testid="param-input-message"], #param-message');
+    await expect(messageInput).toBeVisible();
+    await messageInput.fill('hello stdio from e2e');
 
-    // 10. Execute the tool
+    // 9. Execute the tool
     await testbench.executeTool();
 
-    // 11. Assert that the output console shows successful response from mock_stdio.js
-    const outputConsole = page.locator('#jsonrpc-response, pre.code-block, .payload-viewer pre').last();
-    await expect(outputConsole).toBeVisible({ timeout: 15000 });
+    // 10. Assert that the output console shows successful response
+    await expect(testbench.outputConsole).toContainText('Tool executed successfully');
   });
 
 });

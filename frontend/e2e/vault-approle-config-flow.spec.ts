@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { setupMockApi } from './fixtures/mockApi';
 
 test.describe('Vault AppRole Configuration Flow', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await setupMockApi(page);
+  });
 
   /**
    * @requirement SEC-02
@@ -12,14 +17,13 @@ test.describe('Vault AppRole Configuration Flow', () => {
     await page.goto('/');
 
     // Navigate to Settings -> Secret Providers
-    const settingsTab = page.locator('button:has-text("Settings")').first();
+    const settingsTab = page.locator('[data-testid="tab-settings"], button:has-text("Settings")').first();
     await expect(settingsTab).toBeVisible();
     await settingsTab.click();
 
-    const providersTab = page.locator('button:has-text("Secret Providers"), .nav-tab:has-text("Secret Providers")').first();
-    if (await providersTab.isVisible()) {
-      await providersTab.click();
-    }
+    const providersTab = page.locator('[data-testid="settings-tab-secrets"], button:has-text("Secret Providers")').first();
+    await expect(providersTab).toBeVisible();
+    await providersTab.click();
 
     // Check Vault card header
     await expect(page.locator('h2:has-text("Secret Providers")').first()).toBeVisible();
@@ -45,14 +49,16 @@ test.describe('Vault AppRole Configuration Flow', () => {
     await secretIdInput.fill('test-secret-id');
 
     // Click Test Vault button
-    const testVaultBtn = page.locator('#btn-test-vault');
+    const testVaultBtn = page.locator('[data-testid="btn-test-vault"], #btn-test-vault');
     await expect(testVaultBtn).toBeVisible();
     await testVaultBtn.click();
 
-    await page.waitForTimeout(500);
+    // Verify feedback
+    const feedback = page.locator('[data-testid="vault-test-feedback"], #vault-test-feedback');
+    await expect(feedback).toBeVisible();
 
     // Save Secret config
-    const saveSecretsBtn = page.locator('#btn-save-secrets');
+    const saveSecretsBtn = page.locator('[data-testid="btn-save-secrets"], #btn-save-secrets');
     await expect(saveSecretsBtn).toBeVisible();
     await saveSecretsBtn.click();
   });

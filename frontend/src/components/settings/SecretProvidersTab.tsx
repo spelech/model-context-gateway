@@ -181,7 +181,7 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
   };
 
   return (
-    <div id="subview-secrets" className="settings-subview active">
+    <div id="subview-secrets" data-testid="secret-providers-tab" className="settings-subview active">
       <div className="glass-card settings-card" style={{ maxWidth: '850px', margin: '0 auto' }}>
         <h2>
           <i className="fa-solid fa-vault"></i> Secret Providers
@@ -296,6 +296,7 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
                   <button
                     type="button"
                     id="btn-test-vault"
+                    data-testid="btn-test-vault"
                     className="btn btn-secondary btn-sm"
                     onClick={handleTestVault}
                     disabled={vaultTestStatus.type === 'testing'}
@@ -306,6 +307,7 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
                   {vaultTestStatus.type !== 'idle' && (
                     <span
                       id="vault-test-feedback"
+                      data-testid="vault-test-feedback"
                       style={{
                         fontSize: '10px',
                         color: vaultTestStatus.type === 'success' ? '#10b981' : vaultTestStatus.type === 'error' ? '#ef4444' : 'var(--text-muted)'
@@ -506,7 +508,7 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
             </div>
           </div>
           <div style={{ marginTop: '15px', textAlign: 'right' }}>
-            <button type="submit" id="btn-save-secrets" className="btn btn-primary btn-sm">
+            <button type="submit" id="btn-save-secrets" data-testid="btn-save-secrets" className="btn btn-primary btn-sm">
               <i className="fa-solid fa-floppy-disk"></i> Save Secret Config
             </button>
           </div>

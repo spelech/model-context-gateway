@@ -26,7 +26,7 @@ export const AccessControlTab: React.FC<AccessControlTabProps> = ({
           <h2>
             <i className="fa-solid fa-shield-halved"></i> Access Control Policies
           </h2>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => openPolicyModal()}>
+          <button type="button" data-testid="btn-create-policy" className="btn btn-secondary btn-sm" onClick={() => openPolicyModal()}>
             <i className="fa-solid fa-plus"></i> Create Policy
           </button>
         </div>
@@ -44,14 +44,14 @@ export const AccessControlTab: React.FC<AccessControlTabProps> = ({
               </tr>
             </thead>
             <tbody>
-              {policies.length === 0 ? (
+              {!Array.isArray(policies) || policies.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="empty-state" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>
                     No policies configured. All targets are default-allowed.
                   </td>
                 </tr>
               ) : (
-                policies.map((p) => {
+                (policies || []).map((p) => {
                   const badgeLabel = p.isAllowed ? 'ALLOW' : 'DENY';
                   const badgeStyle: React.CSSProperties = p.isAllowed
                     ? { background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', fontWeight: '600' }
@@ -91,7 +91,7 @@ export const AccessControlTab: React.FC<AccessControlTabProps> = ({
           <h2>
             <i className="fa-solid fa-user-group"></i> Group &amp; SID Mappings
           </h2>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => openMappingModal()}>
+          <button type="button" data-testid="btn-create-mapping" className="btn btn-secondary btn-sm" onClick={() => openMappingModal()}>
             <i className="fa-solid fa-plus"></i> Create Mapping
           </button>
         </div>
@@ -108,14 +108,14 @@ export const AccessControlTab: React.FC<AccessControlTabProps> = ({
               </tr>
             </thead>
             <tbody>
-              {mappings.length === 0 ? (
+              {!Array.isArray(mappings) || mappings.length === 0 ? (
                 <tr>
                   <td colSpan={3} className="empty-state" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>
                     No mappings configured.
                   </td>
                 </tr>
               ) : (
-                mappings.map((m) => (
+                (mappings || []).map((m) => (
                   <tr key={m.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '12px 10px', fontFamily: 'monospace', fontWeight: 500 }}>{m.externalId}</td>
                     <td style={{ padding: '12px 10px' }}>{m.internalGroup}</td>

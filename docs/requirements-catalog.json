@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-27T10:36:53.5821058Z",
+    "generatedAt": "2026-09-27T11:05:23.0457285Z",
     "totalRequirements": 448,
     "positiveCount": 358,
     "guardrailCount": 90,
@@ -722,7 +722,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/ldap-identity-and-auth-flow.spec.ts",
-          "lineNumber": 5,
+          "lineNumber": 10,
           "testName": "should configure LDAP identity provider, test connection, and save settings",
           "details": null
         }
@@ -745,7 +745,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/my-mcp-servers.spec.ts",
-          "lineNumber": 7,
+          "lineNumber": 12,
           "testName": "should render user provided servers and allow editing credentials with SQLite schema",
           "details": null
         }
@@ -1712,7 +1712,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/personal-appkeys-and-quotas.spec.ts",
-          "lineNumber": 135,
+          "lineNumber": 134,
           "testName": "Admin Context: configures custom user quota override",
           "details": null
         }
@@ -7887,7 +7887,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/full-ui-flow-sse-vault.spec.ts",
-          "lineNumber": 8,
+          "lineNumber": 13,
           "testName": "should register SSE server with Vault provider (Mount/Path/Field), verify badge, and run semantic search",
           "details": null
         }
@@ -8099,7 +8099,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/vault-approle-config-flow.spec.ts",
-          "lineNumber": 5,
+          "lineNumber": 10,
           "testName": "should configure Vault AppRole credentials and test connection in settings",
           "details": null
         }
@@ -9030,7 +9030,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/full-ui-flow-http-direct.spec.ts",
-          "lineNumber": 8,
+          "lineNumber": 13,
           "testName": "should register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench",
           "details": null
         }
@@ -9046,7 +9046,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/full-ui-flow-stdio-env.spec.ts",
-          "lineNumber": 8,
+          "lineNumber": 13,
           "testName": "should register STDIO server, verify card, and execute echo tool via Test Bench",
           "details": null
         }
@@ -10040,14 +10040,14 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/dashboard.spec.ts",
-          "lineNumber": 23,
+          "lineNumber": 28,
           "testName": "should display aggregate statistics cards",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/dashboard.spec.ts",
-          "lineNumber": 37,
+          "lineNumber": 42,
           "testName": "should filter servers using search input",
           "details": null
         }

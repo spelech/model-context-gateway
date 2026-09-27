@@ -26,8 +26,8 @@ test.describe('Self-Service Personal AppKeys, System Keys & User Quotas Flow', (
     const headerTitle = operatorPage.locator('#appkeys-card-title, h2:has-text("My App Keys")');
     await expect(headerTitle.first()).toBeVisible();
 
-    const quotaBadge = operatorPage.locator('.quota-badge, text=/Personal Quota:/i');
-    await expect(quotaBadge.first()).toBeVisible();
+    const quotaBadge = operatorPage.getByText(/Personal Quota:/i).first();
+    await expect(quotaBadge).toBeVisible();
   });
 
   /**
@@ -72,16 +72,16 @@ test.describe('Self-Service Personal AppKeys, System Keys & User Quotas Flow', (
     const keyRow = operatorPage.locator('tr:has-text("Personal VS Code Agent")');
     await expect(keyRow.first()).toBeVisible();
 
-    // Revoke key with custom confirmation modal
-    const revokeBtn = keyRow.first().locator('button:has-text("Revoke"), .btn-danger, button:has(.fa-trash)');
+    // Revoke key with confirmation modal
+    const revokeBtn = keyRow.first().locator('[data-testid="btn-revoke-key"], button:has-text("Revoke"), .btn-danger');
     await revokeBtn.click();
 
-    // Confirm dialog in custom ConfirmModal
-    const confirmModal = operatorPage.locator('#custom-confirm-modal, .confirm-modal-card');
-    if (await confirmModal.isVisible()) {
-      const confirmActionBtn = operatorPage.locator('#confirm-modal-ok-btn, button:has-text("Revoke Key"), button:has-text("Confirm")');
-      await confirmActionBtn.click();
-    }
+    // Confirm dialog in ConfirmModal
+    const confirmModal = operatorPage.locator('#confirm-modal, [data-testid="modal"]');
+    await expect(confirmModal).toBeVisible();
+    const confirmActionBtn = confirmModal.locator('[data-testid="confirm-modal-ok-btn"], button:has-text("Revoke Key"), button:has-text("Confirm")');
+    await confirmActionBtn.click();
+    await expect(confirmModal).toBeHidden();
   });
 
   /**
@@ -99,9 +99,9 @@ test.describe('Self-Service Personal AppKeys, System Keys & User Quotas Flow', (
     await securityTab.click();
 
     // Verify sub-tabs exist for Admin
-    const personalSubTab = adminPage.locator('button:has-text("User Personal Keys")');
-    const systemSubTab = adminPage.locator('button:has-text("App-Level Keys")');
-    const quotasSubTab = adminPage.locator('button:has-text("Custom User Quotas")');
+    const personalSubTab = adminPage.locator('[data-testid="appkeys-tab-personal"], button:has-text("User Personal Keys")');
+    const systemSubTab = adminPage.locator('[data-testid="appkeys-tab-system"], button:has-text("App-Level Keys")');
+    const quotasSubTab = adminPage.locator('[data-testid="appkeys-tab-quotas"], button:has-text("Custom User Quotas")');
 
     await expect(personalSubTab).toBeVisible();
     await expect(systemSubTab).toBeVisible();
@@ -109,17 +109,16 @@ test.describe('Self-Service Personal AppKeys, System Keys & User Quotas Flow', (
 
     // Switch to App-Level Keys
     await systemSubTab.click();
-    await expect(adminPage.locator('text=App-Level / System Keys (Shared Integrations)')).toBeVisible();
+    await expect(systemSubTab).toHaveClass(/active/);
 
     // Open create modal as Admin
-    const createKeyBtn = adminPage.locator('#btn-open-add-key-modal, button:has-text("Create App Key")').first();
+    const createKeyBtn = adminPage.locator('[data-testid="btn-create-appkey"], button:has-text("Create App Key")').first();
     await createKeyBtn.click();
 
     // Select App-Level / System Key type
-    const keyTypeSelect = adminPage.locator('#key-type');
-    if (await keyTypeSelect.isVisible()) {
-      await keyTypeSelect.selectOption('system');
-    }
+    const keyTypeSelect = adminPage.locator('[data-testid="appkey-keytype-select"], #modal-key-type');
+    await expect(keyTypeSelect).toBeVisible();
+    await keyTypeSelect.selectOption('system');
 
     const nameInput = adminPage.locator('#key-name');
     await nameInput.fill('CI/CD Pipeline Daemon');
@@ -145,13 +144,13 @@ test.describe('Self-Service Personal AppKeys, System Keys & User Quotas Flow', (
     await securityTab.click();
 
     // Switch to Custom User Quotas sub-tab
-    const quotasSubTab = adminPage.locator('button:has-text("Custom User Quotas")');
+    const quotasSubTab = adminPage.locator('[data-testid="appkeys-tab-quotas"], button:has-text("Custom User Quotas")');
     await quotasSubTab.click();
 
     // Fill quota form
-    const usernameInput = adminPage.locator('#quota-username');
-    const maxKeysInput = adminPage.locator('#quota-max-keys');
-    const saveQuotaBtn = adminPage.locator('#btn-save-quota, button:has-text("Set / Update Quota")');
+    const usernameInput = adminPage.locator('[data-testid="quota-username-input"], #quota-username-input');
+    const maxKeysInput = adminPage.locator('[data-testid="quota-max-keys-input"], #quota-max-keys-input');
+    const saveQuotaBtn = adminPage.locator('[data-testid="btn-set-quota"], button:has-text("Set Quota")');
 
     await usernameInput.fill('power_developer');
     await maxKeysInput.fill('15');
@@ -163,14 +162,14 @@ test.describe('Self-Service Personal AppKeys, System Keys & User Quotas Flow', (
     await expect(quotaRow.first().locator('text=15')).toBeVisible();
 
     // Reset quota
-    const resetBtn = quotaRow.first().locator('button:has-text("Reset to Default"), button:has(.fa-rotate-left)');
+    const resetBtn = quotaRow.first().locator('[data-testid="quota-reset-btn"], button:has-text("Reset"), button:has(.fa-rotate-left)');
     await resetBtn.click();
 
-    const confirmModal = adminPage.locator('#custom-confirm-modal, .confirm-modal-card');
-    if (await confirmModal.isVisible()) {
-      const confirmActionBtn = adminPage.locator('#confirm-modal-ok-btn, button:has-text("Reset Quota"), button:has-text("Confirm")');
-      await confirmActionBtn.click();
-    }
+    const confirmModal = adminPage.locator('#confirm-modal, [data-testid="modal"]');
+    await expect(confirmModal).toBeVisible();
+    const confirmActionBtn = confirmModal.locator('[data-testid="confirm-modal-ok-btn"], button:has-text("Reset Quota"), button:has-text("Confirm")');
+    await confirmActionBtn.click();
+    await expect(confirmModal).toBeHidden();
   });
 
 });

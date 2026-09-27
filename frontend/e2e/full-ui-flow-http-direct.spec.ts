@@ -1,9 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { setupMockApi } from './fixtures/mockApi';
 import { DashboardPage } from './pages/DashboardPage';
 import { ServerModalPage } from './pages/ServerModalPage';
 import { TestBenchPage } from './pages/TestBenchPage';
 
 test.describe('Full UI Flow: HTTP Transport + Direct Key Secret Provider', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await setupMockApi(page);
+  });
 
   /**
    * @requirement TRANS-01
@@ -12,7 +17,6 @@ test.describe('Full UI Flow: HTTP Transport + Direct Key Secret Provider', () =>
    * @description Register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench.
    */
   test('should register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench', async ({ page }) => {
-    test.setTimeout(60000);
     const dashboard = new DashboardPage(page);
     const serverModal = new ServerModalPage(page);
     const testbench = new TestBenchPage(page);
@@ -22,39 +26,36 @@ test.describe('Full UI Flow: HTTP Transport + Direct Key Secret Provider', () =>
     await expect(dashboard.navDashboardBtn).toBeVisible();
 
     // 2. Open Add Server Modal
-    if (await dashboard.addServerBtn.isVisible()) {
-      await dashboard.addServerBtn.click();
-      await expect(serverModal.modal).toBeVisible();
+    await expect(dashboard.addServerBtn).toBeVisible();
+    await dashboard.addServerBtn.click();
+    await expect(serverModal.modal).toBeVisible();
 
-      // 3. Fill HTTP server details with Direct Key provider
-      await serverModal.fillServerForm({
-        id: 'http_direct_mock',
-        name: 'HTTP Mock Server',
-        type: 'http',
-        url: process.env.MOCK_MCP_HTTP_URL || 'http://127.0.0.1:8090/mcp',
-        secretProvider: 'None'
-      });
+    // 3. Fill HTTP server details with Direct Key provider
+    await serverModal.fillServerForm({
+      id: 'http_direct_mock',
+      name: 'HTTP Mock Server',
+      type: 'http',
+      url: 'http://127.0.0.1:8090/mcp',
+      secretProvider: 'None'
+    });
 
-      // 4. Save server
-      await serverModal.save();
+    // 4. Save server
+    await serverModal.save();
 
-      // 5. Assert server card appears on dashboard with status badge
-      await dashboard.searchServer('HTTP Mock Server');
-      const serverId = await dashboard.getServerIdByName('HTTP Mock Server');
-      const badge = dashboard.getServerStatusBadge(serverId);
-      await expect(badge.first()).toBeVisible({ timeout: 30000 });
-      await page.waitForTimeout(4000); // Give backend more time to fetch and save tools
+    // 5. Assert server card appears on dashboard with status badge
+    await dashboard.searchServer('HTTP Mock Server');
+    const serverCard = page.locator('.server-card, .server-item').filter({ hasText: 'HTTP Mock Server' }).first();
+    await expect(serverCard).toBeVisible({ timeout: 15000 });
 
-      // Reload the page to ensure TestBenchView remounts and fetches the latest tools
-      await page.reload();
+    // 6. Navigate to Test Bench
+    await dashboard.navigateToTestbench();
 
-      // 6. Navigate to Test Bench
-      await dashboard.navigateToTestbench();
+    // 7. Select new server & execute tool
+    await testbench.selectServerAndTool('http_direct_mock', 'health');
+    await testbench.executeTool();
 
-      // 7. Select new server & execute tool
-      await testbench.selectServerAndTool(serverId, 'health');
-      await testbench.executeTool();
-    }
+    // Verify console response output
+    await expect(testbench.outputConsole).toContainText('Tool executed successfully');
   });
 
 });
