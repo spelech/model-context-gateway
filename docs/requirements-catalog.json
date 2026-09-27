@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-27T10:25:33.2789499Z",
-    "totalRequirements": 446,
-    "positiveCount": 356,
+    "generatedAt": "2026-09-27T10:36:53.5821058Z",
+    "totalRequirements": 448,
+    "positiveCount": 358,
     "guardrailCount": 90,
-    "totalProofs": 1013
+    "totalProofs": 1017
   },
   "requirements": [
     {
@@ -6145,13 +6145,20 @@
       "category": "MCP",
       "type": "Positive",
       "description": "PromptRoutingManager resolves prompt directly on cold-start without requiring prior prompts/list call.",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs",
           "lineNumber": 11,
           "testName": "PromptRoutingManager_GetPromptAsync_ResolvesDirectly_OnColdStart",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/prompts-and-resources-execution.spec.ts",
+          "lineNumber": 1,
+          "testName": "should select and execute prompt with parameters in Test Bench",
           "details": null
         }
       ]
@@ -6177,7 +6184,7 @@
       "category": "MCP",
       "type": "Positive",
       "description": "PromptRoutingManager supports slash, colon, and double-underscore delimiters for prompts/get.",
-      "proofCount": 2,
+      "proofCount": 3,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -6191,6 +6198,13 @@
           "filePath": "ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs",
           "lineNumber": 101,
           "testName": "PromptRoutingManager_GetPromptAsync_ResolvesRouterLocalPrompts_AcrossDelimiters",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/prompts-and-resources-execution.spec.ts",
+          "lineNumber": 93,
+          "testName": "should select and read resource in Test Bench",
           "details": null
         }
       ]
@@ -7384,13 +7398,20 @@
       "category": "MCP",
       "type": "Positive",
       "description": "renders nothing when isAddEditOpen is false",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/ServerModal.test.tsx",
           "lineNumber": 1,
           "testName": "renders nothing when isAddEditOpen is false",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
+          "lineNumber": 186,
+          "testName": "renders alias input, validates characters, and submits alias (UI-SERVERS-ALIAS-MANAGEMENT)",
           "details": null
         }
       ]
@@ -7412,40 +7433,17 @@
       ]
     },
     {
-      "id": "UI-126",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "should open Server Inspect Modal if servers are present on dashboard",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Playwright E2E",
-          "filePath": "frontend/e2e/server-inspector.spec.ts",
-          "lineNumber": 1,
-          "testName": "should open Server Inspect Modal if servers are present on dashboard",
-          "details": null
-        }
-      ]
-    },
-    {
       "id": "UI-SERVERS-ALIAS-MANAGEMENT",
       "category": "MCP",
       "type": "Positive",
       "description": "renders server alias badge alongside server id when configured",
-      "proofCount": 2,
+      "proofCount": 1,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/ServerCard.test.tsx",
           "lineNumber": 145,
           "testName": "renders server alias badge alongside server id when configured (UI-SERVERS-ALIAS-MANAGEMENT)",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
-          "lineNumber": 186,
-          "testName": "renders alias input, validates characters, and submits alias (UI-SERVERS-ALIAS-MANAGEMENT)",
           "details": null
         }
       ]
@@ -10035,7 +10033,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/prompts-resources-customfiles.spec.ts",
-          "lineNumber": 42,
+          "lineNumber": 37,
           "testName": "should navigate to Custom Files and Prompts in Settings view",
           "details": null
         },
@@ -10696,17 +10694,33 @@
       ]
     },
     {
+      "id": "UI-126",
+      "category": "UI",
+      "type": "Positive",
+      "description": "should open Server Inspect Modal and inspect capabilities tabs deterministically",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/server-inspector.spec.ts",
+          "lineNumber": 1,
+          "testName": "should open Server Inspect Modal and inspect capabilities tabs deterministically",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "UI-128",
       "category": "UI",
       "type": "Positive",
-      "description": "should navigate to Test Bench view and render tester cards",
+      "description": "should navigate to Test Bench view, render tester cards, and test semantic search",
       "proofCount": 1,
       "proofs": [
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/testbench.spec.ts",
           "lineNumber": 1,
-          "testName": "should navigate to Test Bench view and render tester cards",
+          "testName": "should navigate to Test Bench view and render tester cards deterministically",
           "details": null
         }
       ]
@@ -10818,6 +10832,38 @@
           "filePath": "frontend/src/test/utils/mcpNaming.test.ts",
           "lineNumber": 44,
           "testName": "identifies un-namespaced custom tools",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-133",
+      "category": "UI",
+      "type": "Positive",
+      "description": "verifies deterministic data-testid attributes and interactive flow across test bench tabs",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 473,
+          "testName": "renders and interacts with test bench elements via deterministic data-testid attributes",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-134",
+      "category": "UI",
+      "type": "Positive",
+      "description": "verifies server modal exposes deterministic data-testid attributes",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
+          "lineNumber": 225,
+          "testName": "exposes deterministic data-testid attributes for automation",
           "details": null
         }
       ]

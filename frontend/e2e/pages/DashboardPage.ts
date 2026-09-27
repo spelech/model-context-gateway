@@ -13,14 +13,14 @@ export class DashboardPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.navDashboardBtn = page.getByRole('button', { name: /Overview/i });
-    this.navTestbenchBtn = page.getByRole('button', { name: /Test Bench/i });
-    this.navSettingsBtn = page.getByRole('button', { name: /Settings/i });
-    this.navClientsBtn = page.getByRole('button', { name: /Clients|App Keys/i });
-    this.addServerBtn = page.getByRole('button', { name: /Add Server/i });
-    this.searchInput = page.locator('#server-search, [data-testid="server-search-input"]');
-    this.sortBySelect = page.locator('#server-sort-by, [data-testid="sort-by-select"]');
-    this.groupBySelect = page.locator('#server-group-by, [data-testid="group-by-select"]');
+    this.navDashboardBtn = page.locator('[data-testid="tab-dashboard"], button:has-text("Overview")');
+    this.navTestbenchBtn = page.locator('[data-testid="tab-testbench"], button:has-text("Test Bench")');
+    this.navSettingsBtn = page.locator('[data-testid="tab-settings"], button:has-text("Settings")');
+    this.navClientsBtn = page.locator('[data-testid="tab-security"], button:has-text("Clients"), button:has-text("Security")');
+    this.addServerBtn = page.locator('[data-testid="btn-add-server"], #btn-add-server');
+    this.searchInput = page.locator('[data-testid="server-search-input"], #server-search');
+    this.sortBySelect = page.locator('[data-testid="server-sort-select"], #server-sort-by');
+    this.groupBySelect = page.locator('[data-testid="server-group-select"], #server-group-by');
   }
 
   async goto() {
@@ -40,17 +40,15 @@ export class DashboardPage {
   }
 
   async searchServer(query: string) {
-    if (await this.searchInput.isVisible()) {
-      await this.searchInput.fill(query);
-    }
+    await this.searchInput.fill(query);
   }
 
   getServerCard(serverId: string): Locator {
-    return this.page.locator(`[data-server-id="${serverId}"], .server-item:has-text("${serverId}")`);
+    return this.page.locator(`[data-testid="server-card-${serverId}"], [data-server-id="${serverId}"], .server-item:has-text("${serverId}")`);
   }
 
   getServerStatusBadge(serverId: string): Locator {
-    return this.page.locator(`[data-server-id="${serverId}"] .indicator, [data-server-id="${serverId}"] .server-badge, [data-server-id="${serverId}"] .status-badge`);
+    return this.page.locator(`[data-testid="server-status-${serverId}"], [data-server-id="${serverId}"] .indicator, [data-server-id="${serverId}"] .server-badge`);
   }
 
   getServerStatusBadgeByName(name: string): Locator {

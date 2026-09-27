@@ -6,37 +6,32 @@ test.describe('Prompts, Resources, Terminal Logs & Custom Files E2E Workflows', 
    * @requirement UI-04
    * @category UI
    * @type PositiveFeature
-   * @description Switch tabs in Test Bench to interact with Prompt Tester and Resource Tester.
+   * @description Switch tabs in Test Bench to interact with Prompt Tester and Resource Tester deterministically.
    */
   test('should interact with Prompt Tester and Resource Tester cards in Test Bench', async ({ page }) => {
     await page.goto('/');
 
     // Navigate to Test Bench
-    const testbenchTab = page.locator('button:has-text("Test Bench")').first();
+    const testbenchTab = page.locator('[data-testid="tab-testbench"]');
     await expect(testbenchTab).toBeVisible();
     await testbenchTab.click();
 
-    // Verify Prompt Tester Card exists
-    const promptCard = page.locator('.dcr-card:has-text("Prompt Tester"), #prompt-tester-card, h2:has-text("Prompt")').first();
-    if (await promptCard.count() > 0) {
-      await expect(promptCard).toBeVisible();
-    }
+    // Switch to Prompts tab and verify
+    await page.locator('[data-testid="testbench-tab-prompts"]').click();
+    const promptCard = page.locator('[data-testid="prompt-tester-card"]');
+    await expect(promptCard).toBeVisible();
+    await expect(page.locator('[data-testid="prompt-server-select"]')).toBeVisible();
+    await expect(page.locator('[data-testid="prompt-name-select"]')).toBeVisible();
 
-    // Verify Resource Tester Card exists
-    const resourceCard = page.locator('.dcr-card:has-text("Resource Reader"), #resource-tester-card, h2:has-text("Resource")').first();
-    if (await resourceCard.count() > 0) {
-      await expect(resourceCard).toBeVisible();
-    }
+    // Switch to Resources tab and verify
+    await page.locator('[data-testid="testbench-tab-resources"]').click();
+    const resourceCard = page.locator('[data-testid="resource-tester-card"]');
+    await expect(resourceCard).toBeVisible();
+    await expect(page.locator('[data-testid="resource-server-select"]')).toBeVisible();
+    await expect(page.locator('[data-testid="resource-uri-input"]')).toBeVisible();
 
-    // Verify Logs Terminal Card exists and has log level filter buttons
-    const logsCard = page.locator('.dcr-card:has-text("Live Logs"), #logs-terminal-card, h2:has-text("Logs")').first();
-    if (await logsCard.count() > 0) {
-      await expect(logsCard).toBeVisible();
-      const clearBtn = logsCard.locator('button:has-text("Clear"), .btn:has-text("Clear")').first();
-      if (await clearBtn.count() > 0) {
-        await clearBtn.click();
-      }
-    }
+    // Verify Console Card
+    await expect(page.locator('[data-testid="console-card"]')).toBeVisible();
   });
 
   /**
@@ -46,19 +41,31 @@ test.describe('Prompts, Resources, Terminal Logs & Custom Files E2E Workflows', 
    * @description Navigate to Settings > Custom Files and Prompts & Resources tabs to verify authoring.
    */
   test('should navigate to Custom Files and Prompts in Settings view', async ({ page }) => {
+    await page.route('**/api/me', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          username: 'admin',
+          displayName: 'Administrator',
+          authenticated: true,
+          groups: ['full_admin']
+        })
+      });
+    });
+
     await page.goto('/');
 
     // Navigate to Settings
-    const settingsTab = page.locator('button:has-text("Settings")').first();
+    const settingsTab = page.locator('[data-testid="tab-settings"]');
     await expect(settingsTab).toBeVisible();
     await settingsTab.click();
 
     // Click Prompts & Resources sub-tab
     const customFilesTab = page.locator('button:has-text("Prompts & Resources"), button:has-text("Custom Files")').first();
-    if (await customFilesTab.count() > 0) {
-      await customFilesTab.click();
-      await expect(page.locator('button:has-text("Add Custom File"), button:has-text("Create File"), h2:has-text("Prompts & Resources")').first()).toBeVisible();
-    }
+    await expect(customFilesTab).toBeVisible();
+    await customFilesTab.click();
+    await expect(page.locator('button:has-text("Add Custom File"), button:has-text("Create File"), h2:has-text("Prompts & Resources")').first()).toBeVisible();
   });
 
 });

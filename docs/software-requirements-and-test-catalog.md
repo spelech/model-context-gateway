@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **446 Requirements Verified** across **1013 Test Proofs** (356 Functional Capabilities, 90 Safety Guardrails).
+> **Catalog Statistics:** **448 Requirements Verified** across **1017 Test Proofs** (358 Functional Capabilities, 90 Safety Guardrails).
 
 ---
 
@@ -15,10 +15,10 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **65** | 3 | 62 | 137 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **117** | 111 | 6 | 237 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **116** | 110 | 6 | 238 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **29** | 26 | 3 | 176 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **32** | 29 | 3 | 179 proofs |
 
 ---
 
@@ -1231,8 +1231,9 @@
 ### `[MCP-36]` PromptRoutingManager resolves prompt directly on cold-start without requiring prior prompts/list call.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (2):**
   - [Backend xUnit] [`ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L11) (`PromptRoutingManager_GetPromptAsync_ResolvesDirectly_OnColdStart`)
+  - [Playwright E2E] [`frontend/e2e/prompts-and-resources-execution.spec.ts#L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/prompts-and-resources-execution.spec.ts#L1) (`should select and execute prompt with parameters in Test Bench`)
 
 ### `[MCP-37]` ResourceRoutingManager resolves mcp:// URIs directly on cold-start without prior resources/list.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1243,9 +1244,10 @@
 ### `[MCP-38]` PromptRoutingManager supports slash, colon, and double-underscore delimiters for prompts/get.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (2):**
+* **Verification Proofs (3):**
   - [Backend xUnit] [`ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L56`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L56) (`PromptRoutingManager_GetPromptAsync_SupportsMultipleDelimiters`)
   - [Backend xUnit] [`ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L101`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L101) (`PromptRoutingManager_GetPromptAsync_ResolvesRouterLocalPrompts_AcrossDelimiters`)
+  - [Playwright E2E] [`frontend/e2e/prompts-and-resources-execution.spec.ts#L93`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/prompts-and-resources-execution.spec.ts#L93) (`should select and read resource in Test Bench`)
 
 ### `[MCP-39]` CapabilityEndpoints test bench APIs return 404 Not Found gracefully when target server is missing.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1694,8 +1696,9 @@
 ### `[UI-112]` renders nothing when isAddEditOpen is false
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (2):**
   - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L1) (`renders nothing when isAddEditOpen is false`)
+  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L186`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L186) (`renders alias input, validates characters, and submits alias (UI-SERVERS-ALIAS-MANAGEMENT)`)
 
 ### `[UI-121]` should open Add Server modal and switch secret provider types
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1703,18 +1706,11 @@
 * **Verification Proofs (1):**
   - [Playwright E2E] [`frontend/e2e/server-management.spec.ts#L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/server-management.spec.ts#L1) (`should open Add Server modal and switch secret provider types`)
 
-### `[UI-126]` should open Server Inspect Modal if servers are present on dashboard
-* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
-  - [Playwright E2E] [`frontend/e2e/server-inspector.spec.ts#L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/server-inspector.spec.ts#L1) (`should open Server Inspect Modal if servers are present on dashboard`)
-
 ### `[UI-SERVERS-ALIAS-MANAGEMENT]` renders server alias badge alongside server id when configured
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (2):**
+* **Verification Proofs (1):**
   - [Frontend Vitest] [`frontend/src/test/components/ServerCard.test.tsx#L145`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerCard.test.tsx#L145) (`renders server alias badge alongside server id when configured (UI-SERVERS-ALIAS-MANAGEMENT)`)
-  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L186`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L186) (`renders alias input, validates characters, and submits alias (UI-SERVERS-ALIAS-MANAGEMENT)`)
 
 ### `[API-PIPELINE-GET-AUDIT]` GET /api/audit returns audit log records with 200 OK.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -2359,7 +2355,7 @@
   - [Frontend Vitest] [`frontend/src/test/api/typedApi.test.ts#L154`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/api/typedApi.test.ts#L154) (`calls policies and mappings endpoints correctly`)
   - [Frontend Vitest] [`frontend/src/test/api/typedApi.test.ts#L181`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/api/typedApi.test.ts#L181) (`calls settings, providers, custom files, approvals endpoints correctly`)
   - [Frontend Vitest] [`frontend/src/test/api/typedApi.test.ts#L237`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/api/typedApi.test.ts#L237) (`calls testbench tool, prompt, resource, log endpoints correctly`)
-  - [Playwright E2E] [`frontend/e2e/prompts-resources-customfiles.spec.ts#L42`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/prompts-resources-customfiles.spec.ts#L42) (`should navigate to Custom Files and Prompts in Settings view`)
+  - [Playwright E2E] [`frontend/e2e/prompts-resources-customfiles.spec.ts#L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/prompts-resources-customfiles.spec.ts#L37) (`should navigate to Custom Files and Prompts in Settings view`)
   - [Playwright E2E] [`frontend/e2e/dashboard.spec.ts#L23`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/dashboard.spec.ts#L23) (`should display aggregate statistics cards`)
   - [Playwright E2E] [`frontend/e2e/dashboard.spec.ts#L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/dashboard.spec.ts#L37) (`should filter servers using search input`)
 
@@ -2525,11 +2521,17 @@
 * **Verification Proofs (1):**
   - [Playwright E2E] [`frontend/e2e/dashboard.spec.ts#L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/dashboard.spec.ts#L1) (`should render the dashboard layout and header components`)
 
-### `[UI-128]` should navigate to Test Bench view and render tester cards
+### `[UI-126]` should open Server Inspect Modal and inspect capabilities tabs deterministically
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Playwright E2E] [`frontend/e2e/testbench.spec.ts#L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/testbench.spec.ts#L1) (`should navigate to Test Bench view and render tester cards`)
+  - [Playwright E2E] [`frontend/e2e/server-inspector.spec.ts#L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/server-inspector.spec.ts#L1) (`should open Server Inspect Modal and inspect capabilities tabs deterministically`)
+
+### `[UI-128]` should navigate to Test Bench view, render tester cards, and test semantic search
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Playwright E2E] [`frontend/e2e/testbench.spec.ts#L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/testbench.spec.ts#L1) (`should navigate to Test Bench view and render tester cards deterministically`)
 
 ### `[UI-130]` Renders Connect Account button for OAuth-enabled servers directing to authorization URL.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -2557,6 +2559,18 @@
   - [Frontend Vitest] [`frontend/src/test/utils/mcpNaming.test.ts#L18`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/utils/mcpNaming.test.ts#L18) (`parses tool names with dunder delimiter`)
   - [Frontend Vitest] [`frontend/src/test/utils/mcpNaming.test.ts#L31`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/utils/mcpNaming.test.ts#L31) (`parses tool names with colon delimiter`)
   - [Frontend Vitest] [`frontend/src/test/utils/mcpNaming.test.ts#L44`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/utils/mcpNaming.test.ts#L44) (`identifies un-namespaced custom tools`)
+
+### `[UI-133]` verifies deterministic data-testid attributes and interactive flow across test bench tabs
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L473`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L473) (`renders and interacts with test bench elements via deterministic data-testid attributes`)
+
+### `[UI-134]` verifies server modal exposes deterministic data-testid attributes
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L225`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L225) (`exposes deterministic data-testid attributes for automation`)
 
 ### `[UI-30]` Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -3594,7 +3608,6 @@
 | `UI-107` | Positive | `MCP` | renders prompt dropdown and filters by selected server | [`PromptTesterCard.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/PromptTesterCard.test.tsx#L1) | Frontend Vitest |
 | `UI-112` | Positive | `MCP` | renders nothing when isAddEditOpen is false | [`ServerModal.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L1) | Frontend Vitest |
 | `UI-121` | Positive | `MCP` | should open Add Server modal and switch secret provider types | [`server-management.spec.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/server-management.spec.ts#L1) | Playwright E2E |
-| `UI-126` | Positive | `MCP` | should open Server Inspect Modal if servers are present on dashboard | [`server-inspector.spec.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/server-inspector.spec.ts#L1) | Playwright E2E |
 | `UI-SERVERS-ALIAS-MANAGEMENT` | Positive | `MCP` | renders server alias badge alongside server id when configured | [`ServerCard.test.tsx:L145`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerCard.test.tsx#L145) | Frontend Vitest |
 | `API-PIPELINE-GET-AUDIT` | Positive | `SEC` | GET /api/audit returns audit log records with 200 OK. | [`PipelineIntegrationTests.cs:L394`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L394) | Backend xUnit |
 | `API-PIPELINE-GET-LOGS` | Positive | `SEC` | GET /api/logs returns system log records with 200 OK. | [`PipelineIntegrationTests.cs:L421`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L421) | Backend xUnit |
@@ -3717,10 +3730,13 @@
 | `UI-119` | Positive | `UI` | calls server endpoints correctly | [`typedApi.test.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/api/typedApi.test.ts#L1) | Frontend Vitest |
 | `UI-122` | Positive | `UI` | should navigate to Settings view and configure vector embedding options | [`settings.spec.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/settings.spec.ts#L1) | Playwright E2E |
 | `UI-124` | Positive | `UI` | Renders main dashboard navigation tabs and layout headers | [`dashboard.spec.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/dashboard.spec.ts#L1) | Playwright E2E |
-| `UI-128` | Positive | `UI` | should navigate to Test Bench view and render tester cards | [`testbench.spec.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/testbench.spec.ts#L1) | Playwright E2E |
+| `UI-126` | Positive | `UI` | should open Server Inspect Modal and inspect capabilities tabs deterministically | [`server-inspector.spec.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/server-inspector.spec.ts#L1) | Playwright E2E |
+| `UI-128` | Positive | `UI` | should navigate to Test Bench view, render tester cards, and test semantic search | [`testbench.spec.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/testbench.spec.ts#L1) | Playwright E2E |
 | `UI-130` | Positive | `UI` | Renders Connect Account button for OAuth-enabled servers directing to authorization URL. | [`MyMcpServers.test.tsx:L121`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L121) | Frontend Vitest |
 | `UI-131` | Positive | `UI` | Renders Connected (OAuth) badge and supports account disconnection. | [`MyMcpServers.test.tsx:L157`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L157) | Frontend Vitest |
 | `UI-132` | Positive | `UI` | groups slash-namespaced tools into distinct backend servers without grouping under custom | [`TestBenchView.test.tsx:L198`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L198) | Frontend Vitest |
+| `UI-133` | Positive | `UI` | verifies deterministic data-testid attributes and interactive flow across test bench tabs | [`TestBenchView.test.tsx:L473`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L473) | Frontend Vitest |
+| `UI-134` | Positive | `UI` | verifies server modal exposes deterministic data-testid attributes | [`ServerModal.test.tsx:L225`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L225) | Frontend Vitest |
 | `UI-30` | Positive | `UI` | Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration. | [`ClientModal.test.tsx:L27`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientModal.test.tsx#L27) | Frontend Vitest |
 | `UI-31` | **Guardrail** | `UI` | Fetches registered OAuth clients and updates store state. | [`useClientStore.test.ts:L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L37) | Frontend Vitest |
 | `UI-32` | Positive | `UI` | Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials. | [`useClientStore.test.ts:L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L76) | Frontend Vitest |
