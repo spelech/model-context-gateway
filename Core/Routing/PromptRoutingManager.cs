@@ -146,9 +146,20 @@ namespace ModelContextGateway.Core.Routing
 
         public async Task<object?> GetPromptAsync(string promptName, string body, ConcurrentDictionary<string, BackendConnection> backendConnections, Func<Task> ensureBackendsInitializedAsync, Func<string, string, string, string> rewriteRequestJson)
         {
-            if (promptName.StartsWith("router__"))
+            if (promptName.StartsWith("router__", StringComparison.OrdinalIgnoreCase) ||
+                promptName.StartsWith("router/", StringComparison.OrdinalIgnoreCase) ||
+                promptName.StartsWith("router:", StringComparison.OrdinalIgnoreCase))
             {
-                return ResolveLocalPrompt(promptName, body);
+                var normalizedPromptName = promptName;
+                if (promptName.StartsWith("router/", StringComparison.OrdinalIgnoreCase))
+                {
+                    normalizedPromptName = "router__" + promptName.Substring("router/".Length);
+                }
+                else if (promptName.StartsWith("router:", StringComparison.OrdinalIgnoreCase))
+                {
+                    normalizedPromptName = "router__" + promptName.Substring("router:".Length);
+                }
+                return ResolveLocalPrompt(normalizedPromptName, body);
             }
 
             await ensureBackendsInitializedAsync();
@@ -156,11 +167,47 @@ namespace ModelContextGateway.Core.Routing
             if (_promptRoutingTable.TryGetValue(promptName, out var serverId) && backendConnections.TryGetValue(serverId, out var conn))
             {
                 var prefix = serverId + "__";
-                var rawName = promptName.Substring(prefix.Length);
+                var rawName = promptName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ? promptName.Substring(prefix.Length) : promptName;
                 string routingBody = rewriteRequestJson(body, "name", rawName);
                 var resp = await conn.SendRequestAsync("prompts/get", routingBody);
                 return resp.Result;
             }
+
+            // Fallback for cold-start or alternate delimiters (__, /, :)
+            string? parsedServer = null;
+            string? parsedRawName = null;
+
+            if (promptName.Contains("__", StringComparison.Ordinal))
+            {
+                var idx = promptName.IndexOf("__", StringComparison.Ordinal);
+                parsedServer = promptName.Substring(0, idx);
+                parsedRawName = promptName.Substring(idx + 2);
+            }
+            else if (promptName.Contains('/'))
+            {
+                var idx = promptName.IndexOf('/');
+                parsedServer = promptName.Substring(0, idx);
+                parsedRawName = promptName.Substring(idx + 1);
+            }
+            else if (promptName.Contains(':'))
+            {
+                var idx = promptName.IndexOf(':');
+                parsedServer = promptName.Substring(0, idx);
+                parsedRawName = promptName.Substring(idx + 1);
+            }
+
+            if (!string.IsNullOrEmpty(parsedServer) && !string.IsNullOrEmpty(parsedRawName))
+            {
+                var matchedConn = backendConnections.FirstOrDefault(c => string.Equals(c.Key, parsedServer, StringComparison.OrdinalIgnoreCase));
+                if (matchedConn.Value != null)
+                {
+                    _promptRoutingTable[promptName] = matchedConn.Key;
+                    string routingBody = rewriteRequestJson(body, "name", parsedRawName);
+                    var resp = await matchedConn.Value.SendRequestAsync("prompts/get", routingBody);
+                    return resp.Result;
+                }
+            }
+
             throw new KeyNotFoundException($"Prompt {promptName} not found in routing table.");
         }
 

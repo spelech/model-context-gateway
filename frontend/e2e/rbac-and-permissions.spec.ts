@@ -1,52 +1,56 @@
 /** @requirement UI-127 */
 
 import { test, expect } from '@playwright/test';
+import { setupMockApi } from './fixtures/mockApi';
 
 test.describe('RBAC Access Control & Policy Modal Flow', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await setupMockApi(page);
+  });
 
   /**
    * @requirement AUTH-01
    * @category AUTH
-   * @type Positive
+   * @type PositiveFeature
    * @description should navigate to settings permissions tab and open policy configuration modal
    */
   test('should navigate to settings permissions tab and open policy configuration modal', async ({ page }) => {
     await page.goto('/');
 
     // Navigate to Settings
-    const settingsTab = page.locator('button:has-text("Settings")');
-    await expect(settingsTab.first()).toBeVisible();
-    await settingsTab.first().click();
+    const settingsTab = page.locator('[data-testid="tab-settings"], button:has-text("Settings")').first();
+    await expect(settingsTab).toBeVisible();
+    await settingsTab.click();
 
-    // Click Permissions & Policies sub-tab if present
-    const permissionsSubTab = page.locator('button:has-text("Permissions"), button:has-text("Policies"), button:has-text("Access")');
-    if (await permissionsSubTab.count() > 0) {
-      await permissionsSubTab.first().click();
-    }
+    // Click Permissions & Policies sub-tab
+    const permissionsSubTab = page.locator('[data-testid="settings-tab-permissions"], button:has-text("Access Control")').first();
+    await expect(permissionsSubTab).toBeVisible();
+    await permissionsSubTab.click();
 
-    // Check if Add Policy button is present
-    const addPolicyBtn = page.locator('button:has-text("Add Policy"), button:has-text("Create Policy"), button:has-text("+ Policy")');
-    if (await addPolicyBtn.count() > 0) {
-      await addPolicyBtn.first().click();
+    // Check Create Policy button
+    const addPolicyBtn = page.locator('[data-testid="btn-create-policy"], button:has-text("Create Policy")').first();
+    await expect(addPolicyBtn).toBeVisible();
+    await addPolicyBtn.click();
 
-      // Verify Policy Modal opens
-      const policyModal = page.locator('.modal-backdrop, #policy-modal, [role="dialog"]').first();
-      await expect(policyModal).toBeVisible();
+    // Verify Policy Modal opens
+    const policyModal = page.locator('[data-testid="policy-modal"], #policy-modal').first();
+    await expect(policyModal).toBeVisible();
 
-      // Check target input
-      const targetInput = page.locator('input#policy-target, input[name="targetId"]');
-      await expect(targetInput).toBeVisible();
-      await targetInput.fill('server:ha');
+    // Check target input
+    const targetInput = page.locator('[data-testid="policy-target-input"], input#policy-target');
+    await expect(targetInput).toBeVisible();
+    await targetInput.fill('server:ha');
 
-      // Check group input
-      const groupInput = page.locator('input#policy-group, input[name="requiredGroup"]');
-      await expect(groupInput).toBeVisible();
-      await groupInput.fill('SmartHomeOperators');
+    // Check group input
+    const groupInput = page.locator('[data-testid="policy-group-input"], input#policy-group');
+    await expect(groupInput).toBeVisible();
+    await groupInput.fill('SmartHomeOperators');
 
-      // Close modal
-      const closeBtn = page.locator('.btn-close, button:has-text("Cancel")').first();
-      await closeBtn.click();
-    }
+    // Close modal
+    const closeBtn = page.locator('[data-testid="policy-cancel-btn"], [data-testid="policy-close-btn"]').first();
+    await closeBtn.click();
+    await expect(policyModal).toBeHidden();
   });
 
 });

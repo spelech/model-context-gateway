@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-26T11:51:16.6306933Z",
-    "totalRequirements": 442,
-    "positiveCount": 352,
+    "generatedAt": "2026-09-27T11:05:23.0457285Z",
+    "totalRequirements": 448,
+    "positiveCount": 358,
     "guardrailCount": 90,
-    "totalProofs": 1008
+    "totalProofs": 1017
   },
   "requirements": [
     {
@@ -722,7 +722,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/ldap-identity-and-auth-flow.spec.ts",
-          "lineNumber": 5,
+          "lineNumber": 10,
           "testName": "should configure LDAP identity provider, test connection, and save settings",
           "details": null
         }
@@ -745,7 +745,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/my-mcp-servers.spec.ts",
-          "lineNumber": 7,
+          "lineNumber": 12,
           "testName": "should render user provided servers and allow editing credentials with SQLite schema",
           "details": null
         }
@@ -1712,7 +1712,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/personal-appkeys-and-quotas.spec.ts",
-          "lineNumber": 135,
+          "lineNumber": 134,
           "testName": "Admin Context: configures custom user quota override",
           "details": null
         }
@@ -6141,6 +6141,91 @@
       ]
     },
     {
+      "id": "MCP-36",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "PromptRoutingManager resolves prompt directly on cold-start without requiring prior prompts/list call.",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs",
+          "lineNumber": 11,
+          "testName": "PromptRoutingManager_GetPromptAsync_ResolvesDirectly_OnColdStart",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/prompts-and-resources-execution.spec.ts",
+          "lineNumber": 1,
+          "testName": "should select and execute prompt with parameters in Test Bench",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-37",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "ResourceRoutingManager resolves mcp:// URIs directly on cold-start without prior resources/list.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs",
+          "lineNumber": 120,
+          "testName": "ResourceRoutingManager_ReadResourceAsync_ResolvesDirectly_OnColdStart",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-38",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "PromptRoutingManager supports slash, colon, and double-underscore delimiters for prompts/get.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs",
+          "lineNumber": 56,
+          "testName": "PromptRoutingManager_GetPromptAsync_SupportsMultipleDelimiters",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs",
+          "lineNumber": 101,
+          "testName": "PromptRoutingManager_GetPromptAsync_ResolvesRouterLocalPrompts_AcrossDelimiters",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/prompts-and-resources-execution.spec.ts",
+          "lineNumber": 93,
+          "testName": "should select and read resource in Test Bench",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-39",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "CapabilityEndpoints test bench APIs return 404 Not Found gracefully when target server is missing.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs",
+          "lineNumber": 165,
+          "testName": "CapabilityEndpoints_TestBench_HandlesMissingServer_GracefullyWith404",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-ADMIN-ENDPOINT-CALL-TOOL",
       "category": "MCP",
       "type": "Positive",
@@ -7313,13 +7398,20 @@
       "category": "MCP",
       "type": "Positive",
       "description": "renders nothing when isAddEditOpen is false",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/ServerModal.test.tsx",
           "lineNumber": 1,
           "testName": "renders nothing when isAddEditOpen is false",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
+          "lineNumber": 186,
+          "testName": "renders alias input, validates characters, and submits alias (UI-SERVERS-ALIAS-MANAGEMENT)",
           "details": null
         }
       ]
@@ -7341,40 +7433,17 @@
       ]
     },
     {
-      "id": "UI-126",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "should open Server Inspect Modal if servers are present on dashboard",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Playwright E2E",
-          "filePath": "frontend/e2e/server-inspector.spec.ts",
-          "lineNumber": 1,
-          "testName": "should open Server Inspect Modal if servers are present on dashboard",
-          "details": null
-        }
-      ]
-    },
-    {
       "id": "UI-SERVERS-ALIAS-MANAGEMENT",
       "category": "MCP",
       "type": "Positive",
       "description": "renders server alias badge alongside server id when configured",
-      "proofCount": 2,
+      "proofCount": 1,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/ServerCard.test.tsx",
           "lineNumber": 145,
           "testName": "renders server alias badge alongside server id when configured (UI-SERVERS-ALIAS-MANAGEMENT)",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
-          "lineNumber": 186,
-          "testName": "renders alias input, validates characters, and submits alias (UI-SERVERS-ALIAS-MANAGEMENT)",
           "details": null
         }
       ]
@@ -7818,7 +7887,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/full-ui-flow-sse-vault.spec.ts",
-          "lineNumber": 8,
+          "lineNumber": 13,
           "testName": "should register SSE server with Vault provider (Mount/Path/Field), verify badge, and run semantic search",
           "details": null
         }
@@ -8030,7 +8099,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/vault-approle-config-flow.spec.ts",
-          "lineNumber": 5,
+          "lineNumber": 10,
           "testName": "should configure Vault AppRole credentials and test connection in settings",
           "details": null
         }
@@ -8961,7 +9030,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/full-ui-flow-http-direct.spec.ts",
-          "lineNumber": 8,
+          "lineNumber": 13,
           "testName": "should register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench",
           "details": null
         }
@@ -8977,7 +9046,7 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/full-ui-flow-stdio-env.spec.ts",
-          "lineNumber": 8,
+          "lineNumber": 13,
           "testName": "should register STDIO server, verify card, and execute echo tool via Test Bench",
           "details": null
         }
@@ -9964,21 +10033,21 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/prompts-resources-customfiles.spec.ts",
-          "lineNumber": 42,
+          "lineNumber": 37,
           "testName": "should navigate to Custom Files and Prompts in Settings view",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/dashboard.spec.ts",
-          "lineNumber": 23,
+          "lineNumber": 28,
           "testName": "should display aggregate statistics cards",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/dashboard.spec.ts",
-          "lineNumber": 37,
+          "lineNumber": 42,
           "testName": "should filter servers using search input",
           "details": null
         }
@@ -10625,17 +10694,33 @@
       ]
     },
     {
+      "id": "UI-126",
+      "category": "UI",
+      "type": "Positive",
+      "description": "should open Server Inspect Modal and inspect capabilities tabs deterministically",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/server-inspector.spec.ts",
+          "lineNumber": 1,
+          "testName": "should open Server Inspect Modal and inspect capabilities tabs deterministically",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "UI-128",
       "category": "UI",
       "type": "Positive",
-      "description": "should navigate to Test Bench view and render tester cards",
+      "description": "should navigate to Test Bench view, render tester cards, and test semantic search",
       "proofCount": 1,
       "proofs": [
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/testbench.spec.ts",
           "lineNumber": 1,
-          "testName": "should navigate to Test Bench view and render tester cards",
+          "testName": "should navigate to Test Bench view and render tester cards deterministically",
           "details": null
         }
       ]
@@ -10747,6 +10832,38 @@
           "filePath": "frontend/src/test/utils/mcpNaming.test.ts",
           "lineNumber": 44,
           "testName": "identifies un-namespaced custom tools",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-133",
+      "category": "UI",
+      "type": "Positive",
+      "description": "verifies deterministic data-testid attributes and interactive flow across test bench tabs",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 473,
+          "testName": "renders and interacts with test bench elements via deterministic data-testid attributes",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-134",
+      "category": "UI",
+      "type": "Positive",
+      "description": "verifies server modal exposes deterministic data-testid attributes",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
+          "lineNumber": 225,
+          "testName": "exposes deterministic data-testid attributes for automation",
           "details": null
         }
       ]

@@ -5,27 +5,67 @@ import { test, expect } from '@playwright/test';
 test.describe('Server Inspector Modal Flow', () => {
 
   /**
-   * @requirement MCP-01
-   * @category MCP
-   * @type Positive
-   * @description should open Server Inspect Modal if servers are present on dashboard
+   * @requirement UI-126
+   * @category UI
+   * @type PositiveFeature
+   * @description should open Server Inspect Modal and inspect capabilities tabs deterministically
    */
-  test('should open Server Inspect Modal if servers are present on dashboard', async ({ page }) => {
+  test('should open Server Inspect Modal and inspect capabilities tabs deterministically', async ({ page }) => {
+    await page.route('**/api/servers', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'mock-notes',
+            displayName: 'Notes Service',
+            type: 'sse',
+            url: 'http://localhost:3000/sse',
+            enabled: true,
+            connectionStatus: 'Connected',
+            categories: ['notes'],
+          },
+        ]),
+      });
+    });
+
+    await page.route('**/api/servers/mock-notes/inspect', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          tools: [{ name: 'read_note', description: 'Read a note' }],
+          resources: [{ uri: 'notes://list', name: 'Note list' }],
+          prompts: [{ name: 'summarize_note', description: 'Summarize a note' }],
+        }),
+      });
+    });
+
     await page.goto('/');
 
-    // Check if server cards exist
-    const inspectBtn = page.locator('button:has-text("Inspect"), button:has-text("Tools"), .btn-inspect').first();
-    if (await inspectBtn.count() > 0) {
-      await inspectBtn.click();
+    const inspectBtn = page.locator('[data-testid="server-inspect-btn-mock-notes"]');
+    await expect(inspectBtn).toBeVisible();
+    await inspectBtn.click();
 
-      // Verify Inspect Modal overlay opens
-      const inspectModal = page.locator('.modal-backdrop, #inspect-modal, [role="dialog"]').first();
-      await expect(inspectModal).toBeVisible();
+    // Verify Inspect Modal overlay opens
+    const inspectModal = page.locator('[data-testid="server-inspect-modal"]');
+    await expect(inspectModal).toBeVisible();
 
-      // Close modal
-      const closeBtn = page.locator('.btn-close, button:has-text("Close")').first();
-      await closeBtn.click();
-    }
+    // Verify tools tab is active and shows read_note
+    await expect(page.locator('[data-testid="inspect-tab-tools"]')).toBeVisible();
+    await expect(inspectModal.locator('strong:has-text("read_note")')).toBeVisible();
+
+    // Switch to resources tab
+    await page.locator('[data-testid="inspect-tab-resources"]').click();
+    await expect(inspectModal.locator('strong:has-text("Note list")')).toBeVisible();
+
+    // Switch to prompts tab
+    await page.locator('[data-testid="inspect-tab-prompts"]').click();
+    await expect(inspectModal.locator('strong:has-text("summarize_note")')).toBeVisible();
+
+    // Close modal
+    await page.locator('[data-testid="server-inspect-close-btn"]').click();
+    await expect(inspectModal).toBeHidden();
   });
 
 });

@@ -8,52 +8,51 @@ export class TestBenchPage {
   readonly outputConsole: Locator;
   readonly semanticQueryInput: Locator;
   readonly searchToolsBtn: Locator;
+  readonly promptTabBtn: Locator;
+  readonly resourceTabBtn: Locator;
+  readonly promptServerSelect: Locator;
+  readonly promptNameSelect: Locator;
+  readonly promptExecuteBtn: Locator;
+  readonly resourceServerSelect: Locator;
+  readonly resourceNameSelect: Locator;
+  readonly resourceUriInput: Locator;
+  readonly resourceReadBtn: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.serverSelect = page.locator('select#tester-server, select[name="server"]');
-    this.toolSelect = page.locator('select#tester-tool, select[name="tool"]');
-    this.executeBtn = page.getByRole('button', { name: /Execute|Run/i }).first();
-    this.outputConsole = page.locator('.output-console, #tool-output, pre.output');
-    this.semanticQueryInput = page.locator('input#semantic-query, input[placeholder*="query"]');
-    this.searchToolsBtn = page.getByRole('button', { name: /Search Tools/i }).first();
+    this.serverSelect = page.locator('[data-testid="tool-server-select"], select#tester-server');
+    this.toolSelect = page.locator('[data-testid="tool-name-select"], select#tester-tool');
+    this.executeBtn = page.locator('[data-testid="tool-execute-btn"]');
+    this.outputConsole = page.locator('[data-testid="console-response-output"], #jsonrpc-response');
+    this.semanticQueryInput = page.locator('[data-testid="semantic-query-input"], #semantic-search-query');
+    this.searchToolsBtn = page.locator('[data-testid="semantic-search-btn"]');
+
+    this.promptTabBtn = page.locator('[data-testid="testbench-tab-prompts"]');
+    this.resourceTabBtn = page.locator('[data-testid="testbench-tab-resources"]');
+    this.promptServerSelect = page.locator('[data-testid="prompt-server-select"]');
+    this.promptNameSelect = page.locator('[data-testid="prompt-name-select"]');
+    this.promptExecuteBtn = page.locator('[data-testid="prompt-execute-btn"]');
+    this.resourceServerSelect = page.locator('[data-testid="resource-server-select"]');
+    this.resourceNameSelect = page.locator('[data-testid="resource-name-select"]');
+    this.resourceUriInput = page.locator('[data-testid="resource-uri-input"]');
+    this.resourceReadBtn = page.locator('[data-testid="resource-read-btn"]');
   }
 
   async selectServerAndTool(serverId: string, toolName?: string) {
-    if (await this.serverSelect.isVisible()) {
-      try {
-        await this.serverSelect.selectOption(serverId, { timeout: 8000 });
-      } catch {
-        const options = await this.serverSelect.locator('option').all();
-        if (options.length > 1) {
-          await this.serverSelect.selectOption({ index: 1 });
-        }
-      }
-    }
-    if (toolName && await this.toolSelect.isVisible()) {
-      try {
-        await this.toolSelect.selectOption({ label: toolName }, { timeout: 8000 });
-      } catch {
-        const toolOptions = await this.toolSelect.locator('option').all();
-        if (toolOptions.length > 1) {
-          await this.toolSelect.selectOption({ index: 1 });
-        }
-      }
+    await this.serverSelect.waitFor({ state: 'visible' });
+    await this.serverSelect.selectOption(serverId);
+    if (toolName) {
+      await this.toolSelect.waitFor({ state: 'visible' });
+      await this.toolSelect.selectOption(toolName);
     }
   }
 
   async executeTool() {
-    if (await this.executeBtn.isVisible()) {
-      await this.executeBtn.click();
-    }
+    await this.executeBtn.click();
   }
 
   async searchTools(query: string) {
-    if (await this.semanticQueryInput.isVisible()) {
-      await this.semanticQueryInput.fill(query);
-      if (await this.searchToolsBtn.isVisible()) {
-        await this.searchToolsBtn.click();
-      }
-    }
+    await this.semanticQueryInput.fill(query);
+    await this.searchToolsBtn.click();
   }
 }

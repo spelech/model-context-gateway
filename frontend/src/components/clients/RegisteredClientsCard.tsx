@@ -15,16 +15,16 @@ export const RegisteredClientsCard: React.FC = () => {
   };
 
   return (
-    <div className="glass-card dcr-card">
+    <div className="glass-card dcr-card" data-testid="registered-clients-card">
       <div className="card-header-btn">
         <h2>
           <i className="fa-solid fa-desktop"></i> Dynamic Client Registration (RFC 7591)
         </h2>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn btn-secondary btn-sm" id="btn-cleanup-clients" onClick={() => cleanupClients()} title="Prune duplicate and stale dynamic client registrations">
+          <button className="btn btn-secondary btn-sm" id="btn-cleanup-clients" data-testid="btn-cleanup-dcr" onClick={() => cleanupClients()} title="Prune duplicate and stale dynamic client registrations">
             <i className="fa-solid fa-broom"></i> Clean Up DCR
           </button>
-          <button className="btn btn-primary btn-sm" id="btn-add-client" onClick={openAddClientModal}>
+          <button className="btn btn-primary btn-sm" id="btn-add-client" data-testid="btn-register-client" onClick={openAddClientModal}>
             <i className="fa-solid fa-plus"></i> Register Client
           </button>
         </div>
@@ -122,6 +122,7 @@ export const RegisteredClientsCard: React.FC = () => {
                   <td>
                     <button
                       className="btn btn-danger btn-sm"
+                      data-testid="btn-delete-client"
                       onClick={() => deleteClient(c.id, c.displayName)}
                     >
                       Delete

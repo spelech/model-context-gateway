@@ -168,18 +168,68 @@ services:
                 sendResponse({
                   jsonrpc: "2.0",
                   id: parsedId,
-                  result: { protocolVersion: "2024-11-05", capabilities: {}, serverInfo: { name: "mock", version: "1" } }
+                  result: {
+                    protocolVersion: "2024-11-05",
+                    capabilities: { tools: {}, prompts: {}, resources: {} },
+                    serverInfo: { name: "mock-mcp-server", version: "1.0.0" }
+                  }
+                });
+              } else if (method === "prompts/list") {
+                sendResponse({
+                  jsonrpc: "2.0",
+                  id: parsedId,
+                  result: {
+                    prompts: [
+                      { name: "diagnose_system", description: "Diagnose system health and connectivity", arguments: [{ name: "level", required: false }] }
+                    ]
+                  }
+                });
+              } else if (method === "prompts/get") {
+                sendResponse({
+                  jsonrpc: "2.0",
+                  id: parsedId,
+                  result: {
+                    description: "System diagnosis prompt template",
+                    messages: [{ role: "user", content: { type: "text", text: "Please diagnose system health and connectivity status." } }]
+                  }
+                });
+              } else if (method === "resources/list") {
+                sendResponse({
+                  jsonrpc: "2.0",
+                  id: parsedId,
+                  result: {
+                    resources: [
+                      { uri: "mock://system/status", name: "System Status", mimeType: "text/plain", description: "Realtime mock server health status" }
+                    ]
+                  }
+                });
+              } else if (method === "resources/read") {
+                sendResponse({
+                  jsonrpc: "2.0",
+                  id: parsedId,
+                  result: {
+                    contents: [{ uri: "mock://system/status", mimeType: "text/plain", text: "Mock MCP server status: Healthy (All subsystems active)." }]
+                  }
+                });
+              } else if (method === "tools/call") {
+                sendResponse({
+                  jsonrpc: "2.0",
+                  id: parsedId,
+                  result: {
+                    content: [{ type: "text", text: "Mock tool executed successfully." }]
+                  }
                 });
               } else {
                 sendResponse({
                   jsonrpc: "2.0",
+                  id: parsedId,
                   result: {
                     tools: [
-                      { name: "semantic_search", description: "Search docs", inputSchema: { type: "object" } },
-                      { name: "health", description: "Returns service status", inputSchema: { type: "object" } }
+                      { name: "health", description: "Returns service status", inputSchema: { type: "object" } },
+                      { name: "echo", description: "Echo back message", inputSchema: { type: "object", properties: { message: { type: "string" } }, required: ["message"] } },
+                      { name: "semantic_search", description: "Search docs", inputSchema: { type: "object" } }
                     ]
-                  },
-                  id: parsedId
+                  }
                 });
               }
             });

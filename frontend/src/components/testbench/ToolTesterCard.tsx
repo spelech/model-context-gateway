@@ -121,7 +121,7 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
   };
 
   return (
-    <div className="glass-card">
+    <div className="glass-card" data-testid="tool-tester-card">
       <h2>
         <i className="fa-solid fa-wand-magic-sparkles"></i> Interactive Tool Tester
       </h2>
@@ -131,6 +131,7 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
             <label htmlFor="tester-server">Server</label>
             <select
               id="tester-server"
+              data-testid="tool-server-select"
               value={selectedServer}
               onChange={(e) => onServerChange(e.target.value)}
               required
@@ -147,6 +148,7 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
             <label htmlFor="tester-tool">Tool</label>
             <select
               id="tester-tool"
+              data-testid="tool-name-select"
               value={selectedToolName}
               onChange={(e) => onToolChange(e.target.value)}
               required
@@ -183,6 +185,7 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
           <button
             type="button"
             className={`tester-tab-btn ${interactiveTab === 'form' ? 'active' : ''}`}
+            data-testid="tool-tab-form"
             onClick={() => setInteractiveTab('form')}
           >
             Interactive Form
@@ -190,6 +193,7 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
           <button
             type="button"
             className={`tester-tab-btn ${interactiveTab === 'json' ? 'active' : ''}`}
+            data-testid="tool-tab-json"
             onClick={() => setInteractiveTab('json')}
           >
             Raw JSON Input
@@ -198,6 +202,7 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
             <button
               type="button"
               className="btn btn-prefill"
+              data-testid="tool-prefill-btn"
               style={{ marginLeft: 'auto' }}
               onClick={handlePrefillExample}
               title="Pre-fill with example parameters"
@@ -223,6 +228,7 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
               <label htmlFor="tester-raw-json">Arguments (JSON)</label>
               <textarea
                 id="tester-raw-json"
+                data-testid="tool-raw-json-input"
                 rows={8}
                 placeholder="{}"
                 value={rawToolJson}
@@ -233,7 +239,7 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
         )}
 
         <div style={{ marginTop: '20px' }}>
-          <button type="submit" className="btn btn-primary" disabled={!selectedToolName}>
+          <button type="submit" className="btn btn-primary" data-testid="tool-execute-btn" disabled={!selectedToolName}>
             <i className="fa-solid fa-play"></i> Run Tool
           </button>
         </div>
@@ -313,6 +319,7 @@ const renderDynamicFields = (
           </label>
           <input
             id={`param-${key}`}
+            data-testid={`param-input-${key}`}
             type="number"
             step={prop.type === 'integer' ? '1' : 'any'}
             placeholder={placeholder}
@@ -339,7 +346,8 @@ const renderDynamicFields = (
           </label>
           <textarea
             id={`param-${key}`}
-            rows={2}
+            data-testid={`param-input-${key}`}
+            rows={4}
             placeholder={placeholder}
             value={displayVal}
             onChange={(e) => onChange(key, prop.type, e.target.value)}
@@ -360,6 +368,7 @@ const renderDynamicFields = (
         </label>
         <input
           id={`param-${key}`}
+          data-testid={`param-input-${key}`}
           type="text"
           placeholder={placeholder}
           value={args[key] !== undefined ? args[key] : ''}

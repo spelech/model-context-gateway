@@ -83,7 +83,7 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
   };
 
   return (
-    <div id="subview-search" className="settings-subview active">
+    <div id="subview-search" data-testid="general-tab" className="settings-subview active">
       <div className="glass-card settings-card" style={{ maxWidth: '600px', margin: '0 auto' }}>
         <h2>
           <i className="fa-solid fa-gear"></i> General Settings
@@ -120,6 +120,7 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
             <button
               type="button"
               id="btn-open-master-key-modal"
+              data-testid="btn-open-master-key-modal"
               className="btn btn-primary btn-sm"
               onClick={() => setIsMasterKeyModalOpen(true)}
               style={{ whiteSpace: 'nowrap', marginLeft: '12px' }}
@@ -207,6 +208,7 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
               <button
                 type="button"
                 id="btn-rotate-master-key"
+                data-testid="btn-rotate-master-key"
                 className="btn btn-secondary btn-sm"
                 onClick={() => setIsMasterKeyModalOpen(true)}
                 style={{ fontSize: '11px', padding: '3px 8px' }}
@@ -227,6 +229,7 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
               <input
                 type="text"
                 id="settings-dashboard-title"
+                data-testid="settings-dashboard-title"
                 placeholder="Model Context Gateway"
                 value={dashboardTitle}
                 onChange={(e) => setDashboardTitle(e.target.value)}
@@ -238,6 +241,7 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
                 <input
                   type="text"
                   id="settings-dashboard-icon"
+                  data-testid="settings-dashboard-icon"
                   placeholder="fa-solid fa-network-wired"
                   value={dashboardIcon}
                   onChange={(e) => setDashboardIcon(e.target.value)}
@@ -253,6 +257,7 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
                 />
                 <button
                   type="button"
+                  data-testid="btn-upload-logo"
                   className="btn btn-secondary btn-sm"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
@@ -393,6 +398,8 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
             <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', margin: 0 }}>
               <input
                 type="checkbox"
+                id="settings-allow-dcr"
+                data-testid="settings-allow-dcr-checkbox"
                 checked={allowOpenDCR}
                 onChange={(e) => setAllowOpenDCR(e.target.checked)}
                 style={{ width: '18px', height: '18px', margin: 0, cursor: 'pointer' }}
@@ -409,6 +416,7 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
               type="submit"
               className="btn btn-primary"
               id="btn-save-settings"
+              data-testid="btn-save-general-settings"
               disabled={saveStatus === 'saving'}
               style={{
                 backgroundColor: saveStatus === 'saved' ? '#10b981' : saveStatus === 'error' ? '#ef4444' : '',

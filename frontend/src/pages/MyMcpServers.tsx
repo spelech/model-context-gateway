@@ -86,11 +86,11 @@ export const MyMcpServers: React.FC = () => {
   }
 
   return (
-    <div id="view-my-mcp-servers" className="view-panel active">
+    <div id="view-my-mcp-servers" data-testid="my-mcp-servers-view" className="view-panel active">
       <div className="glass-card dcr-card">
         <div className="card-header"><h2><i className="fa-solid fa-server"></i> My MCP Servers (User Provided Auth)</h2></div>
         <div className="table-container">
-          <table className="data-table">
+          <table className="data-table" data-testid="my-mcp-servers-table">
             <thead>
               <tr>
                 <th>Name</th>
@@ -107,8 +107,8 @@ export const MyMcpServers: React.FC = () => {
                 const isOAuth = !!server.enableOAuth3Lo;
 
                 return (
-                  <tr key={server.id}>
-                    <td>{server.displayName || server.id}</td>
+                  <tr key={server.id} data-testid={`my-mcp-server-row-${server.id}`}>
+                    <td data-testid="server-name">{server.displayName || server.id}</td>
                     <td>
                       {isOAuth ? (
                         isConfigured ? (
@@ -117,9 +117,9 @@ export const MyMcpServers: React.FC = () => {
                           <span style={{ color: 'var(--text-muted)' }}>Not Connected</span>
                         )
                       ) : isConfigured ? (
-                        <span style={{ color: 'var(--success-color)' }}>Auth Configured</span>
+                        <span className="badge badge-success" data-testid="auth-status-configured" style={{ color: 'var(--success-color)' }}>Auth Configured</span>
                       ) : (
-                        <span style={{ color: 'var(--danger-color)' }}>Auth Missing</span>
+                        <span className="badge badge-danger" data-testid="auth-status-missing" style={{ color: 'var(--danger-color)' }}>Auth Missing</span>
                       )}
                     </td>
                     <td style={{ display: 'flex', gap: '8px' }}>
@@ -135,11 +135,11 @@ export const MyMcpServers: React.FC = () => {
                         )
                       ) : (
                         <>
-                          <button className="btn-icon" onClick={() => handleEdit(server)}>
+                          <button className="btn-icon" data-testid={`btn-edit-auth-${server.id}`} onClick={() => handleEdit(server)}>
                             <i className="fa-solid fa-pen"></i> Edit Auth
                           </button>
                           {isConfigured && (
-                            <button className="btn-icon" style={{ color: 'var(--danger-color)' }} onClick={() => handleDelete(server)}>
+                            <button className="btn-icon" data-testid={`btn-delete-auth-${server.id}`} style={{ color: 'var(--danger-color)' }} onClick={() => handleDelete(server)}>
                               <i className="fa-solid fa-trash"></i> Remove
                             </button>
                           )}
@@ -159,13 +159,17 @@ export const MyMcpServers: React.FC = () => {
       </div>
 
       {editingServer && (
-        <div className="modal-backdrop" style={{ display: 'flex' }} onClick={() => setEditingServer(null)}>
+        <div className="modal-backdrop" data-testid="user-auth-modal" style={{ display: 'flex' }} onClick={() => setEditingServer(null)}>
           <div className="glass-card modal-card" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header"><h2><i className="fa-solid fa-lock"></i> Edit Auth for {editingServer.displayName}</h2><button className="btn-close" onClick={() => setEditingServer(null)}>&times;</button></div>
+            <div className="modal-header">
+              <h2><i className="fa-solid fa-lock"></i> Edit Auth for {editingServer.displayName}</h2>
+              <button className="btn-close" data-testid="user-auth-close-btn" onClick={() => setEditingServer(null)}>&times;</button>
+            </div>
             <div className="form-group">
               <label>Credentials (JSON format or raw token string)</label>
               <textarea 
                 className="form-control" 
+                data-testid="user-auth-textarea"
                 style={{ height: '150px', fontFamily: 'monospace' }}
                 placeholder='Paste raw token (e.g. xoxp-...) or JSON object: {"apiKey": "..."}'
                 value={secretJson}
@@ -176,8 +180,8 @@ export const MyMcpServers: React.FC = () => {
               </small>
             </div>
             <div className="modal-actions">
-              <button className="btn btn-secondary" onClick={() => setEditingServer(null)}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleSave}>Save</button>
+              <button className="btn btn-secondary" data-testid="user-auth-cancel-btn" onClick={() => setEditingServer(null)}>Cancel</button>
+              <button className="btn btn-primary" data-testid="user-auth-save-btn" onClick={handleSave}>Save</button>
             </div>
           </div>
         </div>

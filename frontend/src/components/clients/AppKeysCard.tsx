@@ -97,7 +97,7 @@ export const AppKeysCard: React.FC = () => {
   };
 
   return (
-    <div className="glass-card dcr-card">
+    <div className="glass-card dcr-card" data-testid="appkeys-card">
       <div className="card-header-btn">
         <div>
           <h2>
@@ -121,7 +121,7 @@ export const AppKeysCard: React.FC = () => {
             </small>
           )}
         </div>
-        <button className="btn btn-primary btn-sm" onClick={openModal} disabled={!!limits?.isLimitReached}>
+        <button className="btn btn-primary btn-sm" data-testid="btn-create-appkey" onClick={openModal} disabled={!!limits?.isLimitReached}>
           <i className="fa-solid fa-plus"></i> Create App Key
         </button>
       </div>
@@ -130,6 +130,7 @@ export const AppKeysCard: React.FC = () => {
         <div className="sub-tabs-nav" style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '10px' }}>
           <button
             className={`tab-btn btn-sm ${activeTab === 'personal' ? 'active' : ''}`}
+            data-testid="appkeys-tab-personal"
             onClick={() => handleTabSwitch('personal')}
             style={{ borderRadius: '6px', padding: '6px 12px' }}
           >
@@ -137,6 +138,7 @@ export const AppKeysCard: React.FC = () => {
           </button>
           <button
             className={`tab-btn btn-sm ${activeTab === 'system' ? 'active' : ''}`}
+            data-testid="appkeys-tab-system"
             onClick={() => handleTabSwitch('system')}
             style={{ borderRadius: '6px', padding: '6px 12px' }}
           >
@@ -144,6 +146,7 @@ export const AppKeysCard: React.FC = () => {
           </button>
           <button
             className={`tab-btn btn-sm ${activeTab === 'quotas' ? 'active' : ''}`}
+            data-testid="appkeys-tab-quotas"
             onClick={() => handleTabSwitch('quotas')}
             style={{ borderRadius: '6px', padding: '6px 12px' }}
           >
@@ -163,6 +166,7 @@ export const AppKeysCard: React.FC = () => {
               <label htmlFor="quota-username-input" style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Username</label>
               <input
                 id="quota-username-input"
+                data-testid="quota-username-input"
                 type="text"
                 placeholder="e.g. jdoe"
                 value={quotaUsername}
@@ -175,6 +179,7 @@ export const AppKeysCard: React.FC = () => {
               <label htmlFor="quota-max-keys-input" style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Max Keys (0=unlimited)</label>
               <input
                 id="quota-max-keys-input"
+                data-testid="quota-max-keys-input"
                 type="number"
                 min="0"
                 value={quotaMaxKeys}
@@ -183,7 +188,7 @@ export const AppKeysCard: React.FC = () => {
                 style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', color: '#fff', border: '1px solid var(--glass-border)' }}
               />
             </div>
-            <button type="submit" className="btn btn-primary btn-sm" disabled={isSubmittingQuota}>
+            <button type="submit" data-testid="btn-set-quota" className="btn btn-primary btn-sm" disabled={isSubmittingQuota}>
               <i className="fa-solid fa-plus"></i> Set Quota
             </button>
           </form>
@@ -218,6 +223,7 @@ export const AppKeysCard: React.FC = () => {
                       <td>
                         <button
                           className="btn btn-danger btn-sm"
+                          data-testid="quota-reset-btn"
                           onClick={() => deleteUserQuota(q.username)}
                           title="Reset Quota to Default"
                         >
@@ -311,6 +317,7 @@ export const AppKeysCard: React.FC = () => {
                       <td>
                         <button
                           className="btn btn-secondary btn-sm"
+                          data-testid="btn-copy-config"
                           onClick={() => copyConfigSnippet(key.keyPrefix)}
                           title="Copy MCP Config Snippet"
                           style={{ marginRight: '6px' }}
@@ -319,6 +326,7 @@ export const AppKeysCard: React.FC = () => {
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
+                          data-testid="btn-revoke-key"
                           onClick={() => revokeAppKey(key.id, key.name)}
                           title="Revoke Key"
                         >

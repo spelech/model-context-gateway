@@ -62,6 +62,7 @@ export const SettingsView: React.FC = () => {
       >
         <button
           type="button"
+          data-testid="settings-tab-search"
           className={`tester-tab-btn settings-tab-btn ${activeSubview === 'search' ? 'active' : ''}`}
           onClick={() => setActiveSubview('search')}
         >
@@ -69,6 +70,7 @@ export const SettingsView: React.FC = () => {
         </button>
         <button
           type="button"
+          data-testid="settings-tab-identity"
           className={`tester-tab-btn settings-tab-btn ${activeSubview === 'identity' ? 'active' : ''}`}
           onClick={() => setActiveSubview('identity')}
         >
@@ -76,6 +78,7 @@ export const SettingsView: React.FC = () => {
         </button>
         <button
           type="button"
+          data-testid="settings-tab-secrets"
           className={`tester-tab-btn settings-tab-btn ${activeSubview === 'secrets' ? 'active' : ''}`}
           onClick={() => setActiveSubview('secrets')}
         >
@@ -83,6 +86,7 @@ export const SettingsView: React.FC = () => {
         </button>
         <button
           type="button"
+          data-testid="settings-tab-files"
           className={`tester-tab-btn settings-tab-btn ${activeSubview === 'files' ? 'active' : ''}`}
           onClick={() => setActiveSubview('files')}
         >
@@ -90,6 +94,7 @@ export const SettingsView: React.FC = () => {
         </button>
         <button
           type="button"
+          data-testid="settings-tab-permissions"
           className={`tester-tab-btn settings-tab-btn ${activeSubview === 'permissions' ? 'active' : ''}`}
           onClick={() => setActiveSubview('permissions')}
         >

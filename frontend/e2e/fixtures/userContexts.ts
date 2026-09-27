@@ -37,12 +37,15 @@ export interface MultiUserFixtures {
   appKeyPage: Page;
 }
 
+import { setupMockApi } from './mockApi';
+
 export const test = base.extend<MultiUserFixtures>({
   adminPage: async ({ browser }, use) => {
     const context = await browser.newContext({
       extraHTTPHeaders: USER_CONTEXTS.admin
     });
     const page = await context.newPage();
+    await setupMockApi(page, { role: 'admin' });
     await use(page);
     await context.close();
   },
@@ -51,6 +54,7 @@ export const test = base.extend<MultiUserFixtures>({
       extraHTTPHeaders: USER_CONTEXTS.operator
     });
     const page = await context.newPage();
+    await setupMockApi(page, { role: 'operator' });
     await use(page);
     await context.close();
   },
@@ -59,6 +63,7 @@ export const test = base.extend<MultiUserFixtures>({
       extraHTTPHeaders: USER_CONTEXTS.guest
     });
     const page = await context.newPage();
+    await setupMockApi(page, { role: 'guest' });
     await use(page);
     await context.close();
   },
@@ -67,6 +72,7 @@ export const test = base.extend<MultiUserFixtures>({
       extraHTTPHeaders: USER_CONTEXTS.appKey
     });
     const page = await context.newPage();
+    await setupMockApi(page, { role: 'guest' });
     await use(page);
     await context.close();
   }

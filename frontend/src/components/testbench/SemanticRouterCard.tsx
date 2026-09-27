@@ -16,7 +16,7 @@ export const SemanticRouterCard: React.FC<SemanticRouterCardProps> = ({
   onSearch,
 }) => {
   return (
-    <div className="glass-card">
+    <div className="glass-card" data-testid="semantic-router-card">
       <h2>
         <i className="fa-solid fa-magnifying-glass-chart"></i> Semantic Router Simulator
       </h2>
@@ -25,6 +25,7 @@ export const SemanticRouterCard: React.FC<SemanticRouterCardProps> = ({
         <input
           type="text"
           id="semantic-search-query"
+          data-testid="semantic-query-input"
           name="semantic-search-query"
           aria-label="Natural Language Prompt"
           placeholder="e.g. search matrix in plex"
@@ -32,11 +33,11 @@ export const SemanticRouterCard: React.FC<SemanticRouterCardProps> = ({
           onChange={(e) => onQueryChange(e.target.value)}
         />
       </div>
-      <button type="button" className="btn btn-secondary" onClick={onSearch} disabled={isSearchingSemantic}>
+      <button type="button" className="btn btn-secondary" data-testid="semantic-search-btn" onClick={onSearch} disabled={isSearchingSemantic}>
         <i className="fa-solid fa-ranking-star"></i> {isSearchingSemantic ? 'Evaluating...' : 'Test Filter Score'}
       </button>
 
-      <div className="semantic-search-results" id="semantic-search-results">
+      <div className="semantic-search-results" id="semantic-search-results" data-testid="semantic-results-container">
         {semanticResults.length === 0 ? (
           <div className="empty-state">
             {isSearchingSemantic ? 'Searching...' : 'Enter a prompt query to test tool matching scoring.'}

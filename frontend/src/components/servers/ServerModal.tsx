@@ -96,13 +96,13 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
   const showCustomHeaderName = authShape === 'custom-header' || authShape === 'query';
 
   return (
-    <div className="modal-backdrop" id="server-modal" style={{ display: 'flex' }}>
+    <div className="modal-backdrop" id="server-modal" data-testid="server-modal" style={{ display: 'flex' }}>
       <div className="glass-card modal-card" style={{ maxWidth: '600px', width: '90%' }}>
         <div className="modal-header">
           <h2>
             <i className="fa-solid fa-server"></i> {editingServer ? 'Edit MCP Server' : 'Add MCP Server'}
           </h2>
-          <button className="btn-close" onClick={closeAddEditModal} aria-label="Close modal">
+          <button className="btn-close" data-testid="server-close-btn" onClick={closeAddEditModal} aria-label="Close modal">
             &times;
           </button>
         </div>
@@ -112,6 +112,7 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
             <input
               type="text"
               id="server-name"
+              data-testid="server-name-input"
               aria-label="Display Name"
               placeholder="e.g. Notes RAG"
               value={displayName}
@@ -125,6 +126,7 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
             <input
               type="text"
               id="server-alias"
+              data-testid="server-alias-input"
               aria-label="Alias or Namespace"
               placeholder="e.g. homebox_db"
               value={alias}
@@ -146,6 +148,7 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
               <label htmlFor="server-type">Transport Type</label>
               <select
                 id="server-type"
+                data-testid="server-type-select"
                 value={type}
                 onChange={(e) => setType(e.target.value)}
                 required
@@ -161,6 +164,7 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
               <input
                 type="text"
                 id="server-category"
+                data-testid="server-category-input"
                 aria-label="Category"
                 placeholder="e.g. infrastructure"
                 value={category}
@@ -177,6 +181,7 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
             <input
               type="text"
               id="server-url"
+              data-testid="server-url-input"
               aria-label={type === 'stdio' ? 'Connection Command' : 'Connection URL'}
               placeholder={type === 'stdio' ? 'e.g. node /app/mock_stdio.js' : 'e.g. http://notes-rag-mcp:3000/sse'}
               value={url}
@@ -190,6 +195,7 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
               <label htmlFor="server-secret-provider">Secret Provider</label>
               <select
                 id="server-secret-provider"
+                data-testid="server-secret-provider-select"
                 value={authShape === 'impersonation' ? 'None' : secretProvider}
                 disabled={authShape === 'impersonation'}
                 onChange={(e) => setSecretProvider(e.target.value)}
@@ -207,6 +213,7 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
               <input
                 type="text"
                 id="server-secret-key"
+                data-testid="server-secret-key-input"
                 aria-label="Secret Key or Item Name"
                 disabled={authShape === 'impersonation'}
                 placeholder={
@@ -355,10 +362,10 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={closeAddEditModal}>
+            <button type="button" className="btn btn-secondary" data-testid="server-cancel-btn" onClick={closeAddEditModal}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" id="btn-save">
+            <button type="submit" className="btn btn-primary" id="btn-save" data-testid="server-save-btn">
               Save Server
             </button>
           </div>

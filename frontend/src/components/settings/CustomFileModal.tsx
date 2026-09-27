@@ -153,13 +153,13 @@ const CustomFileModalDialog: React.FC = () => {
   };
 
   return (
-    <div className="modal-backdrop" id="custom-file-modal" style={{ display: 'flex' }}>
+    <div className="modal-backdrop" id="custom-file-modal" data-testid="custom-file-modal" style={{ display: 'flex' }}>
       <div className="glass-card modal-card" style={{ maxWidth: '850px', width: '90%' }}>
         <div className="modal-header">
           <h2>
             <i className="fa-solid fa-file-code"></i> {editingFileMeta ? `Edit ${editingFileMeta.name}` : 'Create Custom File'}
           </h2>
-          <button type="button" className="btn-close" onClick={closeCustomFileModal}>
+          <button type="button" className="btn-close" data-testid="custom-file-close-btn" onClick={closeCustomFileModal}>
             &times;
           </button>
         </div>
@@ -170,6 +170,7 @@ const CustomFileModalDialog: React.FC = () => {
               <label htmlFor="custom-file-type">File Type</label>
               <select
                 id="custom-file-type"
+                data-testid="custom-file-type-select"
                 value={fileType}
                 disabled={!!editingFileMeta}
                 onChange={(e) => {
@@ -192,6 +193,7 @@ const CustomFileModalDialog: React.FC = () => {
               <input
                 type="text"
                 id="custom-file-name"
+                data-testid="custom-file-name-input"
                 placeholder={fileType === 'prompts' ? 'e.g. system-summary.json' : 'e.g. guide.md'}
                 value={fileName}
                 disabled={!!editingFileMeta}
@@ -205,6 +207,7 @@ const CustomFileModalDialog: React.FC = () => {
             <div className="tester-tabs" style={{ marginBottom: '15px', marginTop: '5px' }}>
               <button
                 type="button"
+                data-testid="custom-file-tab-editor"
                 className={`tester-tab-btn ${activeFileModalTab === 'editor' ? 'active' : ''}`}
                 onClick={() => handleTabSwitch('editor')}
               >
@@ -212,6 +215,7 @@ const CustomFileModalDialog: React.FC = () => {
               </button>
               <button
                 type="button"
+                data-testid="custom-file-tab-builder"
                 className={`tester-tab-btn ${activeFileModalTab === 'builder' ? 'active' : ''}`}
                 onClick={() => handleTabSwitch('builder')}
               >
@@ -225,6 +229,7 @@ const CustomFileModalDialog: React.FC = () => {
               <label htmlFor="custom-file-content">File Content</label>
               <textarea
                 id="custom-file-content"
+                data-testid="custom-file-content-input"
                 rows={14}
                 style={{
                   fontFamily: 'JetBrains Mono, monospace',
@@ -253,10 +258,10 @@ const CustomFileModalDialog: React.FC = () => {
           )}
 
           <div className="modal-footer" style={{ marginTop: '15px' }}>
-            <button type="button" className="btn btn-secondary" onClick={closeCustomFileModal}>
+            <button type="button" className="btn btn-secondary" data-testid="custom-file-cancel-btn" onClick={closeCustomFileModal}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" id="btn-save-custom-file">
+            <button type="submit" className="btn btn-primary" id="btn-save-custom-file" data-testid="custom-file-save-btn">
               Save File
             </button>
           </div>

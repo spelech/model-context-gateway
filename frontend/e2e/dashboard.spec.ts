@@ -1,29 +1,34 @@
 /** @requirement UI-124 */
 
 import { test, expect } from '@playwright/test';
+import { setupMockApi } from './fixtures/mockApi';
 
 test.describe('Dashboard & Navigation Flow', () => {
 
+  test.beforeEach(async ({ page }) => {
+    await setupMockApi(page);
+  });
+
   /**
-   * @id UI-01
+   * @requirement UI-01
    * @category UI
-   * @type positive
+   * @type PositiveFeature
    * @description Renders main dashboard navigation tabs and layout headers
    */
   test('should render the dashboard layout and header components', async ({ page }) => {
     await page.goto('/');
 
     // Check navigation buttons exist
-    await expect(page.locator('button:has-text("Overview")')).toBeVisible();
-    await expect(page.locator('button:has-text("Test Bench")')).toBeVisible();
-    await expect(page.locator('button:has-text("Settings")')).toBeVisible();
-    await expect(page.locator('button:has-text("App Keys & Security")')).toBeVisible();
+    await expect(page.locator('[data-testid="tab-dashboard"], button:has-text("Overview")').first()).toBeVisible();
+    await expect(page.locator('[data-testid="tab-testbench"], button:has-text("Test Bench")').first()).toBeVisible();
+    await expect(page.locator('[data-testid="tab-settings"], button:has-text("Settings")').first()).toBeVisible();
+    await expect(page.locator('[data-testid="tab-security"], button:has-text("App Keys & Security")').first()).toBeVisible();
   });
 
   /**
-   * @id UI-01
+   * @requirement UI-01
    * @category UI
-   * @type positive
+   * @type PositiveFeature
    * @description Displays aggregate system metrics and health status cards
    */
   test('should display aggregate statistics cards', async ({ page }) => {
@@ -35,16 +40,16 @@ test.describe('Dashboard & Navigation Flow', () => {
   });
 
   /**
-   * @id UI-01
+   * @requirement UI-01
    * @category UI
-   * @type positive
+   * @type PositiveFeature
    * @description Filters backend MCP server catalog via dashboard search input
    */
   test('should filter servers using search input', async ({ page }) => {
     await page.goto('/');
 
     // Type in search bar
-    const searchInput = page.locator('input[placeholder*="Search"], input[type="search"], #server-search, [data-testid="server-search-input"]').first();
+    const searchInput = page.locator('[data-testid="server-search-input"], #server-search').first();
     await expect(searchInput).toBeVisible();
     await searchInput.fill('docker');
     await expect(searchInput).toHaveValue('docker');

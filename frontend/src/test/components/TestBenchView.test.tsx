@@ -469,4 +469,40 @@ describe('TestBenchView Component', () => {
     expect(screen.getByText('[MCP-ARR-HD]')).toBeInTheDocument();
     expect(screen.getByText(/1 required argument/i)).toBeInTheDocument();
   });
+
+  /**
+   * @requirement UI-133
+   * @category UI
+   * @type Positive
+   * @description verifies deterministic data-testid attributes and interactive flow across test bench tabs
+   */
+  it('renders and interacts with test bench elements via deterministic data-testid attributes', async () => {
+    render(<TestBenchView />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('view-testbench')).toBeInTheDocument();
+      expect(screen.getByTestId('tool-tester-card')).toBeInTheDocument();
+      expect(screen.getByTestId('tool-server-select')).toBeInTheDocument();
+      expect(screen.getByTestId('tool-name-select')).toBeInTheDocument();
+      expect(screen.getByTestId('console-card')).toBeInTheDocument();
+      expect(screen.getByTestId('console-request-output')).toBeInTheDocument();
+      expect(screen.getByTestId('console-response-output')).toBeInTheDocument();
+      expect(screen.getByTestId('semantic-router-card')).toBeInTheDocument();
+      expect(screen.getByTestId('semantic-query-input')).toBeInTheDocument();
+      expect(screen.getByTestId('semantic-search-btn')).toBeInTheDocument();
+    });
+
+    // Switch to Prompts tab via data-testid
+    fireEvent.click(screen.getByTestId('testbench-tab-prompts'));
+    expect(screen.getByTestId('prompt-tester-card')).toBeInTheDocument();
+    expect(screen.getByTestId('prompt-server-select')).toBeInTheDocument();
+    expect(screen.getByTestId('prompt-name-select')).toBeInTheDocument();
+
+    // Switch to Resources tab via data-testid
+    fireEvent.click(screen.getByTestId('testbench-tab-resources'));
+    expect(screen.getByTestId('resource-tester-card')).toBeInTheDocument();
+    expect(screen.getByTestId('resource-server-select')).toBeInTheDocument();
+    expect(screen.getByTestId('resource-name-select')).toBeInTheDocument();
+    expect(screen.getByTestId('resource-uri-input')).toBeInTheDocument();
+  });
 });

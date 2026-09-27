@@ -222,12 +222,13 @@ export const TestBenchView: React.FC = () => {
   };
 
   return (
-    <div id="view-testbench" className="view-panel active">
+    <div id="view-testbench" data-testid="view-testbench" className="view-panel active">
       {/* Top Tab Switcher */}
       <div className="tester-tabs">
         <button
           type="button"
           className={`tester-tab-btn ${activeTab === 'tools' ? 'active' : ''}`}
+          data-testid="testbench-tab-tools"
           onClick={() => setActiveTab('tools')}
         >
           <i className="fa-solid fa-wrench"></i> Tools
@@ -235,6 +236,7 @@ export const TestBenchView: React.FC = () => {
         <button
           type="button"
           className={`tester-tab-btn ${activeTab === 'prompts' ? 'active' : ''}`}
+          data-testid="testbench-tab-prompts"
           onClick={() => setActiveTab('prompts')}
         >
           <i className="fa-solid fa-comments"></i> Prompts
@@ -242,6 +244,7 @@ export const TestBenchView: React.FC = () => {
         <button
           type="button"
           className={`tester-tab-btn ${activeTab === 'resources' ? 'active' : ''}`}
+          data-testid="testbench-tab-resources"
           onClick={() => setActiveTab('resources')}
         >
           <i className="fa-solid fa-file-invoice"></i> Resources

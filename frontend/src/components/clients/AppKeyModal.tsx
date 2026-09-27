@@ -77,11 +77,11 @@ export const AppKeyModal: React.FC = () => {
   };
 
   return (
-    <div id="add-appkey-modal" className="modal-backdrop" style={{ display: 'flex' }}>
+    <div id="add-appkey-modal" data-testid="appkey-modal" className="modal-backdrop" style={{ display: 'flex' }}>
       <div className="glass-card modal-card" style={{ maxWidth: '540px' }}>
         <div className="modal-header">
           <h2><i className="fa-solid fa-key"></i> {isAdmin ? 'Create New App Key' : 'Create Personal App Key'}</h2>
-          <button className="btn-close" onClick={closeModal}>&times;</button>
+          <button className="btn-close" data-testid="appkey-close-btn" onClick={closeModal}>&times;</button>
         </div>
 
         {!createdResult ? (
@@ -92,6 +92,7 @@ export const AppKeyModal: React.FC = () => {
                   <label htmlFor="modal-key-type">Key Type</label>
                   <select
                     id="modal-key-type"
+                    data-testid="appkey-keytype-select"
                     value={keyType}
                     onChange={(e) => setKeyType(e.target.value as 'personal' | 'system')}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', color: '#fff', border: '1px solid var(--glass-border)' }}
@@ -107,6 +108,7 @@ export const AppKeyModal: React.FC = () => {
                     <input
                       type="text"
                       id="modal-target-username"
+                      data-testid="appkey-target-username-input"
                       placeholder={user?.username || 'Username'}
                       value={targetUsername}
                       onChange={(e) => setTargetUsername(e.target.value)}
@@ -136,6 +138,7 @@ export const AppKeyModal: React.FC = () => {
               <input
                 type="text"
                 id="key-name"
+                data-testid="appkey-name-input"
                 placeholder="e.g. My Laptop CLI"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -147,6 +150,7 @@ export const AppKeyModal: React.FC = () => {
               <label htmlFor="key-scope-type">Scope / Access Level</label>
               <select
                 id="key-scope-type"
+                data-testid="appkey-scope-select"
                 value={scopeType}
                 onChange={(e) => setScopeType(e.target.value as any)}
                 style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', color: '#fff', border: '1px solid var(--glass-border)' }}
@@ -163,6 +167,7 @@ export const AppKeyModal: React.FC = () => {
                 <input
                   type="text"
                   id="key-custom-scope"
+                  data-testid="appkey-custom-scope-input"
                   placeholder={scopeType === 'server' ? 'e.g. ha, docker' : 'e.g. smarthome, media'}
                   value={customScope}
                   onChange={(e) => setCustomScope(e.target.value)}
@@ -175,6 +180,7 @@ export const AppKeyModal: React.FC = () => {
               <label htmlFor="key-expires">Expiration</label>
               <select
                 id="key-expires"
+                data-testid="appkey-expires-select"
                 value={expiresInDays === undefined ? 'never' : expiresInDays}
                 onChange={(e) => setExpiresInDays(e.target.value === 'never' ? undefined : Number(e.target.value))}
                 style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', color: '#fff', border: '1px solid var(--glass-border)' }}
@@ -187,14 +193,14 @@ export const AppKeyModal: React.FC = () => {
             </div>
 
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={closeModal}>Cancel</button>
-              <button type="submit" className="btn btn-primary" disabled={isSubmitting || !!limits?.isLimitReached}>
+              <button type="button" className="btn btn-secondary" data-testid="appkey-cancel-btn" onClick={closeModal}>Cancel</button>
+              <button type="submit" className="btn btn-primary" data-testid="appkey-save-btn" disabled={isSubmitting || !!limits?.isLimitReached}>
                 {isSubmitting ? 'Generating...' : 'Generate App Key'}
               </button>
             </div>
           </form>
         ) : (
-          <div style={{ padding: '10px', background: 'rgba(249, 115, 22, 0.08)', border: '1px solid var(--accent)', borderRadius: '8px' }}>
+          <div data-testid="appkey-created-result" style={{ padding: '10px', background: 'rgba(249, 115, 22, 0.08)', border: '1px solid var(--accent)', borderRadius: '8px' }}>
             <h4 style={{ color: 'var(--accent)', margin: '0 0 10px 0' }}><i className="fa-solid fa-check-circle"></i> App Key Created!</h4>
             <p style={{ fontSize: '13px', margin: '4px 0 12px 0', color: 'var(--secondary)' }}>
               Copy your App Key now. It will <strong>never be shown again</strong>.
@@ -214,7 +220,7 @@ export const AppKeyModal: React.FC = () => {
               {getMcpConfigSnippet()}
             </pre>
 
-            <button type="button" className="btn btn-primary" onClick={closeModal} style={{ marginTop: '14px', width: '100%' }}>
+            <button type="button" className="btn btn-primary" data-testid="appkey-done-btn" onClick={closeModal} style={{ marginTop: '14px', width: '100%' }}>
               Done
             </button>
           </div>

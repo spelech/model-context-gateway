@@ -135,7 +135,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
   };
 
   return (
-    <div id="subview-identity" className="settings-subview active">
+    <div id="subview-identity" data-testid="identity-auth-tab" className="settings-subview active">
       <div className="glass-card settings-card" style={{ maxWidth: '850px', margin: '0 auto' }}>
         <h2>
           <i className="fa-solid fa-id-card"></i> Identity &amp; Auth Providers
@@ -271,6 +271,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                     <button
                       type="button"
                       id="btn-test-ldap"
+                      data-testid="btn-test-ldap"
                       className="btn btn-secondary btn-sm"
                       onClick={handleTestLdap}
                       disabled={adTestStatus.type === 'testing'}
@@ -280,6 +281,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                     {adTestStatus.type !== 'idle' && (
                       <span
                         id="ad-test-feedback"
+                        data-testid="ad-test-feedback"
                         style={{
                           fontSize: '11px',
                           color: adTestStatus.type === 'success' ? '#10b981' : adTestStatus.type === 'error' ? '#ef4444' : 'var(--text-muted)'
@@ -400,7 +402,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
             </div>
           </div>
           <div style={{ marginTop: '15px', textAlign: 'right' }}>
-            <button type="submit" id="btn-save-auth" className="btn btn-primary btn-sm">
+            <button type="submit" id="btn-save-auth" data-testid="btn-save-auth" className="btn btn-primary btn-sm">
               <i className="fa-solid fa-floppy-disk"></i> Save Auth Config
             </button>
           </div>

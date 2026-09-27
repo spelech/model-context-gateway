@@ -249,11 +249,34 @@ namespace ModelContextGateway.Core.Routing
             if (_resourceRoutingTable.TryGetValue(resourceUri, out var serverId) && backendConnections.TryGetValue(serverId, out var conn))
             {
                 var prefix = $"mcp://{serverId}/";
-                var rawUri = Uri.UnescapeDataString(resourceUri.Substring(prefix.Length));
+                var rawUri = resourceUri.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                    ? Uri.UnescapeDataString(resourceUri.Substring(prefix.Length))
+                    : resourceUri;
                 string routingBody = rewriteRequestJson(body, "uri", rawUri);
                 var resp = await conn.SendRequestAsync("resources/read", routingBody);
                 return resp.Result;
             }
+
+            // Fallback for cold-start mcp://{serverId}/{rawUri}
+            if (resourceUri.StartsWith("mcp://", StringComparison.OrdinalIgnoreCase))
+            {
+                var withoutScheme = resourceUri.Substring("mcp://".Length);
+                var slashIdx = withoutScheme.IndexOf('/');
+                if (slashIdx > 0)
+                {
+                    var targetServer = withoutScheme.Substring(0, slashIdx);
+                    var rawUri = Uri.UnescapeDataString(withoutScheme.Substring(slashIdx + 1));
+                    var matchedConn = backendConnections.FirstOrDefault(c => string.Equals(c.Key, targetServer, StringComparison.OrdinalIgnoreCase));
+                    if (matchedConn.Value != null)
+                    {
+                        _resourceRoutingTable[resourceUri] = matchedConn.Key;
+                        string routingBody = rewriteRequestJson(body, "uri", rawUri);
+                        var resp = await matchedConn.Value.SendRequestAsync("resources/read", routingBody);
+                        return resp.Result;
+                    }
+                }
+            }
+
             throw new KeyNotFoundException($"Resource {resourceUri} not found in routing table.");
         }
 

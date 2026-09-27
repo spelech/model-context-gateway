@@ -20,13 +20,13 @@ const MappingModalDialog: React.FC = () => {
   };
 
   return (
-    <div className="modal-backdrop" id="mapping-modal" style={{ display: 'flex' }}>
+    <div className="modal-backdrop" id="mapping-modal" data-testid="mapping-modal" style={{ display: 'flex' }}>
       <div className="glass-card modal-card" style={{ maxWidth: '500px', width: '90%' }}>
         <div className="modal-header">
           <h2>
             <i className="fa-solid fa-user-group"></i> {editingMapping ? 'Edit Group Mapping' : 'Create Group Mapping'}
           </h2>
-          <button type="button" className="btn-close" onClick={closeMappingModal}>
+          <button type="button" className="btn-close" data-testid="mapping-close-btn" onClick={closeMappingModal}>
             &times;
           </button>
         </div>
@@ -36,6 +36,7 @@ const MappingModalDialog: React.FC = () => {
             <input
               type="text"
               id="mapping-external"
+              data-testid="mapping-external-input"
               placeholder="e.g. S-1-5-21-... or devops_admins"
               value={externalId}
               onChange={(e) => setExternalId(e.target.value)}
@@ -48,6 +49,7 @@ const MappingModalDialog: React.FC = () => {
             <input
               type="text"
               id="mapping-internal"
+              data-testid="mapping-internal-input"
               placeholder="e.g. database_users"
               value={internalGroup}
               onChange={(e) => setInternalGroup(e.target.value)}
@@ -56,10 +58,10 @@ const MappingModalDialog: React.FC = () => {
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={closeMappingModal}>
+            <button type="button" className="btn btn-secondary" data-testid="mapping-cancel-btn" onClick={closeMappingModal}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary" data-testid="mapping-save-btn">
               Save Mapping
             </button>
           </div>

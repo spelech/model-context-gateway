@@ -879,7 +879,11 @@ namespace ModelContextGateway.Components.Capabilities
                     return Results.Ok(res);
                 }
 
-                var targetServer = servers.First(s => s.Id == serverId || (s.Alias != null && s.Alias == serverId));
+                var targetServer = servers.FirstOrDefault(s => string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase) || (!string.IsNullOrEmpty(s.Alias) && string.Equals(s.Alias, serverId, StringComparison.OrdinalIgnoreCase)));
+                if (targetServer == null)
+                {
+                    return Results.NotFound($"Server {serverId} not found");
+                }
                 var targetPromptNameBackend = promptName;
                 var prefixes = new List<string>();
                 if (!string.IsNullOrEmpty(serverId))
@@ -995,12 +999,16 @@ namespace ModelContextGateway.Components.Capabilities
                     serverId = servers[0].Id;
                 }
 
-                if (string.IsNullOrEmpty(serverId) || !servers.Any(s => s.Id == serverId || (s.Alias != null && s.Alias == serverId)))
+                if (string.IsNullOrEmpty(serverId) || !servers.Any(s => string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase) || (!string.IsNullOrEmpty(s.Alias) && string.Equals(s.Alias, serverId, StringComparison.OrdinalIgnoreCase))))
                 {
                     return Results.BadRequest("Invalid resource URI or server not found");
                 }
 
-                var targetServer = servers.First(s => s.Id == serverId || (s.Alias != null && s.Alias == serverId));
+                var targetServer = servers.FirstOrDefault(s => string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase) || (!string.IsNullOrEmpty(s.Alias) && string.Equals(s.Alias, serverId, StringComparison.OrdinalIgnoreCase)));
+                if (targetServer == null)
+                {
+                    return Results.BadRequest("Invalid resource URI or server not found");
+                }
 
                 // Unescape / un-virtualize mcp://{serverId}/{rawUri}
                 var rawUri = uri;
