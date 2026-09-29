@@ -11,30 +11,24 @@ This guide details how to integrate Slack's direct MCP server with **Model Conte
 1. **Autonomous Background Agents (e.g., OpenClaw, CI/CD bots)**: Authenticate 24/7 without interactive browser prompts via a dedicated installer/service account User token (`xoxp-...`).
 2. **Interactive Human Users (e.g., Developers, Admins)**: Authenticate individually via standard 3-Legged OAuth (3LO) redirect, granting fine-grained user delegation and personal audit trails.
 
----
-
-## 2. Deprecation of Self-Hosted Node.js Wrappers
-
-Previous configurations relied on `@modelcontextprotocol/server-slack` hosted via Docker containers and `supergateway`. This architecture is officially deprecated:
-
-| Dimension | Legacy Self-Hosted (`@modelcontextprotocol/server-slack`) | Slack Native Direct (`mcp.slack.com/mcp`) |
-| :--- | :--- | :--- |
-| **Hosting Model** | Self-hosted container (`docker run ...`) | Hosted & managed natively by Slack |
-| **Transport** | SSE / Stdio via Node.js wrapper | JSON-RPC 2.0 over Streamable HTTP (POST) |
-| **Supported Features** | Basic channel messages & history | Canvases, Lists, Global Search, DMs, Threads, File Uploads, Reactions |
-| **Token Type** | Bot Token (`xoxb-...`) | User Token (`xoxp-...`) |
-| **Maintenance** | Local npm/Node.js updates, container CVEs | Zero maintenance; Slack maintains the endpoint |
+### Core Capabilities
+Connecting to `https://mcp.slack.com/mcp` provides direct access to Slack tools:
+* **Search**: Global search across messages, channels, files, users, and emojis.
+* **Canvases**: Read, create, and update rich formatted canvases with markdown export.
+* **Lists**: Query, create, and modify structured records and databases.
+* **Messaging & Collaboration**: Read/write public channels, private groups, threads, DMs, and reactions.
+* **Files**: Two-step signed upload URLs and file completion.
 
 ---
 
-## 3. Strict Protocol & Schema Compliance
+## 2. Strict Protocol & Schema Compliance
 
-### 3.1 The `_meta` Parameter Placement (Zod Strict Validation)
+### 2.1 The `_meta` Parameter Placement (Zod Strict Validation)
 The official TypeScript `@modelcontextprotocol/sdk` validates incoming JSON-RPC 2.0 requests with `JSONRPCRequestSchema.strict()`. Root-level properties not defined in the JSON-RPC 2.0 spec (`jsonrpc`, `id`, `method`, `params`) will fail validation with `400 Bad Request: Unrecognized key(s) in object: '_meta'`.
 
 **Requirement**: In MCG, OpenTelemetry and W3C trace context metadata (`traceparent`, `tracestate`) must **never** be injected at the JSON-RPC root. They are injected inside `params._meta` (`BaseRequestParamsSchema` permits `_meta` for tracing).
 
-### 3.2 Token Type Requirement: User Token (`xoxp-...`) Is Mandatory
+### 2.2 Token Type Requirement: User Token (`xoxp-...`) Is Mandatory
 Slack's MCP endpoint strictly verifies that the Bearer token belongs to an authorized user:
 * Calling with a Bot Token (`xoxb-...`) returns:
   ```json
@@ -48,7 +42,7 @@ Slack's MCP endpoint strictly verifies that the Bearer token belongs to an autho
 
 ---
 
-## 4. Slack App Manifest Configuration
+## 3. Slack App Manifest Configuration
 
 In the Slack Developer Portal ([api.slack.com/apps](https://api.slack.com/apps)), apply the following App Manifest JSON:
 
@@ -151,7 +145,7 @@ In the Slack Developer Portal ([api.slack.com/apps](https://api.slack.com/apps))
 
 ---
 
-## 5. The Hybrid Integration Model in MCG
+## 4. The Hybrid Integration Model in MCG
 
 MCG supports a hybrid authentication resolution pipeline in `HttpTransport`:
 
@@ -168,7 +162,7 @@ flowchart TD
     InjectService --> Dispatch
 ```
 
-### 5.1 Server Configuration Parameters
+### 4.1 Server Configuration Parameters
 
 | Field | Value | Description |
 | :--- | :--- | :--- |
@@ -187,9 +181,9 @@ flowchart TD
 
 ---
 
-## 6. How Users & Agents Interact
+## 5. How Users & Agents Interact
 
-### 6.1 Interactive Humans (3LO Flow)
+### 5.1 Interactive Humans (3LO Flow)
 1. User logs into MCG (or visits `https://<mcg-host>/api/oauth/egress/authorize/slack`).
 2. MCG redirects to Slack with `user_scope` and cryptographically random `state`.
 3. User approves in Slack browser prompt.
@@ -197,7 +191,7 @@ flowchart TD
 5. MCG exchanges `code` for the user's specific `xoxp` token and encrypts it in `UserServerCredentials`.
 6. Future tool calls from this user are attributed directly to them in Slack audit logs.
 
-### 6.2 Autonomous Agents (Headless Flow)
+### 5.2 Autonomous Agents (Headless Flow)
 1. Agent (e.g. OpenClaw) connects to MCG via `/sse` or target route using its AppKey.
 2. Request has no `Remote-User` header.
 3. MCG automatically uses the static `ApiKey` (`xoxp-...`) configured on server `slack`.
@@ -205,9 +199,9 @@ flowchart TD
 
 ---
 
-## 7. Verification & Testing
+## 6. Verification & Testing
 
-### 7.1 Verify Tools via Admin MCP
+### 6.1 Verify Tools via Admin MCP
 ```json
 {
   "tool": "test_tool_call",
@@ -221,7 +215,7 @@ flowchart TD
 }
 ```
 
-### 7.2 Verify Direct Curl
+### 6.2 Verify Direct Curl
 ```bash
 curl -s -X POST https://mcp.slack.com/mcp \
   -H "Authorization: Bearer xoxp-YOUR-TOKEN" \
