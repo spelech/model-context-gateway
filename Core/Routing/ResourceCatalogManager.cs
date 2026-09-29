@@ -43,12 +43,12 @@ namespace ModelContextGateway.Core.Routing
                 }
                 else if (res is JsonElement je)
                 {
-                    if (je.TryGetProperty("name", out var n))
+                    if (je.TryGetProperty("name", out var n) && n.ValueKind == JsonValueKind.String)
                     {
                         name = n.GetString() ?? "";
                     }
 
-                    if (je.TryGetProperty("description", out var d))
+                    if (je.TryGetProperty("description", out var d) && d.ValueKind == JsonValueKind.String)
                     {
                         description = d.GetString() ?? "";
                     }

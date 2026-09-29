@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-27T11:05:23.0457285Z",
+    "generatedAt": "2026-09-29T05:18:54.5298518Z",
     "totalRequirements": 448,
     "positiveCount": 358,
     "guardrailCount": 90,
-    "totalProofs": 1017
+    "totalProofs": 1024
   },
   "requirements": [
     {
@@ -75,15 +75,99 @@
       "id": "AUTH-02",
       "category": "AUTH",
       "type": "Positive",
-      "description": "AppKey scopes restrict access precisely across all MCP capabilities and backend targets",
+      "description": "Allows token pass-through in query parameters for SSE stream initialization.",
       "proofCount": 49,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
+          "lineNumber": 49,
+          "testName": "Pipeline_QueryToken_MiddlewareBypass",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
+          "lineNumber": 320,
+          "testName": "Pipeline_AppKey_Create_And_Revoke",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
+          "lineNumber": 403,
+          "testName": "Pipeline_GET_AppKeys_Returns200",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
+          "lineNumber": 412,
+          "testName": "Pipeline_GET_AppKeysLimits_Returns200",
+          "details": null
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 242,
           "testName": "Pairwise_AppKeyScopes_RestrictsAccessPrecisely",
           "details": "Verifies pairwise combination of AppKey scopes across all MCP capabilities and backend targets."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AuditSidAttributionTests.cs",
+          "lineNumber": 34,
+          "testName": "AppKeyAuthenticationHandler_Emits_Sid_Claim_When_OwnerSid_Present",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AuditSidAttributionTests.cs",
+          "lineNumber": 69,
+          "testName": "AppKeyIdentityProvider_ResolvesOwnerAndSid_FromHttpContextItems",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AuditSidAttributionTests.cs",
+          "lineNumber": 87,
+          "testName": "AppKeyIdentityProvider_ReturnsAnonymous_WhenNoAppKey",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
+          "lineNumber": 252,
+          "testName": "AppKeyScopes_RestrictTargetAccessPrecisely",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
+          "lineNumber": 86,
+          "testName": "AppKeys_PrefixLookup_WorksCorrectly",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
+          "lineNumber": 122,
+          "testName": "AppKeys_KeyExpiration_CheckedCorrectly",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
+          "lineNumber": 151,
+          "testName": "AppKeys_Limits_CheckWorks",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
+          "lineNumber": 189,
+          "testName": "AppKeys_Sha256Hashing_VerificationWorks",
+          "details": null
         },
         {
           "suite": "Backend xUnit",
@@ -164,55 +248,6 @@
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/AuditSidAttributionTests.cs",
-          "lineNumber": 34,
-          "testName": "AppKeyAuthenticationHandler_Emits_Sid_Claim_When_OwnerSid_Present",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/AuditSidAttributionTests.cs",
-          "lineNumber": 69,
-          "testName": "AppKeyIdentityProvider_ResolvesOwnerAndSid_FromHttpContextItems",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/AuditSidAttributionTests.cs",
-          "lineNumber": 87,
-          "testName": "AppKeyIdentityProvider_ReturnsAnonymous_WhenNoAppKey",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
-          "lineNumber": 86,
-          "testName": "AppKeys_PrefixLookup_WorksCorrectly",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
-          "lineNumber": 122,
-          "testName": "AppKeys_KeyExpiration_CheckedCorrectly",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
-          "lineNumber": 151,
-          "testName": "AppKeys_Limits_CheckWorks",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
-          "lineNumber": 189,
-          "testName": "AppKeys_Sha256Hashing_VerificationWorks",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
           "lineNumber": 338,
           "testName": "ServiceCollection_Resolves_VaultUserSecretStore_WhenConfigured",
@@ -226,38 +261,52 @@
           "details": null
         },
         {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 49,
-          "testName": "Pipeline_QueryToken_MiddlewareBypass",
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ClientSetupGuide.test.tsx",
+          "lineNumber": 51,
+          "testName": "switches between format tabs (Standard, VS Code, Generic SSE)",
           "details": null
         },
         {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 320,
-          "testName": "Pipeline_AppKey_Create_And_Revoke",
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ClientSetupGuide.test.tsx",
+          "lineNumber": 78,
+          "testName": "switches server scope from all servers to individual server",
           "details": null
         },
         {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 403,
-          "testName": "Pipeline_GET_AppKeys_Returns200",
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ClientSetupGuide.test.tsx",
+          "lineNumber": 97,
+          "testName": "updates domain when LAN or custom is chosen",
           "details": null
         },
         {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 412,
-          "testName": "Pipeline_GET_AppKeysLimits_Returns200",
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ClientSetupGuide.test.tsx",
+          "lineNumber": 122,
+          "testName": "toggles meta mode when server scope is all",
           "details": null
         },
         {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
-          "lineNumber": 252,
-          "testName": "AppKeyScopes_RestrictTargetAccessPrecisely",
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ClientSetupGuide.test.tsx",
+          "lineNumber": 143,
+          "testName": "populates app keys dropdown and injects selected key",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ClientSetupGuide.test.tsx",
+          "lineNumber": 166,
+          "testName": "copies configuration to clipboard and triggers success toast",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ClientModal.test.tsx",
+          "lineNumber": 15,
+          "testName": "renders nothing when isAddClientOpen is false",
           "details": null
         },
         {
@@ -366,55 +415,6 @@
           "details": null
         },
         {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ClientSetupGuide.test.tsx",
-          "lineNumber": 51,
-          "testName": "switches between format tabs (Standard, VS Code, Generic SSE)",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ClientSetupGuide.test.tsx",
-          "lineNumber": 78,
-          "testName": "switches server scope from all servers to individual server",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ClientSetupGuide.test.tsx",
-          "lineNumber": 97,
-          "testName": "updates domain when LAN or custom is chosen",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ClientSetupGuide.test.tsx",
-          "lineNumber": 122,
-          "testName": "toggles meta mode when server scope is all",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ClientSetupGuide.test.tsx",
-          "lineNumber": 143,
-          "testName": "populates app keys dropdown and injects selected key",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ClientSetupGuide.test.tsx",
-          "lineNumber": 166,
-          "testName": "copies configuration to clipboard and triggers success toast",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ClientModal.test.tsx",
-          "lineNumber": 15,
-          "testName": "renders nothing when isAddClientOpen is false",
-          "details": null
-        },
-        {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 70,
@@ -427,14 +427,35 @@
       "id": "AUTH-03",
       "category": "AUTH",
       "type": "Positive",
-      "description": "Auth middleware allows bypass routes and extracts SSO headers in a case-insensitive manner.",
+      "description": "GET /api/permissions/mappings returns group mappings with 200 OK.",
       "proofCount": 25,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
-          "lineNumber": 603,
-          "testName": "AuthMiddleware_CaseInsensitivity_BypassAndHeader_Check",
+          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
+          "lineNumber": 367,
+          "testName": "Pipeline_GET_Permissions_Mappings_Returns200",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
+          "lineNumber": 385,
+          "testName": "Pipeline_GET_Providers_Auth_Returns200",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs",
+          "lineNumber": 93,
+          "testName": "GroupMapping_AllowsUser_WhenMappingResolvesToAllowedInternalGroup",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs",
+          "lineNumber": 111,
+          "testName": "GroupMapping_AllowsUser_WhenOidcGroupMapsToAllowedInternalGroup",
           "details": null
         },
         {
@@ -443,34 +464,6 @@
           "lineNumber": 319,
           "testName": "Pairwise_SsoIdentityAndGroupMappings_EvaluateCorrectly",
           "details": "Verifies pairwise combination of SSO identities, SIDs, and group mappings across all targets."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs",
-          "lineNumber": 330,
-          "testName": "HeaderIdentityProvider_DynamicallyLoadsAndAppliesDbConfig",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ProvidersControllerTests.cs",
-          "lineNumber": 53,
-          "testName": "GetAllProviders_ReturnsOkWithSecretAndAuthProviders",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ProvidersControllerTests.cs",
-          "lineNumber": 161,
-          "testName": "GetAuthProviders_ReturnsOkWithList",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ProvidersControllerTests.cs",
-          "lineNumber": 185,
-          "testName": "SaveAuthProvider_SavesSuccessfully",
-          "details": null
         },
         {
           "suite": "Backend xUnit",
@@ -502,9 +495,51 @@
         },
         {
           "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
+          "lineNumber": 603,
+          "testName": "AuthMiddleware_CaseInsensitivity_BypassAndHeader_Check",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ProvidersControllerTests.cs",
+          "lineNumber": 53,
+          "testName": "GetAllProviders_ReturnsOkWithSecretAndAuthProviders",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ProvidersControllerTests.cs",
+          "lineNumber": 161,
+          "testName": "GetAuthProviders_ReturnsOkWithList",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ProvidersControllerTests.cs",
+          "lineNumber": 185,
+          "testName": "SaveAuthProvider_SavesSuccessfully",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AuditSidAttributionTests.cs",
           "lineNumber": 11,
           "testName": "HeaderIdentityProvider_Extracts_RemoteUserSid_And_Populates_Sid",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs",
+          "lineNumber": 330,
+          "testName": "HeaderIdentityProvider_DynamicallyLoadsAndAppliesDbConfig",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PermissionsControllerTests.cs",
+          "lineNumber": 207,
+          "testName": "DeleteMapping_DeletesSuccessfully",
           "details": null
         },
         {
@@ -537,44 +572,9 @@
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 367,
-          "testName": "Pipeline_GET_Permissions_Mappings_Returns200",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 385,
-          "testName": "Pipeline_GET_Providers_Auth_Returns200",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs",
-          "lineNumber": 93,
-          "testName": "GroupMapping_AllowsUser_WhenMappingResolvesToAllowedInternalGroup",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs",
-          "lineNumber": 111,
-          "testName": "GroupMapping_AllowsUser_WhenOidcGroupMapsToAllowedInternalGroup",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/McpIntegrationTests.cs",
           "lineNumber": 629,
           "testName": "AuthMiddleware_Allows_SSO_Session_With_RemoteUser_Header",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/PermissionsControllerTests.cs",
-          "lineNumber": 207,
-          "testName": "DeleteMapping_DeletesSuccessfully",
           "details": null
         },
         {
@@ -611,63 +611,14 @@
       "id": "AUTH-04",
       "category": "AUTH",
       "type": "Positive",
-      "description": "ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP",
+      "description": "ProvidersController validates LDAP test connections and handles connection errors gracefully.",
       "proofCount": 16,
       "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs",
-          "lineNumber": 12,
-          "testName": "ResolveIdentityAsync_ExtractsWindowsIdentitySids_ViaAccessor",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs",
-          "lineNumber": 50,
-          "testName": "ResolveIdentityAsync_AugmentsWithLdapSids_WhenLdapServiceProvided",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs",
-          "lineNumber": 365,
-          "testName": "LdapActiveDirectoryService_RespectsDisabledStatusInDatabase",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs",
-          "lineNumber": 11,
-          "testName": "ResolveUserSidsAsync_ReturnsEmpty_WhenLdapProviderDisabledInDb",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs",
-          "lineNumber": 59,
-          "testName": "ResolveUserSidsAsync_UsesCache_WhenCachedSidsExist",
-          "details": null
-        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ProvidersControllerTests.cs",
           "lineNumber": 298,
           "testName": "TestLdapConnection_ValidatesInputAndHandlesFailureGracefully",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
-          "lineNumber": 55,
-          "testName": "ActiveDirectoryIdentityProvider_Resolves_Steve_Identity_And_Sids",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
-          "lineNumber": 89,
-          "testName": "ActiveDirectoryIdentityProvider_Augments_Steve_With_LdapGroupSids",
           "details": null
         },
         {
@@ -717,6 +668,55 @@
           "filePath": "ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs",
           "lineNumber": 112,
           "testName": "ActiveDirectoryIdentityProvider_ResolvesLdapSids_WhenLdapServiceProvided",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs",
+          "lineNumber": 365,
+          "testName": "LdapActiveDirectoryService_RespectsDisabledStatusInDatabase",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs",
+          "lineNumber": 11,
+          "testName": "ResolveUserSidsAsync_ReturnsEmpty_WhenLdapProviderDisabledInDb",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs",
+          "lineNumber": 59,
+          "testName": "ResolveUserSidsAsync_UsesCache_WhenCachedSidsExist",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs",
+          "lineNumber": 12,
+          "testName": "ResolveIdentityAsync_ExtractsWindowsIdentitySids_ViaAccessor",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs",
+          "lineNumber": 50,
+          "testName": "ResolveIdentityAsync_AugmentsWithLdapSids_WhenLdapServiceProvided",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 55,
+          "testName": "ActiveDirectoryIdentityProvider_Resolves_Steve_Identity_And_Sids",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
+          "lineNumber": 89,
+          "testName": "ActiveDirectoryIdentityProvider_Augments_Steve_With_LdapGroupSids",
           "details": null
         },
         {
@@ -787,23 +787,9 @@
       "id": "AUTH-110",
       "category": "AUTH",
       "type": "Positive",
-      "description": "CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0.",
+      "description": "GetClients returns list of OAuthClient records without secret hashes",
       "proofCount": 4,
       "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/AppKeysControllerTests.cs",
-          "lineNumber": 343,
-          "testName": "CreateAppKey_AllowsUnlimited_WhenLimitsAreZero",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 135,
-          "testName": "ApplyConfigurationResponseContext_SetsRegistrationEndpoint",
-          "details": null
-        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientsControllerTests.cs",
@@ -817,51 +803,49 @@
           "lineNumber": 238,
           "testName": "GetClients_NeverLeaksRawBearerSecretOrHash",
           "details": null
-        }
-      ]
-    },
-    {
-      "id": "AUTH-118",
-      "category": "AUTH",
-      "type": "Positive",
-      "description": "FindDcrClientAsync resolves existing DCR client matching client name and type.",
-      "proofCount": 2,
-      "proofs": [
+        },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
-          "lineNumber": 214,
-          "testName": "FindDcrClient_ReturnsMatchingClient",
+          "filePath": "ModelContextGateway.Tests/AppKeysControllerTests.cs",
+          "lineNumber": 343,
+          "testName": "CreateAppKey_AllowsUnlimited_WhenLimitsAreZero",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 556,
-          "testName": "RegisterClient_DuplicateDcrRequest_ReusesExistingClientIdAndUpdatesRecord",
+          "lineNumber": 135,
+          "testName": "ApplyConfigurationResponseContext_SetsRegistrationEndpoint",
           "details": null
         }
       ]
     },
     {
-      "id": "AUTH-119",
+      "id": "AUTH-112",
       "category": "AUTH",
-      "type": "Positive",
-      "description": "CleanupDcrClientsAsync prunes duplicate and expired dynamic client registrations across all database providers.",
-      "proofCount": 2,
+      "type": "Negative",
+      "description": "DeleteClient removes OAuthClient via repository",
+      "proofCount": 3,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
-          "lineNumber": 237,
-          "testName": "CleanupDcrClients_PrunesDuplicateRegistrations_AndExpiredClients",
+          "filePath": "ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 120,
+          "testName": "DeleteClient_ReturnsNoContent_WhenAppExists",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 333,
-          "testName": "CleanupClients_CallsRepoAndReturnsCleanedCount",
+          "lineNumber": 141,
+          "testName": "DeleteClient_ReturnsNotFound_WhenAppDoesNotExist",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 297,
+          "testName": "Authorize_ResolvesClientAndRedirectsToConsent",
           "details": null
         }
       ]
@@ -1560,13 +1544,6 @@
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 421,
-          "testName": "creates category-scoped key, captures one-time plaintext key, and refreshes",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 19,
           "testName": "renders nothing when isCreateModalOpen is false",
@@ -1608,6 +1585,13 @@
           "details": null
         },
         {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 421,
+          "testName": "creates category-scoped key, captures one-time plaintext key, and refreshes",
+          "details": null
+        },
+        {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/personal-appkeys-and-quotas.spec.ts",
           "lineNumber": 33,
@@ -1632,9 +1616,16 @@
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 351,
-          "testName": "loads app keys and updates store",
+          "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
+          "lineNumber": 34,
+          "testName": "renders role-adapted My App Keys view for non-admin user",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
+          "lineNumber": 79,
+          "testName": "renders keys list, copies config snippet, and revokes key",
           "details": null
         },
         {
@@ -1646,16 +1637,9 @@
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 34,
-          "testName": "renders role-adapted My App Keys view for non-admin user",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 79,
-          "testName": "renders keys list, copies config snippet, and revokes key",
+          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 351,
+          "testName": "loads app keys and updates store",
           "details": null
         },
         {
@@ -1683,9 +1667,9 @@
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 594,
-          "testName": "sets user quota override and refreshes quota list",
+          "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
+          "lineNumber": 222,
+          "testName": "manages custom user quotas in admin quotas tab",
           "details": null
         },
         {
@@ -1704,9 +1688,9 @@
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 222,
-          "testName": "manages custom user quotas in admin quotas tab",
+          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 594,
+          "testName": "sets user quota override and refreshes quota list",
           "details": null
         },
         {
@@ -2113,16 +2097,9 @@
       "id": "AUTH-SYSTEM-APPKEY-SEPARATION",
       "category": "AUTH",
       "type": "Positive",
-      "description": "System keys are distinct and require admin permissions",
+      "description": "Personal AppKey with \u0027all\u0027 scope does not grant Administrator role",
       "proofCount": 10,
       "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/AppKeysControllerTests.cs",
-          "lineNumber": 151,
-          "testName": "SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys",
-          "details": null
-        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
@@ -2138,17 +2115,17 @@
           "details": null
         },
         {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 335,
-          "testName": "switches keyTypeTab between personal and system",
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AppKeysControllerTests.cs",
+          "lineNumber": 151,
+          "testName": "SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 369,
-          "testName": "fetches system-filtered app keys via query parameters",
+          "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
+          "lineNumber": 166,
+          "testName": "handles admin tab switching and username filtering",
           "details": null
         },
         {
@@ -2174,9 +2151,16 @@
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 166,
-          "testName": "handles admin tab switching and username filtering",
+          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 335,
+          "testName": "switches keyTypeTab between personal and system",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 369,
+          "testName": "fetches system-filtered app keys via query parameters",
           "details": null
         },
         {
@@ -2232,6 +2216,29 @@
           "filePath": "frontend/src/test/stores/useUserStore.test.ts",
           "lineNumber": 1,
           "testName": "should initialize with default values",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-109",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "renders default standard mcpServers configuration with meta mode",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ClientSetupGuide.test.tsx",
+          "lineNumber": 1,
+          "testName": "renders default standard mcpServers configuration with meta mode",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 104,
+          "testName": "renders client setup guide below credentials card",
           "details": null
         }
       ]
@@ -3246,21 +3253,21 @@
       "id": "GUARD-01",
       "category": "GUARD",
       "type": "Negative",
-      "description": "handles policy save failure with error toast",
+      "description": "submits form with constructed payload for DENY policy",
       "proofCount": 2,
       "proofs": [
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/stores/usePolicyStore.test.ts",
-          "lineNumber": 86,
-          "testName": "handles policy save failure with error toast",
-          "details": null
-        },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/PolicyModal.test.tsx",
           "lineNumber": 60,
           "testName": "submits form with constructed payload for DENY policy",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 86,
+          "testName": "handles policy save failure with error toast",
           "details": null
         }
       ]
@@ -3269,51 +3276,9 @@
       "id": "GUARD-02",
       "category": "GUARD",
       "type": "Negative",
-      "description": "SSE transport fails closed with SecurityException when secret provider resolution fails",
+      "description": "LdapService rejects unencrypted LDAP with InvalidOperationException.",
       "proofCount": 12,
       "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/SseTransportTests.cs",
-          "lineNumber": 34,
-          "testName": "ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails",
-          "details": "Ensures SSE transport fails closed with SecurityException when secret retriever fails."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/SseTransportTests.cs",
-          "lineNumber": 55,
-          "testName": "ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered",
-          "details": "Ensures SSE transport fails closed when no secret retriever is registered."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs",
-          "lineNumber": 37,
-          "testName": "ResolveUserSidsAsync_ThrowsInvalidOperation_WhenDbConfigSpecifiesPlaintextLdap",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs",
-          "lineNumber": 78,
-          "testName": "ResolveUserSidsAsync_FailsClosedWithSecurityException_OnUnreachableServer",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/DbKeyHelperTests.cs",
-          "lineNumber": 283,
-          "testName": "ResolveDbEncryptionKey_ThrowsInvalidOperationException_WhenVaultFails",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/TransportsAuthShapeTests.cs",
-          "lineNumber": 218,
-          "testName": "HttpTransport_SendRequestAsync_Throws_When_Impersonation_Missing_WindowsIdentity",
-          "details": null
-        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/IdentityProviderTests.cs",
@@ -3330,6 +3295,41 @@
         },
         {
           "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/DbKeyHelperTests.cs",
+          "lineNumber": 283,
+          "testName": "ResolveDbEncryptionKey_ThrowsInvalidOperationException_WhenVaultFails",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SseTransportTests.cs",
+          "lineNumber": 34,
+          "testName": "ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails",
+          "details": "Ensures SSE transport fails closed with SecurityException when secret retriever fails."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SseTransportTests.cs",
+          "lineNumber": 55,
+          "testName": "ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered",
+          "details": "Ensures SSE transport fails closed when no secret retriever is registered."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/TransportsAuthShapeTests.cs",
+          "lineNumber": 218,
+          "testName": "HttpTransport_SendRequestAsync_Throws_When_Impersonation_Missing_WindowsIdentity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs",
+          "lineNumber": 64,
+          "testName": "ResolveUserSidsAsync_ThrowsInvalidOperation_WhenPlaintextLdapConfigured",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/StdioTransportTests.cs",
           "lineNumber": 394,
           "testName": "StdioTransport_ShouldFailClosed_WhenSecretResolutionFails",
@@ -3337,9 +3337,16 @@
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs",
-          "lineNumber": 64,
-          "testName": "ResolveUserSidsAsync_ThrowsInvalidOperation_WhenPlaintextLdapConfigured",
+          "filePath": "ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs",
+          "lineNumber": 37,
+          "testName": "ResolveUserSidsAsync_ThrowsInvalidOperation_WhenDbConfigSpecifiesPlaintextLdap",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs",
+          "lineNumber": 78,
+          "testName": "ResolveUserSidsAsync_FailsClosedWithSecurityException_OnUnreachableServer",
           "details": null
         },
         {
@@ -3362,28 +3369,21 @@
       "id": "GUARD-03",
       "category": "GUARD",
       "type": "Negative",
-      "description": "CompositeSecretRetriever throws InvalidOperationException when an unregistered secret provider is requested.",
+      "description": "TokenExchangeSecretRetriever fails closed with InvalidOperationException when token endpoint is not configured.",
       "proofCount": 13,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/CompositeSecretRetrieverTests.cs",
-          "lineNumber": 17,
-          "testName": "GetSecretForProviderAsync_ThrowsInvalidOperationException_WhenProviderNotRegistered",
+          "filePath": "ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
+          "lineNumber": 94,
+          "testName": "GetSecretAsync_ThrowsInvalidOperationException_WhenTokenEndpointMissing",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/VaultSecretRetrieverTests.cs",
-          "lineNumber": 19,
-          "testName": "EnsureVaultClientAsync_ThrowsArgumentException_WhenAddressInvalidScheme",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/VaultSecretRetrieverTests.cs",
-          "lineNumber": 104,
-          "testName": "GetSecretAsync_UsesCustomVaultClientFactory",
+          "filePath": "ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
+          "lineNumber": 102,
+          "testName": "GetSecretAsync_ThrowsSecurityException_WhenHttpResponseIsNotSuccess",
           "details": null
         },
         {
@@ -3391,13 +3391,6 @@
           "filePath": "ModelContextGateway.Tests/TransportsAuthShapeTests.cs",
           "lineNumber": 184,
           "testName": "SseTransport_ResolveTokenAsync_FailsClosed_WhenVaultResolvesNull",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/WindowsRegistrySecretRetrieverTests.cs",
-          "lineNumber": 66,
-          "testName": "GetSecretAsync_HandlesExceptionGracefully_ReturnsNull",
           "details": null
         },
         {
@@ -3437,16 +3430,30 @@
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
-          "lineNumber": 94,
-          "testName": "GetSecretAsync_ThrowsInvalidOperationException_WhenTokenEndpointMissing",
+          "filePath": "ModelContextGateway.Tests/CompositeSecretRetrieverTests.cs",
+          "lineNumber": 17,
+          "testName": "GetSecretForProviderAsync_ThrowsInvalidOperationException_WhenProviderNotRegistered",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
-          "lineNumber": 102,
-          "testName": "GetSecretAsync_ThrowsSecurityException_WhenHttpResponseIsNotSuccess",
+          "filePath": "ModelContextGateway.Tests/VaultSecretRetrieverTests.cs",
+          "lineNumber": 19,
+          "testName": "EnsureVaultClientAsync_ThrowsArgumentException_WhenAddressInvalidScheme",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/VaultSecretRetrieverTests.cs",
+          "lineNumber": 104,
+          "testName": "GetSecretAsync_UsesCustomVaultClientFactory",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/WindowsRegistrySecretRetrieverTests.cs",
+          "lineNumber": 66,
+          "testName": "GetSecretAsync_HandlesExceptionGracefully_ReturnsNull",
           "details": null
         },
         {
@@ -3478,34 +3485,6 @@
           "lineNumber": 531,
           "testName": "Pairwise_DatabaseDisconnection_FailsClosedSafely",
           "details": "Ensures database disconnection or failure fails closed safely without leaking access."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
-          "lineNumber": 163,
-          "testName": "SchemaValidation_FailsClosed_WhenRequiredColumnOrTableMissing",
-          "details": "Ensures database schema validation fails closed when required columns or tables are missing."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
-          "lineNumber": 189,
-          "testName": "SchemaValidation_FailsClosed_WhenUserQuotasOrKeyTypeMissing",
-          "details": "Ensures database schema validation fails closed when KeyType column or UserQuotas table is missing."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
-          "lineNumber": 587,
-          "testName": "SchemaValidation_FailsClosed_WhenOAuthClientsTableMissing",
-          "details": "Ensures database schema validation fails closed when OAuthClients table is missing."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/AppKeysControllerTests.cs",
-          "lineNumber": 449,
-          "testName": "Controllers_HandleDbFailures_Returning500",
-          "details": null
         },
         {
           "suite": "Backend xUnit",
@@ -3544,6 +3523,48 @@
         },
         {
           "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "lineNumber": 163,
+          "testName": "SchemaValidation_FailsClosed_WhenRequiredColumnOrTableMissing",
+          "details": "Ensures database schema validation fails closed when required columns or tables are missing."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "lineNumber": 189,
+          "testName": "SchemaValidation_FailsClosed_WhenUserQuotasOrKeyTypeMissing",
+          "details": "Ensures database schema validation fails closed when KeyType column or UserQuotas table is missing."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "lineNumber": 587,
+          "testName": "SchemaValidation_FailsClosed_WhenOAuthClientsTableMissing",
+          "details": "Ensures database schema validation fails closed when OAuthClients table is missing."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PermissionsControllerTests.cs",
+          "lineNumber": 217,
+          "testName": "DeleteMapping_Returns500_OnDbException",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PermissionsControllerTests.cs",
+          "lineNumber": 230,
+          "testName": "GetPolicies_Returns500_OnDbException",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/FineGrainedRbacTests.cs",
+          "lineNumber": 173,
+          "testName": "RBAC_DefaultsToDenied_WhenDbExceptionThrown",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
           "lineNumber": 216,
           "testName": "AuditLogger_ThrowsException_OnDatabaseError",
@@ -3565,6 +3586,13 @@
         },
         {
           "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AppKeysControllerTests.cs",
+          "lineNumber": 449,
+          "testName": "Controllers_HandleDbFailures_Returning500",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AuditLoggerTests.cs",
           "lineNumber": 91,
           "testName": "LogInvocationAsync_ThrowsInvalidOperationException_OnConnectionFailure",
@@ -3579,30 +3607,9 @@
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/FineGrainedRbacTests.cs",
-          "lineNumber": 173,
-          "testName": "RBAC_DefaultsToDenied_WhenDbExceptionThrown",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/McpIntegrationTests.cs",
           "lineNumber": 89,
           "testName": "AuditLogger_AuditFailClosed_RefusesInvocation_OnAuditWriteError",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/PermissionsControllerTests.cs",
-          "lineNumber": 217,
-          "testName": "DeleteMapping_Returns500_OnDbException",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/PermissionsControllerTests.cs",
-          "lineNumber": 230,
-          "testName": "GetPolicies_Returns500_OnDbException",
           "details": null
         }
       ]
@@ -3611,9 +3618,23 @@
       "id": "GUARD-05",
       "category": "GUARD",
       "type": "Negative",
-      "description": "Socket-level SSRF protection blocks private and loopback IP connections unless explicitly allowlisted.",
+      "description": "Docker auto-discovery skips containers resolving to blocked private IP ranges (SSRF protection).",
       "proofCount": 16,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
+          "lineNumber": 59,
+          "testName": "DockerDiscovery_SkipsContainer_ResolvingToPrivateIp",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EmbeddingServiceTests.cs",
+          "lineNumber": 83,
+          "testName": "ApiEmbeddingService_GetEmbeddingAsync_Throws_On_Http_Error",
+          "details": null
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
@@ -3626,20 +3647,6 @@
           "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
           "lineNumber": 744,
           "testName": "SecurityValidationHelper_IsBlockedIp_ValidatesAllBlockedAndAllowedRanges",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs",
-          "lineNumber": 84,
-          "testName": "PrivateOrLoopback_Blocked_When_AllowPrivateIps_False",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs",
-          "lineNumber": 256,
-          "testName": "FailClosedValidation_RejectsInvalidJson_AndInsecureUrls",
           "details": null
         },
         {
@@ -3665,6 +3672,13 @@
         },
         {
           "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
+          "lineNumber": 232,
+          "testName": "ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ServerEndpointsValidationTests.cs",
           "lineNumber": 28,
           "testName": "IsValidServerUrl_Rejects_Invalid_Http_Urls",
@@ -3679,37 +3693,9 @@
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 232,
-          "testName": "ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 59,
-          "testName": "DockerDiscovery_SkipsContainer_ResolvingToPrivateIp",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/EmbeddingServiceTests.cs",
-          "lineNumber": 83,
-          "testName": "ApiEmbeddingService_GetEmbeddingAsync_Throws_On_Http_Error",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/McpIntegrationTests.cs",
-          "lineNumber": 58,
-          "testName": "McpClient_NamedHttpClient_Applies_SsrfConnectCallback_AndBlocksPrivateIps",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/McpIntegrationTests.cs",
-          "lineNumber": 1054,
-          "testName": "CustomFilesSanitization_PreventsDirectoryTraversal",
+          "filePath": "ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs",
+          "lineNumber": 256,
+          "testName": "FailClosedValidation_RejectsInvalidJson_AndInsecureUrls",
           "details": null
         },
         {
@@ -3725,6 +3711,27 @@
           "lineNumber": 31,
           "testName": "IsInSubnet_HandlesSpecialCases",
           "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs",
+          "lineNumber": 84,
+          "testName": "PrivateOrLoopback_Blocked_When_AllowPrivateIps_False",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/McpIntegrationTests.cs",
+          "lineNumber": 58,
+          "testName": "McpClient_NamedHttpClient_Applies_SsrfConnectCallback_AndBlocksPrivateIps",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/McpIntegrationTests.cs",
+          "lineNumber": 1054,
+          "testName": "CustomFilesSanitization_PreventsDirectoryTraversal",
+          "details": null
         }
       ]
     },
@@ -3732,16 +3739,9 @@
       "id": "GUARD-06",
       "category": "GUARD",
       "type": "Negative",
-      "description": "Auth middleware enforces case-insensitive route matching preventing path bypass.",
+      "description": "Header authentication strips remote identity headers when request is sent through untrusted proxy.",
       "proofCount": 13,
       "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
-          "lineNumber": 216,
-          "testName": "AuthMiddleware_CaseInsensitivity_Bypass_Check",
-          "details": null
-        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/IdentityProviderTests.cs",
@@ -3786,6 +3786,27 @@
         },
         {
           "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
+          "lineNumber": 216,
+          "testName": "AuthMiddleware_CaseInsensitivity_Bypass_Check",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OpenIddictProductionTests.cs",
+          "lineNumber": 12,
+          "testName": "Production_WithNoCert_Throws_InvalidOperationException",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PermissionsControllerTests.cs",
+          "lineNumber": 243,
+          "testName": "SavePolicy_ReturnsBadRequest_WhenWildcardDenyPolicy",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CorsTests.cs",
           "lineNumber": 20,
           "testName": "Cors_DefaultFallback_Allows_LocalhostOrigins",
@@ -3810,20 +3831,6 @@
           "filePath": "ModelContextGateway.Tests/CorsTests.cs",
           "lineNumber": 121,
           "testName": "Cors_WithAllowedOriginsKeyFallback_RestrictsToConfigured",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/PermissionsControllerTests.cs",
-          "lineNumber": 243,
-          "testName": "SavePolicy_ReturnsBadRequest_WhenWildcardDenyPolicy",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/OpenIddictProductionTests.cs",
-          "lineNumber": 12,
-          "testName": "Production_WithNoCert_Throws_InvalidOperationException",
           "details": null
         }
       ]
@@ -4472,21 +4479,21 @@
       "id": "GUARD-RBAC-DEFAULT-DENY",
       "category": "GUARD",
       "type": "Negative",
-      "description": "RBAC defaults to deny when no matching access policies are configured.",
+      "description": "Non-admin identities default to denied fail-closed when no matching policies exist.",
       "proofCount": 2,
       "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/FineGrainedRbacTests.cs",
-          "lineNumber": 84,
-          "testName": "RBAC_DefaultsToDenied_WhenNoPoliciesConfigured",
-          "details": null
-        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
           "lineNumber": 177,
           "testName": "NonAdmin_DefaultsToDeny_WhenNoMatchingPoliciesConfigured",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/FineGrainedRbacTests.cs",
+          "lineNumber": 84,
+          "testName": "RBAC_DefaultsToDenied_WhenNoPoliciesConfigured",
           "details": null
         }
       ]
@@ -4495,21 +4502,21 @@
       "id": "GUARD-RBAC-EXPLICIT-DENY",
       "category": "GUARD",
       "type": "Negative",
-      "description": "RBAC enforces explicit policy denials to reject unauthorized callers.",
+      "description": "Explicit policy deny rules override group allows.",
       "proofCount": 2,
       "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/FineGrainedRbacTests.cs",
-          "lineNumber": 118,
-          "testName": "RBAC_RejectsUser_OnExplicitDeny",
-          "details": null
-        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
           "lineNumber": 235,
           "testName": "ExplicitDeny_OverridesGroupAllow",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/FineGrainedRbacTests.cs",
+          "lineNumber": 118,
+          "testName": "RBAC_RejectsUser_OnExplicitDeny",
           "details": null
         }
       ]
@@ -4950,9 +4957,79 @@
       "id": "MCP-01",
       "category": "MCP",
       "type": "Positive",
-      "description": "initializes with default state",
+      "description": "renders Add MCP Server form with default values when in add mode",
       "proofCount": 29,
       "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
+          "lineNumber": 41,
+          "testName": "renders Add MCP Server form with default values when in add mode",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
+          "lineNumber": 62,
+          "testName": "renders Edit MCP Server form populated with server details when editing",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
+          "lineNumber": 83,
+          "testName": "switches to connection command when STDIO transport type is selected",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
+          "lineNumber": 104,
+          "testName": "shows custom header input when auth shape is custom-header or query",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
+          "lineNumber": 127,
+          "testName": "closes modal when cancel button or close X is clicked",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
+          "lineNumber": 147,
+          "testName": "submits form with correctly formatted payload including trimmed categories",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerCard.test.tsx",
+          "lineNumber": 66,
+          "testName": "renders connecting/retrying state",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerCard.test.tsx",
+          "lineNumber": 83,
+          "testName": "renders failed state with retry button",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerCard.test.tsx",
+          "lineNumber": 106,
+          "testName": "renders disconnected state with connect button and hidden badge",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerCard.test.tsx",
+          "lineNumber": 129,
+          "testName": "renders disabled state",
+          "details": null
+        },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/stores/useServerStore.test.ts",
@@ -5085,76 +5162,6 @@
           "lineNumber": 445,
           "testName": "sets inspect active tab and search query",
           "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ServerCard.test.tsx",
-          "lineNumber": 66,
-          "testName": "renders connecting/retrying state",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ServerCard.test.tsx",
-          "lineNumber": 83,
-          "testName": "renders failed state with retry button",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ServerCard.test.tsx",
-          "lineNumber": 106,
-          "testName": "renders disconnected state with connect button and hidden badge",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ServerCard.test.tsx",
-          "lineNumber": 129,
-          "testName": "renders disabled state",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
-          "lineNumber": 41,
-          "testName": "renders Add MCP Server form with default values when in add mode",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
-          "lineNumber": 62,
-          "testName": "renders Edit MCP Server form populated with server details when editing",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
-          "lineNumber": 83,
-          "testName": "switches to connection command when STDIO transport type is selected",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
-          "lineNumber": 104,
-          "testName": "shows custom header input when auth shape is custom-header or query",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
-          "lineNumber": 127,
-          "testName": "closes modal when cancel button or close X is clicked",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
-          "lineNumber": 147,
-          "testName": "submits form with correctly formatted payload including trimmed categories",
-          "details": null
         }
       ]
     },
@@ -5220,9 +5227,23 @@
       "id": "MCP-05",
       "category": "MCP",
       "type": "Positive",
-      "description": "ResourceRoutingManager returns all registered resources when search query is empty.",
-      "proofCount": 10,
+      "description": "ResourceRoutingManager filters and matches MCP resources using semantic and keyword matching.",
+      "proofCount": 17,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ResourceRoutingTests.cs",
+          "lineNumber": 5,
+          "testName": "SearchResourcesAsync_FiltersResourcesCorrectly",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SecurityValidationHelperTests.cs",
+          "lineNumber": 61,
+          "testName": "ValidateResourceUri_ValidatesUris",
+          "details": null
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ResourceRoutingManagerTests.cs",
@@ -5253,6 +5274,55 @@
         },
         {
           "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ResourceCatalogManagerTests.cs",
+          "lineNumber": 8,
+          "testName": "SearchResourcesAsync_ReturnsTop15_WhenQueryIsNullOrEmpty",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ResourceCatalogManagerTests.cs",
+          "lineNumber": 36,
+          "testName": "SearchResourcesAsync_FiltersDictionaryResources_ByNameAndDescription",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ResourceCatalogManagerTests.cs",
+          "lineNumber": 61,
+          "testName": "SearchResourcesAsync_FiltersJsonElementResources_ByNameAndDescription",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ResourceCatalogManagerTests.cs",
+          "lineNumber": 81,
+          "testName": "SearchResourcesAsync_HandlesNullAndMissingPropertiesGracefully",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ResourceCatalogManagerTests.cs",
+          "lineNumber": 104,
+          "testName": "SearchResourcesAsync_LimitsResultsTo15Items",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ResourceCatalogManagerTests.cs",
+          "lineNumber": 123,
+          "testName": "TryMatchLogsTemplate_MatchesValidUri_ExtractsServerId",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ResourceCatalogManagerTests.cs",
+          "lineNumber": 135,
+          "testName": "TryMatchLogsTemplate_ReturnsFalse_ForInvalidPatterns",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/McpIntegrationTests.cs",
           "lineNumber": 411,
           "testName": "ResourceRouting_And_UriTranslation_Works_Correctly",
@@ -5270,20 +5340,6 @@
           "filePath": "ModelContextGateway.Tests/McpIntegrationTests.cs",
           "lineNumber": 977,
           "testName": "CustomUserPrompts_And_Resources_Work_Correctly",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/SecurityValidationHelperTests.cs",
-          "lineNumber": 61,
-          "testName": "ValidateResourceUri_ValidatesUris",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ResourceRoutingTests.cs",
-          "lineNumber": 5,
-          "testName": "SearchResourcesAsync_FiltersResourcesCorrectly",
           "details": null
         },
         {
@@ -5359,16 +5415,9 @@
       "id": "MCP-10",
       "category": "MCP",
       "type": "Positive",
-      "description": "DockerAutoDiscoveryService handles missing Docker socket gracefully without throwing unhandled exceptions.",
+      "description": "DockerAutoDiscoveryService initializes with valid container service dependencies.",
       "proofCount": 5,
       "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/SeederAndDiscoveryTests.cs",
-          "lineNumber": 83,
-          "testName": "DockerAutoDiscovery_ScanContainers_HandlesMissingSocketGracefully",
-          "details": null
-        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
@@ -5396,6 +5445,13 @@
           "lineNumber": 138,
           "testName": "UpsertDiscoveredServers_AddsNewServers_AndDisablesStoppedServers",
           "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SeederAndDiscoveryTests.cs",
+          "lineNumber": 83,
+          "testName": "DockerAutoDiscovery_ScanContainers_HandlesMissingSocketGracefully",
+          "details": null
         }
       ]
     },
@@ -5403,9 +5459,65 @@
       "id": "MCP-12",
       "category": "MCP",
       "type": "Positive",
-      "description": "DynamicEmbeddingService retrieves and persists embedding provider configurations in Settings table.",
+      "description": "ApiEmbeddingService parses OpenAI-compatible vector responses and extracts float embeddings.",
       "proofCount": 19,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/EmbeddingServiceTests.cs",
+          "lineNumber": 61,
+          "testName": "ApiEmbeddingService_GetEmbeddingAsync_Returns_Vector_From_OpenAI_Response",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs",
+          "lineNumber": 5,
+          "testName": "CalculateCosineSimilarity_ComputesSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs",
+          "lineNumber": 17,
+          "testName": "ReloadSettings_UpdatesSettings",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SeederAndDiscoveryTests.cs",
+          "lineNumber": 106,
+          "testName": "SemanticSearchService_Fallback_With_DummyEmbeddings",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SemanticSearchServiceTests.cs",
+          "lineNumber": 42,
+          "testName": "SearchToolsSemanticAsync_ScoresAndRanksTools",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SemanticSearchServiceTests.cs",
+          "lineNumber": 61,
+          "testName": "SearchTools_KeywordMatching_WorksCorrectly",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SemanticSearchServiceTests.cs",
+          "lineNumber": 78,
+          "testName": "SearchToolsSemanticAsync_FallsBackToKeyword_WhenEmbeddingServiceThrows",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 93,
+          "testName": "CallToolAsync_SearchTools_ReturnsSemanticResults",
+          "details": null
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs",
@@ -5450,6 +5562,13 @@
         },
         {
           "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/McpIntegrationTests.cs",
+          "lineNumber": 668,
+          "testName": "SemanticToolSearchRanking_Sorts_By_Score",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs",
           "lineNumber": 7,
           "testName": "Service_InitializesAndSetsUpPaths",
@@ -5474,69 +5593,6 @@
           "filePath": "ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs",
           "lineNumber": 54,
           "testName": "GetEmbeddingAsync_ReturnsEmpty384Vector_ForEmptyString",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/SemanticSearchServiceTests.cs",
-          "lineNumber": 42,
-          "testName": "SearchToolsSemanticAsync_ScoresAndRanksTools",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/SemanticSearchServiceTests.cs",
-          "lineNumber": 61,
-          "testName": "SearchTools_KeywordMatching_WorksCorrectly",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/SemanticSearchServiceTests.cs",
-          "lineNumber": 78,
-          "testName": "SearchToolsSemanticAsync_FallsBackToKeyword_WhenEmbeddingServiceThrows",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/SeederAndDiscoveryTests.cs",
-          "lineNumber": 106,
-          "testName": "SemanticSearchService_Fallback_With_DummyEmbeddings",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/EmbeddingServiceTests.cs",
-          "lineNumber": 61,
-          "testName": "ApiEmbeddingService_GetEmbeddingAsync_Returns_Vector_From_OpenAI_Response",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 93,
-          "testName": "CallToolAsync_SearchTools_ReturnsSemanticResults",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/McpIntegrationTests.cs",
-          "lineNumber": 668,
-          "testName": "SemanticToolSearchRanking_Sorts_By_Score",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs",
-          "lineNumber": 5,
-          "testName": "CalculateCosineSimilarity_ComputesSimilarity",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs",
-          "lineNumber": 17,
-          "testName": "ReloadSettings_UpdatesSettings",
           "details": null
         }
       ]
@@ -5659,13 +5715,6 @@
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs",
-          "lineNumber": 371,
-          "testName": "DownstreamBackend_ProtocolVersionMismatch_NegotiatesOlderVersionSuccessfully",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
           "lineNumber": 124,
           "testName": "Middleware_Extracts_Stateless_Capabilities_And_ClientInfo_In_Meta",
@@ -5676,6 +5725,13 @@
           "filePath": "ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
           "lineNumber": 162,
           "testName": "Middleware_Rejects_Unsupported_Protocol_Version_With_32021_Error",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs",
+          "lineNumber": 371,
+          "testName": "DownstreamBackend_ProtocolVersionMismatch_NegotiatesOlderVersionSuccessfully",
           "details": null
         }
       ]
@@ -5804,23 +5860,9 @@
       "id": "MCP-27",
       "category": "MCP",
       "type": "Positive",
-      "description": "McpServer supports Alias property",
+      "description": "ToolRoutingManager exposes tools using {namespace}/{tool_name} format by default with [{namespace}] description prefix and dual-key routing.",
       "proofCount": 4,
       "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/McpServerTests.cs",
-          "lineNumber": 15,
-          "testName": "McpServer_Supports_Alias_Property",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/McpServerTests.cs",
-          "lineNumber": 30,
-          "testName": "DatabaseInitializer_EnsureAliasColumn_AddsColumnSuccessfully",
-          "details": null
-        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
@@ -5833,6 +5875,20 @@
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
           "lineNumber": 599,
           "testName": "CacheTools_Exposes_Slash_Formatted_Name_With_Server_Id_When_Alias_Empty",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/McpServerTests.cs",
+          "lineNumber": 15,
+          "testName": "McpServer_Supports_Alias_Property",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/McpServerTests.cs",
+          "lineNumber": 30,
+          "testName": "DatabaseInitializer_EnsureAliasColumn_AddsColumnSuccessfully",
           "details": null
         }
       ]
@@ -6019,23 +6075,9 @@
       "id": "MCP-33",
       "category": "MCP",
       "type": "Positive",
-      "description": "OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints.",
+      "description": "ToolRoutingManager fuses lexical and semantic vector candidate rankings using Reciprocal Rank Fusion (RRF, k=60).",
       "proofCount": 5,
       "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
-          "lineNumber": 26,
-          "testName": "GenerateEmbeddingAsync_SendsValidPayload_AndParsesResponse",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
-          "lineNumber": 75,
-          "testName": "GenerateEmbeddingsAsync_PreservesInputOrder_AcrossBatch",
-          "details": null
-        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
@@ -6056,6 +6098,20 @@
           "lineNumber": 141,
           "testName": "SearchTools_SynchronousMethod_ReturnsRankedCandidates",
           "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
+          "lineNumber": 26,
+          "testName": "GenerateEmbeddingAsync_SendsValidPayload_AndParsesResponse",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
+          "lineNumber": 75,
+          "testName": "GenerateEmbeddingsAsync_PreservesInputOrder_AcrossBatch",
+          "details": null
         }
       ]
     },
@@ -6063,9 +6119,16 @@
       "id": "MCP-34",
       "category": "MCP",
       "type": "Negative",
-      "description": "ToolRoutingManager gracefully falls back to keyword matching when NoOpEmbeddingProvider is active.",
+      "description": "OpenAiEmbeddingProvider blocks private loopback IPs preventing SSRF.",
       "proofCount": 6,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
+          "lineNumber": 108,
+          "testName": "GenerateEmbeddingAsync_ThrowsOnLoopbackIp_WhenPrivateIpsDisallowed",
+          "details": null
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
@@ -6099,13 +6162,6 @@
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs",
           "lineNumber": 101,
           "testName": "CallToolAsync_SearchTools_ExecutesHybridRrfSearch",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
-          "lineNumber": 108,
-          "testName": "GenerateEmbeddingAsync_ThrowsOnLoopbackIp_WhenPrivateIpsDisallowed",
           "details": null
         }
       ]
@@ -7574,27 +7630,6 @@
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 159,
-          "testName": "Exchange_ClientCredentials_ValidSecret_ReturnsSignInResult",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 206,
-          "testName": "Exchange_ClientCredentials_InvalidSecret_ReturnsForbid",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 251,
-          "testName": "Exchange_ClientCredentials_ExpiredClient_ReturnsForbid",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 84,
           "testName": "CreateClient_ReturnsOk_WithGeneratedCredentials",
@@ -7620,35 +7655,26 @@
           "lineNumber": 215,
           "testName": "CreateClient_WithExpiresInDays_SetsExpiration",
           "details": null
-        }
-      ]
-    },
-    {
-      "id": "AUTH-112",
-      "category": "SEC",
-      "type": "Negative",
-      "description": "Authorize resolves client application from IOAuthClientRepository and redirects to consent.",
-      "proofCount": 3,
-      "proofs": [
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 297,
-          "testName": "Authorize_ResolvesClientAndRedirectsToConsent",
+          "lineNumber": 159,
+          "testName": "Exchange_ClientCredentials_ValidSecret_ReturnsSignInResult",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 120,
-          "testName": "DeleteClient_ReturnsNoContent_WhenAppExists",
+          "filePath": "ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 206,
+          "testName": "Exchange_ClientCredentials_InvalidSecret_ReturnsForbid",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 141,
-          "testName": "DeleteClient_ReturnsNotFound_WhenAppDoesNotExist",
+          "filePath": "ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 251,
+          "testName": "Exchange_ClientCredentials_ExpiredClient_ReturnsForbid",
           "details": null
         }
       ]
@@ -7734,6 +7760,52 @@
       ]
     },
     {
+      "id": "AUTH-118",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "RegisterClient deduplicates and reuses existing dynamic client registrations for matching client name and type without accumulating redundant records.",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 556,
+          "testName": "RegisterClient_DuplicateDcrRequest_ReusesExistingClientIdAndUpdatesRecord",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "lineNumber": 214,
+          "testName": "FindDcrClient_ReturnsMatchingClient",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-119",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "CleanupClients endpoint triggers DCR pruning and returns total cleaned client count.",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 333,
+          "testName": "CleanupClients_CallsRepoAndReturnsCleanedCount",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "lineNumber": 237,
+          "testName": "CleanupDcrClients_PrunesDuplicateRegistrations_AndExpiredClients",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-ADMIN-TEST-TOOL-CALL-SECRET-RESOLUTION",
       "category": "SEC",
       "type": "Positive",
@@ -7769,14 +7841,21 @@
       "id": "SEC-01",
       "category": "SEC",
       "type": "Negative",
-      "description": "SQLite database is encrypted at rest using SQLCipher with DB_ENCRYPTION_KEY.",
+      "description": "TokenExchangeSecretRetriever fails closed when HttpClient throws an exception during token exchange.",
       "proofCount": 17,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/DatabaseEncryptionTests.cs",
-          "lineNumber": 8,
-          "testName": "SqliteDatabase_IsEncrypted_WithSQLCipher",
+          "filePath": "ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
+          "lineNumber": 127,
+          "testName": "GetSecretAsync_ThrowsHttpRequestException_WhenHttpClientFails",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
+          "lineNumber": 165,
+          "testName": "GetSecretAsync_ThrowsJsonException_WhenResponseIsInvalidJson",
           "details": null
         },
         {
@@ -7823,16 +7902,9 @@
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
-          "lineNumber": 127,
-          "testName": "GetSecretAsync_ThrowsHttpRequestException_WhenHttpClientFails",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
-          "lineNumber": 165,
-          "testName": "GetSecretAsync_ThrowsJsonException_WhenResponseIsInvalidJson",
+          "filePath": "ModelContextGateway.Tests/DatabaseEncryptionTests.cs",
+          "lineNumber": 8,
+          "testName": "SqliteDatabase_IsEncrypted_WithSQLCipher",
           "details": null
         },
         {
@@ -7897,14 +7969,21 @@
       "id": "SEC-02",
       "category": "SEC",
       "type": "Positive",
-      "description": "VaultSecretRetriever dynamically loads, applies, and reloads Vault configurations from database repository.",
+      "description": "GET /api/providers/secrets returns secret providers with 200 OK.",
       "proofCount": 29,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs",
-          "lineNumber": 294,
-          "testName": "VaultSecretRetriever_DynamicallyLoadsAndAppliesDbConfig_WithReload",
+          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
+          "lineNumber": 376,
+          "testName": "Pipeline_GET_Providers_Secret_Returns200",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/IdentityProviderTests.cs",
+          "lineNumber": 482,
+          "testName": "ConnectAndInitializeBackendAsync_WithVaultServer_ResolvesRetrieverFromRootServices_WhenHttpContextIsNull",
           "details": null
         },
         {
@@ -7941,6 +8020,41 @@
           "lineNumber": 373,
           "testName": "SaveSecretProvider_HttpUrl_AllowedForSimpleHost",
           "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
+          "lineNumber": 37,
+          "testName": "GetSecretAsync_MintsTokenViaTokenExchange_AndCachesResponse",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
+          "lineNumber": 190,
+          "testName": "CompositeSecretRetriever_RoutesOboAndPocketIdAliases_ToTokenExchangeRetriever",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs",
+          "lineNumber": 294,
+          "testName": "VaultSecretRetriever_DynamicallyLoadsAndAppliesDbConfig_WithReload",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/StdioTransportTests.cs",
+          "lineNumber": 344,
+          "testName": "StdioTransport_ShouldPassSecretViaEnvironmentVariables_AndNotCommandLine",
+          "details": "Verifies that STDIO transport securely injects secret credentials via environment variables rather than command-line arguments."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/StdioTransportTests.cs",
+          "lineNumber": 429,
+          "testName": "StdioTransport_ShouldSanitizeAndMaskSecretsInLogs",
+          "details": "Verifies that subprocess logs and stderr streams are actively sanitized to mask sensitive tokens and credentials."
         },
         {
           "suite": "Backend xUnit",
@@ -8000,27 +8114,6 @@
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/IdentityProviderTests.cs",
-          "lineNumber": 482,
-          "testName": "ConnectAndInitializeBackendAsync_WithVaultServer_ResolvesRetrieverFromRootServices_WhenHttpContextIsNull",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/StdioTransportTests.cs",
-          "lineNumber": 344,
-          "testName": "StdioTransport_ShouldPassSecretViaEnvironmentVariables_AndNotCommandLine",
-          "details": "Verifies that STDIO transport securely injects secret credentials via environment variables rather than command-line arguments."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/StdioTransportTests.cs",
-          "lineNumber": 429,
-          "testName": "StdioTransport_ShouldSanitizeAndMaskSecretsInLogs",
-          "details": "Verifies that subprocess logs and stderr streams are actively sanitized to mask sensitive tokens and credentials."
-        },
-        {
-          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
           "lineNumber": 129,
           "testName": "VaultUserSecretStore_SaveSecretAsync_WritesToVaultKv2",
@@ -8045,27 +8138,6 @@
           "filePath": "ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs",
           "lineNumber": 216,
           "testName": "VaultUserSecretStore_Resolves_Enterprise_Path_Template_And_Discrete_KVs",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 376,
-          "testName": "Pipeline_GET_Providers_Secret_Returns200",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
-          "lineNumber": 37,
-          "testName": "GetSecretAsync_MintsTokenViaTokenExchange_AndCachesResponse",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
-          "lineNumber": 190,
-          "testName": "CompositeSecretRetriever_RoutesOboAndPocketIdAliases_ToTokenExchangeRetriever",
           "details": null
         },
         {
@@ -8109,23 +8181,9 @@
       "id": "SEC-03",
       "category": "SEC",
       "type": "Positive",
-      "description": "EnvironmentSecretRetriever retrieves configured environment variable value.",
+      "description": "Ensure TrustedProxyHelper supports CIDR ranges in XFF validation",
       "proofCount": 5,
       "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/SecretRetrieverTests.cs",
-          "lineNumber": 5,
-          "testName": "EnvironmentSecretRetriever_ReturnsEnvVariable_WhenExists",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/SecretRetrieverTests.cs",
-          "lineNumber": 25,
-          "testName": "EnvironmentSecretRetriever_ReturnsNull_WhenVariableDoesNotExist",
-          "details": null
-        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/IdentityProviderTests.cs",
@@ -8145,6 +8203,20 @@
           "filePath": "ModelContextGateway.Tests/EnvironmentSecretRetrieverTests.cs",
           "lineNumber": 5,
           "testName": "EnvironmentSecretRetriever_RetrievesSecret_FromEnvironmentVariables",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SecretRetrieverTests.cs",
+          "lineNumber": 5,
+          "testName": "EnvironmentSecretRetriever_ReturnsEnvVariable_WhenExists",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SecretRetrieverTests.cs",
+          "lineNumber": 25,
+          "testName": "EnvironmentSecretRetriever_ReturnsNull_WhenVariableDoesNotExist",
           "details": null
         }
       ]
@@ -8190,30 +8262,9 @@
       "id": "SEC-05",
       "category": "SEC",
       "type": "Positive",
-      "description": "renders RPC message stream with formatted JSON",
+      "description": "renders img live preview when dashboardIcon is an image URL",
       "proofCount": 6,
       "proofs": [
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/LogsTerminalCard.test.tsx",
-          "lineNumber": 61,
-          "testName": "renders RPC message stream with formatted JSON",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/LogsTerminalCard.test.tsx",
-          "lineNumber": 81,
-          "testName": "toggles autoscroll and handles clear logs",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/LogsTerminalCard.test.tsx",
-          "lineNumber": 108,
-          "testName": "shows empty state when no logs match filter",
-          "details": null
-        },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/GeneralTabLogoUpload.test.tsx",
@@ -8233,6 +8284,27 @@
           "filePath": "frontend/src/test/components/GeneralTabLogoUpload.test.tsx",
           "lineNumber": 141,
           "testName": "saves settings with the updated logo URL when form is submitted after upload",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/LogsTerminalCard.test.tsx",
+          "lineNumber": 61,
+          "testName": "renders RPC message stream with formatted JSON",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/LogsTerminalCard.test.tsx",
+          "lineNumber": 81,
+          "testName": "toggles autoscroll and handles clear logs",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/LogsTerminalCard.test.tsx",
+          "lineNumber": 108,
+          "testName": "shows empty state when no logs match filter",
           "details": null
         }
       ]
@@ -8673,9 +8745,16 @@
       "id": "SEC-MASTERKEY-ATOMIC-REENCRYPTION",
       "category": "SEC",
       "type": "Positive",
-      "description": "Atomically re-encrypts database credentials when setting a custom master key.",
+      "description": "Rejects POST /api/config/master-key when key source is external.",
       "proofCount": 5,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
+          "lineNumber": 482,
+          "testName": "Pipeline_POST_MasterKey_RejectsWhenExternalKeySource",
+          "details": null
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs",
@@ -8702,13 +8781,6 @@
           "filePath": "ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs",
           "lineNumber": 338,
           "testName": "SetMasterKey_RejectsInvalidOrShortKeys",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 482,
-          "testName": "Pipeline_POST_MasterKey_RejectsWhenExternalKeySource",
           "details": null
         }
       ]
@@ -9582,21 +9654,21 @@
       "id": "TRANS-TIMEOUT-PENDING-CLEANUP",
       "category": "TRANS",
       "type": "Positive",
-      "description": "SendRequestAsync times out cleanly and removes pending completion handlers without leaking memory.",
+      "description": "Cleans up pending request tracking maps upon timeout and cancellation.",
       "proofCount": 2,
       "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
-          "lineNumber": 276,
-          "testName": "SendRequestAsync_TimesOutCleanly_AndDoesNotLeak",
-          "details": null
-        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs",
           "lineNumber": 217,
           "testName": "TimeoutAndCancellationCleanup_DoesNotLeavePendingRequests",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
+          "lineNumber": 276,
+          "testName": "SendRequestAsync_TimesOutCleanly_AndDoesNotLeak",
           "details": null
         }
       ]
@@ -9621,37 +9693,9 @@
       "id": "UI-01",
       "category": "UI",
       "type": "Positive",
-      "description": "opens confirmation modal and resolves true when confirmed",
+      "description": "renders CustomFileModal in create mode and displays visual builder tabs",
       "proofCount": 61,
       "proofs": [
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/stores/useConfirmStore.test.ts",
-          "lineNumber": 31,
-          "testName": "opens confirmation modal and resolves true when confirmed",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/stores/useConfirmStore.test.ts",
-          "lineNumber": 58,
-          "testName": "resolves false when cancelled",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/stores/useConfirmStore.test.ts",
-          "lineNumber": 76,
-          "testName": "settles existing pending promise with false when a new confirmation is opened",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/DashboardView.test.tsx",
-          "lineNumber": 115,
-          "testName": "renders empty state when no servers match search",
-          "details": null
-        },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/CustomFileModal.test.tsx",
@@ -9710,251 +9754,6 @@
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/HeaderBranding.test.tsx",
-          "lineNumber": 37,
-          "testName": "identifies FontAwesome class names and invalid inputs as non-image URLs",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/HeaderBranding.test.tsx",
-          "lineNumber": 54,
-          "testName": "updates document.title and sets custom image favicon when icon is an image URL",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/HeaderBranding.test.tsx",
-          "lineNumber": 69,
-          "testName": "sets default title and generated SVG favicon when branding is null or uses FontAwesome icon",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/HeaderBranding.test.tsx",
-          "lineNumber": 87,
-          "testName": "renders img element with logo-icon logo-img class when branding.icon is an image endpoint",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/HeaderBranding.test.tsx",
-          "lineNumber": 115,
-          "testName": "renders FontAwesome i element when branding.icon is a FontAwesome class",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/MappingModal.test.tsx",
-          "lineNumber": 27,
-          "testName": "renders create mapping form with empty inputs",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/MappingModal.test.tsx",
-          "lineNumber": 42,
-          "testName": "renders edit mapping form pre-filled with mapping data",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/MappingModal.test.tsx",
-          "lineNumber": 57,
-          "testName": "submits form with externalId and internalGroup",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/MappingModal.test.tsx",
-          "lineNumber": 82,
-          "testName": "closes modal on cancel click",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/Header.test.tsx",
-          "lineNumber": 38,
-          "testName": "renders admin badge and shield icon for full_admin users",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/Header.test.tsx",
-          "lineNumber": 64,
-          "testName": "renders standard user badge for non-admin users",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/Header.test.tsx",
-          "lineNumber": 90,
-          "testName": "does not render user status item when unauthenticated",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/Header.test.tsx",
-          "lineNumber": 110,
-          "testName": "displays gateway status and SSE endpoint",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/Header.test.tsx",
-          "lineNumber": 126,
-          "testName": "toggles light and dark theme on button click and updates document attribute",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SettingsTabs.test.tsx",
-          "lineNumber": 49,
-          "testName": "renders IdentityAuthTab and SecretProvidersTab inside ProvidersTab",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SettingsTabs.test.tsx",
-          "lineNumber": 77,
-          "testName": "renders CustomFilesTab and triggers modal open and delete",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SettingsTabs.test.tsx",
-          "lineNumber": 110,
-          "testName": "renders AccessControlTab with policies and mappings",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SettingsTabs.test.tsx",
-          "lineNumber": 139,
-          "testName": "renders BackupsTab",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 144,
-          "testName": "saves embedding settings and displays success feedback",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 183,
-          "testName": "saves Auth Provider configurations including Active Directory and OIDC header mappings",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 240,
-          "testName": "saves secret providers while preserving Vault config and secrets",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 311,
-          "testName": "renders custom files table with edit and delete actions",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 354,
-          "testName": "renders access policies and group mappings with CRUD actions",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 71,
-          "testName": "handles semantic search queries in SemanticRouterCard",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 99,
-          "testName": "executes tool and updates console",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 130,
-          "testName": "executes prompt get in prompt tester tab",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 164,
-          "testName": "executes resource read in resource inspector tab",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SharedComponents.test.tsx",
-          "lineNumber": 26,
-          "testName": "renders title, children, and handles close button click",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SharedComponents.test.tsx",
-          "lineNumber": 50,
-          "testName": "renders various statuses correctly with indicators",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SharedComponents.test.tsx",
-          "lineNumber": 72,
-          "testName": "returns null when totalItems is 0",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SharedComponents.test.tsx",
-          "lineNumber": 91,
-          "testName": "renders page info and navigation controls",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SharedComponents.test.tsx",
-          "lineNumber": 130,
-          "testName": "handles pageSize all",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ConfirmModal.test.tsx",
-          "lineNumber": 32,
-          "testName": "renders title, message, and action buttons when open",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ConfirmModal.test.tsx",
-          "lineNumber": 58,
-          "testName": "calls handleConfirm when confirm button clicked",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ConfirmModal.test.tsx",
-          "lineNumber": 82,
-          "testName": "calls handleCancel when cancel button clicked",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/LayoutCentering.test.tsx",
           "lineNumber": 19,
           "testName": "renders top navigation bar with centered alignment in layout.css and App",
@@ -9997,6 +9796,258 @@
         },
         {
           "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/MappingModal.test.tsx",
+          "lineNumber": 27,
+          "testName": "renders create mapping form with empty inputs",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/MappingModal.test.tsx",
+          "lineNumber": 42,
+          "testName": "renders edit mapping form pre-filled with mapping data",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/MappingModal.test.tsx",
+          "lineNumber": 57,
+          "testName": "submits form with externalId and internalGroup",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/MappingModal.test.tsx",
+          "lineNumber": 82,
+          "testName": "closes modal on cancel click",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ConfirmModal.test.tsx",
+          "lineNumber": 32,
+          "testName": "renders title, message, and action buttons when open",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ConfirmModal.test.tsx",
+          "lineNumber": 58,
+          "testName": "calls handleConfirm when confirm button clicked",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ConfirmModal.test.tsx",
+          "lineNumber": 82,
+          "testName": "calls handleCancel when cancel button clicked",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SettingsTabs.test.tsx",
+          "lineNumber": 49,
+          "testName": "renders IdentityAuthTab and SecretProvidersTab inside ProvidersTab",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SettingsTabs.test.tsx",
+          "lineNumber": 77,
+          "testName": "renders CustomFilesTab and triggers modal open and delete",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SettingsTabs.test.tsx",
+          "lineNumber": 110,
+          "testName": "renders AccessControlTab with policies and mappings",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SettingsTabs.test.tsx",
+          "lineNumber": 139,
+          "testName": "renders BackupsTab",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/DashboardView.test.tsx",
+          "lineNumber": 115,
+          "testName": "renders empty state when no servers match search",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SettingsView.test.tsx",
+          "lineNumber": 144,
+          "testName": "saves embedding settings and displays success feedback",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SettingsView.test.tsx",
+          "lineNumber": 183,
+          "testName": "saves Auth Provider configurations including Active Directory and OIDC header mappings",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SettingsView.test.tsx",
+          "lineNumber": 240,
+          "testName": "saves secret providers while preserving Vault config and secrets",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SettingsView.test.tsx",
+          "lineNumber": 311,
+          "testName": "renders custom files table with edit and delete actions",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SettingsView.test.tsx",
+          "lineNumber": 354,
+          "testName": "renders access policies and group mappings with CRUD actions",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/Header.test.tsx",
+          "lineNumber": 38,
+          "testName": "renders admin badge and shield icon for full_admin users",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/Header.test.tsx",
+          "lineNumber": 64,
+          "testName": "renders standard user badge for non-admin users",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/Header.test.tsx",
+          "lineNumber": 90,
+          "testName": "does not render user status item when unauthenticated",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/Header.test.tsx",
+          "lineNumber": 110,
+          "testName": "displays gateway status and SSE endpoint",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/Header.test.tsx",
+          "lineNumber": 126,
+          "testName": "toggles light and dark theme on button click and updates document attribute",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SharedComponents.test.tsx",
+          "lineNumber": 26,
+          "testName": "renders title, children, and handles close button click",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SharedComponents.test.tsx",
+          "lineNumber": 50,
+          "testName": "renders various statuses correctly with indicators",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SharedComponents.test.tsx",
+          "lineNumber": 72,
+          "testName": "returns null when totalItems is 0",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SharedComponents.test.tsx",
+          "lineNumber": 91,
+          "testName": "renders page info and navigation controls",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SharedComponents.test.tsx",
+          "lineNumber": 130,
+          "testName": "handles pageSize all",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 71,
+          "testName": "handles semantic search queries in SemanticRouterCard",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 99,
+          "testName": "executes tool and updates console",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 130,
+          "testName": "executes prompt get in prompt tester tab",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 164,
+          "testName": "executes resource read in resource inspector tab",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/HeaderBranding.test.tsx",
+          "lineNumber": 37,
+          "testName": "identifies FontAwesome class names and invalid inputs as non-image URLs",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/HeaderBranding.test.tsx",
+          "lineNumber": 54,
+          "testName": "updates document.title and sets custom image favicon when icon is an image URL",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/HeaderBranding.test.tsx",
+          "lineNumber": 69,
+          "testName": "sets default title and generated SVG favicon when branding is null or uses FontAwesome icon",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/HeaderBranding.test.tsx",
+          "lineNumber": 87,
+          "testName": "renders img element with logo-icon logo-img class when branding.icon is an image endpoint",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/HeaderBranding.test.tsx",
+          "lineNumber": 115,
+          "testName": "renders FontAwesome i element when branding.icon is a FontAwesome class",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/api/typedApi.test.ts",
           "lineNumber": 74,
           "testName": "calls client and appkey endpoints correctly",
@@ -10028,6 +10079,27 @@
           "filePath": "frontend/src/test/api/typedApi.test.ts",
           "lineNumber": 237,
           "testName": "calls testbench tool, prompt, resource, log endpoints correctly",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/stores/useConfirmStore.test.ts",
+          "lineNumber": 31,
+          "testName": "opens confirmation modal and resolves true when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/stores/useConfirmStore.test.ts",
+          "lineNumber": 58,
+          "testName": "resolves false when cancelled",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/stores/useConfirmStore.test.ts",
+          "lineNumber": 76,
+          "testName": "settles existing pending promise with false when a new confirmation is opened",
           "details": null
         },
         {
@@ -10201,16 +10273,16 @@
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/HeaderBranding.test.tsx",
-          "lineNumber": 7,
-          "testName": "identifies image URLs and paths accurately",
+          "filePath": "frontend/src/test/components/GeneralTabLogoUpload.test.tsx",
+          "lineNumber": 6,
+          "testName": "renders branding label and FontAwesome icon preview when icon is a CSS class",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/GeneralTabLogoUpload.test.tsx",
-          "lineNumber": 6,
-          "testName": "renders branding label and FontAwesome icon preview when icon is a CSS class",
+          "filePath": "frontend/src/test/components/HeaderBranding.test.tsx",
+          "lineNumber": 7,
+          "testName": "identifies image URLs and paths accurately",
           "details": null
         }
       ]
@@ -10522,29 +10594,6 @@
           "filePath": "frontend/src/test/components/MappingModal.test.tsx",
           "lineNumber": 1,
           "testName": "renders nothing when isMappingModalOpen is false",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "UI-109",
-      "category": "UI",
-      "type": "Positive",
-      "description": "Renders ClientSetupGuide below the user credentials card.",
-      "proofCount": 2,
-      "proofs": [
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 104,
-          "testName": "renders client setup guide below credentials card",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ClientSetupGuide.test.tsx",
-          "lineNumber": 1,
-          "testName": "renders default standard mcpServers configuration with meta mode",
           "details": null
         }
       ]
@@ -10902,30 +10951,9 @@
       "id": "UI-31",
       "category": "UI",
       "type": "Negative",
-      "description": "Fetches registered OAuth clients and updates store state.",
+      "description": "Fetches clients on mount and renders table headers and action buttons.",
       "proofCount": 7,
       "proofs": [
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 37,
-          "testName": "fetches registered clients and updates state",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 213,
-          "testName": "prompts confirmation and calls cleanupClientsApi when confirmed",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 239,
-          "testName": "cancels DCR cleanup when user cancels confirmation modal",
-          "details": null
-        },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/RegisteredClientsCard.test.tsx",
@@ -10953,6 +10981,27 @@
           "lineNumber": 136,
           "testName": "triggers deleteClient when Delete button is clicked",
           "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 37,
+          "testName": "fetches registered clients and updates state",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 213,
+          "testName": "prompts confirmation and calls cleanupClientsApi when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 239,
+          "testName": "cancels DCR cleanup when user cancels confirmation modal",
+          "details": null
         }
       ]
     },
@@ -10976,9 +11025,30 @@
       "id": "UI-CONFIRM-MODAL",
       "category": "UI",
       "type": "Negative",
-      "description": "Centralized promise-based confirmation store resolves true on confirmation and false on cancellation.",
+      "description": "Renders confirmation dialog with title, message, and trigger buttons for confirm and cancel.",
       "proofCount": 16,
       "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ConfirmModal.test.tsx",
+          "lineNumber": 6,
+          "testName": "renders nothing when closed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/stores/useServerStore.test.ts",
+          "lineNumber": 269,
+          "testName": "prompts window.confirm and deletes server when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/stores/useServerStore.test.ts",
+          "lineNumber": 298,
+          "testName": "does not send delete request when confirm is cancelled",
+          "details": null
+        },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/stores/useConfirmStore.test.ts",
@@ -11069,27 +11139,6 @@
           "lineNumber": 662,
           "testName": "cancels quota reset when user denies confirmation",
           "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/stores/useServerStore.test.ts",
-          "lineNumber": 269,
-          "testName": "prompts window.confirm and deletes server when confirmed",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/stores/useServerStore.test.ts",
-          "lineNumber": 298,
-          "testName": "does not send delete request when confirm is cancelled",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/ConfirmModal.test.tsx",
-          "lineNumber": 6,
-          "testName": "renders nothing when closed",
-          "details": null
         }
       ]
     },
@@ -11097,23 +11146,9 @@
       "id": "UI-TOAST-TRANSITION",
       "category": "UI",
       "type": "Negative",
-      "description": "Displays error toast notification when saving invalid JSON credentials for user-provided server.",
+      "description": "Displays error toast notification when switching from invalid JSON to Visual Prompt Builder.",
       "proofCount": 8,
       "proofs": [
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 25,
-          "testName": "shows error toast when saving invalid JSON credentials",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 66,
-          "testName": "saves valid credentials successfully and closes modal",
-          "details": null
-        },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/CustomFileModal.test.tsx",
@@ -11137,6 +11172,13 @@
         },
         {
           "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "lineNumber": 63,
+          "testName": "displays error toast when saving secret providers fails",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/IdentityAuthTab.test.tsx",
           "lineNumber": 99,
           "testName": "saves updated Active Directory configuration JSON",
@@ -11151,9 +11193,16 @@
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/SecretProvidersTab.test.tsx",
-          "lineNumber": 63,
-          "testName": "displays error toast when saving secret providers fails",
+          "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 25,
+          "testName": "shows error toast when saving invalid JSON credentials",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 66,
+          "testName": "saves valid credentials successfully and closes modal",
           "details": null
         }
       ]
