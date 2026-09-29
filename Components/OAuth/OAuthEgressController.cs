@@ -113,6 +113,10 @@ namespace ModelContextGateway.Components.OAuth
             if (!string.IsNullOrWhiteSpace(server.OAuthScopes))
             {
                 queryParams["scope"] = server.OAuthScopes;
+                if (server.OAuthAuthorizationUrl.Contains("slack.com", StringComparison.OrdinalIgnoreCase))
+                {
+                    queryParams["user_scope"] = server.OAuthScopes;
+                }
             }
 
             var targetUrl = QueryHelpers.AddQueryString(server.OAuthAuthorizationUrl, queryParams);
@@ -201,6 +205,11 @@ namespace ModelContextGateway.Components.OAuth
             }
 
             var accessToken = tokenObj["access_token"]?.GetValue<string>();
+            if (string.IsNullOrEmpty(accessToken) && tokenObj["authed_user"] is JsonObject authedUser)
+            {
+                accessToken = authedUser["access_token"]?.GetValue<string>();
+            }
+
             if (string.IsNullOrEmpty(accessToken))
             {
                 return BadRequest(new { error = "OAuth token response did not contain an access_token." });
@@ -209,7 +218,7 @@ namespace ModelContextGateway.Components.OAuth
             var refreshToken = tokenObj["refresh_token"]?.GetValue<string>();
             var tokenType = tokenObj["token_type"]?.GetValue<string>() ?? "Bearer";
 
-            int expiresIn = 3600;
+            int? expiresIn = null;
             if (tokenObj["expires_in"] is JsonValue expVal && expVal.TryGetValue<int>(out var expNum))
             {
                 expiresIn = expNum;
@@ -219,15 +228,17 @@ namespace ModelContextGateway.Components.OAuth
                 expiresIn = parsedExp;
             }
 
-            long expiresAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + expiresIn;
-
             var persistedObj = new JsonObject
             {
                 ["access_token"] = accessToken,
-                ["token_type"] = tokenType,
-                ["expires_in"] = expiresIn,
-                ["expires_at"] = expiresAt
+                ["token_type"] = tokenType
             };
+
+            if (expiresIn.HasValue)
+            {
+                persistedObj["expires_in"] = expiresIn.Value;
+                persistedObj["expires_at"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + expiresIn.Value;
+            }
 
             if (!string.IsNullOrEmpty(refreshToken))
             {
