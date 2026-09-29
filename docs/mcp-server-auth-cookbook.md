@@ -391,6 +391,7 @@ The backend server trusts the gateway IP and applies Row-Level Security based on
 | **Unifi Network MCP** | `sse` | `Environment` | `x-api-key` | `UNIFI_API_KEY` |
 | **PostgreSQL / MySQL MCP** | `http` / `stdio` | `Environment` / `Vault` | `basic` or Env | `DB_PASSWORD` |
 | **Filesystem / GitHub MCP** | `stdio` | `Environment` | *(Auto Process Env)* | `GITHUB_TOKEN` |
+| **Slack Native Direct MCP** | `http` | *(OAuth 3LO / Hybrid)* | `bearer` | `xoxp-...` (User Token / 3LO Delegated) |
 
 ---
 

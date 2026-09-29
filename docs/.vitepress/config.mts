@@ -52,6 +52,7 @@ export default withMermaid(
             { text: 'OIDC & SSO Reverse Proxy', link: '/oidc-and-sso-guide' },
             { text: 'Downstream Auth & Delegation', link: '/downstream-auth-and-delegation-guide' },
             { text: 'Per-User OAuth Delegation', link: '/auth-flows/per-user-oauth-flow' },
+            { text: 'Slack Direct MCP & Hybrid Egress', link: '/auth-flows/slack-direct-mcp-integration' },
             { text: 'Transports (Detailed Guide)', link: '/transports' },
             { text: 'Data Model & ERD', link: '/data-model' },
             { text: 'Database Providers', link: '/database-providers' },
@@ -177,6 +178,7 @@ export default withMermaid(
                 { text: 'Multi-Tenant OAuth Consent', link: '/auth-flows/multi-tenant-oauth-consent' },
                 { text: 'Dynamic Client Registration (RFC 7591)', link: '/auth-flows/dynamic-client-registration' },
                 { text: 'Per-User OAuth & Connected Accounts', link: '/auth-flows/per-user-oauth-flow' },
+                { text: 'Slack Direct MCP & Hybrid Egress', link: '/auth-flows/slack-direct-mcp-integration' },
                 { text: 'Dynamic Auth Limitations', link: '/auth-flows/dynamic-auth-limitations' }
               ]
             }
