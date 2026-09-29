@@ -119,7 +119,7 @@ export async function setupMockApi(page: Page, options: MockApiOptions = {}) {
 
   let userCredentials: (string | { serverId: string })[] = [];
 
-  let testTools = [
+  const testTools = [
     {
       name: 'stdio_env_mock__echo',
       description: 'Echo back input message from STDIO server',
@@ -169,7 +169,7 @@ export async function setupMockApi(page: Page, options: MockApiOptions = {}) {
     masterKeySource: 'Configured',
   };
 
-  let authProviders = options.providers ?? [
+  const authProviders = options.providers ?? [
     {
       providerName: 'ActiveDirectory',
       displayName: 'Active Directory LDAP',
@@ -193,7 +193,7 @@ export async function setupMockApi(page: Page, options: MockApiOptions = {}) {
     },
   ];
 
-  let secretProviders = options.secretProviders ?? [
+  const secretProviders = options.secretProviders ?? [
     {
       providerName: 'Vault',
       displayName: 'HashiCorp Vault (KV v2)',
