@@ -42,6 +42,13 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
   const [hidden, setHidden] = useState(editingServer ? editingServer.hidden : false);
   const [allowPassThroughAuth, setAllowPassThroughAuth] = useState(editingServer ? editingServer.allowPassThroughAuth : false);
   const [dynamicAuthPrompt, setDynamicAuthPrompt] = useState(editingServer?.dynamicAuthPrompt || "");
+  const [enableOAuth3Lo, setEnableOAuth3Lo] = useState(editingServer?.enableOAuth3Lo || false);
+  const [oauthClientId, setOauthClientId] = useState(editingServer?.oauthClientId || (editingServer as any)?.oAuthClientId || '');
+  const [oauthClientSecret, setOauthClientSecret] = useState('');
+  const [oauthAuthorizationUrl, setOauthAuthorizationUrl] = useState(editingServer?.oauthAuthorizationUrl || (editingServer as any)?.oAuthAuthorizationUrl || '');
+  const [oauthTokenUrl, setOauthTokenUrl] = useState(editingServer?.oauthTokenUrl || (editingServer as any)?.oAuthTokenUrl || '');
+  const [oauthScopes, setOauthScopes] = useState(editingServer?.oauthScopes || (editingServer as any)?.oAuthScopes || '');
+  const [oauthRedirectUri, setOauthRedirectUri] = useState(editingServer?.oauthRedirectUri || (editingServer as any)?.oAuthRedirectUri || '');
 
   const ALIAS_REGEX = /^[a-zA-Z0-9_-]*$/;
 
@@ -76,6 +83,26 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
       allowPassThroughAuth,
       dynamicAuthPrompt,
     };
+    if (enableOAuth3Lo) {
+      serverPayload.enableOAuth3Lo = true;
+      if (oauthClientId.trim()) {
+        serverPayload.oauthClientId = oauthClientId.trim();
+      }
+      if (oauthAuthorizationUrl.trim()) {
+        serverPayload.oauthAuthorizationUrl = oauthAuthorizationUrl.trim();
+      }
+      if (oauthTokenUrl.trim()) {
+        serverPayload.oauthTokenUrl = oauthTokenUrl.trim();
+      }
+      if (oauthScopes.trim()) {
+        serverPayload.oauthScopes = oauthScopes.trim();
+      }
+      if (oauthRedirectUri.trim()) {
+        serverPayload.oauthRedirectUri = oauthRedirectUri.trim();
+      }
+    } else if (editingServer?.enableOAuth3Lo) {
+      serverPayload.enableOAuth3Lo = false;
+    }
     if (alias.trim()) {
       serverPayload.alias = alias.trim();
     }
@@ -84,6 +111,9 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
     }
     if (apiKey) {
       serverPayload.apiKey = apiKey;
+    }
+    if (oauthClientSecret) {
+      serverPayload.oauthClientSecret = oauthClientSecret;
     }
 
     try {
@@ -357,6 +387,104 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
                   value={dynamicAuthPrompt}
                   onChange={(e) => setDynamicAuthPrompt(e.target.value)}
                 />
+              </div>
+            )}
+          </div>
+
+          <div className="form-group" style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))' }}>
+            <div className="checkbox-group" style={{ marginBottom: '8px' }}>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  id="server-enable-oauth-3lo"
+                  data-testid="server-enable-oauth-3lo"
+                  checked={enableOAuth3Lo}
+                  onChange={(e) => setEnableOAuth3Lo(e.target.checked)}
+                />
+                <span className="slider"></span>
+              </label>
+              <span className="checkbox-label">Enable 3LO User Delegation (OAuth 2.0)</span>
+            </div>
+            <small style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: enableOAuth3Lo ? '12px' : '0' }}>
+              Allows interactive users to authorize with the backend server via OAuth 3LO redirect, delegating their user identity while falling back to the static token for automated agents.
+            </small>
+
+            {enableOAuth3Lo && (
+              <div className="oauth-3lo-config" style={{ background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '6px', padding: '12px', marginTop: '10px' }}>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="server-oauth-client-id">OAuth Client ID</label>
+                    <input
+                      type="text"
+                      id="server-oauth-client-id"
+                      data-testid="server-oauth-client-id-input"
+                      placeholder="e.g. 11145550917233.12161096706727"
+                      value={oauthClientId}
+                      onChange={(e) => setOauthClientId(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="server-oauth-client-secret">
+                      OAuth Client Secret {editingServer?.id && '(leave blank to keep unchanged)'}
+                    </label>
+                    <input
+                      type="password"
+                      id="server-oauth-client-secret"
+                      data-testid="server-oauth-client-secret-input"
+                      placeholder={editingServer?.id ? '••••••••' : 'Client secret from OAuth provider'}
+                      value={oauthClientSecret}
+                      onChange={(e) => setOauthClientSecret(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="server-oauth-auth-url">Authorization URL</label>
+                  <input
+                    type="text"
+                    id="server-oauth-auth-url"
+                    data-testid="server-oauth-auth-url-input"
+                    placeholder="e.g. https://slack.com/oauth/v2_user/authorize"
+                    value={oauthAuthorizationUrl}
+                    onChange={(e) => setOauthAuthorizationUrl(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="server-oauth-token-url">Token Exchange URL</label>
+                  <input
+                    type="text"
+                    id="server-oauth-token-url"
+                    data-testid="server-oauth-token-url-input"
+                    placeholder="e.g. https://slack.com/api/oauth.v2.user.access"
+                    value={oauthTokenUrl}
+                    onChange={(e) => setOauthTokenUrl(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="server-oauth-scopes">OAuth Scopes (Space-separated)</label>
+                  <input
+                    type="text"
+                    id="server-oauth-scopes"
+                    data-testid="server-oauth-scopes-input"
+                    placeholder="e.g. channels:read chat:write search:read"
+                    value={oauthScopes}
+                    onChange={(e) => setOauthScopes(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label htmlFor="server-oauth-redirect-uri">OAuth Redirect URI</label>
+                  <input
+                    type="text"
+                    id="server-oauth-redirect-uri"
+                    data-testid="server-oauth-redirect-uri-input"
+                    placeholder="e.g. https://mcp.wileyriley.com/api/oauth/egress/callback"
+                    value={oauthRedirectUri}
+                    onChange={(e) => setOauthRedirectUri(e.target.value)}
+                  />
+                </div>
               </div>
             )}
           </div>
