@@ -214,6 +214,24 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-JSON-REWRITE-META-IN-PARAMS", "MCP", RequirementType.Positive, "RewriteRequestJson strips _meta from root and embeds it into params to comply with MCP JSON-RPC 2.0 Zod schema.")]
+        public void JsonNode_Rewrite_EnsuresMetaInsideParamsAndNotAtRoot()
+        {
+            var loggerMock = new Mock<ILogger>();
+            var embeddingMock = new Mock<IEmbeddingService>();
+            var session = new ClientSession("session-id", null!, new List<McpServer>(), null!, embeddingMock.Object, loggerMock.Object);
+            var methodInfo = typeof(ClientSession).GetMethod("RewriteRequestJson", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            var rootMetaJson = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"slack__slack_list_channels\"},\"_meta\":{\"traceparent\":\"00-test-01\"}}";
+            var rewritten = (string)methodInfo!.Invoke(session, new object[] { rootMetaJson, "name", "slack_list_channels" })!;
+
+            var doc = System.Text.Json.JsonDocument.Parse(rewritten);
+            doc.RootElement.TryGetProperty("_meta", out _).Should().BeFalse("root must not contain _meta as it violates JSON-RPC 2.0 schema");
+            doc.RootElement.GetProperty("params").TryGetProperty("_meta", out var paramsMeta).Should().BeTrue("params must contain _meta");
+            paramsMeta.TryGetProperty("traceparent", out _).Should().BeTrue();
+        }
+
+        [Fact]
         [Requirement("GUARD-06", "GUARD", RequirementType.Negative, "Auth middleware enforces case-insensitive route matching preventing path bypass.")]
         public async Task AuthMiddleware_CaseInsensitivity_Bypass_Check()
         {
