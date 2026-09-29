@@ -381,6 +381,13 @@ namespace ModelContextGateway.Core.Routing
                                 AuthShape = s.AuthShape ?? "bearer",
                                 s.CustomHeaderName,
                                 HasApiKey = !string.IsNullOrEmpty(s.ApiKey),
+                                s.EnableOAuth3Lo,
+                                s.OAuthClientId,
+                                s.OAuthAuthorizationUrl,
+                                s.OAuthTokenUrl,
+                                s.OAuthScopes,
+                                s.OAuthRedirectUri,
+                                HasOAuthClientSecret = !string.IsNullOrEmpty(s.OAuthClientSecret),
                                 ConnectionStatus = s.Enabled ? (status?.Status ?? "Disconnected") : "Disabled",
                                 ConnectionAttempts = status?.Attempts ?? 0,
                                 ConnectionError = status?.Error ?? string.Empty
@@ -413,6 +420,13 @@ namespace ModelContextGateway.Core.Routing
                             AuthShape = server.AuthShape ?? "bearer",
                             server.CustomHeaderName,
                             HasApiKey = !string.IsNullOrEmpty(server.ApiKey),
+                            server.EnableOAuth3Lo,
+                            server.OAuthClientId,
+                            server.OAuthAuthorizationUrl,
+                            server.OAuthTokenUrl,
+                            server.OAuthScopes,
+                            server.OAuthRedirectUri,
+                            HasOAuthClientSecret = !string.IsNullOrEmpty(server.OAuthClientSecret),
                             ConnectionStatus = server.Enabled ? (status?.Status ?? "Disconnected") : "Disabled",
                             ConnectionAttempts = status?.Attempts ?? 0,
                             ConnectionError = status?.Error ?? string.Empty
@@ -1673,6 +1687,41 @@ namespace ModelContextGateway.Core.Routing
                 server.Categories = catProp.EnumerateArray().Select(c => c.GetString()).Where(c => !string.IsNullOrWhiteSpace(c)).Select(c => c!).ToList();
             }
 
+            if (args.TryGetProperty("enableOAuth3Lo", out var eoProp) || args.TryGetProperty("enableOauth3Lo", out eoProp))
+            {
+                server.EnableOAuth3Lo = eoProp.GetBoolean();
+            }
+
+            if (args.TryGetProperty("oAuthClientId", out var cidProp) || args.TryGetProperty("oauthClientId", out cidProp))
+            {
+                server.OAuthClientId = cidProp.GetString();
+            }
+
+            if (args.TryGetProperty("oAuthClientSecret", out var csProp) || args.TryGetProperty("oauthClientSecret", out csProp))
+            {
+                server.OAuthClientSecret = csProp.GetString();
+            }
+
+            if (args.TryGetProperty("oAuthAuthorizationUrl", out var auProp) || args.TryGetProperty("oauthAuthorizationUrl", out auProp))
+            {
+                server.OAuthAuthorizationUrl = auProp.GetString();
+            }
+
+            if (args.TryGetProperty("oAuthTokenUrl", out var tuProp) || args.TryGetProperty("oauthTokenUrl", out tuProp))
+            {
+                server.OAuthTokenUrl = tuProp.GetString();
+            }
+
+            if (args.TryGetProperty("oAuthScopes", out var oscProp) || args.TryGetProperty("oauthScopes", out oscProp))
+            {
+                server.OAuthScopes = oscProp.GetString();
+            }
+
+            if (args.TryGetProperty("oAuthRedirectUri", out var ruriProp) || args.TryGetProperty("oauthRedirectUri", out ruriProp))
+            {
+                server.OAuthRedirectUri = ruriProp.GetString();
+            }
+
             return server;
         }
 
@@ -1698,6 +1747,31 @@ namespace ModelContextGateway.Core.Routing
                     if (deserialized.Alias != null)
                     {
                         server.Alias = deserialized.Alias;
+                    }
+                    server.EnableOAuth3Lo = deserialized.EnableOAuth3Lo;
+                    if (deserialized.OAuthClientId != null)
+                    {
+                        server.OAuthClientId = deserialized.OAuthClientId;
+                    }
+                    if (!string.IsNullOrWhiteSpace(deserialized.OAuthClientSecret) && deserialized.OAuthClientSecret != "******")
+                    {
+                        server.OAuthClientSecret = deserialized.OAuthClientSecret;
+                    }
+                    if (deserialized.OAuthAuthorizationUrl != null)
+                    {
+                        server.OAuthAuthorizationUrl = deserialized.OAuthAuthorizationUrl;
+                    }
+                    if (deserialized.OAuthTokenUrl != null)
+                    {
+                        server.OAuthTokenUrl = deserialized.OAuthTokenUrl;
+                    }
+                    if (deserialized.OAuthScopes != null)
+                    {
+                        server.OAuthScopes = deserialized.OAuthScopes;
+                    }
+                    if (deserialized.OAuthRedirectUri != null)
+                    {
+                        server.OAuthRedirectUri = deserialized.OAuthRedirectUri;
                     }
                 }
             }
@@ -1765,6 +1839,41 @@ namespace ModelContextGateway.Core.Routing
             if (args.TryGetProperty("categories", out var catProp) && catProp.ValueKind == JsonValueKind.Array)
             {
                 server.Categories = catProp.EnumerateArray().Select(c => c.GetString()).Where(c => !string.IsNullOrWhiteSpace(c)).Select(c => c!).ToList();
+            }
+
+            if (args.TryGetProperty("enableOAuth3Lo", out var ueoProp) || args.TryGetProperty("enableOauth3Lo", out ueoProp))
+            {
+                server.EnableOAuth3Lo = ueoProp.GetBoolean();
+            }
+
+            if (args.TryGetProperty("oAuthClientId", out var ucidProp) || args.TryGetProperty("oauthClientId", out ucidProp))
+            {
+                server.OAuthClientId = ucidProp.GetString();
+            }
+
+            if ((args.TryGetProperty("oAuthClientSecret", out var ucsProp) || args.TryGetProperty("oauthClientSecret", out ucsProp)) && !string.IsNullOrWhiteSpace(ucsProp.GetString()) && ucsProp.GetString() != "******")
+            {
+                server.OAuthClientSecret = ucsProp.GetString();
+            }
+
+            if (args.TryGetProperty("oAuthAuthorizationUrl", out var uauProp) || args.TryGetProperty("oauthAuthorizationUrl", out uauProp))
+            {
+                server.OAuthAuthorizationUrl = uauProp.GetString();
+            }
+
+            if (args.TryGetProperty("oAuthTokenUrl", out var utuProp) || args.TryGetProperty("oauthTokenUrl", out utuProp))
+            {
+                server.OAuthTokenUrl = utuProp.GetString();
+            }
+
+            if (args.TryGetProperty("oAuthScopes", out var uoscProp) || args.TryGetProperty("oauthScopes", out uoscProp))
+            {
+                server.OAuthScopes = uoscProp.GetString();
+            }
+
+            if (args.TryGetProperty("oAuthRedirectUri", out var ururiProp) || args.TryGetProperty("oauthRedirectUri", out ururiProp))
+            {
+                server.OAuthRedirectUri = ururiProp.GetString();
             }
         }
 
@@ -1851,7 +1960,14 @@ namespace ModelContextGateway.Core.Routing
                             authShape = new { type = "string", description = "Authentication shape (bearer, customHeader, etc.)" },
                             customHeaderName = new { type = "string", description = "Custom header name for authentication" },
                             apiKey = new { type = "string", description = "API key" },
-                            headersJson = new { type = "string", description = "Custom headers in JSON format" }
+                            headersJson = new { type = "string", description = "Custom headers in JSON format" },
+                            enableOAuth3Lo = new { type = "boolean", description = "Enable 3LO (Three-Legged OAuth) user token delegation" },
+                            oAuthClientId = new { type = "string", description = "OAuth 2.0 Client ID for 3LO authorization" },
+                            oAuthClientSecret = new { type = "string", description = "OAuth 2.0 Client Secret for 3LO token exchange" },
+                            oAuthAuthorizationUrl = new { type = "string", description = "OAuth 2.0 authorization endpoint URL" },
+                            oAuthTokenUrl = new { type = "string", description = "OAuth 2.0 token endpoint URL" },
+                            oAuthScopes = new { type = "string", description = "OAuth 2.0 requested scopes (space-delimited)" },
+                            oAuthRedirectUri = new { type = "string", description = "OAuth 2.0 redirect URI registered with provider" }
                         },
                         required = new[] { "action" }
                     }

@@ -52,7 +52,8 @@ namespace ModelContextGateway.Infrastructure.Transports
             {
                 rawCandidate = await _userSecretStore.GetSecretAsync(_forwardedUser, _server.Id);
             }
-            else
+
+            if (string.IsNullOrEmpty(rawCandidate))
             {
                 var provider = _server.SecretProvider ?? "None";
                 if (provider.Equals("None", StringComparison.OrdinalIgnoreCase))

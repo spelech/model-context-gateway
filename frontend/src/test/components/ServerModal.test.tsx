@@ -243,5 +243,59 @@ describe('ServerModal component', () => {
     expect(screen.getByTestId('server-secret-key-input')).toBeInTheDocument();
     expect(screen.getByTestId('server-cancel-btn')).toBeInTheDocument();
     expect(screen.getByTestId('server-save-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('server-enable-oauth-3lo')).toBeInTheDocument();
+  });
+
+  /**
+   * @requirement UI-135
+   * @category UI
+   * @type Positive
+   * @description toggles 3LO OAuth fields and submits with complete OAuth configuration
+   */
+  it('toggles 3LO OAuth fields and submits with complete OAuth configuration', async () => {
+    const saveSpy = vi.fn().mockResolvedValue(undefined);
+    useServerStore.setState({ isAddEditOpen: true, editingServer: null, saveServer: saveSpy });
+    render(<ServerModal />);
+
+    fireEvent.change(screen.getByLabelText('Display Name'), { target: { value: 'Slack Direct MCP' } });
+    fireEvent.change(screen.getByLabelText('Connection URL'), { target: { value: 'https://mcp.slack.com/mcp' } });
+
+    // Enable OAuth 3LO
+    const oauthCheckbox = screen.getByTestId('server-enable-oauth-3lo');
+    fireEvent.click(oauthCheckbox);
+
+    // Verify fields appear
+    expect(screen.getByTestId('server-oauth-client-id-input')).toBeInTheDocument();
+    expect(screen.getByTestId('server-oauth-client-secret-input')).toBeInTheDocument();
+    expect(screen.getByTestId('server-oauth-auth-url-input')).toBeInTheDocument();
+    expect(screen.getByTestId('server-oauth-token-url-input')).toBeInTheDocument();
+    expect(screen.getByTestId('server-oauth-scopes-input')).toBeInTheDocument();
+    expect(screen.getByTestId('server-oauth-redirect-uri-input')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('server-oauth-client-id-input'), { target: { value: '11145550917233.12161096706727' } });
+    fireEvent.change(screen.getByTestId('server-oauth-client-secret-input'), { target: { value: 'fb33667b3d07d846092e9028fcb8047e' } });
+    fireEvent.change(screen.getByTestId('server-oauth-auth-url-input'), { target: { value: 'https://slack.com/oauth/v2_user/authorize' } });
+    fireEvent.change(screen.getByTestId('server-oauth-token-url-input'), { target: { value: 'https://slack.com/api/oauth.v2.user.access' } });
+    fireEvent.change(screen.getByTestId('server-oauth-scopes-input'), { target: { value: 'channels:read chat:write' } });
+    fireEvent.change(screen.getByTestId('server-oauth-redirect-uri-input'), { target: { value: 'https://mcp.wileyriley.com/api/oauth/egress/callback' } });
+
+    const submitBtn = screen.getByRole('button', { name: /save server/i });
+    await act(async () => {
+      fireEvent.click(submitBtn);
+    });
+
+    expect(saveSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        displayName: 'Slack Direct MCP',
+        url: 'https://mcp.slack.com/mcp',
+        enableOAuth3Lo: true,
+        oauthClientId: '11145550917233.12161096706727',
+        oauthClientSecret: 'fb33667b3d07d846092e9028fcb8047e',
+        oauthAuthorizationUrl: 'https://slack.com/oauth/v2_user/authorize',
+        oauthTokenUrl: 'https://slack.com/api/oauth.v2.user.access',
+        oauthScopes: 'channels:read chat:write',
+        oauthRedirectUri: 'https://mcp.wileyriley.com/api/oauth/egress/callback',
+      })
+    );
   });
 });
