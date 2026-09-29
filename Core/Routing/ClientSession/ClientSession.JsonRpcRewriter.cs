@@ -44,33 +44,47 @@ namespace ModelContextGateway.Core.Routing
 
         private static void RewriteObject(System.Text.Json.Nodes.JsonObject obj, string paramKey, string newValue)
         {
-            if (obj.TryGetPropertyValue("params", out var paramsNode) && paramsNode is System.Text.Json.Nodes.JsonObject paramsObj)
+            System.Text.Json.Nodes.JsonObject? paramsObj = null;
+            if (obj.TryGetPropertyValue("params", out var paramsNode) && paramsNode is System.Text.Json.Nodes.JsonObject foundParams)
             {
-                paramsObj[paramKey] = newValue;
+                foundParams[paramKey] = newValue;
+                paramsObj = foundParams;
+            }
+
+            // In JSON-RPC 2.0 / MCP spec, root request objects must only have jsonrpc, id, method, params.
+            // Any _meta property belongs inside params._meta.
+            if (obj.TryGetPropertyValue("_meta", out var rootMeta))
+            {
+                obj.Remove("_meta");
             }
 
             var currentActivity = System.Diagnostics.Activity.Current;
-            if (currentActivity != null && !string.IsNullOrEmpty(currentActivity.Id))
+            if (paramsObj != null)
             {
-                if (!obj.TryGetPropertyValue("_meta", out var metaNode) || metaNode is not System.Text.Json.Nodes.JsonObject)
+                if (!paramsObj.TryGetPropertyValue("_meta", out var metaNode) || metaNode is not System.Text.Json.Nodes.JsonObject)
                 {
-                    var metaObj = new System.Text.Json.Nodes.JsonObject();
-                    metaObj["traceparent"] = currentActivity.Id;
-                    if (!string.IsNullOrEmpty(currentActivity.TraceStateString))
+                    if (rootMeta is System.Text.Json.Nodes.JsonObject rootMetaObj)
                     {
-                        metaObj["tracestate"] = currentActivity.TraceStateString;
+                        paramsObj["_meta"] = rootMetaObj;
+                        metaNode = rootMetaObj;
                     }
-                    obj["_meta"] = metaObj;
+                    else if (currentActivity != null && !string.IsNullOrEmpty(currentActivity.Id))
+                    {
+                        var metaObj = new System.Text.Json.Nodes.JsonObject();
+                        paramsObj["_meta"] = metaObj;
+                        metaNode = metaObj;
+                    }
                 }
-                else if (metaNode is System.Text.Json.Nodes.JsonObject existingMeta)
+
+                if (currentActivity != null && !string.IsNullOrEmpty(currentActivity.Id) && metaNode is System.Text.Json.Nodes.JsonObject targetMeta)
                 {
-                    if (existingMeta["traceparent"] == null)
+                    if (targetMeta["traceparent"] == null)
                     {
-                        existingMeta["traceparent"] = currentActivity.Id;
+                        targetMeta["traceparent"] = currentActivity.Id;
                     }
-                    if (existingMeta["tracestate"] == null && !string.IsNullOrEmpty(currentActivity.TraceStateString))
+                    if (targetMeta["tracestate"] == null && !string.IsNullOrEmpty(currentActivity.TraceStateString))
                     {
-                        existingMeta["tracestate"] = currentActivity.TraceStateString;
+                        targetMeta["tracestate"] = currentActivity.TraceStateString;
                     }
                 }
             }
