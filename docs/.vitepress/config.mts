@@ -49,6 +49,9 @@ export default withMermaid(
             { text: 'Database & Envelope Encryption', link: '/architecture/database-and-encryption' },
             { text: 'Authentication Architecture', link: '/authentication-architecture' },
             { text: 'Active Directory & Multi-Level RBAC', link: '/active-directory-and-rbac-guide' },
+            { text: 'Active Directory & LDAPS Domain Setup', link: '/architecture/security/active-directory-ldap' },
+            { text: 'Multi-Level RBAC & Access Policies', link: '/architecture/security/rbac-and-policies' },
+            { text: 'Windows Integrated Auth & IIS', link: '/architecture/security/windows-integrated-auth' },
             { text: 'OIDC & SSO Reverse Proxy', link: '/oidc-and-sso-guide' },
             { text: 'Downstream Auth & Delegation', link: '/downstream-auth-and-delegation-guide' },
             { text: 'Per-User OAuth Delegation', link: '/auth-flows/per-user-oauth-flow' },
@@ -67,7 +70,10 @@ export default withMermaid(
             { text: 'Admin MCP Automation', link: '/admin-mcp-automation-guide' },
             { text: 'Admin MCP Tools Reference', link: '/admin-mcp-features' },
             { text: 'Operations Runbook', link: '/runbook' },
-            { text: 'Troubleshooting & RCA', link: '/mcp-routing-and-admin-issues' }
+            { text: 'Troubleshooting & RCA Hub', link: '/mcp-routing-and-admin-issues' },
+            { text: 'Subprocess & STDIO Runbook', link: '/operations/troubleshooting/subprocess-and-stdio' },
+            { text: 'Auth & Token Failures Runbook', link: '/operations/troubleshooting/auth-and-token-failures' },
+            { text: 'Database Locks & Migrations Runbook', link: '/operations/troubleshooting/database-locks-and-migrations' }
           ]
         },
         {
@@ -153,7 +159,16 @@ export default withMermaid(
             { text: 'Admin MCP Automation Guide', link: '/admin-mcp-automation-guide' },
             { text: 'Admin MCP Tools Reference', link: '/admin-mcp-features' },
             { text: 'Operations Runbook', link: '/runbook' },
-            { text: 'Troubleshooting & RCA', link: '/mcp-routing-and-admin-issues' }
+            { text: 'Troubleshooting & RCA Overview', link: '/mcp-routing-and-admin-issues' },
+            {
+              text: 'Troubleshooting Runbooks',
+              collapsed: true,
+              items: [
+                { text: 'Subprocess & STDIO Transports', link: '/operations/troubleshooting/subprocess-and-stdio' },
+                { text: 'Auth & Token Failures', link: '/operations/troubleshooting/auth-and-token-failures' },
+                { text: 'Database Locks & Migrations', link: '/operations/troubleshooting/database-locks-and-migrations' }
+              ]
+            }
           ]
         },
         {
@@ -162,6 +177,15 @@ export default withMermaid(
           items: [
             { text: 'Authentication Architecture', link: '/authentication-architecture' },
             { text: 'Active Directory & Multi-Level RBAC', link: '/active-directory-and-rbac-guide' },
+            {
+              text: 'Active Directory & Security Deep Dives',
+              collapsed: true,
+              items: [
+                { text: 'Active Directory & LDAPS Setup', link: '/architecture/security/active-directory-ldap' },
+                { text: 'Multi-Level RBAC & Policies', link: '/architecture/security/rbac-and-policies' },
+                { text: 'Windows Integrated Auth & IIS', link: '/architecture/security/windows-integrated-auth' }
+              ]
+            },
             { text: 'OIDC & SSO Reverse Proxy', link: '/oidc-and-sso-guide' },
             { text: 'Downstream Auth & Delegation', link: '/downstream-auth-and-delegation-guide' },
             { text: 'MCP Server Auth Cookbook', link: '/mcp-server-auth-cookbook' },

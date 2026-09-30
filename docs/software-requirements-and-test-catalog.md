@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **448 Requirements Verified** across **1017 Test Proofs** (358 Functional Capabilities, 90 Safety Guardrails).
+> **Catalog Statistics:** **450 Requirements Verified** across **1019 Test Proofs** (360 Functional Capabilities, 90 Safety Guardrails).
 
 ---
 
@@ -10,15 +10,15 @@
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
 | **`API`** | API | **2** | 2 | 0 | 2 proofs |
-| **`AUTH`** | Authentication, RBAC & Identity | **97** | 93 | 4 | 228 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **97** | 92 | 5 | 229 proofs |
 | **`CORE`** | CORE | **8** | 7 | 1 | 14 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **65** | 3 | 62 | 137 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **116** | 110 | 6 | 238 proofs |
-| **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **117** | 111 | 6 | 239 proofs |
+| **`SEC`** | Secrets Providers & Encryption | **66** | 58 | 8 | 139 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **32** | 29 | 3 | 179 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **32** | 29 | 3 | 178 proofs |
 
 ---
 
@@ -48,11 +48,23 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/UserCredentialsControllerTests.cs#L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UserCredentialsControllerTests.cs#L11) (`GetUserCredentials_ReturnsServerIds`)
 
-### `[AUTH-02]` AppKey scopes restrict access precisely across all MCP capabilities and backend targets
+### `[AUTH-02]` Allows token pass-through in query parameters for SSE stream initialization.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (49):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L49`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L49) (`Pipeline_QueryToken_MiddlewareBypass`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L320`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L320) (`Pipeline_AppKey_Create_And_Revoke`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L403`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L403) (`Pipeline_GET_AppKeys_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L412`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L412) (`Pipeline_GET_AppKeysLimits_Returns200`)
   - [Backend xUnit] [`ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L242`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L242) (`Pairwise_AppKeyScopes_RestrictsAccessPrecisely`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AuditSidAttributionTests.cs#L34`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditSidAttributionTests.cs#L34) (`AppKeyAuthenticationHandler_Emits_Sid_Claim_When_OwnerSid_Present`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AuditSidAttributionTests.cs#L69`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditSidAttributionTests.cs#L69) (`AppKeyIdentityProvider_ResolvesOwnerAndSid_FromHttpContextItems`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AuditSidAttributionTests.cs#L87`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditSidAttributionTests.cs#L87) (`AppKeyIdentityProvider_ReturnsAnonymous_WhenNoAppKey`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L252`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L252) (`AppKeyScopes_RestrictTargetAccessPrecisely`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L86`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L86) (`AppKeys_PrefixLookup_WorksCorrectly`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L122`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L122) (`AppKeys_KeyExpiration_CheckedCorrectly`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L151`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L151) (`AppKeys_Limits_CheckWorks`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L189`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L189) (`AppKeys_Sha256Hashing_VerificationWorks`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L278`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L278) (`CreateAppKey_CreatesNewKey_Successfully_WithDifferentScopeSlugs`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L391`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L391) (`GetAppKeysLimits_ReturnsLimitsAndCounts`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L197`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L197) (`AppKeysController_CreateAppKey_ValidCategory_Succeeds`)
@@ -64,20 +76,15 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L488`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L488) (`ClientSession_DynamicServerMembership_UpdatesAccessDynamically`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L524`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L524) (`ClientSession_MixedScopes_CombinesCategoryAndSpecificToolScopes`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L551`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L551) (`ClientSession_Complete_FiltersServerNamesByCategoryScope`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AuditSidAttributionTests.cs#L34`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditSidAttributionTests.cs#L34) (`AppKeyAuthenticationHandler_Emits_Sid_Claim_When_OwnerSid_Present`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AuditSidAttributionTests.cs#L69`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditSidAttributionTests.cs#L69) (`AppKeyIdentityProvider_ResolvesOwnerAndSid_FromHttpContextItems`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AuditSidAttributionTests.cs#L87`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditSidAttributionTests.cs#L87) (`AppKeyIdentityProvider_ReturnsAnonymous_WhenNoAppKey`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L86`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L86) (`AppKeys_PrefixLookup_WorksCorrectly`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L122`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L122) (`AppKeys_KeyExpiration_CheckedCorrectly`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L151`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L151) (`AppKeys_Limits_CheckWorks`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L189`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L189) (`AppKeys_Sha256Hashing_VerificationWorks`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L338`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L338) (`ServiceCollection_Resolves_VaultUserSecretStore_WhenConfigured`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L388`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L388) (`ExternalJwtAuthenticationHandler_Authenticates_Valid_Bearer_Jwt`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L49`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L49) (`Pipeline_QueryToken_MiddlewareBypass`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L320`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L320) (`Pipeline_AppKey_Create_And_Revoke`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L403`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L403) (`Pipeline_GET_AppKeys_Returns200`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L412`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L412) (`Pipeline_GET_AppKeysLimits_Returns200`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L252`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L252) (`AppKeyScopes_RestrictTargetAccessPrecisely`)
+  - [Frontend Vitest] [`frontend/src/test/components/ClientSetupGuide.test.tsx#L51`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L51) (`switches between format tabs (Standard, VS Code, Generic SSE)`)
+  - [Frontend Vitest] [`frontend/src/test/components/ClientSetupGuide.test.tsx#L78`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L78) (`switches server scope from all servers to individual server`)
+  - [Frontend Vitest] [`frontend/src/test/components/ClientSetupGuide.test.tsx#L97`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L97) (`updates domain when LAN or custom is chosen`)
+  - [Frontend Vitest] [`frontend/src/test/components/ClientSetupGuide.test.tsx#L122`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L122) (`toggles meta mode when server scope is all`)
+  - [Frontend Vitest] [`frontend/src/test/components/ClientSetupGuide.test.tsx#L143`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L143) (`populates app keys dropdown and injects selected key`)
+  - [Frontend Vitest] [`frontend/src/test/components/ClientSetupGuide.test.tsx#L166`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L166) (`copies configuration to clipboard and triggers success toast`)
+  - [Frontend Vitest] [`frontend/src/test/components/ClientModal.test.tsx#L15`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientModal.test.tsx#L15) (`renders nothing when isAddClientOpen is false`)
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L22`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L22) (`initializes with default state`)
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L57`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L57) (`handles fetch error gracefully without crashing`)
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L123`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L123) (`handles register error with toast and propagates error`)
@@ -93,57 +100,43 @@
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L616`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L616) (`handles setUserQuota error with toast and throws`)
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L687`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L687) (`handles deleteUserQuota failure with error toast`)
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L705`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L705) (`opens and closes create modal and clears result`)
-  - [Frontend Vitest] [`frontend/src/test/components/ClientSetupGuide.test.tsx#L51`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L51) (`switches between format tabs (Standard, VS Code, Generic SSE)`)
-  - [Frontend Vitest] [`frontend/src/test/components/ClientSetupGuide.test.tsx#L78`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L78) (`switches server scope from all servers to individual server`)
-  - [Frontend Vitest] [`frontend/src/test/components/ClientSetupGuide.test.tsx#L97`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L97) (`updates domain when LAN or custom is chosen`)
-  - [Frontend Vitest] [`frontend/src/test/components/ClientSetupGuide.test.tsx#L122`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L122) (`toggles meta mode when server scope is all`)
-  - [Frontend Vitest] [`frontend/src/test/components/ClientSetupGuide.test.tsx#L143`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L143) (`populates app keys dropdown and injects selected key`)
-  - [Frontend Vitest] [`frontend/src/test/components/ClientSetupGuide.test.tsx#L166`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L166) (`copies configuration to clipboard and triggers success toast`)
-  - [Frontend Vitest] [`frontend/src/test/components/ClientModal.test.tsx#L15`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientModal.test.tsx#L15) (`renders nothing when isAddClientOpen is false`)
   - [Playwright E2E] [`frontend/e2e/multi-user-matrix.spec.ts#L70`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/multi-user-matrix.spec.ts#L70) (`AppKey Direct Context: connects with API key header identity`)
 
-### `[AUTH-03]` Auth middleware allows bypass routes and extracts SSO headers in a case-insensitive manner.
+### `[AUTH-03]` GET /api/permissions/mappings returns group mappings with 200 OK.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (25):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L603`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L603) (`AuthMiddleware_CaseInsensitivity_BypassAndHeader_Check`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L319`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L319) (`Pairwise_SsoIdentityAndGroupMappings_EvaluateCorrectly`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L330`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L330) (`HeaderIdentityProvider_DynamicallyLoadsAndAppliesDbConfig`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L53`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L53) (`GetAllProviders_ReturnsOkWithSecretAndAuthProviders`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L161`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L161) (`GetAuthProviders_ReturnsOkWithList`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L185`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L185) (`SaveAuthProvider_SavesSuccessfully`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L10`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L10) (`OidcIdentityProvider_Parses_Remote_User_And_Groups_Headers`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L31`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L31) (`CompositeIdentityProvider_Falls_Back_To_Oidc_When_AD_Not_Authenticated`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L74`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L74) (`HeaderAuth_AllowsHeaders_ForTrustedProxy`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L97`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L97) (`OidcIdentityProvider_DoesNotMapAdminSid_ForAdminGroups`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AuditSidAttributionTests.cs#L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditSidAttributionTests.cs#L11) (`HeaderIdentityProvider_Extracts_RemoteUserSid_And_Populates_Sid`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L9`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L9) (`ProviderName_ReturnsComposite`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L17`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L17) (`ResolveIdentityAsync_ReturnsFirstNonAnonymousUser`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L38`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L38) (`ResolveIdentityAsync_FallsBackToAnonymous_WhenNoUserResolved`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L55`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L55) (`ResolveIdentityAsync_FallsBackToOidcProvider_WhenAnonymous`)
   - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L367`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L367) (`Pipeline_GET_Permissions_Mappings_Returns200`)
   - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L385`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L385) (`Pipeline_GET_Providers_Auth_Returns200`)
   - [Backend xUnit] [`ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L93`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L93) (`GroupMapping_AllowsUser_WhenMappingResolvesToAllowedInternalGroup`)
   - [Backend xUnit] [`ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L111`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L111) (`GroupMapping_AllowsUser_WhenOidcGroupMapsToAllowedInternalGroup`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L629`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L629) (`AuthMiddleware_Allows_SSO_Session_With_RemoteUser_Header`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L319`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L319) (`Pairwise_SsoIdentityAndGroupMappings_EvaluateCorrectly`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L10`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L10) (`OidcIdentityProvider_Parses_Remote_User_And_Groups_Headers`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L31`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L31) (`CompositeIdentityProvider_Falls_Back_To_Oidc_When_AD_Not_Authenticated`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L74`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L74) (`HeaderAuth_AllowsHeaders_ForTrustedProxy`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L97`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L97) (`OidcIdentityProvider_DoesNotMapAdminSid_ForAdminGroups`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L621`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L621) (`AuthMiddleware_CaseInsensitivity_BypassAndHeader_Check`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L53`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L53) (`GetAllProviders_ReturnsOkWithSecretAndAuthProviders`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L161`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L161) (`GetAuthProviders_ReturnsOkWithList`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L185`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L185) (`SaveAuthProvider_SavesSuccessfully`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AuditSidAttributionTests.cs#L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditSidAttributionTests.cs#L11) (`HeaderIdentityProvider_Extracts_RemoteUserSid_And_Populates_Sid`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L330`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L330) (`HeaderIdentityProvider_DynamicallyLoadsAndAppliesDbConfig`)
   - [Backend xUnit] [`ModelContextGateway.Tests/PermissionsControllerTests.cs#L207`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PermissionsControllerTests.cs#L207) (`DeleteMapping_DeletesSuccessfully`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L9`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L9) (`ProviderName_ReturnsComposite`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L17`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L17) (`ResolveIdentityAsync_ReturnsFirstNonAnonymousUser`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L38`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L38) (`ResolveIdentityAsync_FallsBackToAnonymous_WhenNoUserResolved`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L55`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L55) (`ResolveIdentityAsync_FallsBackToOidcProvider_WhenAnonymous`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L629`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L629) (`AuthMiddleware_Allows_SSO_Session_With_RemoteUser_Header`)
   - [Frontend Vitest] [`frontend/src/test/stores/useProviderStore.test.ts#L60`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useProviderStore.test.ts#L60) (`handles provider fetch warnings gracefully when endpoints are unavailable`)
   - [Frontend Vitest] [`frontend/src/test/stores/useProviderStore.test.ts#L80`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useProviderStore.test.ts#L80) (`saves auth provider config and refreshes providers`)
   - [Frontend Vitest] [`frontend/src/test/stores/useProviderStore.test.ts#L109`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useProviderStore.test.ts#L109) (`handles auth provider save error and displays toast`)
   - [Playwright E2E] [`frontend/e2e/multi-user-matrix.spec.ts#L36`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/multi-user-matrix.spec.ts#L36) (`Operator Context: allows overview and testbench navigation with operator identity`)
 
-### `[AUTH-04]` ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP
+### `[AUTH-04]` ProvidersController validates LDAP test connections and handles connection errors gracefully.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (16):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs#L12`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs#L12) (`ResolveIdentityAsync_ExtractsWindowsIdentitySids_ViaAccessor`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs#L50`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs#L50) (`ResolveIdentityAsync_AugmentsWithLdapSids_WhenLdapServiceProvided`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L365`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L365) (`LdapActiveDirectoryService_RespectsDisabledStatusInDatabase`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L11) (`ResolveUserSidsAsync_ReturnsEmpty_WhenLdapProviderDisabledInDb`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L59`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L59) (`ResolveUserSidsAsync_UsesCache_WhenCachedSidsExist`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L298`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L298) (`TestLdapConnection_ValidatesInputAndHandlesFailureGracefully`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L55`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L55) (`ActiveDirectoryIdentityProvider_Resolves_Steve_Identity_And_Sids`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L89`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L89) (`ActiveDirectoryIdentityProvider_Augments_Steve_With_LdapGroupSids`)
   - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L23`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L23) (`ConvertSidBytesToString_FormatsValidBinarySid`)
   - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L34`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L34) (`ConvertSidBytesToString_ReturnsEmpty_OnInvalidBytes`)
   - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L42`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L42) (`ResolveUserSidsAsync_ReturnsEmpty_WhenUsernameEmpty`)
@@ -151,6 +144,13 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L79`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L79) (`ActiveDirectoryIdentityProvider_ReturnsAnonymous_WhenUntrustedProxy`)
   - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L96`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L96) (`ActiveDirectoryIdentityProvider_ReturnsAnonymous_WhenNotWindowsAuth`)
   - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L112`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L112) (`ActiveDirectoryIdentityProvider_ResolvesLdapSids_WhenLdapServiceProvided`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L365`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L365) (`LdapActiveDirectoryService_RespectsDisabledStatusInDatabase`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L11) (`ResolveUserSidsAsync_ReturnsEmpty_WhenLdapProviderDisabledInDb`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L59`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L59) (`ResolveUserSidsAsync_UsesCache_WhenCachedSidsExist`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs#L12`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs#L12) (`ResolveIdentityAsync_ExtractsWindowsIdentitySids_ViaAccessor`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs#L50`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs#L50) (`ResolveIdentityAsync_AugmentsWithLdapSids_WhenLdapServiceProvided`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L55`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L55) (`ActiveDirectoryIdentityProvider_Resolves_Steve_Identity_And_Sids`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L89`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L89) (`ActiveDirectoryIdentityProvider_Augments_Steve_With_LdapGroupSids`)
   - [Playwright E2E] [`frontend/e2e/ldap-identity-and-auth-flow.spec.ts#L10`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/ldap-identity-and-auth-flow.spec.ts#L10) (`should configure LDAP identity provider, test connection, and save settings`)
 
 ### `[AUTH-05]` McpServer supports AllowPassThroughAuth flag
@@ -172,28 +172,14 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/IdentityHeaderTests.cs#L9`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityHeaderTests.cs#L9) (`HttpTransport_InjectsXForwardedUserHeader`)
 
-### `[AUTH-110]` CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0.
+### `[AUTH-110]` GetClients returns list of OAuthClient records without secret hashes
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (4):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L343`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L343) (`CreateAppKey_AllowsUnlimited_WhenLimitsAreZero`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L135`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L135) (`ApplyConfigurationResponseContext_SetsRegistrationEndpoint`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L51`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L51) (`GetClients_ReturnsOk_WithClientsAndMappedProperties`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L238`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L238) (`GetClients_NeverLeaksRawBearerSecretOrHash`)
-
-### `[AUTH-118]` FindDcrClientAsync resolves existing DCR client matching client name and type.
-* **Category:** `AUTH` (Authentication, RBAC & Identity)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (2):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214) (`FindDcrClient_ReturnsMatchingClient`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L556`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L556) (`RegisterClient_DuplicateDcrRequest_ReusesExistingClientIdAndUpdatesRecord`)
-
-### `[AUTH-119]` CleanupDcrClientsAsync prunes duplicate and expired dynamic client registrations across all database providers.
-* **Category:** `AUTH` (Authentication, RBAC & Identity)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (2):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237) (`CleanupDcrClients_PrunesDuplicateRegistrations_AndExpiredClients`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L333`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L333) (`CleanupClients_CallsRepoAndReturnsCleanedCount`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L343`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L343) (`CreateAppKey_AllowsUnlimited_WhenLimitsAreZero`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L135`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L135) (`ApplyConfigurationResponseContext_SetsRegistrationEndpoint`)
 
 ### `[AUTH-130]` Renders In-House IdP / External JWT Bearer card, toggles enable, fills authority, and saves configuration.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -425,10 +411,10 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (6):**
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L125`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L125) (`GetAppKeys_NonAdmin_ReturnsOnlyPersonalKeys_ForCurrentUser`)
-  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L351`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L351) (`loads app keys and updates store`)
-  - [Frontend Vitest] [`frontend/src/test/components/App.test.tsx#L81`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/App.test.tsx#L81) (`renders role-adaptive UI for non-admin user`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L34`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L34) (`renders role-adapted My App Keys view for non-admin user`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L79`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L79) (`renders keys list, copies config snippet, and revokes key`)
+  - [Frontend Vitest] [`frontend/src/test/components/App.test.tsx#L81`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/App.test.tsx#L81) (`renders role-adaptive UI for non-admin user`)
+  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L351`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L351) (`loads app keys and updates store`)
   - [Playwright E2E] [`frontend/e2e/personal-appkeys-and-quotas.spec.ts#L5`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L5) (`Non-Admin Context: displays My App Keys navigation and personal quota indicator`)
 
 ### `[AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE]` Custom user quotas override default limit
@@ -436,10 +422,10 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (6):**
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L223`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L223) (`CreateAppKey_CustomQuotaOverride_AllowsHigherLimit`)
-  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L594`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L594) (`sets user quota override and refreshes quota list`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L222`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L222) (`manages custom user quotas in admin quotas tab`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L6) (`renders GeneralTab with security default quota inputs and triggers save`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L71`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L71) (`updates form state when settings prop changes`)
-  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L222`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L222) (`manages custom user quotas in admin quotas tab`)
+  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L594`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L594) (`sets user quota override and refreshes quota list`)
   - [Playwright E2E] [`frontend/e2e/personal-appkeys-and-quotas.spec.ts#L134`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L134) (`Admin Context: configures custom user quota override`)
 
 ### `[AUTH-PIPELINE-ADMIN-DASHBOARD]` Dashboard management API suite executes for authorized administrators.
@@ -587,19 +573,19 @@
 * **Verification Proofs (1):**
   - [Frontend Vitest] [`frontend/src/test/stores/usePolicyStore.test.ts#L314`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/usePolicyStore.test.ts#L314) (`handles policy modal open and close`)
 
-### `[AUTH-SYSTEM-APPKEY-SEPARATION]` System keys are distinct and require admin permissions
+### `[AUTH-SYSTEM-APPKEY-SEPARATION]` Personal AppKey with 'all' scope does not grant Administrator role
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (10):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L151`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L151) (`SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L311`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L311) (`PersonalAppKey_WithAllScope_DoesNotGrantAdministratorRole`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L364`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L364) (`SystemAppKey_WithAdminScope_GrantsAdministratorRole`)
-  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L335`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L335) (`switches keyTypeTab between personal and system`)
-  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L369`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L369) (`fetches system-filtered app keys via query parameters`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L151`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L151) (`SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L166`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L166) (`handles admin tab switching and username filtering`)
   - [Frontend Vitest] [`frontend/src/test/components/App.test.tsx#L15`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/App.test.tsx#L15) (`renders header, navigation tabs, and default overview dashboard for admin user`)
   - [Frontend Vitest] [`frontend/src/test/components/App.test.tsx#L36`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/App.test.tsx#L36) (`switches between tabs on navigation click`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeyModal.test.tsx#L31`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyModal.test.tsx#L31) (`allows admin to select key type and create system app key`)
-  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L166`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L166) (`handles admin tab switching and username filtering`)
+  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L335`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L335) (`switches keyTypeTab between personal and system`)
+  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L369`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L369) (`fetches system-filtered app keys via query parameters`)
   - [Playwright E2E] [`frontend/e2e/personal-appkeys-and-quotas.spec.ts#L87`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L87) (`Admin Context: manages segmented App-Level Keys and User Personal Keys`)
 
 ### `[UI-100]` initializes with empty providers
@@ -613,6 +599,13 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Frontend Vitest] [`frontend/src/test/stores/useUserStore.test.ts#L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useUserStore.test.ts#L1) (`should initialize with default values`)
+
+### `[UI-109]` renders default standard mcpServers configuration with meta mode
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (2):**
+  - [Frontend Vitest] [`frontend/src/test/components/ClientSetupGuide.test.tsx#L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L1) (`renders default standard mcpServers configuration with meta mode`)
+  - [Frontend Vitest] [`frontend/src/test/pages/MyMcpServers.test.tsx#L104`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L104) (`renders client setup guide below credentials card`)
 
 ### `[UI-114]` renders nothing when isPolicyModalOpen is false
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -1028,10 +1021,20 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L190`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L190) (`ProbeServerAsync_Sets_Connected_For_Valid_Stdio_Server_Without_Http_Probe`)
 
-### `[MCP-01]` initializes with default state
+### `[MCP-01]` renders Add MCP Server form with default values when in add mode
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (29):**
+  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L41`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L41) (`renders Add MCP Server form with default values when in add mode`)
+  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L62`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L62) (`renders Edit MCP Server form populated with server details when editing`)
+  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L83`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L83) (`switches to connection command when STDIO transport type is selected`)
+  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L104`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L104) (`shows custom header input when auth shape is custom-header or query`)
+  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L127`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L127) (`closes modal when cancel button or close X is clicked`)
+  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L147`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L147) (`submits form with correctly formatted payload including trimmed categories`)
+  - [Frontend Vitest] [`frontend/src/test/components/ServerCard.test.tsx#L66`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerCard.test.tsx#L66) (`renders connecting/retrying state`)
+  - [Frontend Vitest] [`frontend/src/test/components/ServerCard.test.tsx#L83`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerCard.test.tsx#L83) (`renders failed state with retry button`)
+  - [Frontend Vitest] [`frontend/src/test/components/ServerCard.test.tsx#L106`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerCard.test.tsx#L106) (`renders disconnected state with connect button and hidden badge`)
+  - [Frontend Vitest] [`frontend/src/test/components/ServerCard.test.tsx#L129`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerCard.test.tsx#L129) (`renders disabled state`)
   - [Frontend Vitest] [`frontend/src/test/stores/useServerStore.test.ts#L24`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useServerStore.test.ts#L24) (`initializes with default state`)
   - [Frontend Vitest] [`frontend/src/test/stores/useServerStore.test.ts#L46`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useServerStore.test.ts#L46) (`successfully loads servers and updates state`)
   - [Frontend Vitest] [`frontend/src/test/stores/useServerStore.test.ts#L65`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useServerStore.test.ts#L65) (`triggers batch reconnect when refreshAll is true`)
@@ -1051,16 +1054,6 @@
   - [Frontend Vitest] [`frontend/src/test/stores/useServerStore.test.ts#L403`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useServerStore.test.ts#L403) (`opens inspect modal and loads server inspection data`)
   - [Frontend Vitest] [`frontend/src/test/stores/useServerStore.test.ts#L428`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useServerStore.test.ts#L428) (`handles inspect failure with error toast`)
   - [Frontend Vitest] [`frontend/src/test/stores/useServerStore.test.ts#L445`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useServerStore.test.ts#L445) (`sets inspect active tab and search query`)
-  - [Frontend Vitest] [`frontend/src/test/components/ServerCard.test.tsx#L66`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerCard.test.tsx#L66) (`renders connecting/retrying state`)
-  - [Frontend Vitest] [`frontend/src/test/components/ServerCard.test.tsx#L83`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerCard.test.tsx#L83) (`renders failed state with retry button`)
-  - [Frontend Vitest] [`frontend/src/test/components/ServerCard.test.tsx#L106`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerCard.test.tsx#L106) (`renders disconnected state with connect button and hidden badge`)
-  - [Frontend Vitest] [`frontend/src/test/components/ServerCard.test.tsx#L129`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerCard.test.tsx#L129) (`renders disabled state`)
-  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L41`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L41) (`renders Add MCP Server form with default values when in add mode`)
-  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L62`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L62) (`renders Edit MCP Server form populated with server details when editing`)
-  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L83`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L83) (`switches to connection command when STDIO transport type is selected`)
-  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L104`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L104) (`shows custom header input when auth shape is custom-header or query`)
-  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L127`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L127) (`closes modal when cancel button or close X is clicked`)
-  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L147`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L147) (`submits form with correctly formatted payload including trimmed categories`)
 
 ### `[MCP-02]` All MCP protocol capabilities enforce caller role authorizations consistently
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1074,10 +1067,12 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L59`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L59) (`InvalidateCache_ClearsPopulatedState`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L348`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L348) (`ToolListing_And_Remapping_Works_Correctly`)
 
-### `[MCP-05]` ResourceRoutingManager returns all registered resources when search query is empty.
+### `[MCP-05]` ResourceRoutingManager filters and matches MCP resources using semantic and keyword matching.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (10):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ResourceRoutingTests.cs#L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ResourceRoutingTests.cs#L5) (`SearchResourcesAsync_FiltersResourcesCorrectly`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L61`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L61) (`ValidateResourceUri_ValidatesUris`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L8) (`SearchResourcesAsync_ReturnsAll_WhenQueryIsEmpty`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L23`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L23) (`SearchResourcesAsync_FiltersByQuery_MatchingNameOrDescription`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L41`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L41) (`ReadResourceAsync_LocalBuiltInResources_ReturnCorrectJson`)
@@ -1085,8 +1080,6 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L411`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L411) (`ResourceRouting_And_UriTranslation_Works_Correctly`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L767`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L767) (`BuiltInResources_Templates_And_Autocompletion_Works_Correctly`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L977`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L977) (`CustomUserPrompts_And_Resources_Work_Correctly`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L61`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L61) (`ValidateResourceUri_ValidatesUris`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ResourceRoutingTests.cs#L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ResourceRoutingTests.cs#L5) (`SearchResourcesAsync_FiltersResourcesCorrectly`)
   - [Frontend Vitest] [`frontend/src/test/components/ResourceTesterCard.test.tsx#L47`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ResourceTesterCard.test.tsx#L47) (`handles custom URI input and submit`)
 
 ### `[MCP-06]` prompts/list aggregates, namespaces, and routes prompts to target backends.
@@ -1105,39 +1098,39 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L531`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L531) (`CompleteAsync_ForResourceTemplate_ForwardsToBackend_WhenAuthorized`)
   - [Backend xUnit] [`ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L589`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L589) (`CompleteAsync_LogsTemplate_ReturnsOnlyAuthorizedServers`)
 
-### `[MCP-10]` DockerAutoDiscoveryService handles missing Docker socket gracefully without throwing unhandled exceptions.
+### `[MCP-10]` DockerAutoDiscoveryService initializes with valid container service dependencies.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (5):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L83`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L83) (`DockerAutoDiscovery_ScanContainers_HandlesMissingSocketGracefully`)
   - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L46`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L46) (`Service_Initializes_With_Valid_Dependencies`)
   - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L80`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L80) (`ExecuteAsync_SkipsScan_WhenDockerSocketDoesNotExist`)
   - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L104`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L104) (`ParseDiscoveredServers_ParsesValidDockerContainerLabels`)
   - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L138`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L138) (`UpsertDiscoveredServers_AddsNewServers_AndDisablesStoppedServers`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L83`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L83) (`DockerAutoDiscovery_ScanContainers_HandlesMissingSocketGracefully`)
 
-### `[MCP-12]` DynamicEmbeddingService retrieves and persists embedding provider configurations in Settings table.
+### `[MCP-12]` ApiEmbeddingService parses OpenAI-compatible vector responses and extracts float embeddings.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (19):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/EmbeddingServiceTests.cs#L61`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EmbeddingServiceTests.cs#L61) (`ApiEmbeddingService_GetEmbeddingAsync_Returns_Vector_From_OpenAI_Response`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs#L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs#L5) (`CalculateCosineSimilarity_ComputesSimilarity`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs#L17`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs#L17) (`ReloadSettings_UpdatesSettings`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L106`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L106) (`SemanticSearchService_Fallback_With_DummyEmbeddings`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchServiceTests.cs#L42`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchServiceTests.cs#L42) (`SearchToolsSemanticAsync_ScoresAndRanksTools`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchServiceTests.cs#L61`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchServiceTests.cs#L61) (`SearchTools_KeywordMatching_WorksCorrectly`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchServiceTests.cs#L78`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchServiceTests.cs#L78) (`SearchToolsSemanticAsync_FallsBackToKeyword_WhenEmbeddingServiceThrows`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L93`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L93) (`CallToolAsync_SearchTools_ReturnsSemanticResults`)
   - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L62`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L62) (`DynamicEmbeddingService_Gets_And_Saves_Settings`)
   - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L108`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L108) (`ReloadSettings_UpdatesSettingsAndActiveService`)
   - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L125`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L125) (`DynamicEmbeddingService_GetEmbeddingAsync_Uses_ApiProvider_When_Configured`)
   - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L149`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L149) (`CosineSimilarity_Calculates_Correct_Vector_Distance`)
   - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L173`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L173) (`PreWarmAsync_Executes_Without_Throwing`)
   - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L199`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L199) (`GenerateEmbeddingAsync_Uses_UnderlyingProvider`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L668`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L668) (`SemanticToolSearchRanking_Sorts_By_Score`)
   - [Backend xUnit] [`ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs#L7`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs#L7) (`Service_InitializesAndSetsUpPaths`)
   - [Backend xUnit] [`ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs#L20`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs#L20) (`ReloadSettings_ClearsSessionAndTokenizerState`)
   - [Backend xUnit] [`ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs#L36`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs#L36) (`CosineSimilarity_CalculatesOrthogonalAndIdenticalVectors`)
   - [Backend xUnit] [`ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs#L54`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs#L54) (`GetEmbeddingAsync_ReturnsEmpty384Vector_ForEmptyString`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchServiceTests.cs#L42`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchServiceTests.cs#L42) (`SearchToolsSemanticAsync_ScoresAndRanksTools`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchServiceTests.cs#L61`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchServiceTests.cs#L61) (`SearchTools_KeywordMatching_WorksCorrectly`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchServiceTests.cs#L78`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchServiceTests.cs#L78) (`SearchToolsSemanticAsync_FallsBackToKeyword_WhenEmbeddingServiceThrows`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L106`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L106) (`SemanticSearchService_Fallback_With_DummyEmbeddings`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/EmbeddingServiceTests.cs#L61`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EmbeddingServiceTests.cs#L61) (`ApiEmbeddingService_GetEmbeddingAsync_Returns_Vector_From_OpenAI_Response`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L93`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L93) (`CallToolAsync_SearchTools_ReturnsSemanticResults`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L668`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L668) (`SemanticToolSearchRanking_Sorts_By_Score`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs#L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs#L5) (`CalculateCosineSimilarity_ComputesSimilarity`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs#L17`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ApiEmbeddingServiceTests.cs#L17) (`ReloadSettings_UpdatesSettings`)
 
 ### `[MCP-15]` All JSON-RPC results return a resultType discriminator (complete or input_required) per MCP 2026-07-28 spec.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1193,14 +1186,14 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L506`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L506) (`NormalizeTargetToolName_ReturnsAmbiguityError_WhenToolExistsAcrossMultipleServers`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L526`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L526) (`SearchTools_ReturnsValidJsonArray_WhenNoToolsMatch`)
 
-### `[MCP-27]` McpServer supports Alias property
+### `[MCP-27]` ToolRoutingManager exposes tools using {namespace}/{tool_name} format by default with [{namespace}] description prefix and dual-key routing.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (4):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/McpServerTests.cs#L15`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpServerTests.cs#L15) (`McpServer_Supports_Alias_Property`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/McpServerTests.cs#L30`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpServerTests.cs#L30) (`DatabaseInitializer_EnsureAliasColumn_AddsColumnSuccessfully`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L563`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L563) (`CacheTools_Exposes_Slash_Formatted_Name_With_Server_Alias`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L599`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L599) (`CacheTools_Exposes_Slash_Formatted_Name_With_Server_Id_When_Alias_Empty`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/McpServerTests.cs#L15`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpServerTests.cs#L15) (`McpServer_Supports_Alias_Property`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/McpServerTests.cs#L30`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpServerTests.cs#L30) (`DatabaseInitializer_EnsureAliasColumn_AddsColumnSuccessfully`)
 
 ### `[MCP-30]` IsUserAuthorizedAsync matches granular tool policies across /, :, and __ delimiters.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1210,15 +1203,15 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L300`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L300) (`IsUserAuthorizedAsync_ResolvesAliasesAndServerIds_ForServerPolicies`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L624`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L624) (`NormalizeTargetToolName_Resolves_Multiple_Delimiters_And_Aliases`)
 
-### `[MCP-33]` OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints.
+### `[MCP-33]` ToolRoutingManager fuses lexical and semantic vector candidate rankings using Reciprocal Rank Fusion (RRF, k=60).
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (5):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L26) (`GenerateEmbeddingAsync_SendsValidPayload_AndParsesResponse`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L75`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L75) (`GenerateEmbeddingsAsync_PreservesInputOrder_AcrossBatch`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39) (`SearchToolsAsync_CombinesKeywordAndVectorRanks_UsingRRF`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L92`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L92) (`SearchToolsAsync_ScoresLexicalSignals_AcrossNameDescriptionTagsAndParameters`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L141`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L141) (`SearchTools_SynchronousMethod_ReturnsRankedCandidates`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L26) (`GenerateEmbeddingAsync_SendsValidPayload_AndParsesResponse`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L75`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L75) (`GenerateEmbeddingsAsync_PreservesInputOrder_AcrossBatch`)
 
 ### `[MCP-35]` Test call and prompt endpoints resolve server and strip prefix across slash, dunder, and colon delimiters.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1547,7 +1540,7 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L572`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L572) (`JsonNode_Rewrite_HandlesAdversarialEdgeCases`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L590`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L590) (`JsonNode_Rewrite_HandlesAdversarialEdgeCases`)
 
 ### `[MCP-JSON-REWRITE-BATCH-COMMENTS-COMMAS]` RewriteRequestJson accurately parses JSON batches, comments, and trailing commas using System.Text.Json JsonNode.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1555,17 +1548,23 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L191`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L191) (`JsonNode_Rewrite_HandlesBatchCommentsAndCommas`)
 
+### `[MCP-JSON-REWRITE-META-IN-PARAMS]` RewriteRequestJson strips _meta from root and embeds it into params to comply with MCP JSON-RPC 2.0 Zod schema.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L216`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L216) (`JsonNode_Rewrite_EnsuresMetaInsideParamsAndNotAtRoot`)
+
 ### `[MCP-JSONRPC-CONVERTER-MINIMAL-VARIANTS]` JsonRpcMessageConverter deserializes edge-case minimal/null JSON-RPC variants without stack overflows.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L684`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L684) (`PlainJsonRpcMessages_DoNotCauseStackOverflow_PolymorphicVariants`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L702`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L702) (`PlainJsonRpcMessages_DoNotCauseStackOverflow_PolymorphicVariants`)
 
 ### `[MCP-JSONRPC-CONVERTER-PRIORITIZE-RESPONSE]` JsonRpcMessageConverter prioritizes result/error properties over method property in polymorphic response parsing.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L336`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L336) (`SendRequestAsync_Succeeds_When_Response_Has_Method_Property`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L354`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L354) (`SendRequestAsync_Succeeds_When_Response_Has_Method_Property`)
 
 ### `[MCP-JSONRPC-DESERIALIZE-PLAIN-NO-OVERFLOW]` Deserializing plain JsonRpcMessage does not cause recursive converter invocation or stack overflow.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1750,6 +1749,20 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L435`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L435) (`RegisterClient_DynamicScopes_AddedToPermissions`)
 
+### `[AUTH-118]` RegisterClient deduplicates and reuses existing dynamic client registrations for matching client name and type without accumulating redundant records.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (2):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L556`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L556) (`RegisterClient_DuplicateDcrRequest_ReusesExistingClientIdAndUpdatesRecord`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214) (`FindDcrClient_ReturnsMatchingClient`)
+
+### `[AUTH-119]` CleanupClients endpoint triggers DCR pruning and returns total cleaned client count.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (2):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L333`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L333) (`CleanupClients_CallsRepoAndReturnsCleanedCount`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237) (`CleanupDcrClients_PrunesDuplicateRegistrations_AndExpiredClients`)
+
 ### `[MCP-ADMIN-TEST-TOOL-CALL-SECRET-RESOLUTION]` AdminMcpServer test_tool_call resolves server secrets via injected ISecretRetriever.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
@@ -1762,16 +1775,22 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L856`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L856) (`TestToolCall_ResolvesUserCredentialsViaInjectedUserSecretStore`)
 
-### `[SEC-02]` VaultSecretRetriever dynamically loads, applies, and reloads Vault configurations from database repository.
+### `[SEC-02]` GET /api/providers/secrets returns secret providers with 200 OK.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (29):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L294) (`VaultSecretRetriever_DynamicallyLoadsAndAppliesDbConfig_WithReload`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L376`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L376) (`Pipeline_GET_Providers_Secret_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L482`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L482) (`ConnectAndInitializeBackendAsync_WithVaultServer_ResolvesRetrieverFromRootServices_WhenHttpContextIsNull`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L79`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L79) (`GetSecretProviders_ReturnsOkWithList`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L121`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L121) (`SaveSecretProvider_SavesSuccessfully`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L257`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L257) (`TestVaultConnection_ValidatesInputAndHandlesFailureGracefully`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L349`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L349) (`SaveSecretProvider_HttpUrl_AllowedForLocalhost`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L373`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L373) (`SaveSecretProvider_HttpUrl_AllowedForSimpleHost`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L37`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L37) (`GetSecretAsync_MintsTokenViaTokenExchange_AndCachesResponse`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L190`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L190) (`CompositeSecretRetriever_RoutesOboAndPocketIdAliases_ToTokenExchangeRetriever`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L294) (`VaultSecretRetriever_DynamicallyLoadsAndAppliesDbConfig_WithReload`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/StdioTransportTests.cs#L344`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L344) (`StdioTransport_ShouldPassSecretViaEnvironmentVariables_AndNotCommandLine`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/StdioTransportTests.cs#L429`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L429) (`StdioTransport_ShouldSanitizeAndMaskSecretsInLogs`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CompositeSecretRetrieverTests.cs#L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeSecretRetrieverTests.cs#L8) (`GetSecretForProviderAsync_ReturnsNull_WhenProviderIsNone`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CompositeSecretRetrieverTests.cs#L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeSecretRetrieverTests.cs#L26) (`GetSecretForProviderAsync_RoutesToTargetProvider_AndCachesValue`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CompositeSecretRetrieverTests.cs#L48`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeSecretRetrieverTests.cs#L48) (`GetSecretForProviderAsync_MatchesVaultAliasNames`)
@@ -1780,31 +1799,25 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/VaultSecretRetrieverTests.cs#L56`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/VaultSecretRetrieverTests.cs#L56) (`EnsureVaultClientAsync_CreatesClient_WhenValidConfig`)
   - [Backend xUnit] [`ModelContextGateway.Tests/VaultSecretRetrieverTests.cs#L78`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/VaultSecretRetrieverTests.cs#L78) (`GetSecretAsync_ReturnsCachedValue_WhenPresent`)
   - [Backend xUnit] [`ModelContextGateway.Tests/VaultSecretRetrieverTests.cs#L92`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/VaultSecretRetrieverTests.cs#L92) (`GetSecretAsync_ReturnsNull_WhenClientIsNull`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L482`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L482) (`ConnectAndInitializeBackendAsync_WithVaultServer_ResolvesRetrieverFromRootServices_WhenHttpContextIsNull`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/StdioTransportTests.cs#L344`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L344) (`StdioTransport_ShouldPassSecretViaEnvironmentVariables_AndNotCommandLine`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/StdioTransportTests.cs#L429`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L429) (`StdioTransport_ShouldSanitizeAndMaskSecretsInLogs`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L129`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L129) (`VaultUserSecretStore_SaveSecretAsync_WritesToVaultKv2`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L164`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L164) (`VaultUserSecretStore_DeleteSecretAsync_DeletesFromVaultKv2`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L187`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L187) (`VaultUserSecretStore_GetServerIdsAsync_ListsPathsFromVaultKv2`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L216`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L216) (`VaultUserSecretStore_Resolves_Enterprise_Path_Template_And_Discrete_KVs`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L376`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L376) (`Pipeline_GET_Providers_Secret_Returns200`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L37`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L37) (`GetSecretAsync_MintsTokenViaTokenExchange_AndCachesResponse`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L190`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L190) (`CompositeSecretRetriever_RoutesOboAndPocketIdAliases_ToTokenExchangeRetriever`)
   - [Frontend Vitest] [`frontend/src/test/stores/useProviderStore.test.ts#L41`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useProviderStore.test.ts#L41) (`successfully loads auth and secret providers`)
   - [Frontend Vitest] [`frontend/src/test/stores/useProviderStore.test.ts#L131`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useProviderStore.test.ts#L131) (`saves secret provider preserving Vault token and mount path`)
   - [Frontend Vitest] [`frontend/src/test/stores/useProviderStore.test.ts#L170`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useProviderStore.test.ts#L170) (`saves Windows Registry and Environment secret providers correctly`)
   - [Frontend Vitest] [`frontend/src/test/stores/useProviderStore.test.ts#L205`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useProviderStore.test.ts#L205) (`handles secret provider save error with toast and throws`)
   - [Playwright E2E] [`frontend/e2e/vault-approle-config-flow.spec.ts#L10`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/vault-approle-config-flow.spec.ts#L10) (`should configure Vault AppRole credentials and test connection in settings`)
 
-### `[SEC-03]` EnvironmentSecretRetriever retrieves configured environment variable value.
+### `[SEC-03]` Ensure TrustedProxyHelper supports CIDR ranges in XFF validation
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (5):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/SecretRetrieverTests.cs#L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecretRetrieverTests.cs#L5) (`EnvironmentSecretRetriever_ReturnsEnvVariable_WhenExists`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/SecretRetrieverTests.cs#L25`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecretRetrieverTests.cs#L25) (`EnvironmentSecretRetriever_ReturnsNull_WhenVariableDoesNotExist`)
   - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L370`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L370) (`TrustedProxyHelper_AllowsXForwardedFor_WhenChainIsFullyTrusted`)
   - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L431`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L431) (`TrustedProxyHelper_ConfiguredProxyTrusted_CIDR`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EnvironmentSecretRetrieverTests.cs#L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnvironmentSecretRetrieverTests.cs#L5) (`EnvironmentSecretRetriever_RetrievesSecret_FromEnvironmentVariables`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SecretRetrieverTests.cs#L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecretRetrieverTests.cs#L5) (`EnvironmentSecretRetriever_ReturnsEnvVariable_WhenExists`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SecretRetrieverTests.cs#L25`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecretRetrieverTests.cs#L25) (`EnvironmentSecretRetriever_ReturnsNull_WhenVariableDoesNotExist`)
 
 ### `[SEC-04]` WindowsRegistrySecretRetriever handles non-Windows platforms gracefully and returns null.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -1815,16 +1828,16 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/WindowsRegistrySecretRetrieverTests.cs#L27`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/WindowsRegistrySecretRetrieverTests.cs#L27) (`GetSecretAsync_DecryptsDpapiBytes_WhenRegistryValueIsByteArray`)
   - [Backend xUnit] [`ModelContextGateway.Tests/WindowsRegistrySecretRetrieverTests.cs#L51`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/WindowsRegistrySecretRetrieverTests.cs#L51) (`GetSecretAsync_ReturnsNull_WhenKeyNotFoundOrNull`)
 
-### `[SEC-05]` renders RPC message stream with formatted JSON
+### `[SEC-05]` renders img live preview when dashboardIcon is an image URL
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (6):**
-  - [Frontend Vitest] [`frontend/src/test/components/LogsTerminalCard.test.tsx#L61`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LogsTerminalCard.test.tsx#L61) (`renders RPC message stream with formatted JSON`)
-  - [Frontend Vitest] [`frontend/src/test/components/LogsTerminalCard.test.tsx#L81`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LogsTerminalCard.test.tsx#L81) (`toggles autoscroll and handles clear logs`)
-  - [Frontend Vitest] [`frontend/src/test/components/LogsTerminalCard.test.tsx#L108`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LogsTerminalCard.test.tsx#L108) (`shows empty state when no logs match filter`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L56`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L56) (`renders img live preview when dashboardIcon is an image URL`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L88`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L88) (`updates dashboardIcon and live preview when a logo image file is uploaded`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L141`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L141) (`saves settings with the updated logo URL when form is submitted after upload`)
+  - [Frontend Vitest] [`frontend/src/test/components/LogsTerminalCard.test.tsx#L61`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LogsTerminalCard.test.tsx#L61) (`renders RPC message stream with formatted JSON`)
+  - [Frontend Vitest] [`frontend/src/test/components/LogsTerminalCard.test.tsx#L81`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LogsTerminalCard.test.tsx#L81) (`toggles autoscroll and handles clear logs`)
+  - [Frontend Vitest] [`frontend/src/test/components/LogsTerminalCard.test.tsx#L108`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LogsTerminalCard.test.tsx#L108) (`shows empty state when no logs match filter`)
 
 ### `[SEC-30]` Renders User Secret Storage options and toggles Vault with warning when disabled.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -1988,15 +2001,15 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/SanitizingLoggerProviderTests.cs#L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SanitizingLoggerProviderTests.cs#L8) (`SanitizingLoggerProvider_RedactsBearerTokensAndKeys`)
 
-### `[SEC-MASTERKEY-ATOMIC-REENCRYPTION]` Atomically re-encrypts database credentials when setting a custom master key.
+### `[SEC-MASTERKEY-ATOMIC-REENCRYPTION]` Rejects POST /api/config/master-key when key source is external.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (5):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L482`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L482) (`Pipeline_POST_MasterKey_RejectsWhenExternalKeySource`)
   - [Backend xUnit] [`ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L142`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L142) (`SetMasterKey_AtomicallyReEncryptsDatabaseCredentials`)
   - [Backend xUnit] [`ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L241`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L241) (`SetMasterKey_RejectsWhenKeySourceIsExternalOrVault`)
   - [Backend xUnit] [`ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L259`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L259) (`AdminMcpServer_ManageSystem_SetMasterKey_ReencryptsCleanly`)
   - [Backend xUnit] [`ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L338`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L338) (`SetMasterKey_RejectsInvalidOrShortKeys`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L482`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L482) (`Pipeline_POST_MasterKey_RejectsWhenExternalKeySource`)
 
 ### `[SEC-MASTERKEY-CONFIGURED-STATUS-BADGE]` Displays configured badge and rotate button when custom master key is configured.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -2163,7 +2176,7 @@
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L494`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L494) (`AsynchronousRouting_HighVolumeAndPolymorphic_DoesNotHang`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L512`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L512) (`AsynchronousRouting_HighVolumeAndPolymorphic_DoesNotHang`)
 
 ### `[TRANS-DISCONNECT-PENDING-CLEANUP]` Cleans up and cancels pending requests upon backend transport disconnect.
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
@@ -2223,7 +2236,7 @@
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L419`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L419) (`SseBackend_Notification_IsForwardedToClient_WithAllFieldsIntact`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L437`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L437) (`SseBackend_Notification_IsForwardedToClient_WithAllFieldsIntact`)
 
 ### `[TRANS-SSE-RESOLVE-STATIC-APIKEY]` SSE transport resolves static plaintext API keys when provider is None
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
@@ -2280,12 +2293,12 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L532`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L532) (`ClientSession_TargetedCancellation_DoesNotCancelOtherClientsReusingId`)
 
-### `[TRANS-TIMEOUT-PENDING-CLEANUP]` SendRequestAsync times out cleanly and removes pending completion handlers without leaking memory.
+### `[TRANS-TIMEOUT-PENDING-CLEANUP]` Cleans up pending request tracking maps upon timeout and cancellation.
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
 * **Type:** Positive Feature Capability
 * **Verification Proofs (2):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L276`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L276) (`SendRequestAsync_TimesOutCleanly_AndDoesNotLeak`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L217`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L217) (`TimeoutAndCancellationCleanup_DoesNotLeavePendingRequests`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L294) (`SendRequestAsync_TimesOutCleanly_AndDoesNotLeak`)
 
 ### `[TRANS-VALIDATION-HTTP-ALLOWED-IPS]` ServerValidationHelper accepts valid HTTP/HTTPS endpoints allowed by IP security rules.
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
@@ -2293,14 +2306,10 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L38`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L38) (`IsValidServerUrl_Accepts_Valid_Http_Urls`)
 
-### `[UI-01]` opens confirmation modal and resolves true when confirmed
+### `[UI-01]` renders CustomFileModal in create mode and displays visual builder tabs
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (61):**
-  - [Frontend Vitest] [`frontend/src/test/stores/useConfirmStore.test.ts#L31`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useConfirmStore.test.ts#L31) (`opens confirmation modal and resolves true when confirmed`)
-  - [Frontend Vitest] [`frontend/src/test/stores/useConfirmStore.test.ts#L58`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useConfirmStore.test.ts#L58) (`resolves false when cancelled`)
-  - [Frontend Vitest] [`frontend/src/test/stores/useConfirmStore.test.ts#L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useConfirmStore.test.ts#L76) (`settles existing pending promise with false when a new confirmation is opened`)
-  - [Frontend Vitest] [`frontend/src/test/components/DashboardView.test.tsx#L115`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/DashboardView.test.tsx#L115) (`renders empty state when no servers match search`)
   - [Frontend Vitest] [`frontend/src/test/components/CustomFileModal.test.tsx#L26`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CustomFileModal.test.tsx#L26) (`renders CustomFileModal in create mode and displays visual builder tabs`)
   - [Frontend Vitest] [`frontend/src/test/components/CustomFileModal.test.tsx#L41`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CustomFileModal.test.tsx#L41) (`allows adding and removing arguments in visual builder`)
   - [Frontend Vitest] [`frontend/src/test/components/CustomFileModal.test.tsx#L68`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CustomFileModal.test.tsx#L68) (`allows adding and removing messages in visual builder`)
@@ -2309,52 +2318,56 @@
   - [Frontend Vitest] [`frontend/src/test/components/CustomFileModal.test.tsx#L194`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CustomFileModal.test.tsx#L194) (`submits form and calls saveCustomFile`)
   - [Frontend Vitest] [`frontend/src/test/components/CustomFileModal.test.tsx#L222`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CustomFileModal.test.tsx#L222) (`renders in edit mode when editingFileMeta is set`)
   - [Frontend Vitest] [`frontend/src/test/components/CustomFileModal.test.tsx#L244`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CustomFileModal.test.tsx#L244) (`allows adding assistant messages, modifying argument required checkbox, and rendering empty arguments state`)
-  - [Frontend Vitest] [`frontend/src/test/components/HeaderBranding.test.tsx#L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/HeaderBranding.test.tsx#L37) (`identifies FontAwesome class names and invalid inputs as non-image URLs`)
-  - [Frontend Vitest] [`frontend/src/test/components/HeaderBranding.test.tsx#L54`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/HeaderBranding.test.tsx#L54) (`updates document.title and sets custom image favicon when icon is an image URL`)
-  - [Frontend Vitest] [`frontend/src/test/components/HeaderBranding.test.tsx#L69`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/HeaderBranding.test.tsx#L69) (`sets default title and generated SVG favicon when branding is null or uses FontAwesome icon`)
-  - [Frontend Vitest] [`frontend/src/test/components/HeaderBranding.test.tsx#L87`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/HeaderBranding.test.tsx#L87) (`renders img element with logo-icon logo-img class when branding.icon is an image endpoint`)
-  - [Frontend Vitest] [`frontend/src/test/components/HeaderBranding.test.tsx#L115`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/HeaderBranding.test.tsx#L115) (`renders FontAwesome i element when branding.icon is a FontAwesome class`)
-  - [Frontend Vitest] [`frontend/src/test/components/MappingModal.test.tsx#L27`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/MappingModal.test.tsx#L27) (`renders create mapping form with empty inputs`)
-  - [Frontend Vitest] [`frontend/src/test/components/MappingModal.test.tsx#L42`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/MappingModal.test.tsx#L42) (`renders edit mapping form pre-filled with mapping data`)
-  - [Frontend Vitest] [`frontend/src/test/components/MappingModal.test.tsx#L57`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/MappingModal.test.tsx#L57) (`submits form with externalId and internalGroup`)
-  - [Frontend Vitest] [`frontend/src/test/components/MappingModal.test.tsx#L82`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/MappingModal.test.tsx#L82) (`closes modal on cancel click`)
-  - [Frontend Vitest] [`frontend/src/test/components/Header.test.tsx#L38`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/Header.test.tsx#L38) (`renders admin badge and shield icon for full_admin users`)
-  - [Frontend Vitest] [`frontend/src/test/components/Header.test.tsx#L64`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/Header.test.tsx#L64) (`renders standard user badge for non-admin users`)
-  - [Frontend Vitest] [`frontend/src/test/components/Header.test.tsx#L90`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/Header.test.tsx#L90) (`does not render user status item when unauthenticated`)
-  - [Frontend Vitest] [`frontend/src/test/components/Header.test.tsx#L110`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/Header.test.tsx#L110) (`displays gateway status and SSE endpoint`)
-  - [Frontend Vitest] [`frontend/src/test/components/Header.test.tsx#L126`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/Header.test.tsx#L126) (`toggles light and dark theme on button click and updates document attribute`)
-  - [Frontend Vitest] [`frontend/src/test/components/SettingsTabs.test.tsx#L49`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsTabs.test.tsx#L49) (`renders IdentityAuthTab and SecretProvidersTab inside ProvidersTab`)
-  - [Frontend Vitest] [`frontend/src/test/components/SettingsTabs.test.tsx#L77`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsTabs.test.tsx#L77) (`renders CustomFilesTab and triggers modal open and delete`)
-  - [Frontend Vitest] [`frontend/src/test/components/SettingsTabs.test.tsx#L110`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsTabs.test.tsx#L110) (`renders AccessControlTab with policies and mappings`)
-  - [Frontend Vitest] [`frontend/src/test/components/SettingsTabs.test.tsx#L139`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsTabs.test.tsx#L139) (`renders BackupsTab`)
-  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L144`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L144) (`saves embedding settings and displays success feedback`)
-  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L183`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L183) (`saves Auth Provider configurations including Active Directory and OIDC header mappings`)
-  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L240`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L240) (`saves secret providers while preserving Vault config and secrets`)
-  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L311`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L311) (`renders custom files table with edit and delete actions`)
-  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L354`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L354) (`renders access policies and group mappings with CRUD actions`)
-  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L71`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L71) (`handles semantic search queries in SemanticRouterCard`)
-  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L99`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L99) (`executes tool and updates console`)
-  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L130`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L130) (`executes prompt get in prompt tester tab`)
-  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L164`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L164) (`executes resource read in resource inspector tab`)
-  - [Frontend Vitest] [`frontend/src/test/components/SharedComponents.test.tsx#L26`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SharedComponents.test.tsx#L26) (`renders title, children, and handles close button click`)
-  - [Frontend Vitest] [`frontend/src/test/components/SharedComponents.test.tsx#L50`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SharedComponents.test.tsx#L50) (`renders various statuses correctly with indicators`)
-  - [Frontend Vitest] [`frontend/src/test/components/SharedComponents.test.tsx#L72`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SharedComponents.test.tsx#L72) (`returns null when totalItems is 0`)
-  - [Frontend Vitest] [`frontend/src/test/components/SharedComponents.test.tsx#L91`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SharedComponents.test.tsx#L91) (`renders page info and navigation controls`)
-  - [Frontend Vitest] [`frontend/src/test/components/SharedComponents.test.tsx#L130`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SharedComponents.test.tsx#L130) (`handles pageSize all`)
-  - [Frontend Vitest] [`frontend/src/test/components/ConfirmModal.test.tsx#L32`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ConfirmModal.test.tsx#L32) (`renders title, message, and action buttons when open`)
-  - [Frontend Vitest] [`frontend/src/test/components/ConfirmModal.test.tsx#L58`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ConfirmModal.test.tsx#L58) (`calls handleConfirm when confirm button clicked`)
-  - [Frontend Vitest] [`frontend/src/test/components/ConfirmModal.test.tsx#L82`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ConfirmModal.test.tsx#L82) (`calls handleCancel when cancel button clicked`)
   - [Frontend Vitest] [`frontend/src/test/components/LayoutCentering.test.tsx#L19`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LayoutCentering.test.tsx#L19) (`renders top navigation bar with centered alignment in layout.css and App`)
   - [Frontend Vitest] [`frontend/src/test/components/LayoutCentering.test.tsx#L42`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LayoutCentering.test.tsx#L42) (`renders tester tabs with centered alignment in tester.css`)
   - [Frontend Vitest] [`frontend/src/test/components/LayoutCentering.test.tsx#L58`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LayoutCentering.test.tsx#L58) (`renders SettingsView sub-navigation bar with centered alignment`)
   - [Frontend Vitest] [`frontend/src/test/components/LayoutCentering.test.tsx#L74`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LayoutCentering.test.tsx#L74) (`renders AppKeysCard sub-navigation tabs with centered alignment for admin`)
   - [Frontend Vitest] [`frontend/src/test/components/LayoutCentering.test.tsx#L90`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LayoutCentering.test.tsx#L90) (`uses body::before and body::after pseudo-elements for ambient gradients and removes background-decor DOM nodes`)
   - [Frontend Vitest] [`frontend/src/test/components/LayoutCentering.test.tsx#L117`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LayoutCentering.test.tsx#L117) (`defines focus-visible outline indicators for interactive focus styling`)
+  - [Frontend Vitest] [`frontend/src/test/components/MappingModal.test.tsx#L27`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/MappingModal.test.tsx#L27) (`renders create mapping form with empty inputs`)
+  - [Frontend Vitest] [`frontend/src/test/components/MappingModal.test.tsx#L42`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/MappingModal.test.tsx#L42) (`renders edit mapping form pre-filled with mapping data`)
+  - [Frontend Vitest] [`frontend/src/test/components/MappingModal.test.tsx#L57`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/MappingModal.test.tsx#L57) (`submits form with externalId and internalGroup`)
+  - [Frontend Vitest] [`frontend/src/test/components/MappingModal.test.tsx#L82`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/MappingModal.test.tsx#L82) (`closes modal on cancel click`)
+  - [Frontend Vitest] [`frontend/src/test/components/ConfirmModal.test.tsx#L32`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ConfirmModal.test.tsx#L32) (`renders title, message, and action buttons when open`)
+  - [Frontend Vitest] [`frontend/src/test/components/ConfirmModal.test.tsx#L58`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ConfirmModal.test.tsx#L58) (`calls handleConfirm when confirm button clicked`)
+  - [Frontend Vitest] [`frontend/src/test/components/ConfirmModal.test.tsx#L82`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ConfirmModal.test.tsx#L82) (`calls handleCancel when cancel button clicked`)
+  - [Frontend Vitest] [`frontend/src/test/components/SettingsTabs.test.tsx#L49`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsTabs.test.tsx#L49) (`renders IdentityAuthTab and SecretProvidersTab inside ProvidersTab`)
+  - [Frontend Vitest] [`frontend/src/test/components/SettingsTabs.test.tsx#L77`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsTabs.test.tsx#L77) (`renders CustomFilesTab and triggers modal open and delete`)
+  - [Frontend Vitest] [`frontend/src/test/components/SettingsTabs.test.tsx#L110`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsTabs.test.tsx#L110) (`renders AccessControlTab with policies and mappings`)
+  - [Frontend Vitest] [`frontend/src/test/components/SettingsTabs.test.tsx#L139`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsTabs.test.tsx#L139) (`renders BackupsTab`)
+  - [Frontend Vitest] [`frontend/src/test/components/DashboardView.test.tsx#L115`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/DashboardView.test.tsx#L115) (`renders empty state when no servers match search`)
+  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L144`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L144) (`saves embedding settings and displays success feedback`)
+  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L183`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L183) (`saves Auth Provider configurations including Active Directory and OIDC header mappings`)
+  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L240`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L240) (`saves secret providers while preserving Vault config and secrets`)
+  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L311`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L311) (`renders custom files table with edit and delete actions`)
+  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L354`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L354) (`renders access policies and group mappings with CRUD actions`)
+  - [Frontend Vitest] [`frontend/src/test/components/Header.test.tsx#L38`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/Header.test.tsx#L38) (`renders admin badge and shield icon for full_admin users`)
+  - [Frontend Vitest] [`frontend/src/test/components/Header.test.tsx#L64`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/Header.test.tsx#L64) (`renders standard user badge for non-admin users`)
+  - [Frontend Vitest] [`frontend/src/test/components/Header.test.tsx#L90`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/Header.test.tsx#L90) (`does not render user status item when unauthenticated`)
+  - [Frontend Vitest] [`frontend/src/test/components/Header.test.tsx#L110`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/Header.test.tsx#L110) (`displays gateway status and SSE endpoint`)
+  - [Frontend Vitest] [`frontend/src/test/components/Header.test.tsx#L126`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/Header.test.tsx#L126) (`toggles light and dark theme on button click and updates document attribute`)
+  - [Frontend Vitest] [`frontend/src/test/components/SharedComponents.test.tsx#L26`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SharedComponents.test.tsx#L26) (`renders title, children, and handles close button click`)
+  - [Frontend Vitest] [`frontend/src/test/components/SharedComponents.test.tsx#L50`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SharedComponents.test.tsx#L50) (`renders various statuses correctly with indicators`)
+  - [Frontend Vitest] [`frontend/src/test/components/SharedComponents.test.tsx#L72`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SharedComponents.test.tsx#L72) (`returns null when totalItems is 0`)
+  - [Frontend Vitest] [`frontend/src/test/components/SharedComponents.test.tsx#L91`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SharedComponents.test.tsx#L91) (`renders page info and navigation controls`)
+  - [Frontend Vitest] [`frontend/src/test/components/SharedComponents.test.tsx#L130`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SharedComponents.test.tsx#L130) (`handles pageSize all`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L71`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L71) (`handles semantic search queries in SemanticRouterCard`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L99`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L99) (`executes tool and updates console`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L130`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L130) (`executes prompt get in prompt tester tab`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L164`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L164) (`executes resource read in resource inspector tab`)
+  - [Frontend Vitest] [`frontend/src/test/components/HeaderBranding.test.tsx#L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/HeaderBranding.test.tsx#L37) (`identifies FontAwesome class names and invalid inputs as non-image URLs`)
+  - [Frontend Vitest] [`frontend/src/test/components/HeaderBranding.test.tsx#L54`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/HeaderBranding.test.tsx#L54) (`updates document.title and sets custom image favicon when icon is an image URL`)
+  - [Frontend Vitest] [`frontend/src/test/components/HeaderBranding.test.tsx#L69`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/HeaderBranding.test.tsx#L69) (`sets default title and generated SVG favicon when branding is null or uses FontAwesome icon`)
+  - [Frontend Vitest] [`frontend/src/test/components/HeaderBranding.test.tsx#L87`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/HeaderBranding.test.tsx#L87) (`renders img element with logo-icon logo-img class when branding.icon is an image endpoint`)
+  - [Frontend Vitest] [`frontend/src/test/components/HeaderBranding.test.tsx#L115`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/HeaderBranding.test.tsx#L115) (`renders FontAwesome i element when branding.icon is a FontAwesome class`)
   - [Frontend Vitest] [`frontend/src/test/api/typedApi.test.ts#L74`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/api/typedApi.test.ts#L74) (`calls client and appkey endpoints correctly`)
   - [Frontend Vitest] [`frontend/src/test/api/typedApi.test.ts#L125`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/api/typedApi.test.ts#L125) (`calls user quota endpoints correctly`)
   - [Frontend Vitest] [`frontend/src/test/api/typedApi.test.ts#L154`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/api/typedApi.test.ts#L154) (`calls policies and mappings endpoints correctly`)
   - [Frontend Vitest] [`frontend/src/test/api/typedApi.test.ts#L181`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/api/typedApi.test.ts#L181) (`calls settings, providers, custom files, approvals endpoints correctly`)
   - [Frontend Vitest] [`frontend/src/test/api/typedApi.test.ts#L237`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/api/typedApi.test.ts#L237) (`calls testbench tool, prompt, resource, log endpoints correctly`)
+  - [Frontend Vitest] [`frontend/src/test/stores/useConfirmStore.test.ts#L31`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useConfirmStore.test.ts#L31) (`opens confirmation modal and resolves true when confirmed`)
+  - [Frontend Vitest] [`frontend/src/test/stores/useConfirmStore.test.ts#L58`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useConfirmStore.test.ts#L58) (`resolves false when cancelled`)
+  - [Frontend Vitest] [`frontend/src/test/stores/useConfirmStore.test.ts#L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useConfirmStore.test.ts#L76) (`settles existing pending promise with false when a new confirmation is opened`)
   - [Playwright E2E] [`frontend/e2e/prompts-resources-customfiles.spec.ts#L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/prompts-resources-customfiles.spec.ts#L37) (`should navigate to Custom Files and Prompts in Settings view`)
   - [Playwright E2E] [`frontend/e2e/dashboard.spec.ts#L28`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/dashboard.spec.ts#L28) (`should display aggregate statistics cards`)
   - [Playwright E2E] [`frontend/e2e/dashboard.spec.ts#L42`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/dashboard.spec.ts#L42) (`should filter servers using search input`)
@@ -2394,8 +2407,8 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (3):**
   - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L254`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L254) (`Pipeline_Settings_Branding_ReadWrite`)
-  - [Frontend Vitest] [`frontend/src/test/components/HeaderBranding.test.tsx#L7`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/HeaderBranding.test.tsx#L7) (`identifies image URLs and paths accurately`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L6) (`renders branding label and FontAwesome icon preview when icon is a CSS class`)
+  - [Frontend Vitest] [`frontend/src/test/components/HeaderBranding.test.tsx#L7`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/HeaderBranding.test.tsx#L7) (`identifies image URLs and paths accurately`)
 
 ### `[UI-06]` Router supports uploading and retrieving custom branding logo images via dedicated endpoints.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -2459,13 +2472,6 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Frontend Vitest] [`frontend/src/test/components/MappingModal.test.tsx#L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/MappingModal.test.tsx#L1) (`renders nothing when isMappingModalOpen is false`)
-
-### `[UI-109]` Renders ClientSetupGuide below the user credentials card.
-* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (2):**
-  - [Frontend Vitest] [`frontend/src/test/pages/MyMcpServers.test.tsx#L104`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L104) (`renders client setup guide below credentials card`)
-  - [Frontend Vitest] [`frontend/src/test/components/ClientSetupGuide.test.tsx#L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L1) (`renders default standard mcpServers configuration with meta mode`)
 
 ### `[UI-110]` renders title, MCG badge, subtitle, and version badge
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -2572,6 +2578,12 @@
 * **Verification Proofs (1):**
   - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L225`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L225) (`exposes deterministic data-testid attributes for automation`)
 
+### `[UI-135]` toggles 3LO OAuth fields and submits with complete OAuth configuration
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L249`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L249) (`toggles 3LO OAuth fields and submits with complete OAuth configuration`)
+
 ### `[UI-30]` Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
@@ -2593,6 +2605,14 @@
 > [!IMPORTANT]
 > The following guardrails define strict security boundaries, fail-closed fault invariants, and forbidden application states.
 
+### `[AUTH-112]` DeleteClient removes OAuthClient via repository
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (3):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L120`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L120) (`DeleteClient_ReturnsNoContent_WhenAppExists`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L141`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L141) (`DeleteClient_ReturnsNotFound_WhenAppDoesNotExist`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L297`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L297) (`Authorize_ResolvesClientAndRedirectsToConsent`)
+
 ### `[AUTH-ADMIN-POLICY-REJECT-REGULAR]` AdminPolicy rejects principal with unconfigured regular role without Admin SID or Admin Group
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
@@ -2611,13 +2631,13 @@
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (9):**
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L191`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L191) (`CreateAppKey_NonAdmin_CreatesPersonalKey_UpToDefaultQuota`)
-  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L421`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L421) (`creates category-scoped key, captures one-time plaintext key, and refreshes`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeyModal.test.tsx#L19`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyModal.test.tsx#L19) (`renders nothing when isCreateModalOpen is false`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeyModal.test.tsx#L61`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyModal.test.tsx#L61) (`locks key type to personal key for non-admin and shows quota feedback`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeyModal.test.tsx#L115`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyModal.test.tsx#L115) (`handles scope serialization for server scope and target username for admin`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeyModal.test.tsx#L154`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyModal.test.tsx#L154) (`handles scope serialization for category scope and expiration days`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeyModal.test.tsx#L192`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyModal.test.tsx#L192) (`disables submit button when quota limit is reached`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeyModal.test.tsx#L217`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyModal.test.tsx#L217) (`displays one-time secret result and copies plaintext key to clipboard`)
+  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L421`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L421) (`creates category-scoped key, captures one-time plaintext key, and refreshes`)
   - [Playwright E2E] [`frontend/e2e/personal-appkeys-and-quotas.spec.ts#L33`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L33) (`Non-Admin Context: mints personal key, views snippet, and revokes key`)
 
 ### `[GUARD-LDAP-FAIL-CLOSED]` LdapActiveDirectoryService fails closed with SecurityException when LDAP connection throws an exception.
@@ -2656,46 +2676,46 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L57`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L57) (`IsAdmin_StandaloneMode_UntrustedIp_ReturnsFalse`)
 
-### `[GUARD-01]` handles policy save failure with error toast
+### `[GUARD-01]` submits form with constructed payload for DENY policy
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (2):**
-  - [Frontend Vitest] [`frontend/src/test/stores/usePolicyStore.test.ts#L86`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/usePolicyStore.test.ts#L86) (`handles policy save failure with error toast`)
   - [Frontend Vitest] [`frontend/src/test/components/PolicyModal.test.tsx#L60`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/PolicyModal.test.tsx#L60) (`submits form with constructed payload for DENY policy`)
+  - [Frontend Vitest] [`frontend/src/test/stores/usePolicyStore.test.ts#L86`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/usePolicyStore.test.ts#L86) (`handles policy save failure with error toast`)
 
-### `[GUARD-02]` SSE transport fails closed with SecurityException when secret provider resolution fails
+### `[GUARD-02]` LdapService rejects unencrypted LDAP with InvalidOperationException.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (12):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/SseTransportTests.cs#L34`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SseTransportTests.cs#L34) (`ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/SseTransportTests.cs#L55`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SseTransportTests.cs#L55) (`ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L37`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L37) (`ResolveUserSidsAsync_ThrowsInvalidOperation_WhenDbConfigSpecifiesPlaintextLdap`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L78`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L78) (`ResolveUserSidsAsync_FailsClosedWithSecurityException_OnUnreachableServer`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DbKeyHelperTests.cs#L283`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DbKeyHelperTests.cs#L283) (`ResolveDbEncryptionKey_ThrowsInvalidOperationException_WhenVaultFails`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L218`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L218) (`HttpTransport_SendRequestAsync_Throws_When_Impersonation_Missing_WindowsIdentity`)
   - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L188`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L188) (`LdapService_ThrowsInvalidOperation_WhenUseSslFalse`)
   - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L208`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L208) (`LdapService_ThrowsSecurityException_OnBindFailure`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/StdioTransportTests.cs#L394`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L394) (`StdioTransport_ShouldFailClosed_WhenSecretResolutionFails`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DbKeyHelperTests.cs#L283`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DbKeyHelperTests.cs#L283) (`ResolveDbEncryptionKey_ThrowsInvalidOperationException_WhenVaultFails`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SseTransportTests.cs#L34`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SseTransportTests.cs#L34) (`ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SseTransportTests.cs#L55`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SseTransportTests.cs#L55) (`ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L218`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L218) (`HttpTransport_SendRequestAsync_Throws_When_Impersonation_Missing_WindowsIdentity`)
   - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L64`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L64) (`ResolveUserSidsAsync_ThrowsInvalidOperation_WhenPlaintextLdapConfigured`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/StdioTransportTests.cs#L394`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L394) (`StdioTransport_ShouldFailClosed_WhenSecretResolutionFails`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L37`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L37) (`ResolveUserSidsAsync_ThrowsInvalidOperation_WhenDbConfigSpecifiesPlaintextLdap`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L78`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceIntegrationTests.cs#L78) (`ResolveUserSidsAsync_FailsClosedWithSecurityException_OnUnreachableServer`)
   - [Backend xUnit] [`ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L61`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L61) (`EnsureVaultClientAsync_ReturnsNull_WhenVaultProviderDisabledInRepo`)
   - [Backend xUnit] [`ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L113`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L113) (`GetSecretAsync_ThrowsSecurityException_OnVaultException`)
 
-### `[GUARD-03]` CompositeSecretRetriever throws InvalidOperationException when an unregistered secret provider is requested.
+### `[GUARD-03]` TokenExchangeSecretRetriever fails closed with InvalidOperationException when token endpoint is not configured.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (13):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/CompositeSecretRetrieverTests.cs#L17`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeSecretRetrieverTests.cs#L17) (`GetSecretForProviderAsync_ThrowsInvalidOperationException_WhenProviderNotRegistered`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/VaultSecretRetrieverTests.cs#L19`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/VaultSecretRetrieverTests.cs#L19) (`EnsureVaultClientAsync_ThrowsArgumentException_WhenAddressInvalidScheme`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/VaultSecretRetrieverTests.cs#L104`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/VaultSecretRetrieverTests.cs#L104) (`GetSecretAsync_UsesCustomVaultClientFactory`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L94`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L94) (`GetSecretAsync_ThrowsInvalidOperationException_WhenTokenEndpointMissing`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L102`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L102) (`GetSecretAsync_ThrowsSecurityException_WhenHttpResponseIsNotSuccess`)
   - [Backend xUnit] [`ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L184`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L184) (`SseTransport_ResolveTokenAsync_FailsClosed_WhenVaultResolvesNull`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/WindowsRegistrySecretRetrieverTests.cs#L66`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/WindowsRegistrySecretRetrieverTests.cs#L66) (`GetSecretAsync_HandlesExceptionGracefully_ReturnsNull`)
   - [Backend xUnit] [`ModelContextGateway.Tests/StdioTransportTests.cs#L104`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L104) (`StdioTransport_ShouldThrowSecurityExceptionForUnsafeExecutable`)
   - [Backend xUnit] [`ModelContextGateway.Tests/StdioTransportTests.cs#L126`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L126) (`StdioTransport_ShouldThrowSecurityExceptionForShellExecutable`)
   - [Backend xUnit] [`ModelContextGateway.Tests/StdioTransportTests.cs#L148`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L148) (`StdioTransport_ShouldThrowOnInvalidExecutable`)
   - [Backend xUnit] [`ModelContextGateway.Tests/StdioTransportTests.cs#L210`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L210) (`StdioTransport_ShouldTimeoutOnSlowRequests`)
   - [Backend xUnit] [`ModelContextGateway.Tests/StdioTransportTests.cs#L289`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L289) (`StdioTransport_ShouldHandleUnexpectedExit`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L94`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L94) (`GetSecretAsync_ThrowsInvalidOperationException_WhenTokenEndpointMissing`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L102`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L102) (`GetSecretAsync_ThrowsSecurityException_WhenHttpResponseIsNotSuccess`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CompositeSecretRetrieverTests.cs#L17`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeSecretRetrieverTests.cs#L17) (`GetSecretForProviderAsync_ThrowsInvalidOperationException_WhenProviderNotRegistered`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/VaultSecretRetrieverTests.cs#L19`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/VaultSecretRetrieverTests.cs#L19) (`EnsureVaultClientAsync_ThrowsArgumentException_WhenAddressInvalidScheme`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/VaultSecretRetrieverTests.cs#L104`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/VaultSecretRetrieverTests.cs#L104) (`GetSecretAsync_UsesCustomVaultClientFactory`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/WindowsRegistrySecretRetrieverTests.cs#L66`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/WindowsRegistrySecretRetrieverTests.cs#L66) (`GetSecretAsync_HandlesExceptionGracefully_ReturnsNull`)
   - [Playwright E2E] [`frontend/e2e/multi-user-matrix.spec.ts#L55`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/multi-user-matrix.spec.ts#L55) (`Guest / Denied Context: restricted user session renders safely`)
 
 ### `[GUARD-04]` Malformed completion payloads or unmapped backends must fail closed safely
@@ -2704,63 +2724,63 @@
 * **Verification Proofs (20):**
   - [Backend xUnit] [`ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L508`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L508) (`Pairwise_CompleteAsync_MalformedOrMissingBackends_ThrowsOrFailsClosed`)
   - [Backend xUnit] [`ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L531`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L531) (`Pairwise_DatabaseDisconnection_FailsClosedSafely`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L163`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L163) (`SchemaValidation_FailsClosed_WhenRequiredColumnOrTableMissing`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L189`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L189) (`SchemaValidation_FailsClosed_WhenUserQuotasOrKeyTypeMissing`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L587`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L587) (`SchemaValidation_FailsClosed_WhenOAuthClientsTableMissing`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L449`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L449) (`Controllers_HandleDbFailures_Returning500`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L64`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L64) (`GetAllProviders_Returns500_OnDbException`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L140`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L140) (`SaveSecretProvider_Returns500_WhenRepositoryThrows`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L206`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L206) (`SaveAuthProvider_Returns500_WhenRepositoryThrows`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L227`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L227) (`GetSecretProviders_Returns500_OnDbException`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L242`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L242) (`GetAuthProviders_Returns500_OnDbException`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L163`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L163) (`SchemaValidation_FailsClosed_WhenRequiredColumnOrTableMissing`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L189`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L189) (`SchemaValidation_FailsClosed_WhenUserQuotasOrKeyTypeMissing`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L587`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L587) (`SchemaValidation_FailsClosed_WhenOAuthClientsTableMissing`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PermissionsControllerTests.cs#L217`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PermissionsControllerTests.cs#L217) (`DeleteMapping_Returns500_OnDbException`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PermissionsControllerTests.cs#L230`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PermissionsControllerTests.cs#L230) (`GetPolicies_Returns500_OnDbException`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/FineGrainedRbacTests.cs#L173`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L173) (`RBAC_DefaultsToDenied_WhenDbExceptionThrown`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L216`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L216) (`AuditLogger_ThrowsException_OnDatabaseError`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L240`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L240) (`CallTool_FailsClosed_WhenAuditLogFails`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L279`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L279) (`CallTool_FailsClosed_WhenAuditLoggerUnresolved`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L449`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L449) (`Controllers_HandleDbFailures_Returning500`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AuditLoggerTests.cs#L91`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditLoggerTests.cs#L91) (`LogInvocationAsync_ThrowsInvalidOperationException_OnConnectionFailure`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AuditLoggerTests.cs#L104`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditLoggerTests.cs#L104) (`LogAdminActionAsync_ThrowsInvalidOperationException_OnConnectionFailure`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/FineGrainedRbacTests.cs#L173`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L173) (`RBAC_DefaultsToDenied_WhenDbExceptionThrown`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L89`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L89) (`AuditLogger_AuditFailClosed_RefusesInvocation_OnAuditWriteError`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PermissionsControllerTests.cs#L217`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PermissionsControllerTests.cs#L217) (`DeleteMapping_Returns500_OnDbException`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PermissionsControllerTests.cs#L230`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PermissionsControllerTests.cs#L230) (`GetPolicies_Returns500_OnDbException`)
 
-### `[GUARD-05]` Socket-level SSRF protection blocks private and loopback IP connections unless explicitly allowlisted.
+### `[GUARD-05]` Docker auto-discovery skips containers resolving to blocked private IP ranges (SSRF protection).
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (16):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L712`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L712) (`Connect_BlocksPrivateOrLoopbackIPs_AtSocketLevel`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L744`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L744) (`SecurityValidationHelper_IsBlockedIp_ValidatesAllBlockedAndAllowedRanges`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L84`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L84) (`PrivateOrLoopback_Blocked_When_AllowPrivateIps_False`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L256`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L256) (`FailClosedValidation_RejectsInvalidJson_AndInsecureUrls`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L59`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L59) (`DockerDiscovery_SkipsContainer_ResolvingToPrivateIp`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/EmbeddingServiceTests.cs#L83`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EmbeddingServiceTests.cs#L83) (`ApiEmbeddingService_GetEmbeddingAsync_Throws_On_Http_Error`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L730`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L730) (`Connect_BlocksPrivateOrLoopbackIPs_AtSocketLevel`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L762`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L762) (`SecurityValidationHelper_IsBlockedIp_ValidatesAllBlockedAndAllowedRanges`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L103`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L103) (`SaveSecretProvider_ReturnsBadRequest_WhenHttpUrlPassedInConfig`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L330`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L330) (`SaveAuthProvidersBatch_ReturnsBadRequest_WhenAllProvidersDisabled`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L397`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L397) (`SaveSecretProvider_HttpUrl_RejectedForExternal`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L232`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L232) (`ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L28`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L28) (`IsValidServerUrl_Rejects_Invalid_Http_Urls`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L53`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L53) (`Validation_Rejects_TypeOnly_Update_Leaving_Incompatible_Url`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L232`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L232) (`ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L59`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L59) (`DockerDiscovery_SkipsContainer_ResolvingToPrivateIp`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/EmbeddingServiceTests.cs#L83`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EmbeddingServiceTests.cs#L83) (`ApiEmbeddingService_GetEmbeddingAsync_Throws_On_Http_Error`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L58`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L58) (`McpClient_NamedHttpClient_Applies_SsrfConnectCallback_AndBlocksPrivateIps`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L1054`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L1054) (`CustomFilesSanitization_PreventsDirectoryTraversal`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L256`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L256) (`FailClosedValidation_RejectsInvalidJson_AndInsecureUrls`)
   - [Backend xUnit] [`ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L7`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L7) (`IsBlockedIp_ValidatesSpecialIpRanges`)
   - [Backend xUnit] [`ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L31`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecurityValidationHelperTests.cs#L31) (`IsInSubnet_HandlesSpecialCases`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L84`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L84) (`PrivateOrLoopback_Blocked_When_AllowPrivateIps_False`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L58`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L58) (`McpClient_NamedHttpClient_Applies_SsrfConnectCallback_AndBlocksPrivateIps`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L1054`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L1054) (`CustomFilesSanitization_PreventsDirectoryTraversal`)
 
-### `[GUARD-06]` Auth middleware enforces case-insensitive route matching preventing path bypass.
+### `[GUARD-06]` Header authentication strips remote identity headers when request is sent through untrusted proxy.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (13):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L216`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L216) (`AuthMiddleware_CaseInsensitivity_Bypass_Check`)
   - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L52`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L52) (`HeaderAuth_StripsHeaders_ForUntrustedProxy`)
   - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L330`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L330) (`TrustedProxyHelper_DeniesLoopback_WhenNotExplicitlyAllowlisted`)
   - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L349`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L349) (`TrustedProxyHelper_DeniesXForwardedFor_WhenChainHasUntrustedHop`)
   - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L390`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L390) (`TrustedProxyHelper_Unconfigured_LoopbackTrusted_LANNotTrusted`)
   - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L412`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L412) (`TrustedProxyHelper_ConfiguredProxyTrusted`)
   - [Backend xUnit] [`ModelContextGateway.Tests/IdentityProviderTests.cs#L458`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L458) (`TrustedProxyHelper_ForgedHeaderFromLanHost_DegradesToGuest`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L234`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L234) (`AuthMiddleware_CaseInsensitivity_Bypass_Check`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/OpenIddictProductionTests.cs#L12`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenIddictProductionTests.cs#L12) (`Production_WithNoCert_Throws_InvalidOperationException`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PermissionsControllerTests.cs#L243`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PermissionsControllerTests.cs#L243) (`SavePolicy_ReturnsBadRequest_WhenWildcardDenyPolicy`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CorsTests.cs#L20`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CorsTests.cs#L20) (`Cors_DefaultFallback_Allows_LocalhostOrigins`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CorsTests.cs#L50`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CorsTests.cs#L50) (`Cors_DefaultFallback_Denies_In_Production`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CorsTests.cs#L92`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CorsTests.cs#L92) (`Cors_WithConfiguredOrigins_RestrictsToConfigured`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CorsTests.cs#L121`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CorsTests.cs#L121) (`Cors_WithAllowedOriginsKeyFallback_RestrictsToConfigured`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PermissionsControllerTests.cs#L243`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PermissionsControllerTests.cs#L243) (`SavePolicy_ReturnsBadRequest_WhenWildcardDenyPolicy`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/OpenIddictProductionTests.cs#L12`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenIddictProductionTests.cs#L12) (`Production_WithNoCert_Throws_InvalidOperationException`)
 
 ### `[GUARD-07]` Custom files endpoint validates file path ensuring sibling directory traversal and parent traversal fail closed.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
@@ -2990,19 +3010,19 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L677`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L677) (`CompleteAsync_FailsClosed_OnUnknownOrUnresolvedTargets`)
 
-### `[GUARD-RBAC-DEFAULT-DENY]` RBAC defaults to deny when no matching access policies are configured.
+### `[GUARD-RBAC-DEFAULT-DENY]` Non-admin identities default to denied fail-closed when no matching policies exist.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (2):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/FineGrainedRbacTests.cs#L84`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L84) (`RBAC_DefaultsToDenied_WhenNoPoliciesConfigured`)
   - [Backend xUnit] [`ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L177`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L177) (`NonAdmin_DefaultsToDeny_WhenNoMatchingPoliciesConfigured`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/FineGrainedRbacTests.cs#L84`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L84) (`RBAC_DefaultsToDenied_WhenNoPoliciesConfigured`)
 
-### `[GUARD-RBAC-EXPLICIT-DENY]` RBAC enforces explicit policy denials to reject unauthorized callers.
+### `[GUARD-RBAC-EXPLICIT-DENY]` Explicit policy deny rules override group allows.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (2):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/FineGrainedRbacTests.cs#L118`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L118) (`RBAC_RejectsUser_OnExplicitDeny`)
   - [Backend xUnit] [`ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L235`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L235) (`ExplicitDeny_OverridesGroupAllow`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/FineGrainedRbacTests.cs#L118`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L118) (`RBAC_RejectsUser_OnExplicitDeny`)
 
 ### `[GUARD-RBAC-MISSING-GROUP]` RBAC denies access when user does not possess the required security group.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
@@ -3087,9 +3107,9 @@
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (4):**
   - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L686`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L686) (`ProcessRequestAsync_Handles_Server_Discover`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L371`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L371) (`DownstreamBackend_ProtocolVersionMismatch_NegotiatesOlderVersionSuccessfully`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpSpecMiddlewareTests.cs#L124`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs#L124) (`Middleware_Extracts_Stateless_Capabilities_And_ClientInfo_In_Meta`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpSpecMiddlewareTests.cs#L162`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs#L162) (`Middleware_Rejects_Unsupported_Protocol_Version_With_32021_Error`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L371`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L371) (`DownstreamBackend_ProtocolVersionMismatch_NegotiatesOlderVersionSuccessfully`)
 
 ### `[MCP-28]` ToolRoutingManager rejects ambiguous bare tool calls when duplicate tool names exist across distinct servers, listing candidates with namespaces.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -3127,16 +3147,16 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L74`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L74) (`SearchSimilarAsync_HandlesDimensionMismatch_AndEmptyGracefully`)
   - [Backend xUnit] [`ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L94`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L94) (`UpsertAndRemove_ManagesToolEmbeddings_Correctly`)
 
-### `[MCP-34]` ToolRoutingManager gracefully falls back to keyword matching when NoOpEmbeddingProvider is active.
+### `[MCP-34]` OpenAiEmbeddingProvider blocks private loopback IPs preventing SSRF.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (6):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L108`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L108) (`GenerateEmbeddingAsync_ThrowsOnLoopbackIp_WhenPrivateIpsDisallowed`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L26) (`SearchToolsAsync_FallsBackToKeyword_WhenNoOpEmbeddingProviderUsed`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L44`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L44) (`SearchToolsAsync_FallsBackToKeyword_WhenEmbeddingProviderThrows`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L66`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L66) (`SearchToolsAsync_FallsBackToKeyword_WhenEmbeddingProviderIsNull`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L83`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L83) (`SearchToolsAsync_ReturnsDefaultCandidates_WhenQueryHasNoMatches`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L101`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L101) (`CallToolAsync_SearchTools_ExecutesHybridRrfSearch`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L108`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L108) (`GenerateEmbeddingAsync_ThrowsOnLoopbackIp_WhenPrivateIpsDisallowed`)
 
 ### `[AUTH-106]` Exchange throws InvalidOperationException when request is null.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -3155,21 +3175,13 @@
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (8):**
   - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L63`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L63) (`Pipeline_WellKnown_Endpoints_ReturnSuccess`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L159`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L159) (`Exchange_ClientCredentials_ValidSecret_ReturnsSignInResult`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L206`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L206) (`Exchange_ClientCredentials_InvalidSecret_ReturnsForbid`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L251`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L251) (`Exchange_ClientCredentials_ExpiredClient_ReturnsForbid`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L84`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L84) (`CreateClient_ReturnsOk_WithGeneratedCredentials`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L153`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L153) (`DatabaseAssertion_PlaintextNotPersisted`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L179`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L179) (`CreateClient_AdminCreator_DoesNotInheritAdminSid`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L215`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L215) (`CreateClient_WithExpiresInDays_SetsExpiration`)
-
-### `[AUTH-112]` Authorize resolves client application from IOAuthClientRepository and redirects to consent.
-* **Category:** `SEC` (Secrets Providers & Encryption)
-* **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (3):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L297`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L297) (`Authorize_ResolvesClientAndRedirectsToConsent`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L120`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L120) (`DeleteClient_ReturnsNoContent_WhenAppExists`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L141`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L141) (`DeleteClient_ReturnsNotFound_WhenAppDoesNotExist`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L159`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L159) (`Exchange_ClientCredentials_ValidSecret_ReturnsSignInResult`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L206`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L206) (`Exchange_ClientCredentials_InvalidSecret_ReturnsForbid`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L251`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L251) (`Exchange_ClientCredentials_ExpiredClient_ReturnsForbid`)
 
 ### `[AUTH-114]` RegisterClient rejects invalid or non-absolute redirect URIs with standard RFC 7591 invalid_redirect_uri error.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -3189,19 +3201,19 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L516`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L516) (`RegisterClient_WhenClosedRegistration_UnauthorizedUser_ReturnsForbidden`)
 
-### `[SEC-01]` SQLite database is encrypted at rest using SQLCipher with DB_ENCRYPTION_KEY.
+### `[SEC-01]` TokenExchangeSecretRetriever fails closed when HttpClient throws an exception during token exchange.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (17):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8) (`SqliteDatabase_IsEncrypted_WithSQLCipher`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L127`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L127) (`GetSecretAsync_ThrowsHttpRequestException_WhenHttpClientFails`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L165`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L165) (`GetSecretAsync_ThrowsJsonException_WhenResponseIsInvalidJson`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L70`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L70) (`SaveSecretProvider_EncryptsConfigJson_AtRestInDatabase`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L99`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L99) (`SaveAuthProvider_EncryptsConfigJson_AtRestInDatabase`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L218`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L218) (`ProvidersController_MaskPreserving_PreservesExistingDecryptedSecret_WhenMaskSubmitted`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L72`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L72) (`SymmetricEncryptionHelper_EncryptsAndDecryptsCorrectly`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CorsTests.cs#L146`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CorsTests.cs#L146) (`Cors_RejectsWildcardAndInvalidOrigins_AndLogsWarning`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CorsTests.cs#L181`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CorsTests.cs#L181) (`Cors_AllInvalidOrigins_FallsBackToDefaultAndLogsWarning`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L127`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L127) (`GetSecretAsync_ThrowsHttpRequestException_WhenHttpClientFails`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L165`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L165) (`GetSecretAsync_ThrowsJsonException_WhenResponseIsInvalidJson`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8) (`SqliteDatabase_IsEncrypted_WithSQLCipher`)
   - [Backend xUnit] [`ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L14`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L14) (`EnsureVaultClientAsync_CreatesClient_WithAppRoleCredentials`)
   - [Backend xUnit] [`ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L35`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L35) (`EnsureVaultClientAsync_LoadsFromSecretRepo_WhenConfigJsonHasAppRole`)
   - [Backend xUnit] [`ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L87`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L87) (`ReloadConfigAsync_ClearsClient_ForcesRecreation`)
@@ -3242,22 +3254,25 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/TransportResilienceTests.cs#L101`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportResilienceTests.cs#L101) (`StdioTransport_SendRequestAsync_ReturnsProcessNotRunning_WhenDisposed`)
 
-### `[UI-31]` Fetches registered OAuth clients and updates store state.
+### `[UI-31]` Fetches clients on mount and renders table headers and action buttons.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (7):**
-  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L37) (`fetches registered clients and updates state`)
-  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L213`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L213) (`prompts confirmation and calls cleanupClientsApi when confirmed`)
-  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L239`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L239) (`cancels DCR cleanup when user cancels confirmation modal`)
   - [Frontend Vitest] [`frontend/src/test/components/RegisteredClientsCard.test.tsx#L42`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L42) (`renders header, register button, and calls fetchClients on mount`)
   - [Frontend Vitest] [`frontend/src/test/components/RegisteredClientsCard.test.tsx#L73`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L73) (`renders empty state when no registered clients exist`)
   - [Frontend Vitest] [`frontend/src/test/components/RegisteredClientsCard.test.tsx#L90`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L90) (`renders rich client columns and handles client ID copy`)
   - [Frontend Vitest] [`frontend/src/test/components/RegisteredClientsCard.test.tsx#L136`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L136) (`triggers deleteClient when Delete button is clicked`)
+  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L37) (`fetches registered clients and updates state`)
+  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L213`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L213) (`prompts confirmation and calls cleanupClientsApi when confirmed`)
+  - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L239`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L239) (`cancels DCR cleanup when user cancels confirmation modal`)
 
-### `[UI-CONFIRM-MODAL]` Centralized promise-based confirmation store resolves true on confirmation and false on cancellation.
+### `[UI-CONFIRM-MODAL]` Renders confirmation dialog with title, message, and trigger buttons for confirm and cancel.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (16):**
+  - [Frontend Vitest] [`frontend/src/test/components/ConfirmModal.test.tsx#L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ConfirmModal.test.tsx#L6) (`renders nothing when closed`)
+  - [Frontend Vitest] [`frontend/src/test/stores/useServerStore.test.ts#L269`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useServerStore.test.ts#L269) (`prompts window.confirm and deletes server when confirmed`)
+  - [Frontend Vitest] [`frontend/src/test/stores/useServerStore.test.ts#L298`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useServerStore.test.ts#L298) (`does not send delete request when confirm is cancelled`)
   - [Frontend Vitest] [`frontend/src/test/stores/useConfirmStore.test.ts#L4`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useConfirmStore.test.ts#L4) (`initializes in closed state`)
   - [Frontend Vitest] [`frontend/src/test/stores/usePolicyStore.test.ts#L100`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/usePolicyStore.test.ts#L100) (`deletes a policy when confirmed`)
   - [Frontend Vitest] [`frontend/src/test/stores/usePolicyStore.test.ts#L129`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/usePolicyStore.test.ts#L129) (`does not delete policy when confirm is cancelled`)
@@ -3271,22 +3286,19 @@
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L516`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L516) (`cancels revocation when confirm is rejected`)
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L632`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L632) (`prompts confirmation modal and resets user quota when confirmed`)
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L662`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L662) (`cancels quota reset when user denies confirmation`)
-  - [Frontend Vitest] [`frontend/src/test/stores/useServerStore.test.ts#L269`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useServerStore.test.ts#L269) (`prompts window.confirm and deletes server when confirmed`)
-  - [Frontend Vitest] [`frontend/src/test/stores/useServerStore.test.ts#L298`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useServerStore.test.ts#L298) (`does not send delete request when confirm is cancelled`)
-  - [Frontend Vitest] [`frontend/src/test/components/ConfirmModal.test.tsx#L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ConfirmModal.test.tsx#L6) (`renders nothing when closed`)
 
-### `[UI-TOAST-TRANSITION]` Displays error toast notification when saving invalid JSON credentials for user-provided server.
+### `[UI-TOAST-TRANSITION]` Displays error toast notification when switching from invalid JSON to Visual Prompt Builder.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (8):**
-  - [Frontend Vitest] [`frontend/src/test/pages/MyMcpServers.test.tsx#L25`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L25) (`shows error toast when saving invalid JSON credentials`)
-  - [Frontend Vitest] [`frontend/src/test/pages/MyMcpServers.test.tsx#L66`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L66) (`saves valid credentials successfully and closes modal`)
   - [Frontend Vitest] [`frontend/src/test/components/CustomFileModal.test.tsx#L112`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CustomFileModal.test.tsx#L112) (`shows error toast when switching from invalid JSON to Visual Prompt Builder`)
   - [Frontend Vitest] [`frontend/src/test/components/CustomFileModal.test.tsx#L133`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CustomFileModal.test.tsx#L133) (`shows error toast when saving without a file name`)
   - [Frontend Vitest] [`frontend/src/test/components/CustomFileModal.test.tsx#L153`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CustomFileModal.test.tsx#L153) (`shows error toast when saving prompt with invalid JSON content`)
+  - [Frontend Vitest] [`frontend/src/test/components/SecretProvidersTab.test.tsx#L63`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SecretProvidersTab.test.tsx#L63) (`displays error toast when saving secret providers fails`)
   - [Frontend Vitest] [`frontend/src/test/components/IdentityAuthTab.test.tsx#L99`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/IdentityAuthTab.test.tsx#L99) (`saves updated Active Directory configuration JSON`)
   - [Frontend Vitest] [`frontend/src/test/components/IdentityAuthTab.test.tsx#L138`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/IdentityAuthTab.test.tsx#L138) (`displays error toast when saving auth providers fails`)
-  - [Frontend Vitest] [`frontend/src/test/components/SecretProvidersTab.test.tsx#L63`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SecretProvidersTab.test.tsx#L63) (`displays error toast when saving secret providers fails`)
+  - [Frontend Vitest] [`frontend/src/test/pages/MyMcpServers.test.tsx#L25`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L25) (`shows error toast when saving invalid JSON credentials`)
+  - [Frontend Vitest] [`frontend/src/test/pages/MyMcpServers.test.tsx#L66`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L66) (`saves valid credentials successfully and closes modal`)
 
 ---
 
@@ -3298,15 +3310,14 @@
 | `API-SERVER-CRUD-LIFECYCLE` | Positive | `API` | Supports full CRUD lifecycle (create, read, update, delete) for downstream MCP server definitions. | [`MinimalApiEndpointsTests.cs:L55`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MinimalApiEndpointsTests.cs#L55) | Backend xUnit |
 | `AUTH-001` | Positive | `AUTH` | Verify DatabaseUserSecretStore encrypts and decrypts secret correctly. | [`UserSecretStoreTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UserSecretStoreTests.cs#L8) | Backend xUnit |
 | `AUTH-002` | Positive | `AUTH` | Verify UserCredentialsController returns configured server IDs. | [`UserCredentialsControllerTests.cs:L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UserCredentialsControllerTests.cs#L11) | Backend xUnit |
-| `AUTH-02` | Positive | `AUTH` | AppKey scopes restrict access precisely across all MCP capabilities and backend targets | [`PairwiseIntegrationMatrixTests.cs:L242`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L242) | Backend xUnit |
-| `AUTH-03` | Positive | `AUTH` | Auth middleware allows bypass routes and extracts SSO headers in a case-insensitive manner. | [`ChallengerTests.cs:L603`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L603) | Backend xUnit |
-| `AUTH-04` | Positive | `AUTH` | ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP | [`ActiveDirectoryWindowsIdentityTests.cs:L12`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs#L12) | Backend xUnit |
+| `AUTH-02` | Positive | `AUTH` | Allows token pass-through in query parameters for SSE stream initialization. | [`PipelineIntegrationTests.cs:L49`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L49) | Backend xUnit |
+| `AUTH-03` | Positive | `AUTH` | GET /api/permissions/mappings returns group mappings with 200 OK. | [`PipelineIntegrationTests.cs:L367`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L367) | Backend xUnit |
+| `AUTH-04` | Positive | `AUTH` | ProvidersController validates LDAP test connections and handles connection errors gracefully. | [`ProvidersControllerTests.cs:L298`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L298) | Backend xUnit |
 | `AUTH-05` | Positive | `AUTH` | McpServer supports AllowPassThroughAuth flag | [`McpServerTests.cs:L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpServerTests.cs#L5) | Backend xUnit |
 | `AUTH-06` | Positive | `AUTH` | Transports use passThroughToken when AllowPassThroughAuth is true | [`TransportsAuthShapeTests.cs:L208`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L208) | Backend xUnit |
 | `AUTH-101` | Positive | `AUTH` | HTTP transport injects X-Forwarded-User header based on connected user identity. | [`IdentityHeaderTests.cs:L9`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityHeaderTests.cs#L9) | Backend xUnit |
-| `AUTH-110` | Positive | `AUTH` | CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0. | [`AppKeysControllerTests.cs:L343`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L343) | Backend xUnit |
-| `AUTH-118` | Positive | `AUTH` | FindDcrClientAsync resolves existing DCR client matching client name and type. | [`OAuthClientRepositoryTests.cs:L214`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214) | Backend xUnit |
-| `AUTH-119` | Positive | `AUTH` | CleanupDcrClientsAsync prunes duplicate and expired dynamic client registrations across all database providers. | [`OAuthClientRepositoryTests.cs:L237`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237) | Backend xUnit |
+| `AUTH-110` | Positive | `AUTH` | GetClients returns list of OAuthClient records without secret hashes | [`ClientsControllerTests.cs:L51`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L51) | Backend xUnit |
+| `AUTH-112` | **Guardrail** | `AUTH` | DeleteClient removes OAuthClient via repository | [`ClientsControllerTests.cs:L120`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L120) | Backend xUnit |
 | `AUTH-130` | Positive | `AUTH` | Renders In-House IdP / External JWT Bearer card, toggles enable, fills authority, and saves configuration. | [`IdentityAuthTab.test.tsx:L167`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/IdentityAuthTab.test.tsx#L167) | Frontend Vitest |
 | `AUTH-131` | Positive | `AUTH` | RFC 9728 Protected Resource Metadata endpoint exposes discovery document with canonical resource URI, authorization servers, scopes, and documentation. | [`Rfc9728ProtectedResourceDiscoveryTests.cs:L37`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L37) | Backend xUnit |
 | `AUTH-132` | Positive | `AUTH` | Unauthenticated client requests to /sse endpoint return 401 Unauthorized with RFC 9728 WWW-Authenticate header containing realm and resource_metadata. | [`Rfc9728ProtectedResourceDiscoveryTests.cs:L115`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L115) | Backend xUnit |
@@ -3372,10 +3383,11 @@
 | `AUTH-STORE-POLICY-FETCH` | Positive | `AUTH` | fetches access policies and updates store | [`usePolicyStore.test.ts:L38`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/usePolicyStore.test.ts#L38) | Frontend Vitest |
 | `AUTH-STORE-POLICY-INIT` | Positive | `AUTH` | initializes with empty policies and mappings | [`usePolicyStore.test.ts:L21`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/usePolicyStore.test.ts#L21) | Frontend Vitest |
 | `AUTH-STORE-POLICY-MODAL-TOGGLE` | Positive | `AUTH` | handles policy modal open and close | [`usePolicyStore.test.ts:L314`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/usePolicyStore.test.ts#L314) | Frontend Vitest |
-| `AUTH-SYSTEM-APPKEY-SEPARATION` | Positive | `AUTH` | System keys are distinct and require admin permissions | [`AppKeysControllerTests.cs:L151`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L151) | Backend xUnit |
+| `AUTH-SYSTEM-APPKEY-SEPARATION` | Positive | `AUTH` | Personal AppKey with 'all' scope does not grant Administrator role | [`AppKeyAuthenticationTests.cs:L311`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L311) | Backend xUnit |
 | `GUARD-LDAP-FAIL-CLOSED` | **Guardrail** | `AUTH` | LdapActiveDirectoryService fails closed with SecurityException when LDAP connection throws an exception. | [`LdapActiveDirectoryServiceTests.cs:L132`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs#L132) | Backend xUnit |
 | `UI-100` | Positive | `AUTH` | initializes with empty providers | [`useProviderStore.test.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useProviderStore.test.ts#L1) | Frontend Vitest |
 | `UI-101` | Positive | `AUTH` | should initialize with default values | [`useUserStore.test.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useUserStore.test.ts#L1) | Frontend Vitest |
+| `UI-109` | Positive | `AUTH` | renders default standard mcpServers configuration with meta mode | [`ClientSetupGuide.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientSetupGuide.test.tsx#L1) | Frontend Vitest |
 | `UI-114` | Positive | `AUTH` | renders nothing when isPolicyModalOpen is false | [`PolicyModal.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/PolicyModal.test.tsx#L1) | Frontend Vitest |
 | `UI-120` | Positive | `AUTH` | RBAC and SID mapping administration UI allows configuring role policies and SID associations | [`rbac-enforcement-flow.spec.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/rbac-enforcement-flow.spec.ts#L1) | Playwright E2E |
 | `UI-123` | Positive | `AUTH` | should open App Keys & Security view and display client setup controls | [`client-setup-and-appkeys.spec.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/client-setup-and-appkeys.spec.ts#L1) | Playwright E2E |
@@ -3431,12 +3443,12 @@
 | `AUTH-EXTERNAL-IDP-DENIES-ANONYMOUS-LOOPBACK` | **Guardrail** | `GUARD` | When an external IDP is configured, anonymous loopback requests do not bypass authentication. | [`StandaloneAdminAuthTests.cs:L224`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L224) | Backend xUnit |
 | `AUTH-STANDALONE-ADMINPOLICY-EXTERNAL-DENY` | **Guardrail** | `GUARD` | AdminPolicy rejects unauthenticated requests from non-whitelisted external IPs in standalone mode. | [`StandaloneAdminAuthTests.cs:L200`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L200) | Backend xUnit |
 | `AUTH-STANDALONE-EXTERNAL-DENY` | **Guardrail** | `GUARD` | Standalone mode denies admin access to non-whitelisted external IPs without an Admin AppKey. | [`StandaloneAdminAuthTests.cs:L57`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L57) | Backend xUnit |
-| `GUARD-01` | **Guardrail** | `GUARD` | handles policy save failure with error toast | [`usePolicyStore.test.ts:L86`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/usePolicyStore.test.ts#L86) | Frontend Vitest |
-| `GUARD-02` | **Guardrail** | `GUARD` | SSE transport fails closed with SecurityException when secret provider resolution fails | [`SseTransportTests.cs:L34`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SseTransportTests.cs#L34) | Backend xUnit |
-| `GUARD-03` | **Guardrail** | `GUARD` | CompositeSecretRetriever throws InvalidOperationException when an unregistered secret provider is requested. | [`CompositeSecretRetrieverTests.cs:L17`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeSecretRetrieverTests.cs#L17) | Backend xUnit |
+| `GUARD-01` | **Guardrail** | `GUARD` | submits form with constructed payload for DENY policy | [`PolicyModal.test.tsx:L60`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/PolicyModal.test.tsx#L60) | Frontend Vitest |
+| `GUARD-02` | **Guardrail** | `GUARD` | LdapService rejects unencrypted LDAP with InvalidOperationException. | [`IdentityProviderTests.cs:L188`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L188) | Backend xUnit |
+| `GUARD-03` | **Guardrail** | `GUARD` | TokenExchangeSecretRetriever fails closed with InvalidOperationException when token endpoint is not configured. | [`TokenExchangeSecretRetrieverTests.cs:L94`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L94) | Backend xUnit |
 | `GUARD-04` | **Guardrail** | `GUARD` | Malformed completion payloads or unmapped backends must fail closed safely | [`PairwiseIntegrationMatrixTests.cs:L508`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L508) | Backend xUnit |
-| `GUARD-05` | **Guardrail** | `GUARD` | Socket-level SSRF protection blocks private and loopback IP connections unless explicitly allowlisted. | [`ChallengerTests.cs:L712`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L712) | Backend xUnit |
-| `GUARD-06` | **Guardrail** | `GUARD` | Auth middleware enforces case-insensitive route matching preventing path bypass. | [`ChallengerTests.cs:L216`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L216) | Backend xUnit |
+| `GUARD-05` | **Guardrail** | `GUARD` | Docker auto-discovery skips containers resolving to blocked private IP ranges (SSRF protection). | [`DockerAutoDiscoveryServiceTests.cs:L59`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L59) | Backend xUnit |
+| `GUARD-06` | **Guardrail** | `GUARD` | Header authentication strips remote identity headers when request is sent through untrusted proxy. | [`IdentityProviderTests.cs:L52`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L52) | Backend xUnit |
 | `GUARD-07` | **Guardrail** | `GUARD` | Custom files endpoint validates file path ensuring sibling directory traversal and parent traversal fail closed. | [`CustomFilesSecurityTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CustomFilesSecurityTests.cs#L8) | Backend xUnit |
 | `GUARD-ADMIN-CUSTOM-FILES-VALIDATION` | **Guardrail** | `GUARD` | manage_custom_files rejects invalid prompt JSON syntax and unsupported file categories. | [`AdminToolsParityTests.cs:L779`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L779) | Backend xUnit |
 | `GUARD-ADMIN-ENDPOINT-UNAUTHORIZED` | **Guardrail** | `GUARD` | Unauthenticated / non-admin client request to /admin receives 403 Forbidden. | [`AdminEndpointsTests.cs:L193`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L193) | Backend xUnit |
@@ -3477,8 +3489,8 @@
 | `GUARD-RBAC-COMPLETION-PROMPT` | **Guardrail** | `GUARD` | completion/complete throws UnauthorizedAccessException when caller lacks prompt permissions. | [`UnifiedMcpAuthorizationTests.cs:L613`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L613) | Backend xUnit |
 | `GUARD-RBAC-COMPLETION-TEMPLATE` | **Guardrail** | `GUARD` | completion/complete throws UnauthorizedAccessException when caller lacks resource template permissions. | [`UnifiedMcpAuthorizationTests.cs:L645`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L645) | Backend xUnit |
 | `GUARD-RBAC-COMPLETION-UNRESOLVED` | **Guardrail** | `GUARD` | completion/complete fails closed on unknown or unresolved completion references. | [`UnifiedMcpAuthorizationTests.cs:L677`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L677) | Backend xUnit |
-| `GUARD-RBAC-DEFAULT-DENY` | **Guardrail** | `GUARD` | RBAC defaults to deny when no matching access policies are configured. | [`FineGrainedRbacTests.cs:L84`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L84) | Backend xUnit |
-| `GUARD-RBAC-EXPLICIT-DENY` | **Guardrail** | `GUARD` | RBAC enforces explicit policy denials to reject unauthorized callers. | [`FineGrainedRbacTests.cs:L118`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L118) | Backend xUnit |
+| `GUARD-RBAC-DEFAULT-DENY` | **Guardrail** | `GUARD` | Non-admin identities default to denied fail-closed when no matching policies exist. | [`UnifiedMcpAuthorizationTests.cs:L177`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L177) | Backend xUnit |
+| `GUARD-RBAC-EXPLICIT-DENY` | **Guardrail** | `GUARD` | Explicit policy deny rules override group allows. | [`UnifiedMcpAuthorizationTests.cs:L235`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L235) | Backend xUnit |
 | `GUARD-RBAC-MISSING-GROUP` | **Guardrail** | `GUARD` | RBAC denies access when user does not possess the required security group. | [`FineGrainedRbacTests.cs:L106`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L106) | Backend xUnit |
 | `GUARD-RBAC-NULL-TARGET` | **Guardrail** | `GUARD` | IsUserAuthorizedAsync fails closed on null, empty, or whitespace target identifiers. | [`UnifiedMcpAuthorizationTests.cs:L198`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L198) | Backend xUnit |
 | `GUARD-RBAC-PROMPT-UNAUTHORIZED` | **Guardrail** | `GUARD` | GetPromptAsync throws UnauthorizedAccessException when user lacks permissions for target prompt. | [`FineGrainedRbacTests.cs:L145`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L145) | Backend xUnit |
@@ -3506,13 +3518,13 @@
 | `HEALTH-PROBE-HTTP-CONNECTED-200` | Positive | `MCP` | BackendHealthCheckService marks server as Connected when downstream HTTP/SSE endpoint returns 200 OK. | [`BackendHealthCheckServiceTests.cs:L57`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L57) | Backend xUnit |
 | `HEALTH-PROBE-HTTP-FAILED-EXCEPTION` | Positive | `MCP` | BackendHealthCheckService marks server as Failed when downstream HTTP connection fails. | [`BackendHealthCheckServiceTests.cs:L97`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L97) | Backend xUnit |
 | `HEALTH-PROBE-STDIO-VALID-CONNECTED` | Positive | `MCP` | BackendHealthCheckService sets valid STDIO servers to Connected without making network HTTP probes. | [`BackendHealthCheckServiceTests.cs:L190`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L190) | Backend xUnit |
-| `MCP-01` | Positive | `MCP` | initializes with default state | [`useServerStore.test.ts:L24`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useServerStore.test.ts#L24) | Frontend Vitest |
+| `MCP-01` | Positive | `MCP` | renders Add MCP Server form with default values when in add mode | [`ServerModal.test.tsx:L41`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L41) | Frontend Vitest |
 | `MCP-02` | Positive | `MCP` | All MCP protocol capabilities enforce caller role authorizations consistently | [`PairwiseIntegrationMatrixTests.cs:L385`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385) | Backend xUnit |
-| `MCP-05` | Positive | `MCP` | ResourceRoutingManager returns all registered resources when search query is empty. | [`ResourceRoutingManagerTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L8) | Backend xUnit |
+| `MCP-05` | Positive | `MCP` | ResourceRoutingManager filters and matches MCP resources using semantic and keyword matching. | [`ResourceRoutingTests.cs:L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ResourceRoutingTests.cs#L5) | Backend xUnit |
 | `MCP-06` | Positive | `MCP` | prompts/list aggregates, namespaces, and routes prompts to target backends. | [`McpIntegrationTests.cs:L499`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L499) | Backend xUnit |
 | `MCP-08` | Positive | `MCP` | completion/complete forwards prompt completions to backend when caller is authorized. | [`UnifiedMcpAuthorizationTests.cs:L473`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L473) | Backend xUnit |
-| `MCP-10` | Positive | `MCP` | DockerAutoDiscoveryService handles missing Docker socket gracefully without throwing unhandled exceptions. | [`SeederAndDiscoveryTests.cs:L83`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L83) | Backend xUnit |
-| `MCP-12` | Positive | `MCP` | DynamicEmbeddingService retrieves and persists embedding provider configurations in Settings table. | [`DynamicEmbeddingServiceTests.cs:L62`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L62) | Backend xUnit |
+| `MCP-10` | Positive | `MCP` | DockerAutoDiscoveryService initializes with valid container service dependencies. | [`DockerAutoDiscoveryServiceTests.cs:L46`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L46) | Backend xUnit |
+| `MCP-12` | Positive | `MCP` | ApiEmbeddingService parses OpenAI-compatible vector responses and extracts float embeddings. | [`EmbeddingServiceTests.cs:L61`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EmbeddingServiceTests.cs#L61) | Backend xUnit |
 | `MCP-15` | Positive | `MCP` | All JSON-RPC results return a resultType discriminator (complete or input_required) per MCP 2026-07-28 spec. | [`ProtocolResultTypeTests.cs:L7`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProtocolResultTypeTests.cs#L7) | Backend xUnit |
 | `MCP-21` | Positive | `MCP` | Admin endpoint handles direct Streamable HTTP POST tools/list request returning JSON even with Accept text/event-stream header. | [`AdminEndpointsTests.cs:L370`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L370) | Backend xUnit |
 | `MCP-22` | **Guardrail** | `MCP` | AdminMcpServer ProcessRequestAsync handles server/discover request returning supported versions and subscriptions capability. | [`AdminMcpServerTests.cs:L686`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L686) | Backend xUnit |
@@ -3520,14 +3532,14 @@
 | `MCP-24` | Positive | `MCP` | McpSpecMiddleware extracts OpenTelemetry W3C traceparent, tracestate, and baggage from headers and _meta. | [`McpSpecMiddlewareTests.cs:L219`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs#L219) | Backend xUnit |
 | `MCP-25` | Positive | `MCP` | ToolRoutingManager falls back to SessionManager global server tools cache during cold-start search_tools execution | [`ToolRoutingManagerTests.cs:L264`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L264) | Backend xUnit |
 | `MCP-26` | Positive | `MCP` | ToolRoutingManager dynamically registers prefix routes for tools with slash, colon, and double underscore delimiters | [`ToolRoutingManagerTests.cs:L434`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L434) | Backend xUnit |
-| `MCP-27` | Positive | `MCP` | McpServer supports Alias property | [`McpServerTests.cs:L15`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpServerTests.cs#L15) | Backend xUnit |
+| `MCP-27` | Positive | `MCP` | ToolRoutingManager exposes tools using {namespace}/{tool_name} format by default with [{namespace}] description prefix and dual-key routing. | [`ToolRoutingManagerTests.cs:L563`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L563) | Backend xUnit |
 | `MCP-28` | **Guardrail** | `MCP` | ToolRoutingManager rejects ambiguous bare tool calls when duplicate tool names exist across distinct servers, listing candidates with namespaces. | [`ToolRoutingManagerTests.cs:L647`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L647) | Backend xUnit |
 | `MCP-29` | **Guardrail** | `MCP` | ServerValidationHelper rejects invalid characters in Alias. | [`ServerEndpointsValidationTests.cs:L72`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L72) | Backend xUnit |
 | `MCP-30` | Positive | `MCP` | IsUserAuthorizedAsync matches granular tool policies across /, :, and __ delimiters. | [`UnifiedMcpAuthorizationTests.cs:L284`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L284) | Backend xUnit |
 | `MCP-31` | **Guardrail** | `MCP` | DockerAutoDiscoveryService parses mcp.alias from Docker container labels | [`DockerAutoDiscoveryServiceTests.cs:L188`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L188) | Backend xUnit |
 | `MCP-32` | **Guardrail** | `MCP` | InMemorySimdToolVectorStore scores tool embeddings using .NET 10 hardware SIMD TensorPrimitives. | [`InMemorySimdToolVectorStoreTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L8) | Backend xUnit |
-| `MCP-33` | Positive | `MCP` | OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints. | [`OpenAiEmbeddingProviderTests.cs:L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L26) | Backend xUnit |
-| `MCP-34` | **Guardrail** | `MCP` | ToolRoutingManager gracefully falls back to keyword matching when NoOpEmbeddingProvider is active. | [`ToolRoutingManagerFallbackTests.cs:L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L26) | Backend xUnit |
+| `MCP-33` | Positive | `MCP` | ToolRoutingManager fuses lexical and semantic vector candidate rankings using Reciprocal Rank Fusion (RRF, k=60). | [`ToolRoutingManagerHybridSearchTests.cs:L39`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39) | Backend xUnit |
+| `MCP-34` | **Guardrail** | `MCP` | OpenAiEmbeddingProvider blocks private loopback IPs preventing SSRF. | [`OpenAiEmbeddingProviderTests.cs:L108`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L108) | Backend xUnit |
 | `MCP-35` | Positive | `MCP` | Test call and prompt endpoints resolve server and strip prefix across slash, dunder, and colon delimiters. | [`PipelineIntegrationTests.cs:L500`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L500) | Backend xUnit |
 | `MCP-36` | Positive | `MCP` | PromptRoutingManager resolves prompt directly on cold-start without requiring prior prompts/list call. | [`PromptAndResourceResilienceTests.cs:L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L11) | Backend xUnit |
 | `MCP-37` | Positive | `MCP` | ResourceRoutingManager resolves mcp:// URIs directly on cold-start without prior resources/list. | [`PromptAndResourceResilienceTests.cs:L120`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L120) | Backend xUnit |
@@ -3581,10 +3593,11 @@
 | `MCP-EXEC-TOOL-ENFORCE-AUTH-POLICIES` | Positive | `MCP` | Meta-mode execute_tool strictly enforces target tool authorization policies | [`PairwiseIntegrationMatrixTests.cs:L567`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L567) | Backend xUnit |
 | `MCP-EXEC-TOOL-ENFORCE-CATEGORY-SCOPES` | Positive | `MCP` | Router meta-mode execute_tool validates and enforces category scopes on target tool calls | [`CategoryScopedAppKeysTests.cs:L428`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L428) | Backend xUnit |
 | `MCP-FILES-DIR-HELPER-INIT` | Positive | `MCP` | CustomFilesDirectoryHelper initializes and creates required directories on startup. | [`McpIntegrationTests.cs:L1069`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L1069) | Backend xUnit |
-| `MCP-JSON-REWRITE-ADVERSARIAL-EDGE-CASES` | Positive | `MCP` | JsonNode request rewrite handles adversarial mixed arrays, block comments, and malformed JSON. | [`ChallengerTests.cs:L572`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L572) | Backend xUnit |
+| `MCP-JSON-REWRITE-ADVERSARIAL-EDGE-CASES` | Positive | `MCP` | JsonNode request rewrite handles adversarial mixed arrays, block comments, and malformed JSON. | [`ChallengerTests.cs:L590`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L590) | Backend xUnit |
 | `MCP-JSON-REWRITE-BATCH-COMMENTS-COMMAS` | Positive | `MCP` | RewriteRequestJson accurately parses JSON batches, comments, and trailing commas using System.Text.Json JsonNode. | [`ChallengerTests.cs:L191`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L191) | Backend xUnit |
-| `MCP-JSONRPC-CONVERTER-MINIMAL-VARIANTS` | Positive | `MCP` | JsonRpcMessageConverter deserializes edge-case minimal/null JSON-RPC variants without stack overflows. | [`ChallengerTests.cs:L684`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L684) | Backend xUnit |
-| `MCP-JSONRPC-CONVERTER-PRIORITIZE-RESPONSE` | Positive | `MCP` | JsonRpcMessageConverter prioritizes result/error properties over method property in polymorphic response parsing. | [`ChallengerTests.cs:L336`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L336) | Backend xUnit |
+| `MCP-JSON-REWRITE-META-IN-PARAMS` | Positive | `MCP` | RewriteRequestJson strips _meta from root and embeds it into params to comply with MCP JSON-RPC 2.0 Zod schema. | [`ChallengerTests.cs:L216`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L216) | Backend xUnit |
+| `MCP-JSONRPC-CONVERTER-MINIMAL-VARIANTS` | Positive | `MCP` | JsonRpcMessageConverter deserializes edge-case minimal/null JSON-RPC variants without stack overflows. | [`ChallengerTests.cs:L702`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L702) | Backend xUnit |
+| `MCP-JSONRPC-CONVERTER-PRIORITIZE-RESPONSE` | Positive | `MCP` | JsonRpcMessageConverter prioritizes result/error properties over method property in polymorphic response parsing. | [`ChallengerTests.cs:L354`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L354) | Backend xUnit |
 | `MCP-JSONRPC-DESERIALIZE-PLAIN-NO-OVERFLOW` | Positive | `MCP` | Deserializing plain JsonRpcMessage does not cause recursive converter invocation or stack overflow. | [`McpIntegrationTests.cs:L287`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L287) | Backend xUnit |
 | `MCP-JSONRPC-POLYMORPHIC-DESERIALIZATION` | Positive | `MCP` | Polymorphic JSON-RPC message deserializer accurately instantiates request, response, and notification subclasses. | [`McpIntegrationTests.cs:L259`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L259) | Backend xUnit |
 | `MCP-JSONRPC-SERIALIZE-PLAIN-NO-OVERFLOW` | Positive | `MCP` | Serializing plain JsonRpcMessage does not cause recursive converter invocation or stack overflow. | [`McpIntegrationTests.cs:L303`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L303) | Backend xUnit |
@@ -3616,19 +3629,20 @@
 | `AUTH-108` | **Guardrail** | `SEC` | Authorize throws InvalidOperationException when OIDC request is null. | [`AuthorizationControllerTests.cs:L77`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L77) | Backend xUnit |
 | `AUTH-109` | Positive | `SEC` | RegisterClient uses IOAuthClientRepository when IOpenIddictApplicationManager is null. | [`AuthorizationControllerTests.cs:L94`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L94) | Backend xUnit |
 | `AUTH-111` | **Guardrail** | `SEC` | Pipeline exposes RFC 9728 OAuth Protected Resource discovery endpoints with dynamic resource identifiers. | [`PipelineIntegrationTests.cs:L63`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L63) | Backend xUnit |
-| `AUTH-112` | **Guardrail** | `SEC` | Authorize resolves client application from IOAuthClientRepository and redirects to consent. | [`AuthorizationControllerTests.cs:L297`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L297) | Backend xUnit |
 | `AUTH-113` | Positive | `SEC` | RegisterClient supports public clients with PKCE (token_endpoint_auth_method: none) and omits client secret. | [`AuthorizationControllerTests.cs:L351`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L351) | Backend xUnit |
 | `AUTH-114` | **Guardrail** | `SEC` | RegisterClient rejects invalid or non-absolute redirect URIs with standard RFC 7591 invalid_redirect_uri error. | [`AuthorizationControllerTests.cs:L400`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L400) | Backend xUnit |
 | `AUTH-115` | Positive | `SEC` | RegisterClient dynamically binds requested scopes to OpenIddict application descriptor permissions. | [`AuthorizationControllerTests.cs:L435`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L435) | Backend xUnit |
 | `AUTH-116` | **Guardrail** | `SEC` | Exchange rejects client_credentials grant attempts by public clients with UnauthorizedClient error. | [`AuthorizationControllerTests.cs:L475`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L475) | Backend xUnit |
 | `AUTH-117` | **Guardrail** | `SEC` | RegisterClient returns 403 Forbidden with access_denied when open client registration is disabled and caller is unauthorized. | [`AuthorizationControllerTests.cs:L516`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L516) | Backend xUnit |
+| `AUTH-118` | Positive | `SEC` | RegisterClient deduplicates and reuses existing dynamic client registrations for matching client name and type without accumulating redundant records. | [`AuthorizationControllerTests.cs:L556`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L556) | Backend xUnit |
+| `AUTH-119` | Positive | `SEC` | CleanupClients endpoint triggers DCR pruning and returns total cleaned client count. | [`ClientsControllerTests.cs:L333`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L333) | Backend xUnit |
 | `MCP-ADMIN-TEST-TOOL-CALL-SECRET-RESOLUTION` | Positive | `SEC` | AdminMcpServer test_tool_call resolves server secrets via injected ISecretRetriever. | [`AdminMcpServerTests.cs:L765`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L765) | Backend xUnit |
 | `MCP-ADMIN-TEST-TOOL-CALL-USER-SECRET-STORE` | Positive | `SEC` | AdminMcpServer test_tool_call resolves user credentials via injected IUserSecretStore and caller context. | [`AdminMcpServerTests.cs:L856`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L856) | Backend xUnit |
-| `SEC-01` | **Guardrail** | `SEC` | SQLite database is encrypted at rest using SQLCipher with DB_ENCRYPTION_KEY. | [`DatabaseEncryptionTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8) | Backend xUnit |
-| `SEC-02` | Positive | `SEC` | VaultSecretRetriever dynamically loads, applies, and reloads Vault configurations from database repository. | [`ProviderSettingsEncryptionTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L294) | Backend xUnit |
-| `SEC-03` | Positive | `SEC` | EnvironmentSecretRetriever retrieves configured environment variable value. | [`SecretRetrieverTests.cs:L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecretRetrieverTests.cs#L5) | Backend xUnit |
+| `SEC-01` | **Guardrail** | `SEC` | TokenExchangeSecretRetriever fails closed when HttpClient throws an exception during token exchange. | [`TokenExchangeSecretRetrieverTests.cs:L127`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L127) | Backend xUnit |
+| `SEC-02` | Positive | `SEC` | GET /api/providers/secrets returns secret providers with 200 OK. | [`PipelineIntegrationTests.cs:L376`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L376) | Backend xUnit |
+| `SEC-03` | Positive | `SEC` | Ensure TrustedProxyHelper supports CIDR ranges in XFF validation | [`IdentityProviderTests.cs:L370`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityProviderTests.cs#L370) | Backend xUnit |
 | `SEC-04` | Positive | `SEC` | WindowsRegistrySecretRetriever handles non-Windows platforms gracefully and returns null. | [`SecretRetrieverTests.cs:L34`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecretRetrieverTests.cs#L34) | Backend xUnit |
-| `SEC-05` | Positive | `SEC` | renders RPC message stream with formatted JSON | [`LogsTerminalCard.test.tsx:L61`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LogsTerminalCard.test.tsx#L61) | Frontend Vitest |
+| `SEC-05` | Positive | `SEC` | renders img live preview when dashboardIcon is an image URL | [`GeneralTabLogoUpload.test.tsx:L56`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L56) | Frontend Vitest |
 | `SEC-30` | Positive | `SEC` | Renders User Secret Storage options and toggles Vault with warning when disabled. | [`SecretProvidersTab.test.tsx:L136`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SecretProvidersTab.test.tsx#L136) | Frontend Vitest |
 | `SEC-ADMIN-AUDIT-REDACTION` | Positive | `SEC` | AdminMcpServer redacts sensitive secrets from argument payloads before recording audit logs. | [`AdminMcpServerTests.cs:L613`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L613) | Backend xUnit |
 | `SEC-APPKEY-SANITIZE-METADATA-GET` | Positive | `SEC` | AppKeys API returns sanitized key metadata without leaking plaintext tokens. | [`AppKeysControllerTests.cs:L259`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L259) | Backend xUnit |
@@ -3656,7 +3670,7 @@
 | `SEC-LOG-PROVIDER-PRESERVE-PLAIN` | Positive | `SEC` | SanitizingLoggerProvider preserves non-sensitive log statements intact. | [`SanitizingLoggerProviderTests.cs:L43`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SanitizingLoggerProviderTests.cs#L43) | Backend xUnit |
 | `SEC-LOG-PROVIDER-REDACT-EXCEPTIONS` | Positive | `SEC` | SanitizingLoggerProvider sanitizes exception messages and stack traces to prevent credential leaks in error logs. | [`SanitizingLoggerProviderTests.cs:L76`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SanitizingLoggerProviderTests.cs#L76) | Backend xUnit |
 | `SEC-LOG-PROVIDER-REDACT-SECRETS` | Positive | `SEC` | SanitizingLoggerProvider automatically redacts Bearer tokens, API keys, and credentials in log message strings. | [`SanitizingLoggerProviderTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SanitizingLoggerProviderTests.cs#L8) | Backend xUnit |
-| `SEC-MASTERKEY-ATOMIC-REENCRYPTION` | Positive | `SEC` | Atomically re-encrypts database credentials when setting a custom master key. | [`MasterKeyReEncryptionTests.cs:L142`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L142) | Backend xUnit |
+| `SEC-MASTERKEY-ATOMIC-REENCRYPTION` | Positive | `SEC` | Rejects POST /api/config/master-key when key source is external. | [`PipelineIntegrationTests.cs:L482`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L482) | Backend xUnit |
 | `SEC-MASTERKEY-CONFIGURED-STATUS-BADGE` | Positive | `SEC` | Displays configured badge and rotate button when custom master key is configured. | [`GeneralTab.test.tsx:L192`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L192) | Frontend Vitest |
 | `SEC-MASTERKEY-CUSTOM-MODAL-REENCRYPTION` | Positive | `SEC` | Validates master key inputs (length, match) and triggers atomic re-encryption. | [`MasterKeyModal.test.tsx:L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/MasterKeyModal.test.tsx#L6) | Frontend Vitest |
 | `SEC-MASTERKEY-EXTERNAL-LOCKED-BADGE` | Positive | `SEC` | Displays locked badge when master key is externally managed via Vault or Environment. | [`GeneralTab.test.tsx:L149`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L149) | Frontend Vitest |
@@ -3684,7 +3698,7 @@
 | `TRANS-AUTH-SHAPES-HEADERS-JSON` | Positive | `TRANS` | SseTransport parses and applies extra request headers from HeadersJson configuration. | [`TransportsAuthShapeTests.cs:L112`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L112) | Backend xUnit |
 | `TRANS-AUTH-SHAPES-QUERY-PARAM` | Positive | `TRANS` | SseTransport appends authentication tokens as URL query parameters when query auth shape is configured. | [`TransportsAuthShapeTests.cs:L67`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L67) | Backend xUnit |
 | `TRANS-AUTH-SHAPES-STANDARD-HEADERS` | Positive | `TRANS` | SseTransport formats standard authorization shapes (bearer, basic, raw, x-api-key) into HTTP headers. | [`TransportsAuthShapeTests.cs:L17`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L17) | Backend xUnit |
-| `TRANS-BACKEND-MULTIPLEX-CONCURRENT-RPC` | Positive | `TRANS` | BackendConnection multiplexes 100+ concurrent asynchronous polymorphic RPC requests without deadlocking. | [`ChallengerTests.cs:L494`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L494) | Backend xUnit |
+| `TRANS-BACKEND-MULTIPLEX-CONCURRENT-RPC` | Positive | `TRANS` | BackendConnection multiplexes 100+ concurrent asynchronous polymorphic RPC requests without deadlocking. | [`ChallengerTests.cs:L512`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L512) | Backend xUnit |
 | `TRANS-DISCONNECT-PENDING-CLEANUP` | Positive | `TRANS` | Cleans up and cancels pending requests upon backend transport disconnect. | [`ConcurrentResponseIsolationTests.cs:L277`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L277) | Backend xUnit |
 | `TRANS-EXPLICIT-NULL-ID-ISOLATION` | Positive | `TRANS` | Handles JSON-RPC requests with explicit null IDs and multiplexes upstream calls correctly. | [`ConcurrentResponseIsolationTests.cs:L346`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L346) | Backend xUnit |
 | `TRANS-HIGH-CONCURRENCY-ISOLATION` | Positive | `TRANS` | Maintains strict response isolation under high concurrency with 100+ callers reusing identical RPC IDs. | [`ConcurrentResponseIsolationTests.cs:L111`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L111) | Backend xUnit |
@@ -3696,7 +3710,7 @@
 | `TRANS-NOTIFICATION-NO-RESPONSE-LISTENER` | Positive | `TRANS` | Handles JSON-RPC notifications without registering pending response listeners. | [`ConcurrentResponseIsolationTests.cs:L419`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L419) | Backend xUnit |
 | `TRANS-SSE-CALLMETHOD-DISCONNECT-GUARD` | **Guardrail** | `TRANS` | SseTransport CallMethodAsync returns -32001 Not Connected when backend is disconnected. | [`TransportResilienceTests.cs:L12`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportResilienceTests.cs#L12) | Backend xUnit |
 | `TRANS-SSE-LOG-ENDPOINT-WAIT-EXCEPTION` | Positive | `TRANS` | SSE transport logs exceptions gracefully when waiting for endpoint URL without throwing unhandled exceptions. | [`SseTransportTests.cs:L76`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SseTransportTests.cs#L76) | Backend xUnit |
-| `TRANS-SSE-NOTIF-FORWARD-FIELDS-INTACT` | Positive | `TRANS` | SSE backend notifications are forwarded to client sessions with all payload fields intact. | [`ChallengerTests.cs:L419`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L419) | Backend xUnit |
+| `TRANS-SSE-NOTIF-FORWARD-FIELDS-INTACT` | Positive | `TRANS` | SSE backend notifications are forwarded to client sessions with all payload fields intact. | [`ChallengerTests.cs:L437`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L437) | Backend xUnit |
 | `TRANS-SSE-RESOLVE-STATIC-APIKEY` | Positive | `TRANS` | SSE transport resolves static plaintext API keys when provider is None | [`SseTransportTests.cs:L13`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SseTransportTests.cs#L13) | Backend xUnit |
 | `TRANS-SSE-SENDREQUEST-DISCONNECT-GUARD` | **Guardrail** | `TRANS` | SseTransport SendRequestAsync returns -32001 Not Connected when backend is disconnected. | [`TransportResilienceTests.cs:L36`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportResilienceTests.cs#L36) | Backend xUnit |
 | `TRANS-SSE-STREAM-LIFECYCLE` | Positive | `TRANS` | SSE transport correctly resolves relative endpoint URLs and ignores keep-alive SSE comments. | [`SseTransportTests.cs:L100`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SseTransportTests.cs#L100) | Backend xUnit |
@@ -3708,9 +3722,9 @@
 | `TRANS-STDIO-TERMINATE-CLEANLY` | Positive | `TRANS` | STDIO transport terminates subprocess tree cleanly upon disposal or cancellation | [`StdioTransportTests.cs:L242`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L242) | Backend xUnit |
 | `TRANS-STDIO-TOKENIZE-PRESERVE-QUOTES` | Positive | `TRANS` | STDIO command-line tokenizer preserves quoted arguments and space escaping | [`StdioTransportTests.cs:L327`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L327) | Backend xUnit |
 | `TRANS-TARGETED-CANCELLATION-ISOLATION` | Positive | `TRANS` | Targeted cancellation does not cancel concurrent client sessions reusing identical RPC IDs. | [`ConcurrentResponseIsolationTests.cs:L532`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L532) | Backend xUnit |
-| `TRANS-TIMEOUT-PENDING-CLEANUP` | Positive | `TRANS` | SendRequestAsync times out cleanly and removes pending completion handlers without leaking memory. | [`ChallengerTests.cs:L276`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L276) | Backend xUnit |
+| `TRANS-TIMEOUT-PENDING-CLEANUP` | Positive | `TRANS` | Cleans up pending request tracking maps upon timeout and cancellation. | [`ConcurrentResponseIsolationTests.cs:L217`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L217) | Backend xUnit |
 | `TRANS-VALIDATION-HTTP-ALLOWED-IPS` | Positive | `TRANS` | ServerValidationHelper accepts valid HTTP/HTTPS endpoints allowed by IP security rules. | [`ServerEndpointsValidationTests.cs:L38`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L38) | Backend xUnit |
-| `UI-01` | Positive | `UI` | opens confirmation modal and resolves true when confirmed | [`useConfirmStore.test.ts:L31`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useConfirmStore.test.ts#L31) | Frontend Vitest |
+| `UI-01` | Positive | `UI` | renders CustomFileModal in create mode and displays visual builder tabs | [`CustomFileModal.test.tsx:L26`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CustomFileModal.test.tsx#L26) | Frontend Vitest |
 | `UI-02` | Positive | `UI` | Inspect modal displays spinner loading state while querying server capabilities | [`ServerInspectModal.test.tsx:L61`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerInspectModal.test.tsx#L61) | Frontend Vitest |
 | `UI-03` | Positive | `UI` | Grouped server view renders category sections and supports collapsible groups | [`DashboardView.test.tsx:L63`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/DashboardView.test.tsx#L63) | Frontend Vitest |
 | `UI-04` | Positive | `UI` | Tool selector filters available tools by selected backend server | [`ToolTesterCard.test.tsx:L77`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ToolTesterCard.test.tsx#L77) | Frontend Vitest |
@@ -3720,7 +3734,6 @@
 | `UI-102` | Positive | `UI` | Dashboard renders stats card, connected server list, and setup instructions | [`DashboardView.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/DashboardView.test.tsx#L1) | Frontend Vitest |
 | `UI-103` | Positive | `UI` | Interactive tool tester renders server and tool selection dropdowns | [`ToolTesterCard.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ToolTesterCard.test.tsx#L1) | Frontend Vitest |
 | `UI-108` | Positive | `UI` | renders nothing when isMappingModalOpen is false | [`MappingModal.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/MappingModal.test.tsx#L1) | Frontend Vitest |
-| `UI-109` | Positive | `UI` | Renders ClientSetupGuide below the user credentials card. | [`MyMcpServers.test.tsx:L104`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L104) | Frontend Vitest |
 | `UI-110` | Positive | `UI` | renders title, MCG badge, subtitle, and version badge | [`Header.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/Header.test.tsx#L1) | Frontend Vitest |
 | `UI-111` | Positive | `UI` | renders GeneralTab and triggers save | [`SettingsTabs.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsTabs.test.tsx#L1) | Frontend Vitest |
 | `UI-113` | Positive | `UI` | renders tab navigation and switches active subviews | [`SettingsView.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L1) | Frontend Vitest |
@@ -3737,8 +3750,9 @@
 | `UI-132` | Positive | `UI` | groups slash-namespaced tools into distinct backend servers without grouping under custom | [`TestBenchView.test.tsx:L198`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L198) | Frontend Vitest |
 | `UI-133` | Positive | `UI` | verifies deterministic data-testid attributes and interactive flow across test bench tabs | [`TestBenchView.test.tsx:L473`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L473) | Frontend Vitest |
 | `UI-134` | Positive | `UI` | verifies server modal exposes deterministic data-testid attributes | [`ServerModal.test.tsx:L225`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L225) | Frontend Vitest |
+| `UI-135` | Positive | `UI` | toggles 3LO OAuth fields and submits with complete OAuth configuration | [`ServerModal.test.tsx:L249`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L249) | Frontend Vitest |
 | `UI-30` | Positive | `UI` | Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration. | [`ClientModal.test.tsx:L27`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientModal.test.tsx#L27) | Frontend Vitest |
-| `UI-31` | **Guardrail** | `UI` | Fetches registered OAuth clients and updates store state. | [`useClientStore.test.ts:L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L37) | Frontend Vitest |
+| `UI-31` | **Guardrail** | `UI` | Fetches clients on mount and renders table headers and action buttons. | [`RegisteredClientsCard.test.tsx:L42`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L42) | Frontend Vitest |
 | `UI-32` | Positive | `UI` | Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials. | [`useClientStore.test.ts:L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L76) | Frontend Vitest |
-| `UI-CONFIRM-MODAL` | **Guardrail** | `UI` | Centralized promise-based confirmation store resolves true on confirmation and false on cancellation. | [`useConfirmStore.test.ts:L4`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useConfirmStore.test.ts#L4) | Frontend Vitest |
-| `UI-TOAST-TRANSITION` | **Guardrail** | `UI` | Displays error toast notification when saving invalid JSON credentials for user-provided server. | [`MyMcpServers.test.tsx:L25`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L25) | Frontend Vitest |
+| `UI-CONFIRM-MODAL` | **Guardrail** | `UI` | Renders confirmation dialog with title, message, and trigger buttons for confirm and cancel. | [`ConfirmModal.test.tsx:L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ConfirmModal.test.tsx#L6) | Frontend Vitest |
+| `UI-TOAST-TRANSITION` | **Guardrail** | `UI` | Displays error toast notification when switching from invalid JSON to Visual Prompt Builder. | [`CustomFileModal.test.tsx:L112`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CustomFileModal.test.tsx#L112) | Frontend Vitest |
