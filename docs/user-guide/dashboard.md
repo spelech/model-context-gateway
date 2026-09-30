@@ -10,11 +10,13 @@ The **Model Context Gateway (MCG) Dashboard** provides a centralized, web-based 
 
 The web interface features a fixed top navigation bar allowing one-click access across all primary subsystems:
 
-```
-+--------------------------------------------------------------------------------------------------------+
-| 🌐 Model Context Gateway (MCG)  [Overview] [App Keys & Security] [Test Bench] [Settings] [My MCP Servers]  👤 admin |
-+--------------------------------------------------------------------------------------------------------+
-```
+| Navigation Item | Description |
+| :--- | :--- |
+| **Overview** | Operational dashboard, system stats, server catalog, and client setup guides |
+| **App Keys & Security** | Mint AppKeys, manage scope boundaries, inspect clients, and view user quotas |
+| **Test Bench** | Interactive tool tester, resource reader, prompt renderer, semantic search simulator, console, and live logs |
+| **Settings** | Configuration for vector search, identity providers, secret providers, custom files, and RBAC policies |
+| **My MCP Servers** | Personal user access tokens, personal server management, and direct endpoints |
 
 1. **Overview (`Overview`)**: Displays system health metrics (`StatsCard`), the full registered server catalog, search and sort controls, and the interactive client setup guide.
 2. **App Keys & Security (`App Keys & Security` / `My App Keys`)**: Create and manage cryptographically hashed AppKeys, inspect connected clients, set access scopes, manage user quotas, and copy client configuration snippets.
@@ -76,14 +78,7 @@ When viewing the server catalog in flat mode (`Group: None`), the footer toolbar
 
 Each registered backend MCP server is represented by an interactive status card:
 
-```
-+-----------------------------------------------------------------------------+
-| 🟢 Docker Daemon MCP  [docker]                     [SSE] [Tools: 24] [Resources: 6] [Vault] |
-| 🔗 http://docker-mcp:8080/sse                      📂 Infrastructure                        |
-|                                                                                             |
-| [ 👁️ Inspect ]  [ ✏️ Edit ]  [ 🛡️ Policy ]  [ 🔄 Reconnect ]  [ 🗑️ Delete ]                 |
-+-----------------------------------------------------------------------------+
-```
+![Server Status Card](../assets/dashboard.jpg)
 
 ### Card Indicators & Badges
 * **Connection Status Indicator**:

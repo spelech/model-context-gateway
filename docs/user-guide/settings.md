@@ -10,11 +10,13 @@ The **Settings View** (`Settings` tab) provides administrative controls for conf
 
 The Settings interface is structured into five operational tabs:
 
-```
-+-------------------------------------------------------------------------------------------------------------------------+
-| [ 🧠 Vector & Search ]  [ 🪪 Identity & Auth ]  [ 🔐 Secret Providers ]  [ 📂 Prompts & Resources ]  [ 👥 Access Control ] |
-+-------------------------------------------------------------------------------------------------------------------------+
-```
+| Settings Tab | Primary Configuration Domain |
+| :--- | :--- |
+| **🧠 Vector & Search** | Local ONNX runtime parameters, external OpenAI/Ollama embedding APIs, and SIMD RRF search tuning |
+| **🪪 Identity & Auth** | Active Directory LDAP bindings, OIDC proxy headers, and OpenIddict OAuth 2.0 provider |
+| **🔐 Secret Providers** | HashiCorp Vault KV v2 AppRole/Token, Windows DPAPI Registry, and RFC 8693 token exchange |
+| **📂 Prompts & Resources** | Custom JSON specification file manager, prompt templates, and virtual resource definitions |
+| **👥 Access Control** | Role-based access policies (`ALLOW`/`DENY`) and external Windows SID / AD group mappings |
 
 ---
 
@@ -24,26 +26,7 @@ The Settings interface is structured into five operational tabs:
 
 The vector embedding engine powers the **Meta-Mode** tool discovery function (`search_tools`). It generates mathematical representations of natural language intents and compares them against tool catalog metadata:
 
-```
-+-------------------------------------------------------------------------------+
-| 🧠 Vector Embedding & Semantic Search Configuration                           |
-+-------------------------------------------------------------------------------+
-| Embedding Engine:     (•) Local ONNX In-Process   ( ) External API Provider   |
-|                                                                               |
-| [Local ONNX Engine Parameters]                                                |
-| Model Architecture:   All-MiniLM-L6-v2 (384-dimensional dense vectors)        |
-| Model Cache Path:     [ /data/models                                       ]  |
-| Execution Provider:   CPU Multi-Threaded In-Process (Microsoft.ML.OnnxRuntime) |
-|                                                                               |
-| [External API Provider Parameters]                                            |
-| Provider Type:        [ OpenAI / Compatible (LiteLLM, Ollama) ▾ ]             |
-| Base API Endpoint:    [ https://api.openai.com/v1                          ]  |
-| API Secret Key:       [ sk-proj-********************************           ]  |
-| Model Identifier:     [ text-embedding-3-small                             ]  |
-|                                                                               |
-| [ Save Vector Settings ]                                                      |
-+-------------------------------------------------------------------------------+
-```
+![Vector Embedding & Semantic Search Configuration](../assets/settings_vector_search.jpg)
 
 ### 1. Local ONNX Engine (Recommended / Default)
 * **Model Architecture**: Uses the embedded `All-MiniLM-L6-v2` transformer model (384-dimensional dense vectors).

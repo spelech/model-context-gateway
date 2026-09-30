@@ -13,26 +13,7 @@ The **Model Context Gateway (MCG)** manages connections to downstream Model Cont
 
 Click the **`+ Add Server`** button in the dashboard toolbar to open the registration modal:
 
-```
-+-------------------------------------------------------------------------------+
-| ➕ Add New MCP Server                                                      [X] |
-+-------------------------------------------------------------------------------+
-| Server Identifier:   [ docker                                              ]  |
-| Display Name:        [ Docker Infrastructure Daemon                        ]  |
-| Transport Type:      (•) SSE Stream   ( ) HTTP JSON-RPC   ( ) STDIO CLI       |
-| Endpoint / Command:  [ http://docker-mcp:8080/sse                          ]  |
-| Categories (comma):  [ Infrastructure, DevOps                              ]  |
-|                                                                               |
-| Secret Provider:     [ HashiCorp Vault (KV v2) ▾                           ]  |
-|   Vault Mount:       [ secret                                              ]  |
-|   Secret Path:       [ homelab/docker                                      ]  |
-|   Secret Field:      [ api_token                                           ]  |
-|                                                                               |
-| Custom Headers:      [ {"X-Custom-Header": "value"}                        ]  |
-|                                                                               |
-| [ Cancel ]                                                    [ Save Server ] |
-+-------------------------------------------------------------------------------+
-```
+![Add New MCP Server Modal](../assets/add_server_modal.jpg)
 
 ### Core Configuration Parameters
 

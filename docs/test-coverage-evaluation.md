@@ -44,24 +44,20 @@ The automated test suite contains **1,063 passing tests** with high code coverag
    - Automated Roslyn C# and TypeScript AST extraction tool (`scripts/CatalogGenerator`) verifies zero-drift living requirements documentation ([`software-requirements-and-test-catalog.md`](software-requirements-and-test-catalog.md)) mapping **74 Requirements across 1,063 Test Proofs**.
 
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                      SUBSYSTEM CONFIDENCE SCORECARD                    │
-├────────────────────────────────────────────────────────────────────────┤
-│ Core MCP Routing & Protocol Engine (JSON-RPC / SSE) │ [██████████] 99% │
-│ AppKey Auth & Category-Scoped RBAC Policies          │ [██████████] 99% │
-│ Multi-Database Persistence (MSSQL / MySQL / SQLite)  │ [██████████] 99% │
-│ Downstream Transports (STDIO / SSE / HTTP / Stream) │ [██████████] 98% │
-│ Windows Native IIS In-Process Hosting (ANCM v2)     │ [██████████] 99% │
-│ Windows DPAPI Machine Cryptography & Registry       │ [██████████] 99% │
-│ Windows Identity & Active Directory S-1-5-32-544    │ [██████████] 98% │
-│ HashiCorp Vault Secrets Subsystem (Token + AppRole)  │ [██████████] 96% │
-│ Active Directory / LDAP Identity Subsystem (LDAPS)   │ [██████████] 96% │
-│ Standalone Media MCP Service (Plex / Overseerr)      │ [██████████] 98% │
-│ Frontend Unit & Store Layer (Vitest / React 19)      │ [██████████] 98% │
-│ End-to-End UI Process Workflows (Playwright)         │ [█████████░] 95% │
-└────────────────────────────────────────────────────────────────────────┘
-```
+| Subsystem Domain | Confidence Level | Score |
+| :--- | :--- | :--- |
+| **Core MCP Routing & Protocol Engine (JSON-RPC / SSE)** | High Confidence | **99%** |
+| **AppKey Auth & Category-Scoped RBAC Policies** | High Confidence | **99%** |
+| **Multi-Database Persistence (MSSQL / MySQL / SQLite)** | High Confidence | **99%** |
+| **Downstream Transports (STDIO / SSE / HTTP / Stream)** | High Confidence | **98%** |
+| **Windows Native IIS In-Process Hosting (ANCM v2)** | High Confidence | **99%** |
+| **Windows DPAPI Machine Cryptography & Registry** | High Confidence | **99%** |
+| **Windows Identity & Active Directory S-1-5-32-544** | High Confidence | **98%** |
+| **HashiCorp Vault Secrets Subsystem (Token + AppRole)** | High Confidence | **96%** |
+| **Active Directory / LDAP Identity Subsystem (LDAPS)** | High Confidence | **96%** |
+| **Standalone Media MCP Service (Plex / Overseerr)** | High Confidence | **98%** |
+| **Frontend Unit & Store Layer (Vitest / React 19)** | High Confidence | **98%** |
+| **End-to-End UI Process Workflows (Playwright)** | High Confidence | **95%** |
 
 ### Test Suite Metrics
 

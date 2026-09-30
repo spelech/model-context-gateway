@@ -84,12 +84,13 @@ For specialized IDEs, scripts, or agents requiring dedicated, direct access to a
 
 The router multiplexes concurrent requests across shared backend connections while guaranteeing strict response isolation:
 
-```
-Client 1 (ID: 1) ──┐                                  ┌── Upstream Server
-                   ├─► [ JsonRpcStateManager ] ───────┤   (ID: "c18a-981f...")
-Client 2 (ID: 1) ──┘   • Rewrite to Upstream GUID     └──
-                       • Match Response by GUID
-                       • Restore Original ID (1)
+```mermaid
+flowchart LR
+    subgraph Multiplexing ["<b>In-Flight Request Multiplexing & ID Mapping</b>"]
+        C1["Client 1 (Request ID: 1)"] --> StateMgr
+        C2["Client 2 (Request ID: 1)"] --> StateMgr
+        StateMgr["<b>JsonRpcStateManager</b><br>• Rewrites ID to Upstream GUID (e.g. c18a-981f...)<br>• Tracks original client ID and TCS<br>• Restores original ID upon upstream response"] --> Upstream["Upstream Backend Server"]
+    end
 ```
 
 1. **Polymorphic Serialization**:

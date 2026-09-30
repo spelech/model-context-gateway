@@ -201,13 +201,13 @@ erDiagram
 
 Sensitive database columns (e.g. `AppKeys.EncryptedKey`, `SecretProviders.EncryptedConfigJson`, `AuthProviderConfigs.EncryptedConfigJson`, `Servers.ApiKey`) are protected using **AES-256-GCM authenticated envelope encryption** via [`SymmetricEncryptionHelper`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Secrets/SymmetricEncryptionHelper.cs):
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                       AES-256-GCM ENVELOPE PACKET FORMAT                    │
-├───────────────────────────┬──────────────────────────┬──────────────────────┤
-│    Nonce (IV) [12 Bytes]  │  Auth Tag [16 Bytes]     │ Ciphertext [N Bytes] │
-└───────────────────────────┴──────────────────────────┴──────────────────────┘
- ◄────────────────────── Base64 Encoded for Storage ────────────────────────►
+```mermaid
+flowchart LR
+    subgraph Envelope ["<b>AES-256-GCM Envelope Packet Format (Base64 Encoded)</b>"]
+        direction LR
+        Nonce["<b>Nonce (IV)</b><br>12 Bytes"] --> Tag["<b>Authentication Tag</b><br>16 Bytes"]
+        Tag --> Ciphertext["<b>Ciphertext Payload</b><br>N Bytes"]
+    end
 ```
 
 1. **Nonce Generation**: A cryptographically secure 12-byte random nonce is generated for every encryption operation using `RandomNumberGenerator.GetBytes(12)`.

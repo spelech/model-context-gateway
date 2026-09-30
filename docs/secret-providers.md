@@ -191,11 +191,11 @@ All secret provider configurations stored in the database (such as `SecretProvid
 * **Nonce**: 96-bit (12-byte) cryptographically secure random nonce generated per payload via `RandomNumberGenerator.GetBytes(12)`. A nonce is a number used once.
 * **Authentication Tag**: 128-bit (16-byte) tag that verifies ciphertext integrity and prevents data tampering.
 * **Packed Base64 Format**:
-  ```
-  +-------------------+------------------+-----------------------------+
-  | Nonce (12 Bytes)  | Tag (16 Bytes)   | Ciphertext (N Bytes)        |
-  +-------------------+------------------+-----------------------------+
-  ```
+  | Packet Field | Size | Description |
+  | :--- | :--- | :--- |
+  | **Nonce (IV)** | 12 Bytes | Cryptographically secure random nonce generated per payload |
+  | **Auth Tag** | 16 Bytes | AES-256-GCM authentication tag verifying ciphertext integrity |
+  | **Ciphertext** | N Bytes | Encrypted data payload |
   The gateway encodes this combined byte array as a Base64 string.
 
 ### Master Key Resolution Hierarchy and Lifecycle
