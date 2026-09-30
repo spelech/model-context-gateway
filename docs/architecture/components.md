@@ -139,26 +139,16 @@ The Core assembly contains high-performance routing coordinators and protocol en
 
 To preserve modularity, testability, and maintainability across releases, the codebase enforces five strict architectural boundary constraints:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                       ARCHITECTURAL BOUNDARY CONSTRAINTS                    │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ 1. Core NEVER depends on specific database drivers or concrete transports.  │
-│    Core interacts strictly through `IDbConnectionFactory`, `ITransport`,    │
-│    and `ISecretRetriever`.                                                  │
-│                                                                             │
-│ 2. Infrastructure implements strategy interfaces defined in Core and DI.    │
-│    All database dialects (SQLite, MSSQL, MySQL) adhere to common contracts.│
-│                                                                             │
-│ 3. Components expose Minimal API endpoints and controllers that consume      │
-│    Core session managers, repositories, and security helpers.               │
-│                                                                             │
-│ 4. No Raw String JSON Manipulation: All JSON-RPC modifications MUST use     │
-│    `JsonNode`, `JsonObject`, or `JsonDocument` DOM trees.                   │
-│                                                                             │
-│ 5. Thread-Safe State: Shared state MUST use `ConcurrentDictionary` or       │
-│    explicit monitor locks. Single-execution locks guard initialization.     │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Constraints ["<b>Architectural Boundary Constraints</b>"]
+        direction TD
+        C1["<b>1. Decoupled Core Layer</b><br>Core interacts strictly through strategy abstractions (<code>IDbConnectionFactory</code>, <code>ITransport</code>, <code>ISecretRetriever</code>) and never depends on concrete database drivers or transports."]
+        C2["<b>2. Strategy Pattern Implementations</b><br>Infrastructure services implement interfaces defined in Core and DI. All database dialects (SQLite, MSSQL, MySQL) adhere to common contracts."]
+        C3["<b>3. Modular Endpoint API Layer</b><br>Components expose Minimal API endpoints and controllers consuming Core session managers, repositories, and security helpers."]
+        C4["<b>4. DOM-Based Safe JSON Mutations</b><br>No raw string JSON manipulation. All JSON-RPC modifications MUST use <code>JsonNode</code>, <code>JsonObject</code>, or <code>JsonDocument</code> DOM trees."]
+        C5["<b>5. Thread-Safe State & Initialization</b><br>Shared mutable state MUST use <code>ConcurrentDictionary</code> or explicit monitor locks, with single-execution guards during startup."]
+    end
 ```
 
 ---

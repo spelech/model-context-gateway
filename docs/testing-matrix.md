@@ -11,18 +11,14 @@ This document defines the canonical pairwise requirements matrix, interaction co
 
 The router operates across 6 primary orthogonal dimensions:
 
-```
-+---------------------------------------------------------------------------------------------------+
-|                                      PAIRWISE TEST DIMENSIONS                                     |
-+---------------------------------------------------------------------------------------------------+
-| 1. Auth Methods     | AppKey | SSO Headers | OIDC Bearer | Anonymous / Unauthenticated          |
-| 2. Identity / SIDs  | Admin (S-1-5-32-544 / full_admin) | Group-Mapped Operator | Denied | Invalid|
-| 3. AppKey Scopes    | `*`/`all` | `server:{id}` | `category:{cat}` | `tool:`/`prompt:`/`resource:`|
-| 4. Capabilities     | tools/call | prompts/get | resources/read | templates | completion | meta   |
-| 5. Transports       | SSE (`/sse`) | HTTP (`/mcp`) | Target Proxy (`/{server}`) | STDIO Subprocess |
-| 6. Persistence DB   | SQLite | Microsoft SQL Server (MSSQL) | MySQL                               |
-+---------------------------------------------------------------------------------------------------+
-```
+| Dimension | Tested Parameter Variants |
+| :--- | :--- |
+| **1. Auth Methods** | AppKey \| SSO Headers \| OIDC Bearer \| Anonymous / Unauthenticated |
+| **2. Identity / SIDs** | Admin (S-1-5-32-544 / full_admin) \| Group-Mapped Operator \| Denied \| Invalid |
+| **3. AppKey Scopes** | `*`/`all` \| `server:{id}` \| `category:{cat}` \| `tool:`/`prompt:`/`resource:` |
+| **4. Capabilities** | tools/call \| prompts/get \| resources/read \| templates \| completion \| meta |
+| **5. Transports** | SSE (`/sse`) \| HTTP (`/mcp`) \| Target Proxy (`/{server}`) \| STDIO Subprocess |
+| **6. Persistence DB** | SQLite \| Microsoft SQL Server (MSSQL) \| MySQL |
 
 ### Dimension Definitions
 

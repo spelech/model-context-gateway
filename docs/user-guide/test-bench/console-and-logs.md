@@ -8,28 +8,7 @@ The **Interactive Test Bench** provides low-level debugging tools: the **Direct 
 
 The Raw Console allows you to bypass the UI form builders and send exact JSON-RPC 2.0 messages directly to the gateway's routing engine:
 
-```
-+-------------------------------------------------------------------------------+
-| 💻 Direct JSON-RPC Raw Console                                                |
-+-------------------------------------------------------------------------------+
-| Request:                                                                      |
-| {                                                                             |
-|   "jsonrpc": "2.0",                                                           |
-|   "id": 1,                                                                    |
-|   "method": "tools/list",                                                     |
-|   "params": {}                                                                |
-| }                                                                             |
-|                                                                               |
-| [ 🚀 Send Request ]                                                           |
-+-------------------------------------------------------------------------------+
-| Response (200 OK):                                                            |
-| {                                                                             |
-|   "jsonrpc": "2.0",                                                           |
-|   "id": 1,                                                                    |
-|   "result": { "tools": [...] }                                                |
-| }                                                                             |
-+-------------------------------------------------------------------------------+
-```
+![Direct JSON-RPC Raw Console and Interactive Test Bench View](../../assets/test_bench_view.jpg)
 
 ### Useful Raw JSON-RPC Payloads for Testing
 
@@ -83,17 +62,12 @@ Executes a target tool through Meta-Mode's wrapper:
 
 The Live Logs Terminal sits at the bottom of the Test Bench view. It captures and streams internal gateway logs in real time as client sessions connect and execute tools:
 
-```
-+-------------------------------------------------------------------------------+
-| 📟 Live Diagnostic Logs & Gateway Activity             [ Clear ] [ Auto-Scroll ]|
-| Filter: [ ALL ▾ ] [ INFO ▾ ] [ WARN ▾ ] [ ERROR ▾ ]                           |
-+-------------------------------------------------------------------------------+
-| [13:45:02.112] [INF] [McpSession:c8b4] Client authenticated as 'admin' via OIDC
-| [13:45:02.115] [INF] [McpSession:c8b4] Initialized Meta-Mode stream (2 tools)
-| [13:45:04.220] [INF] [ToolExecution] docker__restart_container invoked by admin
-| [13:45:04.262] [INF] [ToolExecution] docker__restart_container completed in 42ms
-| [13:45:10.512] [WRN] [HealthCheck] Backend 'plex' responded slowly (1250ms)
-+-------------------------------------------------------------------------------+
+```text
+[13:45:02.112] [INF] [McpSession:c8b4] Client authenticated as 'admin' via OIDC
+[13:45:02.115] [INF] [McpSession:c8b4] Initialized Meta-Mode stream (2 tools)
+[13:45:04.220] [INF] [ToolExecution] docker__restart_container invoked by admin
+[13:45:04.262] [INF] [ToolExecution] docker__restart_container completed in 42ms
+[13:45:10.512] [WRN] [HealthCheck] Backend 'plex' responded slowly (1250ms)
 ```
 
 ### Key Terminal Capabilities

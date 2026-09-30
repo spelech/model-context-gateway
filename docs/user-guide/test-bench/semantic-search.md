@@ -6,27 +6,7 @@ The **Semantic Router Simulator** (`SemanticRouterCard`) in the Test Bench enabl
 
 ## 🧠 Simulator Interface & Layout
 
-```
-+-------------------------------------------------------------------------------+
-| 🧠 Semantic Search Simulator (Meta-Mode Test)                                 |
-+-------------------------------------------------------------------------------+
-| Natural Language Query: [ restart web proxy container                       ] |
-| Search Limit:           [ 5 ▾ ]                                               |
-|                                                                               |
-| [ 🔍 Simulate Semantic Search ]                                               |
-+-------------------------------------------------------------------------------+
-| Search Results (Embedding Latency: 12ms):                                     |
-|                                                                               |
-| 1. docker__restart_container  [Score: 2.942] 🟢 High Match                    |
-|    "Restart a running Docker container by name or container ID."              |
-|                                                                               |
-| 2. docker__stop_container     [Score: 1.815] 🟡 Moderate                      |
-|    "Stop a running Docker container."                                         |
-|                                                                               |
-| 3. caddy__reload_config       [Score: 1.748] 🟡 Moderate                      |
-|    "Triggers an in-process reload of the Caddy web reverse proxy config."     |
-+-------------------------------------------------------------------------------+
-```
+![Semantic Router Simulator in Action](../../assets/test_bench_view.jpg)
 
 ---
 
@@ -34,33 +14,17 @@ The **Semantic Router Simulator** (`SemanticRouterCard`) in the Test Bench enabl
 
 MCG uses an enterprise-grade **Reciprocal Rank Fusion (RRF, $k=60$)** hybrid ranking pipeline that merges lexical keyword precision with dense vector semantic understanding:
 
-```
-                          ┌──────────────────────────┐
-                          │       search_tools       │
-                          │   "restart web proxy"    │
-                          └─────────────┬────────────┘
-                                        │
-                         ┌──────────────┴──────────────┐
-                         ▼                             ▼
-                ┌──────────────────┐          ┌──────────────────┐
-                │  Lexical Engine  │          │  Vector Search   │
-                │ Exact phrase &   │          │ Dense embedding  │
-                │ token matches in │          │ cosine similarity│
-                │ name, desc, tags │          │ via .NET 10 SIMD │
-                └────────┬─────────┘          └────────┬─────────┘
-                         │                             │
-                         │ Ranked Candidate #1         │ Ranked Candidate #2
-                         │                             │
-                         └──────────────┬──────────────┘
-                                        ▼
-                           ┌────────────────────────┐
-                           │ Reciprocal Rank Fusion │
-                           │     RRF (k = 60)       │
-                           └────────────┬───────────┘
-                                        ▼
-                           ┌────────────────────────┐
-                           │   Final Tool Ranking   │
-                           └────────────────────────┘
+```mermaid
+flowchart TD
+    Query["<b>Client Natural Language Query</b><br><code>search_tools</code> ('restart web proxy')"] --> Split{"Parallel Candidate Ranking"}
+
+    Split --> Lexical["<b>1. Lexical Keyword Engine</b><br>BM25 exact phrase & token matches<br>across tool names, descriptions & tags"]
+    Split --> Vector["<b>2. SIMD Vector Search Engine</b><br>Dense embedding cosine similarity<br>via .NET 10 hardware SIMD intrinsics"]
+
+    Lexical --> RRF["<b>3. Reciprocal Rank Fusion (RRF, k=60)</b><br>RRF_Score = 1.0/(60 + Rank_lexical) + 1.0/(60 + Rank_vector)"]
+    Vector --> RRF
+
+    RRF --> Output["<b>Final Tool Ranking</b><br>Top-k namespaced tools & JSON input schemas"]
 ```
 
 ### Reciprocal Rank Fusion (RRF) Formula

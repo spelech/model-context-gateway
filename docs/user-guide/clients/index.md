@@ -20,17 +20,7 @@ MCG provides three primary routing paths for connecting MCP clients:
 
 The **Client Setup Guide** card (available on both the **Overview** and **App Keys & Security** tabs) features an interactive configuration generator:
 
-```
-+---------------------------------------------------------------------------------------+
-| ⚙️ Dynamic Client Configuration Generator                                              |
-+---------------------------------------------------------------------------------------+
-| Target Route: [ Unified Meta-Mode (/sse) ▾                                          ] |
-| Client Tool:  [ Cursor IDE ▾              ]   Host: [ http://localhost:8080         ] |
-| [☑ Include Key]  Key: [ mcp-usr-Xk9L2mPq-7vN3wZ8aB1cE4fG9                         ] |
-+---------------------------------------------------------------------------------------+
-| [ Copy Configuration Snippet ]                                                        |
-+---------------------------------------------------------------------------------------+
-```
+![Dynamic Client Configuration Generator](../../assets/registered_client_modal.jpg)
 
 1. **Select Target Route**: Choose **Unified Meta-Mode (`/sse`)** for aggregated discovery, or choose a specific downstream server (e.g. `/docker`).
 2. **Select Client Tool**: Choose your AI environment (Cursor, Claude Desktop, Cline / VS Code, Antigravity CLI, or SDKs).

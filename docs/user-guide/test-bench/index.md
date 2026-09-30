@@ -10,19 +10,14 @@ The **Interactive Test Bench** (`Test Bench` tab) is MCG's built-in testing, ver
 
 The Test Bench organizes diagnostic operations into six primary tools:
 
-```
-+---------------------------------------------------------------------------------------------------------------+
-| 🧪 Interactive Test Bench                                                                                     |
-+---------------------------------------------------------------------------------------------------------------+
-|  [ 🛠️ Tools ]   [ 📄 Resources ]   [ 💬 Prompts ]   [ 🧠 Semantic Router ]   [ 💻 Console ]   [ 📟 Logs ]     |
-+---------------------------------------------------------------------------------------------------------------+
-|                                                                                                               |
-|  [ Active Tester Panel: Dynamic Forms, Schema Builder, Raw Arguments Editor, & Execution Controls ]          |
-|                                                                                                               |
-+---------------------------------------------------------------------------------------------------------------+
-| 📟 Live Diagnostic Logs & Gateway Terminal                                                                     |
-+---------------------------------------------------------------------------------------------------------------+
-```
+| Test Bench Tab | Diagnostic Function |
+| :--- | :--- |
+| **🛠️ Tools** | Dynamic schema-driven form builder and execution tester for all registered tools |
+| **📄 Resources** | Virtual MCP resource reader (`mcp://...`) and system information inspector |
+| **💬 Prompts** | Prompt template argument evaluator and system/user prompt renderer |
+| **🧠 Semantic Router** | Vector cosine similarity, BM25 lexical search, and tool ranking simulator |
+| **💻 Console** | Direct JSON-RPC 2.0 command console for low-level protocol testing |
+| **📟 Logs** | Real-time streaming diagnostic log terminal with PII masking and severity filters |
 
 ---
 

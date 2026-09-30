@@ -8,25 +8,7 @@ The **Interactive Test Bench** provides specialized interfaces for inspecting vi
 
 Use the Virtual Resource Tester to read and verify virtual file paths, database snapshots, and system diagnostic dumps:
 
-```
-+-------------------------------------------------------------------------------+
-| 📄 Virtual Resource Tester                                                    |
-+-------------------------------------------------------------------------------+
-| Target Server: [ docker ▾ ]                                                   |
-| Select Resource: [ Container Status (mcp://docker/containers/status) ▾ ]      |
-| Resource URI:  [ mcp://docker/containers/status                             ] |
-|                                                                               |
-| [ 📖 Read Resource ]                                                          |
-+-------------------------------------------------------------------------------+
-| MIME Type: application/json | Size: 1.4 KB                                    |
-| {                                                                             |
-|   "containers": [                                                             |
-|     { "name": "caddy", "status": "running", "uptime": "14d 2h" },             |
-|     { "name": "vault", "status": "running", "uptime": "30d 6h" }              |
-|   ]                                                                           |
-| }                                                                             |
-+-------------------------------------------------------------------------------+
-```
+![Virtual Resource Tester and Custom Files Manager](../../assets/settings_prompts_resources.jpg)
 
 ### How to Read a Virtual Resource
 1. **Select Server or Template**: Choose a registered server from the dropdown to view its published resources.
@@ -60,24 +42,7 @@ curl -X POST http://localhost:8080/api/test/resources/read \
 
 Use the Prompt Template Tester to evaluate dynamic prompt templates and ensure variable substitution works before AI consumption:
 
-```
-+-------------------------------------------------------------------------------+
-| 💬 Prompt Template Tester                                                     |
-+-------------------------------------------------------------------------------+
-| Target Server:   [ notes-rag (SilverBullet / Notes MCP) ▾ ]                   |
-| Prompt Template: [ summarize_architecture ▾               ]                   |
-|                                                                               |
-| Arguments:                                                                    |
-|   Topic (*):     [ Model Context Gateway Security Hardening                 ] |
-|   Max Length:    [ 500                                                      ] |
-|                                                                               |
-| [ 📑 Render Prompt ]                                                          |
-+-------------------------------------------------------------------------------+
-| Rendered Messages:                                                            |
-| [System]: "You are an expert systems architect reviewing homelab security..." |
-| [User]:   "Summarize the architecture for Model Context Gateway Security..."  |
-+-------------------------------------------------------------------------------+
-```
+![Prompt Template Tester in Action](../../assets/test_bench_view.jpg)
 
 ### How to Render a Prompt Template
 1. **Select Server & Template**: Choose the backend server and target prompt template from the dropdown menus.

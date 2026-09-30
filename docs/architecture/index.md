@@ -31,39 +31,15 @@ The Model Context Gateway (MCG) solves the **Context Explosion & Security Fragme
 
 To address these challenges, Model Context Gateway enforces seven **core architectural tenets**:
 
-```
-+---------------------------------------------------------------------------------------------------+
-|                                 CORE ARCHITECTURAL TENETS                                         |
-+---------------------------------------------------------------------------------------------------+
-|  1. Sub-Millisecond Routing Decisions                                                             |
-|     Header inspection (Mcp-Method, Mcp-Name) and lightweight path resolution allow fast triage    |
-|     without buffering large request bodies.                                                       |
-|                                                                                                   |
-|  2. Zero Token Waste via Meta-Mode                                                                |
-|     Default client connections expose only two bootstrap tools: `search_tools` and `execute_tool`.|
-|     Target tools are ranked on-demand using local in-process ONNX embeddings or API embeddings.   |
-|                                                                                                   |
-|  3. Fail-Closed, Multi-Stage RBAC                                                                 |
-|     All capability invocations pass through AppKey scope boundaries, identity group mappings,     |
-|     and stored procedure RBAC evaluations. Any missing policy or exception results in DENY.      |
-|                                                                                                   |
-|  4. Strict Isolation & Concurrency Fidelity                                                       |
-|     Clients maintain separate session contexts. JSON-RPC request IDs (integer, string, GUID) are  |
-|     faithfully preserved while being mapped upstream to prevent collisions in multiplexed streams.|
-|                                                                                                   |
-|  5. Zero Credential Exposure (Environment-Only Injection)                                         |
-|     Downstream secrets are fetched from Vault, Registry DPAPI, or Env, and injected into headers   |
-|     or process environments. Credentials are NEVER passed via CLI arguments or logged to disk.    |
-|                                                                                                   |
-|  6. Pluggable, Strategy-Driven Subsystems                                                         |
-|     All major subsystems (`ITransport`, `IIdentityProvider`, `ISecretRetriever`,                  |
-|     `IDbConnectionFactory`, `IEmbeddingService`) are decoupled through strategy interfaces.      |
-|                                                                                                   |
-|  7. Observability & Mandatory PII Masking                                                         |
-|     Every client request, downstream execution, and admin modification is logged to audit tables  |
-|     after passing through regex-based PII sanitization.                                           |
-+---------------------------------------------------------------------------------------------------+
-```
+| Core Architectural Tenet | Description & Mechanism |
+| :--- | :--- |
+| **1. Sub-Millisecond Routing Decisions** | Header inspection (`Mcp-Method`, `Mcp-Name`) and lightweight path resolution allow fast triage without buffering large request bodies. |
+| **2. Zero Token Waste via Meta-Mode** | Default client connections expose only two bootstrap tools: `search_tools` and `execute_tool`. Target tools are ranked on-demand using local in-process ONNX embeddings or API embeddings. |
+| **3. Fail-Closed, Multi-Stage RBAC** | All capability invocations pass through AppKey scope boundaries, identity group mappings, and stored procedure RBAC evaluations. Any missing policy or exception results in DENY. |
+| **4. Strict Isolation & Concurrency Fidelity** | Clients maintain separate session contexts. JSON-RPC request IDs (integer, string, GUID) are faithfully preserved while being mapped upstream to prevent collisions in multiplexed streams. |
+| **5. Zero Credential Exposure (Environment-Only Injection)** | Downstream secrets are fetched from Vault, Registry DPAPI, or Env, and injected into headers or process environments. Credentials are NEVER passed via CLI arguments or logged to disk. |
+| **6. Pluggable, Strategy-Driven Subsystems** | All major subsystems (`ITransport`, `IIdentityProvider`, `ISecretRetriever`, `IDbConnectionFactory`, `IEmbeddingService`) are decoupled through strategy interfaces. |
+| **7. Observability & Mandatory PII Masking** | Every client request, downstream execution, and admin modification is logged to audit tables after passing through regex-based PII sanitization. |
 
 ---
 

@@ -6,27 +6,7 @@ The **Tool Execution Tester** (`ToolTesterCard`) in the Test Bench enables admin
 
 ## 🛠️ Tool Tester Interface & Layout
 
-```
-+-------------------------------------------------------------------------------+
-| 🛠️ Tool Execution Tester                                                      |
-+-------------------------------------------------------------------------------+
-| Target Server: [ docker (Docker Infrastructure Daemon) ▾ ]                    |
-| Tool Name:     [ docker__restart_container ▾             ]                    |
-|                                                                               |
-| Parameters (Generated from JSON Schema):                                      |
-|   Container ID / Name (*): [ homewebservice                                 ] |
-|   Timeout Seconds:         [ 30                                             ] |
-|                                                                               |
-| [ ▶ Execute Tool ]                                                            |
-+-------------------------------------------------------------------------------+
-| Result (200 OK - 42ms):                                                       |
-| {                                                                             |
-|   "content": [                                                                |
-|     { "type": "text", "text": "Container homewebservice restarted successfully" }|
-|   ]                                                                           |
-| }                                                                             |
-+-------------------------------------------------------------------------------+
-```
+![Dynamic Tool Execution Tester Card](../../assets/test_bench_view.jpg)
 
 ---
 
