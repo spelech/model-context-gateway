@@ -148,7 +148,7 @@ The gateway uses Server-Sent Events (SSE) to stream responses. Reverse proxies m
 
 Caddy streams SSE connections by default. Pass identity headers from your authentication middleware:
 
-```caddy
+```nginx
 mcp.yourdomain.com {
     import cloudflare
     import forward_auth

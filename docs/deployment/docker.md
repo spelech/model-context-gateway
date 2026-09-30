@@ -154,7 +154,7 @@ volumes:
 ```
 
 **Corresponding `Caddyfile`:**
-```caddyfile
+```nginx
 mcp.yourdomain.com {
     reverse_proxy mcg-backend:8080 {
         # Preserve SSE streaming without buffering

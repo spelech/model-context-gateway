@@ -68,7 +68,7 @@ To discover all nested group memberships:
 3. The gateway rejects unencrypted LDAP on port 389.
 4. The service authenticates with configured bind credentials (`Ldap:BindDn`, `Ldap:BindPassword`).
 5. The service executes an LDAP subtree search for the user account:
-   ```ldap
+   ```text
    (&(objectClass=user)(sAMAccountName=steve))
    ```
 6. The query requests two binary attributes:

@@ -101,7 +101,7 @@ When no external Identity Provider (LDAP or OIDC forward-auth) is enabled, MCG a
 - Any HTTP request originating from `127.0.0.1`, `::1`, or any CIDR subnet defined in `STANDALONE_ALLOWED_NETWORKS` is automatically authenticated as `Administrator` (`admin`).
 - Requests from outside these subnets must provide a valid `Authorization: Bearer <appkey>` header.
 - You can specify comma-separated IPv4 and IPv6 subnets:
-  ```env
+  ```bash
   STANDALONE_ALLOWED_NETWORKS=127.0.0.1,::1,192.168.1.0/24,10.10.0.0/16
   ```
 
@@ -136,7 +136,7 @@ You can create and manage AppKeys using three convenient methods:
 
 #### Option B: Pre-Seeding via Environment Variable
 Pre-seed multiple keys at container startup using `MCG_CLIENT_APP_KEYS`:
-```env
+```bash
 MCG_CLIENT_APP_KEYS=mcp-glb-claudeFull123:ClaudeDesktop:all,mcp-srv-cursorDocker456:Cursor:server:docker,mcp-grp-openWebUI789:OpenWebUI:category:media
 ```
 
