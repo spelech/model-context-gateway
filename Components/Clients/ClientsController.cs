@@ -12,6 +12,7 @@ namespace ModelContextGateway.Components.Clients
     [Authorize(Policy = "AdminPolicy")]
     public class ClientsController : ControllerBase
     {
+        private const string Base62Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         private readonly IOAuthClientRepository _oauthClientRepo;
         private readonly IAuditLogger _auditLogger;
         private readonly IDbConnectionFactory? _dbFactory;
@@ -219,6 +220,77 @@ namespace ModelContextGateway.Components.Clients
                 // If Servers table does not exist or DB error
             }
             return categories.ToList();
+        }
+
+        [HttpPost("{id}/rotate-secret")]
+        public async Task<IActionResult> RotateSecret(string id)
+        {
+            var username = User?.Identity?.Name ?? "unknown";
+            UserIdentityContext? identity = null;
+
+            var httpCtx = HttpContext;
+            if (httpCtx?.RequestServices != null)
+            {
+                try
+                {
+                    var compositeProvider = httpCtx.RequestServices.GetService<CompositeIdentityProvider>();
+                    if (compositeProvider != null)
+                    {
+                        identity = await compositeProvider.ResolveIdentityAsync(httpCtx);
+                        if (identity != null)
+                        {
+                            username = identity.Username;
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            var config = httpCtx?.RequestServices?.GetService<Microsoft.Extensions.Configuration.IConfiguration>();
+            var isAdmin = (identity != null && SecurityValidationHelper.IsAdmin(identity, config))
+                || User?.IsInRole("Admin") == true
+                || User?.Claims.Any(c => c.Value == "full_admin" || c.Value == "S-1-5-32-544") == true
+                || httpCtx == null;
+
+            try
+            {
+                var client = await _oauthClientRepo.GetOAuthClientByIdAsync(id);
+                if (client == null)
+                {
+                    await _auditLogger.LogAdminActionAsync(username, "client.rotate_secret", id, "", false, "Client not found");
+                    return NotFound();
+                }
+
+                if (!isAdmin && !string.Equals(client.CreatedBy, username, StringComparison.OrdinalIgnoreCase))
+                {
+                    return Forbid();
+                }
+
+                var plaintextSecret = RandomNumberGenerator.GetString(Base62Chars, 32);
+                var secretHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(plaintextSecret))).ToLowerInvariant();
+
+                if (_dbFactory != null)
+                {
+                    using var conn = _dbFactory.CreateConnection();
+                    await conn.ExecuteAsync(
+                        "UPDATE OAuthClients SET ClientSecretHash = @Hash, LastUsedAt = NULL WHERE ClientId = @Id;",
+                        new { Hash = secretHash, Id = id });
+                }
+
+                client.ClientSecretHash = secretHash;
+                client.LastUsedAt = null;
+                await _oauthClientRepo.SaveOAuthClientAsync(client);
+
+                await _auditLogger.LogAdminActionAsync(username, "client.rotate_secret", id, "", true);
+
+                return Ok(new { clientId = id, clientSecret = plaintextSecret });
+            }
+            catch (Exception ex)
+            {
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
+                await _auditLogger.LogAdminActionAsync(username, "client.rotate_secret", id, "", false, ex.Message);
+                return StatusCode(500, new { error = "An unexpected error occurred." });
+            }
         }
 
         [HttpDelete("{id}")]

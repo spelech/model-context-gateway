@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-30T04:36:18.7050924Z",
-    "totalRequirements": 452,
-    "positiveCount": 362,
-    "guardrailCount": 90,
-    "totalProofs": 1023
+    "generatedAt": "2026-09-30T04:46:04.2152349Z",
+    "totalRequirements": 454,
+    "positiveCount": 363,
+    "guardrailCount": 91,
+    "totalProofs": 1025
   },
   "requirements": [
     {
@@ -908,6 +908,22 @@
           "filePath": "ModelContextGateway.Tests/ActivityTrackerTests.cs",
           "lineNumber": 35,
           "testName": "RecordClientUsage_DebouncesWithinWindow",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-122",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "RotateAppKey issues new plaintext key, updates database, resets LastUsedAt, and audits action.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AppKeyRotationControllerTests.cs",
+          "lineNumber": 16,
+          "testName": "RotateAppKey_Success_ReturnsNewPlaintextKey",
           "details": null
         }
       ]
@@ -3236,6 +3252,22 @@
           "filePath": "ModelContextGateway.Tests/SetupSkillTests.cs",
           "lineNumber": 44,
           "testName": "Skill_ContainsAllRequiredPhasesAndComparisons",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-123",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "RotateAppKey forbids non-owner non-admin user from rotating another user\u0027s key.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AppKeyRotationControllerTests.cs",
+          "lineNumber": 85,
+          "testName": "RotateAppKey_ForbiddenForDifferentUser",
           "details": null
         }
       ]

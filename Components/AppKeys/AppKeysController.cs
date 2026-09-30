@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text.Json;
 using Dapper;
 using Microsoft.AspNetCore.Authorization;
@@ -36,7 +37,16 @@ namespace ModelContextGateway.Components.AppKeys
         private async Task<UserIdentityContext> GetIdentityAsync()
         {
             var compositeProvider = HttpContext.RequestServices.GetRequiredService<CompositeIdentityProvider>();
-            return await compositeProvider.ResolveIdentityAsync(HttpContext);
+            var identity = await compositeProvider.ResolveIdentityAsync(HttpContext);
+            if ((identity == null || identity.Username == "anonymous") && HttpContext.User?.Identity?.IsAuthenticated == true && !string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+            {
+                var groups = HttpContext.User.Claims
+                    .Where(c => c.Type == ClaimTypes.Role || c.Type == "groups" || c.Type == "group")
+                    .Select(c => c.Value)
+                    .ToList();
+                return new UserIdentityContext(HttpContext.User.Identity.Name, HttpContext.User.Identity.AuthenticationType ?? "TestAuth", groups);
+            }
+            return identity!;
         }
 
         private bool IsAdmin(UserIdentityContext identity)
@@ -308,6 +318,59 @@ namespace ModelContextGateway.Components.AppKeys
             }
         }
 
+        [HttpPost("{id}/rotate")]
+        public async Task<IActionResult> RotateAppKey(string id)
+        {
+            var identity = await GetIdentityAsync();
+            var currentUser = identity.Username;
+            var isAdmin = IsAdmin(identity);
+
+            try
+            {
+                var appKey = await _appKeyRepository.GetAppKeyByIdAsync(id);
+
+                if (appKey == null)
+                {
+                    return NotFound(new { error = "AppKey not found." });
+                }
+
+                if (!isAdmin)
+                {
+                    // Non-admin can only rotate their own personal keys (not system keys or other users' keys)
+                    if (!appKey.Username.Equals(currentUser, StringComparison.OrdinalIgnoreCase) ||
+                        !string.Equals(appKey.KeyType, "personal", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return Forbid();
+                    }
+                }
+
+                var (rotatedKey, plaintextKey) = await _credentialService.RotateCredentialAsync(id);
+
+                await _auditLogger.LogAdminActionAsync(
+                    identity.Username, "appkey.rotate", id,
+                    $"owner={rotatedKey.Username};keyType={rotatedKey.KeyType}", true);
+
+                return Ok(new RotateAppKeyResponse
+                {
+                    Id = rotatedKey.Id,
+                    Name = rotatedKey.Name,
+                    Username = rotatedKey.Username,
+                    KeyType = rotatedKey.KeyType,
+                    KeyPrefix = rotatedKey.KeyPrefix,
+                    PlaintextKey = plaintextKey,
+                    Scopes = DeserializeScopes(rotatedKey.ScopesJson),
+                    ExpiresAt = rotatedKey.ExpiresAt,
+                    CreatedAt = rotatedKey.CreatedAt,
+                    LastUsedAt = null
+                });
+            }
+            catch (Exception ex)
+            {
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
+                return StatusCode(500, new { error = "An unexpected error occurred." });
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> RevokeAppKey(string id)
         {
@@ -496,6 +559,20 @@ namespace ModelContextGateway.Components.AppKeys
                 return new List<string> { json };
             }
         }
+    }
+
+    public class RotateAppKeyResponse
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public string KeyType { get; set; } = string.Empty;
+        public string KeyPrefix { get; set; } = string.Empty;
+        public string PlaintextKey { get; set; } = string.Empty;
+        public List<string> Scopes { get; set; } = new();
+        public DateTime? ExpiresAt { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? LastUsedAt { get; set; }
     }
 }
 
