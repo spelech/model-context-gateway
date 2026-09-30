@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-30T05:06:05.0311097Z",
+    "generatedAt": "2026-09-30T05:15:58.1806948Z",
     "totalRequirements": 456,
     "positiveCount": 364,
     "guardrailCount": 92,
@@ -830,7 +830,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs",
-          "lineNumber": 45,
+          "lineNumber": 41,
           "testName": "AppKeyRepository_UpdatesAndReads_LastUsedAt",
           "details": null
         },
@@ -860,7 +860,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs",
-          "lineNumber": 73,
+          "lineNumber": 69,
           "testName": "OAuthClientRepository_UpdatesAndReads_LastUsedAt",
           "details": null
         },
@@ -922,7 +922,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AppKeyRotationControllerTests.cs",
-          "lineNumber": 16,
+          "lineNumber": 12,
           "testName": "RotateAppKey_Success_ReturnsNewPlaintextKey",
           "details": null
         }
@@ -3266,7 +3266,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AppKeyRotationControllerTests.cs",
-          "lineNumber": 85,
+          "lineNumber": 81,
           "testName": "RotateAppKey_ForbiddenForDifferentUser",
           "details": null
         }

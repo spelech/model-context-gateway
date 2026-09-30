@@ -1,10 +1,6 @@
-using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ModelContextGateway.Infrastructure.Persistence;
-using ModelContextGateway.Tests.Attributes;
-using Xunit;
 
 namespace ModelContextGateway.Tests
 {

@@ -3,10 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ModelContextGateway.Infrastructure.Identity;
-using ModelContextGateway.Infrastructure.Logging;
-using ModelContextGateway.Infrastructure.Persistence;
-using ModelContextGateway.Tests.Attributes;
 using Moq;
 
 namespace ModelContextGateway.Tests

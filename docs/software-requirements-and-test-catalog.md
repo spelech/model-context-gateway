@@ -185,7 +185,7 @@
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (3):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L45`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L45) (`AppKeyRepository_UpdatesAndReads_LastUsedAt`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L41`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L41) (`AppKeyRepository_UpdatesAndReads_LastUsedAt`)
   - [Backend xUnit] [`ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214) (`FindDcrClient_ReturnsMatchingClient`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L556`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L556) (`RegisterClient_DuplicateDcrRequest_ReusesExistingClientIdAndUpdatesRecord`)
 
@@ -193,7 +193,7 @@
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (3):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L73`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L73) (`OAuthClientRepository_UpdatesAndReads_LastUsedAt`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L69`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L69) (`OAuthClientRepository_UpdatesAndReads_LastUsedAt`)
   - [Backend xUnit] [`ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237) (`CleanupDcrClients_PrunesDuplicateRegistrations_AndExpiredClients`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L333`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L333) (`CleanupClients_CallsRepoAndReturnsCleanedCount`)
 
@@ -213,7 +213,7 @@
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L16`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L16) (`RotateAppKey_Success_ReturnsNewPlaintextKey`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L12`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L12) (`RotateAppKey_Success_ReturnsNewPlaintextKey`)
 
 ### `[AUTH-130]` Renders In-House IdP / External JWT Bearer card, toggles enable, fills authority, and saves configuration.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -2682,7 +2682,7 @@
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L85`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L85) (`RotateAppKey_ForbiddenForDifferentUser`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L81`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L81) (`RotateAppKey_ForbiddenForDifferentUser`)
 
 ### `[AUTH-EXTERNAL-IDP-DENIES-ANONYMOUS-LOOPBACK]` When an external IDP is configured, anonymous loopback requests do not bypass authentication.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
@@ -3357,11 +3357,11 @@
 | `AUTH-06` | Positive | `AUTH` | Transports use passThroughToken when AllowPassThroughAuth is true | [`TransportsAuthShapeTests.cs:L208`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L208) | Backend xUnit |
 | `AUTH-101` | Positive | `AUTH` | HTTP transport injects X-Forwarded-User header based on connected user identity. | [`IdentityHeaderTests.cs:L9`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityHeaderTests.cs#L9) | Backend xUnit |
 | `AUTH-110` | Positive | `AUTH` | CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0. | [`AppKeysControllerTests.cs:L343`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L343) | Backend xUnit |
-| `AUTH-118` | Positive | `AUTH` | AppKey table contains LastUsedAt column and repository updates and queries it accurately. | [`AppKeyLastUsedPersistenceTests.cs:L45`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L45) | Backend xUnit |
-| `AUTH-119` | Positive | `AUTH` | OAuthClients table contains LastUsedAt column and repository updates and queries it accurately. | [`AppKeyLastUsedPersistenceTests.cs:L73`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L73) | Backend xUnit |
+| `AUTH-118` | Positive | `AUTH` | AppKey table contains LastUsedAt column and repository updates and queries it accurately. | [`AppKeyLastUsedPersistenceTests.cs:L41`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L41) | Backend xUnit |
+| `AUTH-119` | Positive | `AUTH` | OAuthClients table contains LastUsedAt column and repository updates and queries it accurately. | [`AppKeyLastUsedPersistenceTests.cs:L69`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L69) | Backend xUnit |
 | `AUTH-120` | Positive | `AUTH` | ActivityTracker throttles database updates to at most once per 60 seconds per key. | [`ActivityTrackerTests.cs:L9`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ActivityTrackerTests.cs#L9) | Backend xUnit |
 | `AUTH-121` | Positive | `AUTH` | ActivityTracker throttles OAuth client updates to at most once per 60 seconds per client. | [`ActivityTrackerTests.cs:L35`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ActivityTrackerTests.cs#L35) | Backend xUnit |
-| `AUTH-122` | Positive | `AUTH` | RotateAppKey issues new plaintext key, updates database, resets LastUsedAt, and audits action. | [`AppKeyRotationControllerTests.cs:L16`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L16) | Backend xUnit |
+| `AUTH-122` | Positive | `AUTH` | RotateAppKey issues new plaintext key, updates database, resets LastUsedAt, and audits action. | [`AppKeyRotationControllerTests.cs:L12`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L12) | Backend xUnit |
 | `AUTH-130` | Positive | `AUTH` | Renders In-House IdP / External JWT Bearer card, toggles enable, fills authority, and saves configuration. | [`IdentityAuthTab.test.tsx:L167`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/IdentityAuthTab.test.tsx#L167) | Frontend Vitest |
 | `AUTH-131` | Positive | `AUTH` | RFC 9728 Protected Resource Metadata endpoint exposes discovery document with canonical resource URI, authorization servers, scopes, and documentation. | [`Rfc9728ProtectedResourceDiscoveryTests.cs:L37`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L37) | Backend xUnit |
 | `AUTH-132` | Positive | `AUTH` | Unauthenticated client requests to /sse endpoint return 401 Unauthorized with RFC 9728 WWW-Authenticate header containing realm and resource_metadata. | [`Rfc9728ProtectedResourceDiscoveryTests.cs:L115`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L115) | Backend xUnit |
@@ -3483,7 +3483,7 @@
 | `DOC-SETUP-SKILL-MIRROR` | Positive | `DOC` | The mcg-setup skill and templates are mirrored 1:1 in .agents/skills/mcg-setup/ | [`SetupSkillTests.cs:L152`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SetupSkillTests.cs#L152) | Backend xUnit |
 | `DOC-SETUP-SKILL-TEMPLATES` | Positive | `DOC` | All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, MCG_MASTER_KEY, and ghcr.io/spelech/model-context-gateway | [`SetupSkillTests.cs:L98`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SetupSkillTests.cs#L98) | Backend xUnit |
 | `DOC-SETUP-SKILL-WORKFLOW` | Positive | `DOC` | mcg-setup skill contains all 6 required setup phases including environment probing, hosting platforms, env vs UI trade-offs, identity/network topology, artifact generation, and health/client configuration | [`SetupSkillTests.cs:L44`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SetupSkillTests.cs#L44) | Backend xUnit |
-| `AUTH-123` | **Guardrail** | `GUARD` | RotateAppKey forbids non-owner non-admin user from rotating another user's key. | [`AppKeyRotationControllerTests.cs:L85`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L85) | Backend xUnit |
+| `AUTH-123` | **Guardrail** | `GUARD` | RotateAppKey forbids non-owner non-admin user from rotating another user's key. | [`AppKeyRotationControllerTests.cs:L81`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L81) | Backend xUnit |
 | `AUTH-EXTERNAL-IDP-DENIES-ANONYMOUS-LOOPBACK` | **Guardrail** | `GUARD` | When an external IDP is configured, anonymous loopback requests do not bypass authentication. | [`StandaloneAdminAuthTests.cs:L224`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L224) | Backend xUnit |
 | `AUTH-STANDALONE-ADMINPOLICY-EXTERNAL-DENY` | **Guardrail** | `GUARD` | AdminPolicy rejects unauthenticated requests from non-whitelisted external IPs in standalone mode. | [`StandaloneAdminAuthTests.cs:L200`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L200) | Backend xUnit |
 | `AUTH-STANDALONE-EXTERNAL-DENY` | **Guardrail** | `GUARD` | Standalone mode denies admin access to non-whitelisted external IPs without an Admin AppKey. | [`StandaloneAdminAuthTests.cs:L57`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L57) | Backend xUnit |
