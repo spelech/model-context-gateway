@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **455 Requirements Verified** across **1027 Test Proofs** (363 Functional Capabilities, 92 Safety Guardrails).
+> **Catalog Statistics:** **456 Requirements Verified** across **1029 Test Proofs** (364 Functional Capabilities, 92 Safety Guardrails).
 
 ---
 
@@ -18,7 +18,7 @@
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **117** | 111 | 6 | 239 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **34** | 30 | 4 | 182 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **35** | 31 | 4 | 184 proofs |
 
 ---
 
@@ -447,8 +447,8 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L125`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L125) (`GetAppKeys_NonAdmin_ReturnsOnlyPersonalKeys_ForCurrentUser`)
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L351`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L351) (`loads app keys and updates store`)
   - [Frontend Vitest] [`frontend/src/test/components/App.test.tsx#L81`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/App.test.tsx#L81) (`renders role-adaptive UI for non-admin user`)
-  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L34`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L34) (`renders role-adapted My App Keys view for non-admin user`)
-  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L79`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L79) (`renders keys list, copies config snippet, and revokes key`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L33`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L33) (`renders role-adapted My App Keys view for non-admin user`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L78`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L78) (`renders keys list, opens rotate modal, and revokes key`)
   - [Playwright E2E] [`frontend/e2e/personal-appkeys-and-quotas.spec.ts#L5`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L5) (`Non-Admin Context: displays My App Keys navigation and personal quota indicator`)
 
 ### `[AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE]` Custom user quotas override default limit
@@ -459,7 +459,7 @@
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L594`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L594) (`sets user quota override and refreshes quota list`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L6) (`renders GeneralTab with security default quota inputs and triggers save`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L71`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L71) (`updates form state when settings prop changes`)
-  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L222`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L222) (`manages custom user quotas in admin quotas tab`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L215`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L215) (`manages custom user quotas in admin quotas tab`)
   - [Playwright E2E] [`frontend/e2e/personal-appkeys-and-quotas.spec.ts#L134`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L134) (`Admin Context: configures custom user quota override`)
 
 ### `[AUTH-PIPELINE-ADMIN-DASHBOARD]` Dashboard management API suite executes for authorized administrators.
@@ -619,7 +619,7 @@
   - [Frontend Vitest] [`frontend/src/test/components/App.test.tsx#L15`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/App.test.tsx#L15) (`renders header, navigation tabs, and default overview dashboard for admin user`)
   - [Frontend Vitest] [`frontend/src/test/components/App.test.tsx#L36`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/App.test.tsx#L36) (`switches between tabs on navigation click`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeyModal.test.tsx#L31`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyModal.test.tsx#L31) (`allows admin to select key type and create system app key`)
-  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L166`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L166) (`handles admin tab switching and username filtering`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L159`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L159) (`handles admin tab switching and username filtering`)
   - [Playwright E2E] [`frontend/e2e/personal-appkeys-and-quotas.spec.ts#L87`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L87) (`Admin Context: manages segmented App-Level Keys and User Personal Keys`)
 
 ### `[UI-100]` initializes with empty providers
@@ -2603,7 +2603,14 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (2):**
   - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L249`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L249) (`toggles 3LO OAuth fields and submits with complete OAuth configuration`)
-  - [Frontend Vitest] [`frontend/src/test/components/AppKeyRotateModal.test.tsx#L23`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyRotateModal.test.tsx#L23) (`renders confirmation warning, rotates key, and shows config generator`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeyRotateModal.test.tsx#L22`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyRotateModal.test.tsx#L22) (`renders confirmation warning, rotates key, and shows config generator`)
+
+### `[UI-137]` Renders Last Used column and triggers Rotate Secret action for registered clients.
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (2):**
+  - [Frontend Vitest] [`frontend/src/test/components/RegisteredClientsCard.test.tsx#L158`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L158) (`renders Last Used column and triggers Rotate Secret action`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L278`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L278) (`renders Last Used column and triggers Rotate Key modal`)
 
 ### `[UI-30]` Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -3285,7 +3292,7 @@
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Frontend Vitest] [`frontend/src/test/components/AppKeyRotateModal.test.tsx#L68`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyRotateModal.test.tsx#L68) (`prevents backdrop click dismissal`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeyRotateModal.test.tsx#L67`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyRotateModal.test.tsx#L67) (`prevents backdrop click dismissal`)
 
 ### `[UI-31]` Fetches registered OAuth clients and updates store state.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -3788,7 +3795,8 @@
 | `UI-133` | Positive | `UI` | verifies deterministic data-testid attributes and interactive flow across test bench tabs | [`TestBenchView.test.tsx:L473`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L473) | Frontend Vitest |
 | `UI-134` | Positive | `UI` | verifies server modal exposes deterministic data-testid attributes | [`ServerModal.test.tsx:L225`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L225) | Frontend Vitest |
 | `UI-135` | Positive | `UI` | toggles 3LO OAuth fields and submits with complete OAuth configuration | [`ServerModal.test.tsx:L249`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L249) | Frontend Vitest |
-| `UI-136` | **Guardrail** | `UI` | Disables backdrop click dismissal on the key rotation modal to protect plaintext credentials. | [`AppKeyRotateModal.test.tsx:L68`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyRotateModal.test.tsx#L68) | Frontend Vitest |
+| `UI-136` | **Guardrail** | `UI` | Disables backdrop click dismissal on the key rotation modal to protect plaintext credentials. | [`AppKeyRotateModal.test.tsx:L67`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyRotateModal.test.tsx#L67) | Frontend Vitest |
+| `UI-137` | Positive | `UI` | Renders Last Used column and triggers Rotate Secret action for registered clients. | [`RegisteredClientsCard.test.tsx:L158`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L158) | Frontend Vitest |
 | `UI-30` | Positive | `UI` | Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration. | [`ClientModal.test.tsx:L27`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientModal.test.tsx#L27) | Frontend Vitest |
 | `UI-31` | **Guardrail** | `UI` | Fetches registered OAuth clients and updates store state. | [`useClientStore.test.ts:L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L37) | Frontend Vitest |
 | `UI-32` | Positive | `UI` | Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials. | [`useClientStore.test.ts:L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L76) | Frontend Vitest |

@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-30T04:53:48.4934102Z",
-    "totalRequirements": 455,
-    "positiveCount": 363,
+    "generatedAt": "2026-09-30T05:06:05.0311097Z",
+    "totalRequirements": 456,
+    "positiveCount": 364,
     "guardrailCount": 92,
-    "totalProofs": 1027
+    "totalProofs": 1029
   },
   "requirements": [
     {
@@ -1709,15 +1709,15 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 34,
+          "lineNumber": 33,
           "testName": "renders role-adapted My App Keys view for non-admin user",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 79,
-          "testName": "renders keys list, copies config snippet, and revokes key",
+          "lineNumber": 78,
+          "testName": "renders keys list, opens rotate modal, and revokes key",
           "details": null
         },
         {
@@ -1767,7 +1767,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 222,
+          "lineNumber": 215,
           "testName": "manages custom user quotas in admin quotas tab",
           "details": null
         },
@@ -2237,7 +2237,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 166,
+          "lineNumber": 159,
           "testName": "handles admin tab switching and username filtering",
           "details": null
         },
@@ -10979,7 +10979,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/AppKeyRotateModal.test.tsx",
-          "lineNumber": 23,
+          "lineNumber": 22,
           "testName": "renders confirmation warning, rotates key, and shows config generator",
           "details": null
         }
@@ -10995,8 +10995,31 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/AppKeyRotateModal.test.tsx",
-          "lineNumber": 68,
+          "lineNumber": 67,
           "testName": "prevents backdrop click dismissal",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-137",
+      "category": "UI",
+      "type": "Positive",
+      "description": "Renders Last Used column and triggers Rotate Secret action for registered clients.",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/RegisteredClientsCard.test.tsx",
+          "lineNumber": 158,
+          "testName": "renders Last Used column and triggers Rotate Secret action",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
+          "lineNumber": 278,
+          "testName": "renders Last Used column and triggers Rotate Key modal",
           "details": null
         }
       ]

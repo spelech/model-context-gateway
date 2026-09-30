@@ -3,7 +3,6 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { AppKeysCard } from '../../components/clients/AppKeysCard';
 import { useAppKeyStore } from '../../stores/useAppKeyStore';
 import { useUserStore } from '../../stores/useUserStore';
-import { useToastStore } from '../../stores/useToastStore';
 
 vi.mock('../../stores/useAppKeyStore', () => ({
   useAppKeyStore: vi.fn(),
@@ -80,16 +79,9 @@ describe('AppKeysCard Component', () => {
    * @requirement AUTH-PERSONAL-APPKEY-LIST
    * @category AUTH
    * @type PositiveFeature
-   * @description Renders keys list, handles copy snippet and key revocation.
+   * @description Renders keys list, opens rotate modal, and revokes key.
    */
-  it('renders keys list, copies config snippet, and revokes key', async () => {
-    const writeTextSpy = vi.fn().mockResolvedValue(undefined);
-    Object.assign(navigator, {
-      clipboard: {
-        writeText: writeTextSpy,
-      },
-    });
-
+  it('renders keys list, opens rotate modal, and revokes key', async () => {
     (useAppKeyStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       appKeys: [
         {
@@ -131,24 +123,25 @@ describe('AppKeysCard Component', () => {
       revokeAppKey: revokeAppKeyMock,
       openModal: openModalMock,
       setKeyTypeTab: setKeyTypeTabMock,
+      rotateAppKey: vi.fn(),
+      isRotating: false,
     });
 
     render(<AppKeysCard />);
 
     expect(screen.getByText('Active Key')).toBeInTheDocument();
     expect(screen.getByText('Expired')).toBeInTheDocument();
-    expect(screen.getByText('Never')).toBeInTheDocument();
+    expect(screen.getAllByText('Never').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('category:smarthome')).toBeInTheDocument();
     // Admin view shows Owner column
     expect(screen.getByRole('columnheader', { name: /^Owner$/i })).toBeInTheDocument();
 
-    // Test Copy Snippet button
-    const copyBtns = screen.getAllByTitle(/copy mcp config snippet/i);
+    // Test Rotate button
+    const rotateBtns = screen.getAllByTitle(/rotate key/i);
     await act(async () => {
-      fireEvent.click(copyBtns[0]);
+      fireEvent.click(rotateBtns[0]);
     });
-    expect(writeTextSpy).toHaveBeenCalled();
-    expect(useToastStore.getState().toasts.some((t) => t.message.includes('Copied sample mcp_config.json snippet'))).toBe(true);
+    expect(screen.getByRole('heading', { name: /Rotate App Key/i })).toBeInTheDocument();
 
     // Test Revoke button
     const revokeBtns = screen.getAllByRole('button', { name: /revoke/i });
@@ -280,5 +273,72 @@ describe('AppKeysCard Component', () => {
       fireEvent.click(resetBtn);
     });
     expect(deleteUserQuotaMock).toHaveBeenCalledWith('special_user');
+  });
+
+  /**
+   * @requirement UI-137
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders Last Used column and replaces static config button with Rotate Key action opening rotation modal.
+   */
+  it('renders Last Used column and triggers Rotate Key modal', async () => {
+    (useAppKeyStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      appKeys: [
+        {
+          id: 'k-1',
+          name: 'Personal Key 1',
+          keyPrefix: 'mcp_live_123',
+          username: 'steve',
+          scopes: ['category:smarthome'],
+          expiresAt: null,
+          createdAt: new Date().toISOString(),
+          lastUsedAt: new Date(Date.now() - 3600000).toISOString(),
+        },
+        {
+          id: 'k-2',
+          name: 'Never Used Key',
+          keyPrefix: 'mcp_live_456',
+          username: 'steve',
+          scopes: [],
+          expiresAt: null,
+          createdAt: new Date().toISOString(),
+          lastUsedAt: null,
+        }
+      ],
+      limits: { userActiveKeys: 2, userMax: 5, totalActiveKeys: 2, globalMax: 50, isLimitReached: false },
+      keyTypeTab: 'personal',
+      userQuotas: [],
+      fetchAppKeys: fetchAppKeysMock,
+      fetchLimits: fetchLimitsMock,
+      fetchUserQuotas: fetchUserQuotasMock,
+      setUserQuota: setUserQuotaMock,
+      deleteUserQuota: deleteUserQuotaMock,
+      revokeAppKey: revokeAppKeyMock,
+      openModal: openModalMock,
+      setKeyTypeTab: setKeyTypeTabMock,
+      rotateAppKey: vi.fn(),
+      isRotating: false,
+    });
+
+    render(<AppKeysCard />);
+
+    // Last Used table header
+    expect(screen.getByRole('columnheader', { name: /Last Used/i })).toBeInTheDocument();
+
+    // Check Last Used values
+    expect(screen.getByText('1h ago')).toBeInTheDocument();
+    expect(screen.getAllByText('Never').length).toBeGreaterThanOrEqual(1);
+
+    // Click Rotate button
+    const rotateBtns = screen.getAllByRole('button', { name: /Rotate/i });
+    expect(rotateBtns.length).toBeGreaterThan(0);
+    await act(async () => {
+      fireEvent.click(rotateBtns[0]);
+    });
+
+    // Rotation modal should open
+    expect(screen.getByRole('heading', { name: /Rotate App Key/i })).toBeInTheDocument();
+    expect(screen.getByText(/Key to rotate:/i)).toBeInTheDocument();
+    expect(screen.getAllByText('Personal Key 1').length).toBe(2);
   });
 });

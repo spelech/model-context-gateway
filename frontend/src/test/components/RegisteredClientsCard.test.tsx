@@ -154,4 +154,45 @@ describe('RegisteredClientsCard component', () => {
 
     expect(deleteSpy).toHaveBeenCalledWith('c-1', 'Postman Integration');
   });
+
+  /**
+   * @requirement UI-137
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders Last Used column and triggers Rotate Secret action for registered clients.
+   */
+  it('renders Last Used column and triggers Rotate Secret action', async () => {
+    const rotateSpy = vi.fn().mockResolvedValue({ clientId: 'app-client-1', clientSecret: 'rotated_sec_123' });
+    useClientStore.setState({
+      clients: [
+        {
+          ...sampleClients[0],
+          lastUsedAt: new Date(Date.now() - 3600000).toISOString(),
+        },
+        {
+          ...sampleClients[1],
+          lastUsedAt: null,
+        }
+      ],
+      fetchClients: vi.fn(),
+      rotateClientSecret: rotateSpy,
+    });
+
+    render(<RegisteredClientsCard />);
+
+    // Last Used table header
+    expect(screen.getByRole('columnheader', { name: /Last Used/i })).toBeInTheDocument();
+
+    // Relative date and Never badge
+    expect(screen.getByText('1h ago')).toBeInTheDocument();
+    expect(screen.getAllByText('Never').length).toBeGreaterThanOrEqual(1);
+
+    // Rotate Secret button
+    const rotateBtns = screen.getAllByRole('button', { name: /rotate secret/i });
+    expect(rotateBtns.length).toBe(2);
+
+    fireEvent.click(rotateBtns[0]);
+
+    expect(rotateSpy).toHaveBeenCalledWith('c-1');
+  });
 });

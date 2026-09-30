@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useAppKeyStore } from '../../stores/useAppKeyStore';
 import { useUserStore } from '../../stores/useUserStore';
-import { showToast } from '../../stores/useToastStore';
+import { AppKeyRotateModal } from './AppKeyRotateModal';
+import { formatRelativeTime } from '../../utils/dateUtils';
 
 export const AppKeysCard: React.FC = () => {
   const { user } = useUserStore();
@@ -27,6 +28,15 @@ export const AppKeysCard: React.FC = () => {
   const [quotaUsername, setQuotaUsername] = useState('');
   const [quotaMaxKeys, setQuotaMaxKeys] = useState<number>(5);
   const [isSubmittingQuota, setIsSubmittingQuota] = useState(false);
+  const [rotateKeyTarget, setRotateKeyTarget] = useState<{ id: string; name: string } | null>(null);
+
+  const openRotateModal = (id: string, name: string) => {
+    setRotateKeyTarget({ id, name });
+  };
+
+  const closeRotateModal = () => {
+    setRotateKeyTarget(null);
+  };
 
   useEffect(() => {
     fetchLimits();
@@ -76,24 +86,6 @@ export const AppKeysCard: React.FC = () => {
     } finally {
       setIsSubmittingQuota(false);
     }
-  };
-
-  const copyConfigSnippet = (keyPrefix: string) => {
-    const sampleKey = `${keyPrefix}...[YOUR_FULL_KEY]`;
-    const snippet = JSON.stringify({
-      mcpServers: {
-        "model-context-gateway": {
-          url: "http://10.0.0.10:8026/sse",
-          type: "sse",
-          trust: true,
-          headers: {
-            "X-App-Key": sampleKey
-          }
-        }
-      }
-    }, null, 2);
-    navigator.clipboard.writeText(snippet);
-    showToast('Copied sample mcp_config.json snippet to clipboard!', 'success');
   };
 
   return (
@@ -269,13 +261,14 @@ export const AppKeysCard: React.FC = () => {
                   <th>Scopes</th>
                   <th>Expires</th>
                   <th>Created</th>
+                  <th>Last Used</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {appKeys.length === 0 ? (
                   <tr>
-                    <td colSpan={isAdmin ? 7 : 6} className="empty-state">
+                    <td colSpan={isAdmin ? 8 : 7} className="empty-state">
                       {activeTab === 'system'
                         ? 'No app-level system keys active. Click "+ Create App Key" to generate a credential.'
                         : 'No App Keys active. Click "+ Create App Key" to generate a credential for CLI or IDE tools.'}
@@ -315,14 +308,21 @@ export const AppKeysCard: React.FC = () => {
                       </td>
                       <td>{new Date(key.createdAt).toLocaleDateString()}</td>
                       <td>
+                        {(key.lastUsedAt || key.LastUsedAt) ? (
+                          <span>{formatRelativeTime(key.lastUsedAt || key.LastUsedAt)}</span>
+                        ) : (
+                          <span className="badge badge-secondary">Never</span>
+                        )}
+                      </td>
+                      <td>
                         <button
                           className="btn btn-secondary btn-sm"
-                          data-testid="btn-copy-config"
-                          onClick={() => copyConfigSnippet(key.keyPrefix)}
-                          title="Copy MCP Config Snippet"
+                          data-testid="btn-rotate-key"
+                          onClick={() => openRotateModal(key.id, key.name)}
+                          title="Rotate Key & Generate Config"
                           style={{ marginRight: '6px' }}
                         >
-                          <i className="fa-solid fa-code"></i> Config
+                          <i className="fa-solid fa-arrows-rotate"></i> Rotate
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
@@ -341,6 +341,13 @@ export const AppKeysCard: React.FC = () => {
           </div>
         </>
       )}
+
+      <AppKeyRotateModal
+        isOpen={!!rotateKeyTarget}
+        keyId={rotateKeyTarget?.id || ''}
+        keyName={rotateKeyTarget?.name || ''}
+        onClose={closeRotateModal}
+      />
     </div>
   );
 };

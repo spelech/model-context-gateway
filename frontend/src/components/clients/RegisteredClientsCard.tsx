@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 import { useClientStore } from '../../stores/useClientStore';
 import { showToast } from '../../stores/useToastStore';
+import { formatRelativeTime } from '../../utils/dateUtils';
 
 export const RegisteredClientsCard: React.FC = () => {
-  const { clients, fetchClients, deleteClient, cleanupClients, openAddClientModal } = useClientStore();
+  const { clients, fetchClients, deleteClient, cleanupClients, openAddClientModal, rotateClientSecret } = useClientStore();
 
   useEffect(() => {
     fetchClients();
@@ -41,13 +42,14 @@ export const RegisteredClientsCard: React.FC = () => {
               <th>Redirect URIs</th>
               <th>Scopes</th>
               <th>Created / Expires</th>
+              <th>Last Used</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {clients.length === 0 ? (
               <tr>
-                <td colSpan={8} className="empty-state">
+                <td colSpan={9} className="empty-state">
                   No registered clients found.
                 </td>
               </tr>
@@ -120,6 +122,22 @@ export const RegisteredClientsCard: React.FC = () => {
                     </div>
                   </td>
                   <td>
+                    {(c.lastUsedAt || c.LastUsedAt) ? (
+                      <span>{formatRelativeTime(c.lastUsedAt || c.LastUsedAt)}</span>
+                    ) : (
+                      <span className="badge badge-secondary">Never</span>
+                    )}
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      data-testid="btn-rotate-client-secret"
+                      onClick={() => rotateClientSecret(c.id)}
+                      title="Rotate Secret"
+                      style={{ marginRight: '6px' }}
+                    >
+                      <i className="fa-solid fa-arrows-rotate"></i> Rotate Secret
+                    </button>
                     <button
                       className="btn btn-danger btn-sm"
                       data-testid="btn-delete-client"
