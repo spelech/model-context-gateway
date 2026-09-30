@@ -78,11 +78,6 @@ export const TestBenchView: React.FC = () => {
     setRawToolJson(JSON.stringify(updated, null, 2));
   };
 
-  const handleBulkArgsChange = (args: Record<string, any>) => {
-    setToolArguments(args);
-    setRawToolJson(JSON.stringify(args, null, 2));
-  };
-
   const runToolCall = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedToolName) {
@@ -264,7 +259,6 @@ export const TestBenchView: React.FC = () => {
               onServerChange={handleToolServerChange}
               onToolChange={handleToolNameChange}
               onArgChange={handleArgInputChange}
-              onBulkArgsChange={handleBulkArgsChange}
               onRawJsonChange={setRawToolJson}
               onSubmit={runToolCall}
             />

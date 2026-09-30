@@ -453,28 +453,6 @@ input:checked + .slider:before {
     font-size: var(--font-size-xs) !important;
 }
 
-.btn-prefill,
-.prefill-btn {
-    font-size: var(--font-size-xs);
-    padding: var(--space-1) var(--space-3);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    color: var(--accent);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-prefill:hover,
-.prefill-btn:hover {
-    background: rgba(var(--accent-rgb), 0.15);
-    border-color: var(--accent);
-    color: #fff;
-}
-
 /* Logs viewer filter select controls */
 .logs-filters select {
     padding: 6px 12px;

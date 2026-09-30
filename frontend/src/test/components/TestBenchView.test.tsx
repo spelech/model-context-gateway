@@ -350,9 +350,9 @@ describe('TestBenchView Component', () => {
    * @requirement UI-132
    * @category UI
    * @type PositiveFeature
-   * @description populates argument values when Pre-fill Example button is clicked
+   * @description populates argument values in interactive form and submits tool execution
    */
-  it('populates argument values when Pre-fill Example button is clicked', async () => {
+  it('populates argument values in interactive form and submits tool execution', async () => {
     vi.spyOn(testbenchApi, 'fetchTestToolsApi').mockResolvedValue([
       {
         name: 'docker__run',
@@ -379,20 +379,17 @@ describe('TestBenchView Component', () => {
     fireEvent.change(screen.getByLabelText('Tool'), { target: { value: 'docker__run' } });
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Pre-fill Example/i })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: /image/i })).toBeInTheDocument();
     });
 
-    const prefillBtn = screen.getByRole('button', { name: /Pre-fill Example/i });
-    fireEvent.click(prefillBtn);
-
     const imageInput = screen.getByRole('textbox', { name: /image/i }) as HTMLInputElement;
-    expect(imageInput.value).toBe('alpine:latest');
+    fireEvent.change(imageInput, { target: { value: 'alpine:latest' } });
 
     const instancesInput = screen.getByRole('spinbutton', { name: /instances/i }) as HTMLInputElement;
-    expect(instancesInput.value).toBe('3');
+    fireEvent.change(instancesInput, { target: { value: '3' } });
 
     const modeSelect = screen.getByRole('combobox', { name: /mode/i }) as HTMLSelectElement;
-    expect(modeSelect.value).toBe('host');
+    fireEvent.change(modeSelect, { target: { value: 'host' } });
 
     vi.spyOn(api, 'apiRequest').mockResolvedValue({
       content: [{ type: 'text', text: '{"status":"container started"}' }],
