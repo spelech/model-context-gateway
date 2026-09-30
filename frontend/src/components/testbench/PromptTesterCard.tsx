@@ -1,5 +1,6 @@
 import React from 'react';
 import { parseNamespacedName } from '../../shared/utils/mcpNaming';
+import { FormattedDescription } from './FormattedDescription';
 
 interface PromptItem {
   name: string;
@@ -131,7 +132,10 @@ export const PromptTesterCard: React.FC<PromptTesterCardProps> = ({
               <span className="badge">{renderArgumentSummary()}</span>
             </div>
             {currentPrompt.description && (
-              <p className="tool-hint-desc">{currentPrompt.description}</p>
+              <FormattedDescription
+                text={currentPrompt.description}
+                serverId={parsedCurrentPrompt.serverId}
+              />
             )}
           </div>
         )}

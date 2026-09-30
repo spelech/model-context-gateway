@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-30T19:35:57.1709731Z",
-    "totalRequirements": 456,
+    "generatedAt": "2026-09-30T20:36:29.8710918Z",
+    "totalRequirements": 457,
     "positiveCount": 363,
-    "guardrailCount": 93,
-    "totalProofs": 1041
+    "guardrailCount": 94,
+    "totalProofs": 1046
   },
   "requirements": [
     {
@@ -11104,6 +11104,50 @@
           "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
           "lineNumber": 278,
           "testName": "renders Last Used column and triggers Rotate Key modal",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-138",
+      "category": "UI",
+      "type": "Negative",
+      "description": "cleans redundant server prefix from descriptions",
+      "proofCount": 5,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
+          "lineNumber": 6,
+          "testName": "cleans redundant server prefix from descriptions",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
+          "lineNumber": 22,
+          "testName": "renders structured paragraphs and inline code/bold markdown formatting",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
+          "lineNumber": 57,
+          "testName": "renders unordered and ordered lists with inline formatting",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
+          "lineNumber": 85,
+          "testName": "renders safe external links",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
+          "lineNumber": 103,
+          "testName": "renders null when text is empty or blank",
           "details": null
         }
       ]

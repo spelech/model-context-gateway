@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { parseNamespacedName } from '../../shared/utils/mcpNaming';
+import { FormattedDescription } from './FormattedDescription';
 
 interface ToolItem {
   name: string;
@@ -138,7 +139,10 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
               <span className="badge">{renderParameterSummary()}</span>
             </div>
             {currentTool.description && (
-              <p className="tool-hint-desc">{currentTool.description}</p>
+              <FormattedDescription
+                text={currentTool.description}
+                serverId={parsedCurrentTool.serverId}
+              />
             )}
           </div>
         )}
