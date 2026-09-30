@@ -147,7 +147,6 @@ export default withMermaid(
     cleanUrls: true,
     lastUpdated: true,
     appearance: 'dark',
-    ignoreDeadLinks: 'localhostLinks',
     srcExclude: ['superpowers/**'],
 
     head: [
