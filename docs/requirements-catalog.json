@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-30T07:10:04.6990309Z",
+    "generatedAt": "2026-09-30T19:35:57.1709731Z",
     "totalRequirements": 456,
     "positiveCount": 363,
     "guardrailCount": 93,
@@ -10974,13 +10974,13 @@
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
           "lineNumber": 349,
-          "testName": "populates argument values when Pre-fill Example button is clicked",
+          "testName": "populates argument values in interactive form and submits tool execution",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 421,
+          "lineNumber": 418,
           "testName": "groups slash and dunder namespaced prompts into servers and displays prompt hint banner",
           "details": null
         },
@@ -11024,7 +11024,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 473,
+          "lineNumber": 470,
           "testName": "renders and interacts with test bench elements via deterministic data-testid attributes",
           "details": null
         }

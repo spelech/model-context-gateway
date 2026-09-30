@@ -20,7 +20,6 @@ interface ToolTesterCardProps {
   onServerChange: (srv: string) => void;
   onToolChange: (name: string) => void;
   onArgChange: (key: string, type: string, val: any) => void;
-  onBulkArgsChange?: (args: Record<string, any>) => void;
   onRawJsonChange: (val: string) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
@@ -34,7 +33,6 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
   onServerChange,
   onToolChange,
   onArgChange,
-  onBulkArgsChange,
   onRawJsonChange,
   onSubmit,
 }) => {
@@ -69,42 +67,6 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
 
   const currentTool = tools.find((t) => t.name === selectedToolName);
   const parsedCurrentTool = currentTool ? parseNamespacedName(currentTool.name) : null;
-
-  const handlePrefillExample = () => {
-    if (!currentTool?.inputSchema?.properties) return;
-    const properties = currentTool.inputSchema.properties;
-    const required = currentTool.inputSchema.required || [];
-    const prefilled: Record<string, any> = {};
-
-    for (const [key, prop] of Object.entries<any>(properties)) {
-      if (prop.default !== undefined) {
-        prefilled[key] = prop.default;
-      } else if (prop.enum && Array.isArray(prop.enum) && prop.enum.length > 0) {
-        prefilled[key] = prop.enum[0];
-      } else if (prop.type === 'boolean') {
-        prefilled[key] = false;
-      } else if (prop.type === 'integer' || prop.type === 'number') {
-        prefilled[key] = prop.examples?.[0] !== undefined ? prop.examples[0] : 0;
-      } else if (prop.type === 'array') {
-        prefilled[key] = prop.examples?.[0] !== undefined ? prop.examples[0] : [];
-      } else if (prop.type === 'object') {
-        prefilled[key] = prop.examples?.[0] !== undefined ? prop.examples[0] : {};
-      } else {
-        prefilled[key] = prop.examples?.[0] !== undefined
-          ? prop.examples[0]
-          : (required.includes(key) ? `sample_${key}` : 'example');
-      }
-    }
-
-    if (onBulkArgsChange) {
-      onBulkArgsChange(prefilled);
-    } else {
-      onRawJsonChange(JSON.stringify(prefilled, null, 2));
-      for (const [key, prop] of Object.entries<any>(properties)) {
-        onArgChange(key, prop.type || 'string', prefilled[key]);
-      }
-    }
-  };
 
   const renderParameterSummary = () => {
     if (!currentTool) return null;
@@ -198,18 +160,6 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
           >
             Raw JSON Input
           </button>
-          {currentTool && (
-            <button
-              type="button"
-              className="btn btn-prefill"
-              data-testid="tool-prefill-btn"
-              style={{ marginLeft: 'auto' }}
-              onClick={handlePrefillExample}
-              title="Pre-fill with example parameters"
-            >
-              <i className="fa-solid fa-wand-magic-sparkles"></i> Pre-fill Example
-            </button>
-          )}
         </div>
 
         {interactiveTab === 'form' ? (
