@@ -235,8 +235,20 @@ export default withMermaid(
       }
     },
 
+    markdown: {
+      languageAlias: {
+        caddy: 'nginx',
+        caddyfile: 'nginx',
+        env: 'bash',
+        ldap: 'ini'
+      }
+    },
+
     mermaid: {
-      theme: 'dark'
+      theme: 'dark',
+      mermaid: {
+        fontFamily: 'JetBrains Mono, monospace'
+      }
     }
   })
 );

@@ -131,21 +131,34 @@
 }
 
 /* Interactive Mermaid Styling */
+.vp-doc .mermaid,
 .mermaid {
   position: relative !important;
+  margin: 2.5rem auto !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  border: 1px solid var(--vp-c-divider) !important;
   border-radius: 8px !important;
-  border: 1px solid var(--vp-c-border) !important;
+  padding: 1.5rem !important;
   background-color: var(--vp-c-bg-elv) !important;
-  overflow: hidden !important;
-  margin: 1.5em 0 !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   cursor: grab !important;
   user-select: none !important;
   touch-action: none !important;
-  padding: 1.5rem !important;
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
   min-height: 200px !important;
+  font-family: var(--vp-font-family-mono) !important;
+}
+
+.vp-doc .mermaid text,
+.mermaid text,
+.mermaid .label,
+.mermaid .nodeLabel,
+.mermaid .edgeLabel {
+  font-family: var(--vp-font-family-mono) !important;
 }
 
 .mermaid.is-dragging {
@@ -235,4 +248,49 @@
 
 body.has-mermaid-fullscreen {
   overflow: hidden !important;
+}
+
+/* Typography Rhythm & Spacing */
+.vp-doc h2 {
+  margin-top: 3rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.vp-doc h3 {
+  margin-top: 2.25rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* Callout Admonition Spacing */
+.vp-doc .custom-block {
+  margin: 1.75rem 0 !important;
+}
+
+/* Modern Documentation Table Styling */
+.vp-doc table {
+  display: table !important;
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  border: 1px solid var(--vp-c-divider) !important;
+  margin: 1.5rem 0 !important;
+}
+
+.vp-doc table th {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 2 !important;
+  background-color: var(--vp-c-bg-elv) !important;
+  border-bottom: 2px solid var(--vp-c-divider) !important;
+  font-weight: 600 !important;
+}
+
+.vp-doc table tr:nth-child(even) {
+  background-color: var(--vp-c-bg-soft) !important;
+}
+
+.vp-doc table tr:nth-child(odd) {
+  background-color: var(--vp-c-bg) !important;
 }
