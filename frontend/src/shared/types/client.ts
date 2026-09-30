@@ -9,6 +9,8 @@ export interface RegisteredClient {
   expiresAt: string | null;
   createdAt: string;
   isDynamic?: boolean;
+  lastUsedAt?: string | null;
+  LastUsedAt?: string | null;
 }
 
 export interface NewClientResult {

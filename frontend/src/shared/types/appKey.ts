@@ -7,6 +7,8 @@ export interface AppKeyItem {
   scopes: string[];
   expiresAt?: string;
   createdAt: string;
+  lastUsedAt?: string | null;
+  LastUsedAt?: string | null;
 }
 
 export interface AppKeyLimits {
@@ -27,6 +29,8 @@ export interface NewAppKeyResult {
   scopes: string[];
   expiresAt?: string;
   createdAt: string;
+  lastUsedAt?: string | null;
+  LastUsedAt?: string | null;
 }
 
 export interface CreateAppKeyPayload {

@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-30T04:46:04.2152349Z",
-    "totalRequirements": 454,
+    "generatedAt": "2026-09-30T04:53:48.4934102Z",
+    "totalRequirements": 455,
     "positiveCount": 363,
-    "guardrailCount": 91,
-    "totalProofs": 1025
+    "guardrailCount": 92,
+    "totalProofs": 1027
   },
   "requirements": [
     {
@@ -10967,13 +10967,36 @@
       "category": "UI",
       "type": "Positive",
       "description": "toggles 3LO OAuth fields and submits with complete OAuth configuration",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/ServerModal.test.tsx",
           "lineNumber": 249,
           "testName": "toggles 3LO OAuth fields and submits with complete OAuth configuration",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/AppKeyRotateModal.test.tsx",
+          "lineNumber": 23,
+          "testName": "renders confirmation warning, rotates key, and shows config generator",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-136",
+      "category": "UI",
+      "type": "Negative",
+      "description": "Disables backdrop click dismissal on the key rotation modal to protect plaintext credentials.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/AppKeyRotateModal.test.tsx",
+          "lineNumber": 68,
+          "testName": "prevents backdrop click dismissal",
           "details": null
         }
       ]

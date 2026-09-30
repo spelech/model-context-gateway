@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **454 Requirements Verified** across **1025 Test Proofs** (363 Functional Capabilities, 91 Safety Guardrails).
+> **Catalog Statistics:** **455 Requirements Verified** across **1027 Test Proofs** (363 Functional Capabilities, 92 Safety Guardrails).
 
 ---
 
@@ -18,7 +18,7 @@
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **117** | 111 | 6 | 239 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **33** | 30 | 3 | 180 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **34** | 30 | 4 | 182 proofs |
 
 ---
 
@@ -2601,8 +2601,9 @@
 ### `[UI-135]` toggles 3LO OAuth fields and submits with complete OAuth configuration
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (2):**
   - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L249`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L249) (`toggles 3LO OAuth fields and submits with complete OAuth configuration`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeyRotateModal.test.tsx#L23`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyRotateModal.test.tsx#L23) (`renders confirmation warning, rotates key, and shows config generator`)
 
 ### `[UI-30]` Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -3280,6 +3281,12 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/TransportResilienceTests.cs#L101`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportResilienceTests.cs#L101) (`StdioTransport_SendRequestAsync_ReturnsProcessNotRunning_WhenDisposed`)
 
+### `[UI-136]` Disables backdrop click dismissal on the key rotation modal to protect plaintext credentials.
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeyRotateModal.test.tsx#L68`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyRotateModal.test.tsx#L68) (`prevents backdrop click dismissal`)
+
 ### `[UI-31]` Fetches registered OAuth clients and updates store state.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
@@ -3781,6 +3788,7 @@
 | `UI-133` | Positive | `UI` | verifies deterministic data-testid attributes and interactive flow across test bench tabs | [`TestBenchView.test.tsx:L473`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L473) | Frontend Vitest |
 | `UI-134` | Positive | `UI` | verifies server modal exposes deterministic data-testid attributes | [`ServerModal.test.tsx:L225`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L225) | Frontend Vitest |
 | `UI-135` | Positive | `UI` | toggles 3LO OAuth fields and submits with complete OAuth configuration | [`ServerModal.test.tsx:L249`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L249) | Frontend Vitest |
+| `UI-136` | **Guardrail** | `UI` | Disables backdrop click dismissal on the key rotation modal to protect plaintext credentials. | [`AppKeyRotateModal.test.tsx:L68`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyRotateModal.test.tsx#L68) | Frontend Vitest |
 | `UI-30` | Positive | `UI` | Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration. | [`ClientModal.test.tsx:L27`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientModal.test.tsx#L27) | Frontend Vitest |
 | `UI-31` | **Guardrail** | `UI` | Fetches registered OAuth clients and updates store state. | [`useClientStore.test.ts:L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L37) | Frontend Vitest |
 | `UI-32` | Positive | `UI` | Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials. | [`useClientStore.test.ts:L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L76) | Frontend Vitest |

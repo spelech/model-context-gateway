@@ -14,7 +14,8 @@ import {
   fetchAppKeysApi,
   fetchAppKeyLimitsApi,
   createAppKeyApi,
-  revokeAppKeyApi
+  revokeAppKeyApi,
+  rotateAppKeyApi
 } from '../api/appKeyApi';
 import {
   fetchUserQuotasApi,
@@ -39,6 +40,7 @@ interface AppKeyStore {
   userQuotas: UserQuota[];
   isLoading: boolean;
   isLoadingQuotas: boolean;
+  isRotating: boolean;
   isCreateModalOpen: boolean;
   createdResult: NewAppKeyResult | null;
 
@@ -47,6 +49,7 @@ interface AppKeyStore {
   fetchLimits: () => Promise<void>;
   createAppKey: (payload: CreateAppKeyPayload) => Promise<void>;
   revokeAppKey: (id: string, name: string) => Promise<void>;
+  rotateAppKey: (id: string) => Promise<{ id: string; name: string; keyPrefix: string; plaintextKey: string }>;
   fetchUserQuotas: () => Promise<void>;
   setUserQuota: (username: string, maxKeys: number) => Promise<void>;
   deleteUserQuota: (username: string) => Promise<void>;
@@ -61,6 +64,7 @@ export const useAppKeyStore = create<AppKeyStore>((set, get) => ({
   userQuotas: [],
   isLoading: false,
   isLoadingQuotas: false,
+  isRotating: false,
   isCreateModalOpen: false,
   createdResult: null,
 
@@ -114,6 +118,32 @@ export const useAppKeyStore = create<AppKeyStore>((set, get) => ({
       get().fetchLimits();
     } catch (e: any) {
       showToast(`Error revoking App Key: ${e.message}`, 'error');
+    }
+  },
+
+  rotateAppKey: async (id: string) => {
+    set({ isRotating: true });
+    try {
+      const result = await rotateAppKeyApi(id);
+      set((state) => ({
+        isRotating: false,
+        appKeys: state.appKeys.map((k) =>
+          k.id === id
+            ? { ...k, keyPrefix: result.keyPrefix, lastUsedAt: null, LastUsedAt: null }
+            : k
+        )
+      }));
+      showToast('App Key rotated successfully', 'success');
+      return {
+        id: result.id,
+        name: result.name,
+        keyPrefix: result.keyPrefix,
+        plaintextKey: result.plaintextKey
+      };
+    } catch (e: any) {
+      set({ isRotating: false });
+      showToast(`Error rotating App Key: ${e.message}`, 'error');
+      throw e;
     }
   },
 

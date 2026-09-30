@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { showToast } from './useToastStore';
 import { confirmAction } from './useConfirmStore';
 import { RegisteredClient, NewClientResult } from '../shared/types';
-import { fetchClientsApi, registerClientApi, deleteClientApi, cleanupClientsApi } from '../api/clientApi';
+import { fetchClientsApi, registerClientApi, deleteClientApi, cleanupClientsApi, rotateClientSecretApi } from '../api/clientApi';
 
 export type { RegisteredClient, NewClientResult };
 
@@ -23,6 +23,7 @@ interface ClientStore {
   ) => Promise<void>;
   deleteClient: (id: string, name: string) => Promise<void>;
   cleanupClients: (retentionDays?: number) => Promise<void>;
+  rotateClientSecret: (id: string) => Promise<{ clientId: string; clientSecret: string }>;
 
   openAddClientModal: () => void;
   closeClientModal: () => void;
@@ -88,6 +89,24 @@ export const useClientStore = create<ClientStore>((set, get) => ({
       get().fetchClients();
     } catch (e: any) {
       showToast(`Error cleaning up clients: ${e.message}`, 'error');
+    }
+  },
+
+  rotateClientSecret: async (id: string) => {
+    try {
+      const result = await rotateClientSecretApi(id);
+      set((state) => ({
+        clients: state.clients.map((c) =>
+          c.id === id || c.clientId === id
+            ? { ...c, lastUsedAt: null, LastUsedAt: null }
+            : c
+        )
+      }));
+      showToast('Client secret rotated successfully', 'success');
+      return result;
+    } catch (e: any) {
+      showToast(`Error rotating client secret: ${e.message}`, 'error');
+      throw e;
     }
   },
 
