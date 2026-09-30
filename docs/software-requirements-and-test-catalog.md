@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **457 Requirements Verified** across **1046 Test Proofs** (363 Functional Capabilities, 94 Safety Guardrails).
+> **Catalog Statistics:** **458 Requirements Verified** across **1051 Test Proofs** (363 Functional Capabilities, 95 Safety Guardrails).
 
 ---
 
@@ -18,7 +18,7 @@
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **117** | 110 | 7 | 251 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **36** | 31 | 5 | 189 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **37** | 31 | 6 | 194 proofs |
 
 ---
 
@@ -3316,6 +3316,16 @@
   - [Frontend Vitest] [`frontend/src/test/components/FormattedDescription.test.tsx#L85`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/FormattedDescription.test.tsx#L85) (`renders safe external links`)
   - [Frontend Vitest] [`frontend/src/test/components/FormattedDescription.test.tsx#L103`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/FormattedDescription.test.tsx#L103) (`renders null when text is empty or blank`)
 
+### `[UI-139]` Compacts multiple redirect URIs with +N more button and opens RedirectUrisModal on click.
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (5):**
+  - [Frontend Vitest] [`frontend/src/test/components/RegisteredClientsCard.test.tsx#L199`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L199) (`compacts multiple redirect URIs and opens detail modal on +N more click`)
+  - [Frontend Vitest] [`frontend/src/test/components/RedirectUrisModal.test.tsx#L20`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RedirectUrisModal.test.tsx#L20) (`renders client name, registered URIs count, and each individual URI`)
+  - [Frontend Vitest] [`frontend/src/test/components/RedirectUrisModal.test.tsx#L44`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RedirectUrisModal.test.tsx#L44) (`copies individual URI and all URIs to clipboard`)
+  - [Frontend Vitest] [`frontend/src/test/components/RedirectUrisModal.test.tsx#L71`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RedirectUrisModal.test.tsx#L71) (`calls onClose when close button or dismiss is clicked`)
+  - [Frontend Vitest] [`frontend/src/test/components/RedirectUrisModal.test.tsx#L93`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RedirectUrisModal.test.tsx#L93) (`renders nothing when isOpen is false`)
+
 ### `[UI-31]` Fetches registered OAuth clients and updates store state.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
@@ -3820,6 +3830,7 @@
 | `UI-136` | **Guardrail** | `UI` | Disables backdrop click dismissal on the key rotation modal to protect plaintext credentials. | [`AppKeyRotateModal.test.tsx:L67`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyRotateModal.test.tsx#L67) | Frontend Vitest |
 | `UI-137` | Positive | `UI` | Renders Last Used column and triggers Rotate Secret action for registered clients. | [`RegisteredClientsCard.test.tsx:L158`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L158) | Frontend Vitest |
 | `UI-138` | **Guardrail** | `UI` | cleans redundant server prefix from descriptions | [`FormattedDescription.test.tsx:L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/FormattedDescription.test.tsx#L6) | Frontend Vitest |
+| `UI-139` | **Guardrail** | `UI` | Compacts multiple redirect URIs with +N more button and opens RedirectUrisModal on click. | [`RegisteredClientsCard.test.tsx:L199`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L199) | Frontend Vitest |
 | `UI-30` | Positive | `UI` | Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration. | [`ClientModal.test.tsx:L27`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientModal.test.tsx#L27) | Frontend Vitest |
 | `UI-31` | **Guardrail** | `UI` | Fetches registered OAuth clients and updates store state. | [`useClientStore.test.ts:L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L37) | Frontend Vitest |
 | `UI-32` | Positive | `UI` | Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials. | [`useClientStore.test.ts:L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L76) | Frontend Vitest |

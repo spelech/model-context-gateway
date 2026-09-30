@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-30T20:36:29.8710918Z",
-    "totalRequirements": 457,
+    "generatedAt": "2026-09-30T21:03:02.7056642Z",
+    "totalRequirements": 458,
     "positiveCount": 363,
-    "guardrailCount": 94,
-    "totalProofs": 1046
+    "guardrailCount": 95,
+    "totalProofs": 1051
   },
   "requirements": [
     {
@@ -11148,6 +11148,50 @@
           "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
           "lineNumber": 103,
           "testName": "renders null when text is empty or blank",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-139",
+      "category": "UI",
+      "type": "Negative",
+      "description": "Compacts multiple redirect URIs with \u002BN more button and opens RedirectUrisModal on click.",
+      "proofCount": 5,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/RegisteredClientsCard.test.tsx",
+          "lineNumber": 199,
+          "testName": "compacts multiple redirect URIs and opens detail modal on \u002BN more click",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/RedirectUrisModal.test.tsx",
+          "lineNumber": 20,
+          "testName": "renders client name, registered URIs count, and each individual URI",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/RedirectUrisModal.test.tsx",
+          "lineNumber": 44,
+          "testName": "copies individual URI and all URIs to clipboard",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/RedirectUrisModal.test.tsx",
+          "lineNumber": 71,
+          "testName": "calls onClose when close button or dismiss is clicked",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/RedirectUrisModal.test.tsx",
+          "lineNumber": 93,
+          "testName": "renders nothing when isOpen is false",
           "details": null
         }
       ]
