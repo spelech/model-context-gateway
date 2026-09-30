@@ -221,6 +221,11 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 {
                     conn.Execute("ALTER TABLE AppKeys ADD COLUMN KeyType TEXT DEFAULT 'personal';");
                 }
+
+                if (!cols.Contains("LastUsedAt"))
+                {
+                    conn.Execute("ALTER TABLE AppKeys ADD COLUMN LastUsedAt DATETIME NULL;");
+                }
             }
 
             // 5. Legacy McpServers -> Servers
@@ -335,9 +340,18 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         OwnerSid TEXT DEFAULT '',
                         CreatedBy TEXT DEFAULT '',
                         ExpiresAt TEXT NULL,
-                        CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                        CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                        LastUsedAt DATETIME NULL
                     );
                 ");
+            }
+            else
+            {
+                var cols = conn.Query<string>("SELECT name FROM pragma_table_info('OAuthClients');").ToHashSet(StringComparer.OrdinalIgnoreCase);
+                if (!cols.Contains("LastUsedAt"))
+                {
+                    conn.Execute("ALTER TABLE OAuthClients ADD COLUMN LastUsedAt DATETIME NULL;");
+                }
             }
         }
 
@@ -542,6 +556,10 @@ namespace ModelContextGateway.Infrastructure.Persistence
                     BEGIN
                         ALTER TABLE [dbo].[AppKeys] ADD [KeyType] VARCHAR(50) NOT NULL DEFAULT 'personal';
                     END;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.AppKeys') AND name = 'LastUsedAt')
+                    BEGIN
+                        ALTER TABLE [dbo].[AppKeys] ADD [LastUsedAt] DATETIME2 NULL;
+                    END;
                 END;
 
                 -- 6. Migrate OAuthClients table
@@ -558,8 +576,16 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         [OwnerSid]         NVARCHAR(200) NOT NULL DEFAULT '',
                         [CreatedBy]        NVARCHAR(256) NOT NULL DEFAULT '',
                         [ExpiresAt]        DATETIME2 NULL,
-                        [CreatedAt]        DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+                        [CreatedAt]        DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+                        [LastUsedAt]       DATETIME2 NULL
                     );
+                END
+                ELSE
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.OAuthClients') AND name = 'LastUsedAt')
+                    BEGIN
+                        ALTER TABLE [dbo].[OAuthClients] ADD [LastUsedAt] DATETIME2 NULL;
+                    END;
                 END;
             ");
         }
@@ -888,6 +914,15 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 {
                     conn.Execute("ALTER TABLE `AppKeys` ADD COLUMN `KeyType` VARCHAR(50) NOT NULL DEFAULT 'personal';");
                 }
+
+                var hasLastUsedAt = conn.ExecuteScalar<int>(@"
+                    SELECT COUNT(*) FROM information_schema.columns 
+                    WHERE table_schema = DATABASE() AND table_name = 'AppKeys' AND column_name = 'LastUsedAt';") > 0;
+
+                if (!hasLastUsedAt)
+                {
+                    conn.Execute("ALTER TABLE `AppKeys` ADD COLUMN `LastUsedAt` DATETIME NULL;");
+                }
             }
 
             // 6. Migrate OAuthClients table
@@ -909,9 +944,21 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         `OwnerSid`         VARCHAR(200) NOT NULL DEFAULT '',
                         `CreatedBy`        VARCHAR(256) NOT NULL DEFAULT '',
                         `ExpiresAt`        DATETIME NULL,
-                        `CreatedAt`        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                        `CreatedAt`        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        `LastUsedAt`       DATETIME NULL
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
                 ");
+            }
+            else
+            {
+                var hasLastUsedAt = conn.ExecuteScalar<int>(@"
+                    SELECT COUNT(*) FROM information_schema.columns 
+                    WHERE table_schema = DATABASE() AND table_name = 'OAuthClients' AND column_name = 'LastUsedAt';") > 0;
+
+                if (!hasLastUsedAt)
+                {
+                    conn.Execute("ALTER TABLE `OAuthClients` ADD COLUMN `LastUsedAt` DATETIME NULL;");
+                }
             }
         }
 
@@ -973,7 +1020,8 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         EncryptedKey TEXT,
                         ScopesJson TEXT DEFAULT '[]',
                         ExpiresAt TEXT,
-                        CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                        CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                        LastUsedAt DATETIME NULL
                     );
 
                     CREATE TABLE IF NOT EXISTS UserQuotas (
@@ -1049,7 +1097,8 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         OwnerSid TEXT DEFAULT '',
                         CreatedBy TEXT DEFAULT '',
                         ExpiresAt TEXT NULL,
-                        CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                        CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                        LastUsedAt DATETIME NULL
                     );
                 ");
 
@@ -1137,7 +1186,8 @@ namespace ModelContextGateway.Infrastructure.Persistence
                             [EncryptedKey] NVARCHAR(MAX) NOT NULL,
                             [ScopesJson]   NVARCHAR(MAX) NOT NULL DEFAULT '[]',
                             [ExpiresAt]    DATETIME2 NULL,
-                            [CreatedAt]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+                            [CreatedAt]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+                            [LastUsedAt]   DATETIME2 NULL
                         );
                     END;
 
@@ -1244,7 +1294,8 @@ namespace ModelContextGateway.Infrastructure.Persistence
                             [OwnerSid]         NVARCHAR(200) NOT NULL DEFAULT '',
                             [CreatedBy]        NVARCHAR(256) NOT NULL DEFAULT '',
                             [ExpiresAt]        DATETIME2 NULL,
-                            [CreatedAt]        DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+                            [CreatedAt]        DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+                            [LastUsedAt]       DATETIME2 NULL
                         );
                     END;
                 ");
@@ -1306,7 +1357,8 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         `EncryptedKey` LONGTEXT NOT NULL,
                         `ScopesJson`   LONGTEXT NOT NULL,
                         `ExpiresAt`    DATETIME NULL,
-                        `CreatedAt`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                        `CreatedAt`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        `LastUsedAt`   DATETIME NULL
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
                     CREATE TABLE IF NOT EXISTS `UserQuotas` (
@@ -1389,7 +1441,8 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         `OwnerSid`         VARCHAR(200) NOT NULL DEFAULT '',
                         `CreatedBy`        VARCHAR(256) NOT NULL DEFAULT '',
                         `ExpiresAt`        DATETIME NULL,
-                        `CreatedAt`        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                        `CreatedAt`        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        `LastUsedAt`       DATETIME NULL
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
                 ");
             }
@@ -1458,8 +1511,8 @@ namespace ModelContextGateway.Infrastructure.Persistence
             {
                 { "Servers", "SELECT Id, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered FROM Servers WHERE 1=0" },
                 { "Settings", "SELECT Id, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys FROM Settings WHERE 1=0" },
-                { "AppKeys", "SELECT Id, Name, Username, OwnerSid, KeyType, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys WHERE 1=0" },
-                { "OAuthClients", "SELECT ClientId, ClientSecretHash, ClientName, ClientType, RedirectUrisJson, GrantTypesJson, ScopesJson, OwnerSid, CreatedBy, ExpiresAt, CreatedAt FROM OAuthClients WHERE 1=0" },
+                { "AppKeys", "SELECT Id, Name, Username, OwnerSid, KeyType, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt, LastUsedAt FROM AppKeys WHERE 1=0" },
+                { "OAuthClients", "SELECT ClientId, ClientSecretHash, ClientName, ClientType, RedirectUrisJson, GrantTypesJson, ScopesJson, OwnerSid, CreatedBy, ExpiresAt, CreatedAt, LastUsedAt FROM OAuthClients WHERE 1=0" },
                 { "UserQuotas", "SELECT Username, MaxKeys, CreatedAt, UpdatedAt FROM UserQuotas WHERE 1=0" },
                 { "AccessPolicies", "SELECT Id, TargetId, RequiredGroup, IsAllowed FROM AccessPolicies WHERE 1=0" },
                 { "GroupMappings", "SELECT Id, ExternalId, InternalGroup FROM GroupMappings WHERE 1=0" },
@@ -1523,11 +1576,19 @@ namespace ModelContextGateway.Infrastructure.Persistence
             {
                 throw new InvalidOperationException("SQLite schema compatibility check failed: AppKeys table is missing 'KeyType' column.");
             }
+            if (!appKeyCols.Contains("LastUsedAt"))
+            {
+                throw new InvalidOperationException("SQLite schema compatibility check failed: AppKeys table is missing 'LastUsedAt' column.");
+            }
 
             var oauthCols = conn.Query<string>("SELECT name FROM pragma_table_info('OAuthClients');").ToHashSet(StringComparer.OrdinalIgnoreCase);
             if (!oauthCols.Contains("ClientId") || !oauthCols.Contains("ClientSecretHash") || !oauthCols.Contains("ClientName"))
             {
                 throw new InvalidOperationException("SQLite schema compatibility check failed: OAuthClients table is missing required columns.");
+            }
+            if (!oauthCols.Contains("LastUsedAt"))
+            {
+                throw new InvalidOperationException("SQLite schema compatibility check failed: OAuthClients table is missing 'LastUsedAt' column.");
             }
         }
 

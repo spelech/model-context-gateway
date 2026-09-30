@@ -31,6 +31,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
         Task DeleteAppKeyAsync(string id);
         Task<int> GetTotalActiveKeysAsync();
         Task<int> GetUserActiveKeysAsync(string username);
+        Task UpdateLastUsedAsync(string id, DateTime lastUsedAt);
     }
 
     public interface IUserQuotaRepository
@@ -49,6 +50,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
         Task SaveOAuthClientAsync(OAuthClient client);
         Task<bool> DeleteOAuthClientAsync(string clientId);
         Task<int> CleanupDcrClientsAsync(int retentionDays = 30);
+        Task UpdateLastUsedAsync(string clientId, DateTime lastUsedAt);
     }
 
     public interface ISecretProviderRepository
@@ -393,6 +395,21 @@ namespace ModelContextGateway.Infrastructure.Persistence
         {
             using var conn = _dbFactory.CreateConnection();
             return await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM AppKeys WHERE Username = @Username AND (KeyType IS NULL OR KeyType != 'system');", new { Username = username });
+        }
+
+        public async Task UpdateLastUsedAsync(string id, DateTime lastUsedAt)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            var affected = await conn.ExecuteAsync(
+                "UPDATE AppKeys SET LastUsedAt = @LastUsedAt WHERE Id = @Id;",
+                new { Id = id, LastUsedAt = lastUsedAt });
+
+            if (affected == 0)
+            {
+                await conn.ExecuteAsync(
+                    "UPDATE OAuthClients SET LastUsedAt = @LastUsedAt WHERE ClientId = @Id;",
+                    new { Id = id, LastUsedAt = lastUsedAt });
+            }
         }
 
         // ==========================================
@@ -785,9 +802,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
             if (provider == "sqlite")
             {
                 return await conn.QueryAsync<OAuthClient>(@"
-                    SELECT ClientId, ClientSecretHash, ClientName, ClientType,
-                           RedirectUrisJson, GrantTypesJson, ScopesJson,
-                           OwnerSid, CreatedBy, ExpiresAt, CreatedAt
+                    SELECT *
                     FROM OAuthClients
                     ORDER BY CreatedAt DESC;");
             }
@@ -815,9 +830,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
             if (provider == "sqlite")
             {
                 return await conn.QueryFirstOrDefaultAsync<OAuthClient>(@"
-                    SELECT ClientId, ClientSecretHash, ClientName, ClientType,
-                           RedirectUrisJson, GrantTypesJson, ScopesJson,
-                           OwnerSid, CreatedBy, ExpiresAt, CreatedAt
+                    SELECT *
                     FROM OAuthClients
                     WHERE ClientId = @ClientId;",
                     new { ClientId = clientId });
@@ -955,9 +968,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
             if (provider == "sqlite" || provider == "mysql")
             {
                 return await conn.QueryFirstOrDefaultAsync<OAuthClient>(@"
-                    SELECT ClientId, ClientSecretHash, ClientName, ClientType,
-                           RedirectUrisJson, GrantTypesJson, ScopesJson,
-                           OwnerSid, CreatedBy, ExpiresAt, CreatedAt
+                    SELECT *
                     FROM OAuthClients
                     WHERE (CreatedBy = 'dcr' OR CreatedBy = '' OR CreatedBy IS NULL)
                       AND ClientName = @ClientName
@@ -969,9 +980,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
             else
             {
                 return await conn.QueryFirstOrDefaultAsync<OAuthClient>(@"
-                    SELECT TOP 1 ClientId, ClientSecretHash, ClientName, ClientType,
-                           RedirectUrisJson, GrantTypesJson, ScopesJson,
-                           OwnerSid, CreatedBy, ExpiresAt, CreatedAt
+                    SELECT TOP 1 *
                     FROM [dbo].[OAuthClients]
                     WHERE (CreatedBy = 'dcr' OR CreatedBy = '' OR CreatedBy IS NULL)
                       AND ClientName = @ClientName
