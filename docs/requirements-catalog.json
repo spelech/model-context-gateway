@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-27T11:05:23.0457285Z",
-    "totalRequirements": 448,
-    "positiveCount": 358,
+    "generatedAt": "2026-09-30T04:36:18.7050924Z",
+    "totalRequirements": 452,
+    "positiveCount": 362,
     "guardrailCount": 90,
-    "totalProofs": 1017
+    "totalProofs": 1023
   },
   "requirements": [
     {
@@ -433,7 +433,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
-          "lineNumber": 603,
+          "lineNumber": 621,
           "testName": "AuthMiddleware_CaseInsensitivity_BypassAndHeader_Check",
           "details": null
         },
@@ -824,9 +824,16 @@
       "id": "AUTH-118",
       "category": "AUTH",
       "type": "Positive",
-      "description": "FindDcrClientAsync resolves existing DCR client matching client name and type.",
-      "proofCount": 2,
+      "description": "AppKey table contains LastUsedAt column and repository updates and queries it accurately.",
+      "proofCount": 3,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs",
+          "lineNumber": 45,
+          "testName": "AppKeyRepository_UpdatesAndReads_LastUsedAt",
+          "details": null
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
@@ -847,9 +854,16 @@
       "id": "AUTH-119",
       "category": "AUTH",
       "type": "Positive",
-      "description": "CleanupDcrClientsAsync prunes duplicate and expired dynamic client registrations across all database providers.",
-      "proofCount": 2,
+      "description": "OAuthClients table contains LastUsedAt column and repository updates and queries it accurately.",
+      "proofCount": 3,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs",
+          "lineNumber": 73,
+          "testName": "OAuthClientRepository_UpdatesAndReads_LastUsedAt",
+          "details": null
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
@@ -862,6 +876,38 @@
           "filePath": "ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 333,
           "testName": "CleanupClients_CallsRepoAndReturnsCleanedCount",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-120",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "ActivityTracker throttles database updates to at most once per 60 seconds per key.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ActivityTrackerTests.cs",
+          "lineNumber": 9,
+          "testName": "RecordAppKeyUsage_DebouncesWithinWindow",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-121",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "ActivityTracker throttles OAuth client updates to at most once per 60 seconds per client.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ActivityTrackerTests.cs",
+          "lineNumber": 35,
+          "testName": "RecordClientUsage_DebouncesWithinWindow",
           "details": null
         }
       ]
@@ -3617,14 +3663,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
-          "lineNumber": 712,
+          "lineNumber": 730,
           "testName": "Connect_BlocksPrivateOrLoopbackIPs_AtSocketLevel",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
-          "lineNumber": 744,
+          "lineNumber": 762,
           "testName": "SecurityValidationHelper_IsBlockedIp_ValidatesAllBlockedAndAllowedRanges",
           "details": null
         },
@@ -3738,7 +3784,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
-          "lineNumber": 216,
+          "lineNumber": 234,
           "testName": "AuthMiddleware_CaseInsensitivity_Bypass_Check",
           "details": null
         },
@@ -7003,7 +7049,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
-          "lineNumber": 572,
+          "lineNumber": 590,
           "testName": "JsonNode_Rewrite_HandlesAdversarialEdgeCases",
           "details": null
         }
@@ -7026,6 +7072,22 @@
       ]
     },
     {
+      "id": "MCP-JSON-REWRITE-META-IN-PARAMS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "RewriteRequestJson strips _meta from root and embeds it into params to comply with MCP JSON-RPC 2.0 Zod schema.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
+          "lineNumber": 216,
+          "testName": "JsonNode_Rewrite_EnsuresMetaInsideParamsAndNotAtRoot",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-JSONRPC-CONVERTER-MINIMAL-VARIANTS",
       "category": "MCP",
       "type": "Positive",
@@ -7035,7 +7097,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
-          "lineNumber": 684,
+          "lineNumber": 702,
           "testName": "PlainJsonRpcMessages_DoNotCauseStackOverflow_PolymorphicVariants",
           "details": null
         }
@@ -7051,7 +7113,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
-          "lineNumber": 336,
+          "lineNumber": 354,
           "testName": "SendRequestAsync_Succeeds_When_Response_Has_Method_Property",
           "details": null
         }
@@ -9190,7 +9252,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
-          "lineNumber": 494,
+          "lineNumber": 512,
           "testName": "AsynchronousRouting_HighVolumeAndPolymorphic_DoesNotHang",
           "details": null
         }
@@ -9389,7 +9451,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
-          "lineNumber": 419,
+          "lineNumber": 437,
           "testName": "SseBackend_Notification_IsForwardedToClient_WithAllFieldsIntact",
           "details": null
         }
@@ -9588,7 +9650,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ChallengerTests.cs",
-          "lineNumber": 276,
+          "lineNumber": 294,
           "testName": "SendRequestAsync_TimesOutCleanly_AndDoesNotLeak",
           "details": null
         },
@@ -10864,6 +10926,22 @@
           "filePath": "frontend/src/test/components/ServerModal.test.tsx",
           "lineNumber": 225,
           "testName": "exposes deterministic data-testid attributes for automation",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-135",
+      "category": "UI",
+      "type": "Positive",
+      "description": "toggles 3LO OAuth fields and submits with complete OAuth configuration",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
+          "lineNumber": 249,
+          "testName": "toggles 3LO OAuth fields and submits with complete OAuth configuration",
           "details": null
         }
       ]

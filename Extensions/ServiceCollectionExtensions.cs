@@ -1,3 +1,5 @@
+using ModelContextGateway.Components.Activity;
+
 namespace ModelContextGateway.Extensions
 {
     public static class ServiceCollectionExtensions
@@ -90,6 +92,9 @@ namespace ModelContextGateway.Extensions
 
             // Register Credential Service
             builder.Services.AddSingleton<ICredentialService, CredentialService>();
+
+            // Register Activity Tracker
+            builder.Services.AddSingleton<IActivityTracker, ActivityTracker>();
 
             // Register Pluggable Identity Providers (Active Directory & Configurable Header Auth)
             builder.Services.AddSingleton<ILdapService>(sp =>
