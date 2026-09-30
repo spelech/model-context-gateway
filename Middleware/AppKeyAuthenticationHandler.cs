@@ -5,21 +5,37 @@ using System.Text.Json;
 using Dapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
+using ModelContextGateway.Components.Activity;
 
 namespace ModelContextGateway.Middleware
 {
     public class AppKeyAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
         private readonly IDbConnectionFactory _dbFactory;
+        private readonly IActivityTracker? _activityTracker;
+
+        [ActivatorUtilitiesConstructor]
+        public AppKeyAuthenticationHandler(
+            IOptionsMonitor<AuthenticationSchemeOptions> options,
+            ILoggerFactory logger,
+            UrlEncoder encoder,
+            IDbConnectionFactory dbFactory,
+            IActivityTracker? activityTracker,
+            IConfiguration? config)
+            : base(options, logger, encoder)
+        {
+            _dbFactory = dbFactory;
+            _activityTracker = activityTracker;
+        }
 
         public AppKeyAuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
-            IDbConnectionFactory dbFactory)
-            : base(options, logger, encoder)
+            IDbConnectionFactory dbFactory,
+            IActivityTracker? activityTracker)
+            : this(options, logger, encoder, dbFactory, activityTracker, null)
         {
-            _dbFactory = dbFactory;
         }
 
         public AppKeyAuthenticationHandler(
@@ -28,7 +44,16 @@ namespace ModelContextGateway.Middleware
             UrlEncoder encoder,
             IDbConnectionFactory dbFactory,
             IConfiguration? config)
-            : this(options, logger, encoder, dbFactory)
+            : this(options, logger, encoder, dbFactory, null, config)
+        {
+        }
+
+        public AppKeyAuthenticationHandler(
+            IOptionsMonitor<AuthenticationSchemeOptions> options,
+            ILoggerFactory logger,
+            UrlEncoder encoder,
+            IDbConnectionFactory dbFactory)
+            : this(options, logger, encoder, dbFactory, null, null)
         {
         }
 
@@ -111,6 +136,8 @@ namespace ModelContextGateway.Middleware
                 {
                     return AuthenticateResult.Fail("App Key has expired.");
                 }
+
+                _ = _activityTracker?.RecordAppKeyUsageAsync(appKey.Id);
 
                 // Successfully authenticated!
                 var claims = new System.Collections.Generic.List<Claim>

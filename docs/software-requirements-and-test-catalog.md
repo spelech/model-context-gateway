@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **450 Requirements Verified** across **1031 Test Proofs** (359 Functional Capabilities, 91 Safety Guardrails).
+> **Catalog Statistics:** **456 Requirements Verified** across **1041 Test Proofs** (363 Functional Capabilities, 93 Safety Guardrails).
 
 ---
 
@@ -10,15 +10,15 @@
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
 | **`API`** | API | **2** | 2 | 0 | 2 proofs |
-| **`AUTH`** | Authentication, RBAC & Identity | **97** | 93 | 4 | 228 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **100** | 96 | 4 | 233 proofs |
 | **`CORE`** | CORE | **8** | 7 | 1 | 14 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
-| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **65** | 3 | 62 | 137 proofs |
+| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **66** | 3 | 63 | 138 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **117** | 110 | 7 | 251 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **33** | 30 | 3 | 180 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **35** | 31 | 4 | 184 proofs |
 
 ---
 
@@ -181,19 +181,39 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L51`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L51) (`GetClients_ReturnsOk_WithClientsAndMappedProperties`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L238`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L238) (`GetClients_NeverLeaksRawBearerSecretOrHash`)
 
-### `[AUTH-118]` FindDcrClientAsync resolves existing DCR client matching client name and type.
+### `[AUTH-118]` AppKey table contains LastUsedAt column and repository updates and queries it accurately.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (2):**
+* **Verification Proofs (3):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L41`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L41) (`AppKeyRepository_UpdatesAndReads_LastUsedAt`)
   - [Backend xUnit] [`ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214) (`FindDcrClient_ReturnsMatchingClient`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L556`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L556) (`RegisterClient_DuplicateDcrRequest_ReusesExistingClientIdAndUpdatesRecord`)
 
-### `[AUTH-119]` CleanupDcrClientsAsync prunes duplicate and expired dynamic client registrations across all database providers.
+### `[AUTH-119]` OAuthClients table contains LastUsedAt column and repository updates and queries it accurately.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (2):**
+* **Verification Proofs (3):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L69`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L69) (`OAuthClientRepository_UpdatesAndReads_LastUsedAt`)
   - [Backend xUnit] [`ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237) (`CleanupDcrClients_PrunesDuplicateRegistrations_AndExpiredClients`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ClientsControllerTests.cs#L333`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L333) (`CleanupClients_CallsRepoAndReturnsCleanedCount`)
+
+### `[AUTH-120]` ActivityTracker throttles database updates to at most once per 60 seconds per key.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ActivityTrackerTests.cs#L9`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ActivityTrackerTests.cs#L9) (`RecordAppKeyUsage_DebouncesWithinWindow`)
+
+### `[AUTH-121]` ActivityTracker throttles OAuth client updates to at most once per 60 seconds per client.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ActivityTrackerTests.cs#L35`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ActivityTrackerTests.cs#L35) (`RecordClientUsage_DebouncesWithinWindow`)
+
+### `[AUTH-122]` RotateAppKey issues new plaintext key, updates database, resets LastUsedAt, and audits action.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L12`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L12) (`RotateAppKey_Success_ReturnsNewPlaintextKey`)
 
 ### `[AUTH-130]` Renders In-House IdP / External JWT Bearer card, toggles enable, fills authority, and saves configuration.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -427,8 +447,8 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L125`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L125) (`GetAppKeys_NonAdmin_ReturnsOnlyPersonalKeys_ForCurrentUser`)
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L351`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L351) (`loads app keys and updates store`)
   - [Frontend Vitest] [`frontend/src/test/components/App.test.tsx#L81`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/App.test.tsx#L81) (`renders role-adaptive UI for non-admin user`)
-  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L34`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L34) (`renders role-adapted My App Keys view for non-admin user`)
-  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L79`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L79) (`renders keys list, copies config snippet, and revokes key`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L33`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L33) (`renders role-adapted My App Keys view for non-admin user`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L78`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L78) (`renders keys list, opens rotate modal, and revokes key`)
   - [Playwright E2E] [`frontend/e2e/personal-appkeys-and-quotas.spec.ts#L5`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L5) (`Non-Admin Context: displays My App Keys navigation and personal quota indicator`)
 
 ### `[AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE]` Custom user quotas override default limit
@@ -439,7 +459,7 @@
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L594`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L594) (`sets user quota override and refreshes quota list`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L6) (`renders GeneralTab with security default quota inputs and triggers save`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L71`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L71) (`updates form state when settings prop changes`)
-  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L222`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L222) (`manages custom user quotas in admin quotas tab`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L215`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L215) (`manages custom user quotas in admin quotas tab`)
   - [Playwright E2E] [`frontend/e2e/personal-appkeys-and-quotas.spec.ts#L134`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L134) (`Admin Context: configures custom user quota override`)
 
 ### `[AUTH-PIPELINE-ADMIN-DASHBOARD]` Dashboard management API suite executes for authorized administrators.
@@ -599,7 +619,7 @@
   - [Frontend Vitest] [`frontend/src/test/components/App.test.tsx#L15`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/App.test.tsx#L15) (`renders header, navigation tabs, and default overview dashboard for admin user`)
   - [Frontend Vitest] [`frontend/src/test/components/App.test.tsx#L36`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/App.test.tsx#L36) (`switches between tabs on navigation click`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeyModal.test.tsx#L31`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyModal.test.tsx#L31) (`allows admin to select key type and create system app key`)
-  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L166`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L166) (`handles admin tab switching and username filtering`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L159`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L159) (`handles admin tab switching and username filtering`)
   - [Playwright E2E] [`frontend/e2e/personal-appkeys-and-quotas.spec.ts#L87`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L87) (`Admin Context: manages segmented App-Level Keys and User Personal Keys`)
 
 ### `[UI-100]` initializes with empty providers
@@ -2564,8 +2584,16 @@
 ### `[UI-135]` toggles 3LO OAuth fields and submits with complete OAuth configuration
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (2):**
   - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L249`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L249) (`toggles 3LO OAuth fields and submits with complete OAuth configuration`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeyRotateModal.test.tsx#L22`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyRotateModal.test.tsx#L22) (`renders confirmation warning, rotates key, and shows config generator`)
+
+### `[UI-137]` Renders Last Used column and triggers Rotate Secret action for registered clients.
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (2):**
+  - [Frontend Vitest] [`frontend/src/test/components/RegisteredClientsCard.test.tsx#L158`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L158) (`renders Last Used column and triggers Rotate Secret action`)
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L278`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L278) (`renders Last Used column and triggers Rotate Key modal`)
 
 ### `[UI-30]` Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -2632,6 +2660,12 @@
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/DbKeyHelperTests.cs#L334`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DbKeyHelperTests.cs#L334) (`ResolveDbEncryptionKey_ThrowsInvalidOperationException_WhenAutoGenerationFails`)
+
+### `[AUTH-123]` RotateAppKey forbids non-owner non-admin user from rotating another user's key.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L81`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L81) (`RotateAppKey_ForbiddenForDifferentUser`)
 
 ### `[AUTH-EXTERNAL-IDP-DENIES-ANONYMOUS-LOOPBACK]` When an external IDP is configured, anonymous loopback requests do not bypass authentication.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
@@ -3266,6 +3300,12 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/TransportResilienceTests.cs#L101`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportResilienceTests.cs#L101) (`StdioTransport_SendRequestAsync_ReturnsProcessNotRunning_WhenDisposed`)
 
+### `[UI-136]` Disables backdrop click dismissal on the key rotation modal to protect plaintext credentials.
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/AppKeyRotateModal.test.tsx#L67`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyRotateModal.test.tsx#L67) (`prevents backdrop click dismissal`)
+
 ### `[UI-31]` Fetches registered OAuth clients and updates store state.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
@@ -3329,8 +3369,11 @@
 | `AUTH-06` | Positive | `AUTH` | Transports use passThroughToken when AllowPassThroughAuth is true | [`TransportsAuthShapeTests.cs:L208`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L208) | Backend xUnit |
 | `AUTH-101` | Positive | `AUTH` | HTTP transport injects X-Forwarded-User header based on connected user identity. | [`IdentityHeaderTests.cs:L9`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/IdentityHeaderTests.cs#L9) | Backend xUnit |
 | `AUTH-110` | Positive | `AUTH` | CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0. | [`AppKeysControllerTests.cs:L343`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L343) | Backend xUnit |
-| `AUTH-118` | Positive | `AUTH` | FindDcrClientAsync resolves existing DCR client matching client name and type. | [`OAuthClientRepositoryTests.cs:L214`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214) | Backend xUnit |
-| `AUTH-119` | Positive | `AUTH` | CleanupDcrClientsAsync prunes duplicate and expired dynamic client registrations across all database providers. | [`OAuthClientRepositoryTests.cs:L237`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237) | Backend xUnit |
+| `AUTH-118` | Positive | `AUTH` | AppKey table contains LastUsedAt column and repository updates and queries it accurately. | [`AppKeyLastUsedPersistenceTests.cs:L41`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L41) | Backend xUnit |
+| `AUTH-119` | Positive | `AUTH` | OAuthClients table contains LastUsedAt column and repository updates and queries it accurately. | [`AppKeyLastUsedPersistenceTests.cs:L69`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs#L69) | Backend xUnit |
+| `AUTH-120` | Positive | `AUTH` | ActivityTracker throttles database updates to at most once per 60 seconds per key. | [`ActivityTrackerTests.cs:L9`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ActivityTrackerTests.cs#L9) | Backend xUnit |
+| `AUTH-121` | Positive | `AUTH` | ActivityTracker throttles OAuth client updates to at most once per 60 seconds per client. | [`ActivityTrackerTests.cs:L35`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ActivityTrackerTests.cs#L35) | Backend xUnit |
+| `AUTH-122` | Positive | `AUTH` | RotateAppKey issues new plaintext key, updates database, resets LastUsedAt, and audits action. | [`AppKeyRotationControllerTests.cs:L12`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L12) | Backend xUnit |
 | `AUTH-130` | Positive | `AUTH` | Renders In-House IdP / External JWT Bearer card, toggles enable, fills authority, and saves configuration. | [`IdentityAuthTab.test.tsx:L167`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/IdentityAuthTab.test.tsx#L167) | Frontend Vitest |
 | `AUTH-131` | Positive | `AUTH` | RFC 9728 Protected Resource Metadata endpoint exposes discovery document with canonical resource URI, authorization servers, scopes, and documentation. | [`Rfc9728ProtectedResourceDiscoveryTests.cs:L37`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L37) | Backend xUnit |
 | `AUTH-132` | Positive | `AUTH` | Unauthenticated client requests to /sse endpoint return 401 Unauthorized with RFC 9728 WWW-Authenticate header containing realm and resource_metadata. | [`Rfc9728ProtectedResourceDiscoveryTests.cs:L115`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/Rfc9728ProtectedResourceDiscoveryTests.cs#L115) | Backend xUnit |
@@ -3452,6 +3495,7 @@
 | `DOC-SETUP-SKILL-MIRROR` | Positive | `DOC` | The mcg-setup skill and templates are mirrored 1:1 in .agents/skills/mcg-setup/ | [`SetupSkillTests.cs:L152`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SetupSkillTests.cs#L152) | Backend xUnit |
 | `DOC-SETUP-SKILL-TEMPLATES` | Positive | `DOC` | All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, MCG_MASTER_KEY, and ghcr.io/spelech/model-context-gateway | [`SetupSkillTests.cs:L98`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SetupSkillTests.cs#L98) | Backend xUnit |
 | `DOC-SETUP-SKILL-WORKFLOW` | Positive | `DOC` | mcg-setup skill contains all 6 required setup phases including environment probing, hosting platforms, env vs UI trade-offs, identity/network topology, artifact generation, and health/client configuration | [`SetupSkillTests.cs:L44`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SetupSkillTests.cs#L44) | Backend xUnit |
+| `AUTH-123` | **Guardrail** | `GUARD` | RotateAppKey forbids non-owner non-admin user from rotating another user's key. | [`AppKeyRotationControllerTests.cs:L81`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyRotationControllerTests.cs#L81) | Backend xUnit |
 | `AUTH-EXTERNAL-IDP-DENIES-ANONYMOUS-LOOPBACK` | **Guardrail** | `GUARD` | When an external IDP is configured, anonymous loopback requests do not bypass authentication. | [`StandaloneAdminAuthTests.cs:L224`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L224) | Backend xUnit |
 | `AUTH-STANDALONE-ADMINPOLICY-EXTERNAL-DENY` | **Guardrail** | `GUARD` | AdminPolicy rejects unauthenticated requests from non-whitelisted external IPs in standalone mode. | [`StandaloneAdminAuthTests.cs:L200`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L200) | Backend xUnit |
 | `AUTH-STANDALONE-EXTERNAL-DENY` | **Guardrail** | `GUARD` | Standalone mode denies admin access to non-whitelisted external IPs without an Admin AppKey. | [`StandaloneAdminAuthTests.cs:L57`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L57) | Backend xUnit |
@@ -3763,6 +3807,8 @@
 | `UI-133` | Positive | `UI` | verifies deterministic data-testid attributes and interactive flow across test bench tabs | [`TestBenchView.test.tsx:L473`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L473) | Frontend Vitest |
 | `UI-134` | Positive | `UI` | verifies server modal exposes deterministic data-testid attributes | [`ServerModal.test.tsx:L225`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L225) | Frontend Vitest |
 | `UI-135` | Positive | `UI` | toggles 3LO OAuth fields and submits with complete OAuth configuration | [`ServerModal.test.tsx:L249`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L249) | Frontend Vitest |
+| `UI-136` | **Guardrail** | `UI` | Disables backdrop click dismissal on the key rotation modal to protect plaintext credentials. | [`AppKeyRotateModal.test.tsx:L67`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyRotateModal.test.tsx#L67) | Frontend Vitest |
+| `UI-137` | Positive | `UI` | Renders Last Used column and triggers Rotate Secret action for registered clients. | [`RegisteredClientsCard.test.tsx:L158`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L158) | Frontend Vitest |
 | `UI-30` | Positive | `UI` | Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration. | [`ClientModal.test.tsx:L27`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientModal.test.tsx#L27) | Frontend Vitest |
 | `UI-31` | **Guardrail** | `UI` | Fetches registered OAuth clients and updates store state. | [`useClientStore.test.ts:L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L37) | Frontend Vitest |
 | `UI-32` | Positive | `UI` | Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials. | [`useClientStore.test.ts:L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L76) | Frontend Vitest |

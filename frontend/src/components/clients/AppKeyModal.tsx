@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAppKeyStore } from '../../stores/useAppKeyStore';
 import { useUserStore } from '../../stores/useUserStore';
+import { AppKeyConfigGenerator } from './AppKeyConfigGenerator';
 
 export const AppKeyModal: React.FC = () => {
   const { user } = useUserStore();
@@ -60,25 +61,22 @@ export const AppKeyModal: React.FC = () => {
     }
   };
 
-  const getMcpConfigSnippet = () => {
-    if (!createdResult?.plaintextKey) return '';
-    return JSON.stringify({
-      mcpServers: {
-        "model-context-gateway": {
-          url: "http://10.0.0.10:8026/sse",
-          type: "sse",
-          trust: true,
-          headers: {
-            "X-App-Key": createdResult.plaintextKey
-          }
-        }
-      }
-    }, null, 2);
-  };
-
   return (
-    <div id="add-appkey-modal" data-testid="appkey-modal" className="modal-backdrop" style={{ display: 'flex' }}>
-      <div className="glass-card modal-card" style={{ maxWidth: '540px' }}>
+    <div
+      id="add-appkey-modal"
+      data-testid="appkey-modal"
+      className="modal-backdrop"
+      style={{ display: 'flex' }}
+      onClick={(e) => {
+        // Disables backdrop click dismissal to protect plaintext credentials
+        e.stopPropagation();
+      }}
+    >
+      <div
+        className="glass-card modal-card"
+        style={{ maxWidth: '540px' }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           <h2><i className="fa-solid fa-key"></i> {isAdmin ? 'Create New App Key' : 'Create Personal App Key'}</h2>
           <button className="btn-close" data-testid="appkey-close-btn" onClick={closeModal}>&times;</button>
@@ -215,10 +213,7 @@ export const AppKeyModal: React.FC = () => {
               </button>
             </div>
 
-            <h5 style={{ margin: '14px 0 6px 0', fontSize: '12px', color: 'var(--secondary)' }}>Ready-to-Use mcp_config.json Snippet:</h5>
-            <pre style={{ background: '#090d16', padding: '10px', borderRadius: '6px', fontSize: '11px', maxHeight: '140px', overflowY: 'auto', color: '#cbd5e1' }}>
-              {getMcpConfigSnippet()}
-            </pre>
+            <AppKeyConfigGenerator plaintextKey={createdResult.plaintextKey} />
 
             <button type="button" className="btn btn-primary" data-testid="appkey-done-btn" onClick={closeModal} style={{ marginTop: '14px', width: '100%' }}>
               Done

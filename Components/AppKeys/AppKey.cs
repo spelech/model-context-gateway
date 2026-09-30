@@ -15,5 +15,6 @@ namespace ModelContextGateway.Components.AppKeys
         public string KeyType { get; set; } = "personal"; // "personal" | "system"
         public DateTime? ExpiresAt { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? LastUsedAt { get; set; }
     }
 }

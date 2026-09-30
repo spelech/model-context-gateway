@@ -15,6 +15,8 @@ namespace ModelContextGateway.Components.Clients
             int? expiresInDays,
             string keyType = "personal");
 
+        Task<(AppKey AppKey, string PlaintextKey)> RotateCredentialAsync(string id);
+
         Task<bool> RevokeCredentialAsync(string id);
     }
 
@@ -169,6 +171,71 @@ namespace ModelContextGateway.Components.Clients
                 catch (Exception) when (attempt < maxRetries - 1)
                 {
                     // Retry on race-condition duplicate key conflict
+                    continue;
+                }
+            }
+
+            throw new InvalidOperationException("Failed to generate a unique credential after multiple attempts.");
+        }
+
+        public async Task<(AppKey AppKey, string PlaintextKey)> RotateCredentialAsync(string id)
+        {
+            using var conn = _dbFactory.CreateConnection();
+
+            var existingKey = await conn.QueryFirstOrDefaultAsync<AppKey>(
+                "SELECT * FROM AppKeys WHERE Id = @Id;",
+                new { Id = id });
+
+            if (existingKey == null)
+            {
+                throw new KeyNotFoundException($"AppKey with ID '{id}' not found.");
+            }
+
+            string prefix = "mcp-usr-";
+            if (!string.IsNullOrEmpty(existingKey.KeyPrefix))
+            {
+                var lastDash = existingKey.KeyPrefix.LastIndexOf('-');
+                if (lastDash >= 0)
+                {
+                    prefix = existingKey.KeyPrefix.Substring(0, lastDash + 1);
+                }
+            }
+
+            const int maxRetries = 3;
+            for (int attempt = 0; attempt < maxRetries; attempt++)
+            {
+                var selector = GenerateBase62String(8);
+                var secret = GenerateBase62String(16);
+
+                var keyPrefix = $"{prefix}{selector}";
+                var plaintextKey = $"{keyPrefix}-{secret}";
+
+                var collision = await conn.ExecuteScalarAsync<int>(
+                    "SELECT COUNT(*) FROM AppKeys WHERE KeyPrefix = @KeyPrefix;",
+                    new { KeyPrefix = keyPrefix });
+                if (collision > 0)
+                {
+                    continue;
+                }
+
+                using var sha256 = SHA256.Create();
+                var hashBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(plaintextKey));
+                var encryptedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
+
+                try
+                {
+                    await conn.ExecuteAsync(
+                        "UPDATE AppKeys SET KeyPrefix = @KeyPrefix, EncryptedKey = @EncryptedKey, LastUsedAt = NULL WHERE Id = @Id;",
+                        new { Id = id, KeyPrefix = keyPrefix, EncryptedKey = encryptedKey });
+
+                    existingKey.KeyPrefix = keyPrefix;
+                    existingKey.EncryptedKey = encryptedKey;
+                    existingKey.LastUsedAt = null;
+
+                    return (existingKey, plaintextKey);
+                }
+                catch (Exception) when (attempt < maxRetries - 1)
+                {
                     continue;
                 }
             }

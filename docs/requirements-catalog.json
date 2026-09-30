@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-30T06:39:41.2706138Z",
-    "totalRequirements": 450,
-    "positiveCount": 359,
-    "guardrailCount": 91,
-    "totalProofs": 1031
+    "generatedAt": "2026-09-30T06:41:37.7811765Z",
+    "totalRequirements": 456,
+    "positiveCount": 363,
+    "guardrailCount": 93,
+    "totalProofs": 1041
   },
   "requirements": [
     {
@@ -824,9 +824,16 @@
       "id": "AUTH-118",
       "category": "AUTH",
       "type": "Positive",
-      "description": "FindDcrClientAsync resolves existing DCR client matching client name and type.",
-      "proofCount": 2,
+      "description": "AppKey table contains LastUsedAt column and repository updates and queries it accurately.",
+      "proofCount": 3,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs",
+          "lineNumber": 41,
+          "testName": "AppKeyRepository_UpdatesAndReads_LastUsedAt",
+          "details": null
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
@@ -847,9 +854,16 @@
       "id": "AUTH-119",
       "category": "AUTH",
       "type": "Positive",
-      "description": "CleanupDcrClientsAsync prunes duplicate and expired dynamic client registrations across all database providers.",
-      "proofCount": 2,
+      "description": "OAuthClients table contains LastUsedAt column and repository updates and queries it accurately.",
+      "proofCount": 3,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AppKeyLastUsedPersistenceTests.cs",
+          "lineNumber": 69,
+          "testName": "OAuthClientRepository_UpdatesAndReads_LastUsedAt",
+          "details": null
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
@@ -862,6 +876,54 @@
           "filePath": "ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 333,
           "testName": "CleanupClients_CallsRepoAndReturnsCleanedCount",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-120",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "ActivityTracker throttles database updates to at most once per 60 seconds per key.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ActivityTrackerTests.cs",
+          "lineNumber": 9,
+          "testName": "RecordAppKeyUsage_DebouncesWithinWindow",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-121",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "ActivityTracker throttles OAuth client updates to at most once per 60 seconds per client.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ActivityTrackerTests.cs",
+          "lineNumber": 35,
+          "testName": "RecordClientUsage_DebouncesWithinWindow",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-122",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "RotateAppKey issues new plaintext key, updates database, resets LastUsedAt, and audits action.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AppKeyRotationControllerTests.cs",
+          "lineNumber": 12,
+          "testName": "RotateAppKey_Success_ReturnsNewPlaintextKey",
           "details": null
         }
       ]
@@ -1647,15 +1709,15 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 34,
+          "lineNumber": 33,
           "testName": "renders role-adapted My App Keys view for non-admin user",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 79,
-          "testName": "renders keys list, copies config snippet, and revokes key",
+          "lineNumber": 78,
+          "testName": "renders keys list, opens rotate modal, and revokes key",
           "details": null
         },
         {
@@ -1705,7 +1767,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 222,
+          "lineNumber": 215,
           "testName": "manages custom user quotas in admin quotas tab",
           "details": null
         },
@@ -2175,7 +2237,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 166,
+          "lineNumber": 159,
           "testName": "handles admin tab switching and username filtering",
           "details": null
         },
@@ -3190,6 +3252,22 @@
           "filePath": "ModelContextGateway.Tests/SetupSkillTests.cs",
           "lineNumber": 44,
           "testName": "Skill_ContainsAllRequiredPhasesAndComparisons",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-123",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "RotateAppKey forbids non-owner non-admin user from rotating another user\u0027s key.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/AppKeyRotationControllerTests.cs",
+          "lineNumber": 81,
+          "testName": "RotateAppKey_ForbiddenForDifferentUser",
           "details": null
         }
       ]
@@ -10973,13 +11051,59 @@
       "category": "UI",
       "type": "Positive",
       "description": "toggles 3LO OAuth fields and submits with complete OAuth configuration",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/ServerModal.test.tsx",
           "lineNumber": 249,
           "testName": "toggles 3LO OAuth fields and submits with complete OAuth configuration",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/AppKeyRotateModal.test.tsx",
+          "lineNumber": 22,
+          "testName": "renders confirmation warning, rotates key, and shows config generator",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-136",
+      "category": "UI",
+      "type": "Negative",
+      "description": "Disables backdrop click dismissal on the key rotation modal to protect plaintext credentials.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/AppKeyRotateModal.test.tsx",
+          "lineNumber": 67,
+          "testName": "prevents backdrop click dismissal",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-137",
+      "category": "UI",
+      "type": "Positive",
+      "description": "Renders Last Used column and triggers Rotate Secret action for registered clients.",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/RegisteredClientsCard.test.tsx",
+          "lineNumber": 158,
+          "testName": "renders Last Used column and triggers Rotate Secret action",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
+          "lineNumber": 278,
+          "testName": "renders Last Used column and triggers Rotate Key modal",
           "details": null
         }
       ]

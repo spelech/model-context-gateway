@@ -29,3 +29,10 @@ export async function createAppKeyApi(payload: CreateAppKeyPayload): Promise<New
 export async function revokeAppKeyApi(id: string): Promise<void> {
   await apiRequest(`/api/appkeys/${id}`, { method: 'DELETE' });
 }
+
+export async function rotateAppKeyApi(id: string): Promise<NewAppKeyResult> {
+  return apiRequest<NewAppKeyResult>(`/api/appkeys/${id}/rotate`, {
+    method: 'POST'
+  });
+}
+

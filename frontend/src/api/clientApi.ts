@@ -36,3 +36,10 @@ export async function cleanupClientsApi(retentionDays = 30): Promise<{ cleanedCo
     method: 'POST'
   });
 }
+
+export async function rotateClientSecretApi(id: string): Promise<{ clientId: string; clientSecret: string }> {
+  return await apiRequest<{ clientId: string; clientSecret: string }>(`/api/clients/${id}/rotate-secret`, {
+    method: 'POST'
+  });
+}
+

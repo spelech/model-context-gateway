@@ -6,6 +6,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ModelContextGateway.Components.Activity;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 
@@ -16,20 +17,23 @@ namespace ModelContextGateway.Components.Clients
         private readonly IOpenIddictApplicationManager? _applicationManager;
         private readonly IAuditLogger _auditLogger;
         private readonly IOAuthClientRepository? _oauthClientRepo;
+        private readonly IActivityTracker? _activityTracker;
 
         [ActivatorUtilitiesConstructor]
         public AuthorizationController(
             IOAuthClientRepository oauthClientRepo,
             IAuditLogger auditLogger,
-            IOpenIddictApplicationManager? applicationManager = null)
+            IOpenIddictApplicationManager? applicationManager = null,
+            IActivityTracker? activityTracker = null)
         {
             _oauthClientRepo = oauthClientRepo;
             _auditLogger = auditLogger;
             _applicationManager = applicationManager;
+            _activityTracker = activityTracker;
         }
 
         public AuthorizationController(IOpenIddictApplicationManager applicationManager, IAuditLogger auditLogger)
-            : this(null!, auditLogger, applicationManager)
+            : this(null!, auditLogger, applicationManager, null)
         {
         }
 
@@ -134,6 +138,8 @@ namespace ModelContextGateway.Components.Clients
                                 }));
                         }
                     }
+
+                    _ = _activityTracker?.RecordClientUsageAsync(client.ClientId);
                 }
 
                 var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
