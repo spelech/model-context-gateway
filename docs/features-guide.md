@@ -30,7 +30,7 @@ Step-by-step guides designed to get you up and running with Model Context Gatewa
 
 * [**Single-User & Home-Lab Quickstart**](deployment/homelab.md)
   Deploy MCG for personal automation or homelab environments with zero external dependencies.
-* [**Universal Setup Skill (`mcg-setup`)**](admin-guide.md#universal-setup-skill-mcg-setup)
+* [**Universal Setup Skill (`mcg-setup`)**](admin-guide.md#7-automated-administration)
   Use AI coding assistants (Claude Code, Antigravity, Cursor) to guide you through installing and configuring MCG in any workspace.
 * [**Evaluation Guide**](evaluation-guide.md)
   Evaluate MCG features, performance benchmarks, and security boundaries.
@@ -54,7 +54,7 @@ Practical recipes to help you accomplish specific goals and operational tasks.
 ### Administration & Automation
 * [**Admin MCP Server & Agent Automation**](admin-mcp-automation-guide.md)
   Automate gateway configuration using AI agents via the built-in Admin MCP Server (`/admin`, `/mcg-admin`).
-* [**Universal Admin MCP Automation Skill (`mcg-admin`)**](admin-mcp-automation-guide.md#universal-admin-mcp-automation-skill)
+* [**Universal Admin MCP Automation Skill (`mcg-admin`)**](admin-mcp-automation-guide.md)
   7-phase automation skill for zero-dashboard programmatic provisioning.
 * [**Interactive Developer Test Bench**](user-guide/test-bench/index.md)
   Inspect JSON-RPC traffic, test tools with dynamic form builders, simulate semantic search, and view live logs:
@@ -128,5 +128,5 @@ Deep-dive explanations of core architectural concepts, security pipelines, and s
   Outbound identity delegation via `X-Forwarded-User`, Kerberos impersonation, OAuth2 OBO token exchange, and BYOK credentials.
 * [**Per-User OAuth Delegation & Connected Accounts**](auth-flows/per-user-oauth-flow.md)
   3LO OAuth callback orchestrator, background token refresh, and encrypted user vault storage.
-* [**Observability, PII Sanitization & Audit Logging**](runbook.md#audit-logging-and-observability)
+* [**Observability, PII Sanitization & Audit Logging**](runbook.md#observability-health-checks-and-logs)
   `PiiSanitizer` token masking and database audit log stored procedures.
