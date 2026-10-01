@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-30T19:35:57.1709731Z",
-    "totalRequirements": 456,
-    "positiveCount": 363,
-    "guardrailCount": 93,
-    "totalProofs": 1041
+    "generatedAt": "2026-10-01T05:55:06.3348768Z",
+    "totalRequirements": 459,
+    "positiveCount": 364,
+    "guardrailCount": 95,
+    "totalProofs": 1054
   },
   "requirements": [
     {
@@ -10057,21 +10057,21 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 99,
+          "lineNumber": 102,
           "testName": "executes tool and updates console",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 130,
+          "lineNumber": 133,
           "testName": "executes prompt get in prompt tester tab",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 164,
+          "lineNumber": 167,
           "testName": "executes resource read in resource inspector tab",
           "details": null
         },
@@ -10414,7 +10414,7 @@
       "category": "UI",
       "type": "Positive",
       "description": "Audits desktop viewport layout for zero horizontal overflow and high UX score.",
-      "proofCount": 34,
+      "proofCount": 36,
       "proofs": [
         {
           "suite": "Playwright E2E",
@@ -10525,132 +10525,146 @@
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
           "lineNumber": 776,
+          "testName": "should pass layout audit on Test Bench across Half-Ultrawide viewports",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 817,
+          "testName": "should pass layout audit on Test Bench Semantic Router tab",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 848,
           "testName": "should pass layout audit on App Keys \u0026 Security sub-tabs on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 833,
+          "lineNumber": 905,
           "testName": "should pass layout audit on App Keys \u0026 Security sub-tabs on Samsung Galaxy Tab S10 Lite tablet viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 886,
+          "lineNumber": 958,
           "testName": "should pass layout audit on Settings sub-tabs on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 953,
+          "lineNumber": 1025,
           "testName": "should pass layout audit on Settings sub-tabs on Samsung Galaxy Tab S10 Lite tablet viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1019,
+          "lineNumber": 1091,
           "testName": "should pass layout audit on My MCP Servers tab on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1046,
+          "lineNumber": 1118,
           "testName": "should pass layout audit on My MCP Servers tab on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1074,
+          "lineNumber": 1146,
           "testName": "should pass layout audit on My MCP Servers tab on Samsung Galaxy Tab S10 Lite tablet viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1101,
+          "lineNumber": 1173,
           "testName": "should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1168,
+          "lineNumber": 1240,
           "testName": "should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy Tab S10 Lite tablet viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1235,
+          "lineNumber": 1307,
           "testName": "should pass layout audit for AppKey modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1279,
+          "lineNumber": 1351,
           "testName": "should pass layout audit for AppKey modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1324,
+          "lineNumber": 1396,
           "testName": "should pass layout audit for Client modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1368,
+          "lineNumber": 1440,
           "testName": "should pass layout audit for Client modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1413,
+          "lineNumber": 1485,
           "testName": "should pass layout audit for CustomFile modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1462,
+          "lineNumber": 1534,
           "testName": "should pass layout audit for CustomFile modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1512,
+          "lineNumber": 1584,
           "testName": "should pass layout audit for Policy modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1561,
+          "lineNumber": 1633,
           "testName": "should pass layout audit for Policy modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1611,
+          "lineNumber": 1683,
           "testName": "should pass layout audit for Mapping modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1660,
+          "lineNumber": 1732,
           "testName": "should pass layout audit for Mapping modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         }
@@ -10945,42 +10959,42 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 198,
+          "lineNumber": 201,
           "testName": "groups slash-namespaced tools into distinct backend servers without grouping under custom",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 232,
+          "lineNumber": 235,
           "testName": "filters tools by selected server and displays clean tool names",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 269,
+          "lineNumber": 272,
           "testName": "displays tool hint banner with clean name, server badge, full description, and parameter badge when tool is selected",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 304,
+          "lineNumber": 307,
           "testName": "renders enum parameters as select dropdown with placeholder and options",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 349,
+          "lineNumber": 352,
           "testName": "populates argument values in interactive form and submits tool execution",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 418,
+          "lineNumber": 421,
           "testName": "groups slash and dunder namespaced prompts into servers and displays prompt hint banner",
           "details": null
         },
@@ -11010,22 +11024,6 @@
           "filePath": "frontend/src/test/utils/mcpNaming.test.ts",
           "lineNumber": 44,
           "testName": "identifies un-namespaced custom tools",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "UI-133",
-      "category": "UI",
-      "type": "Positive",
-      "description": "verifies deterministic data-testid attributes and interactive flow across test bench tabs",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
-          "lineNumber": 470,
-          "testName": "renders and interacts with test bench elements via deterministic data-testid attributes",
           "details": null
         }
       ]
@@ -11104,6 +11102,126 @@
           "filePath": "frontend/src/test/components/AppKeysCard.test.tsx",
           "lineNumber": 278,
           "testName": "renders Last Used column and triggers Rotate Key modal",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-138",
+      "category": "UI",
+      "type": "Negative",
+      "description": "cleans redundant server prefix from descriptions",
+      "proofCount": 5,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
+          "lineNumber": 7,
+          "testName": "cleans redundant server prefix from descriptions",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
+          "lineNumber": 24,
+          "testName": "renders structured paragraphs and inline code/bold markdown formatting",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
+          "lineNumber": 59,
+          "testName": "renders unordered and ordered lists with inline formatting",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
+          "lineNumber": 87,
+          "testName": "renders safe external links",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
+          "lineNumber": 105,
+          "testName": "renders null when text is empty or blank",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-139",
+      "category": "UI",
+      "type": "Negative",
+      "description": "Compacts multiple redirect URIs with \u002BN more button and opens RedirectUrisModal on click.",
+      "proofCount": 5,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/RegisteredClientsCard.test.tsx",
+          "lineNumber": 199,
+          "testName": "compacts multiple redirect URIs and opens detail modal on \u002BN more click",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/RedirectUrisModal.test.tsx",
+          "lineNumber": 20,
+          "testName": "renders client name, registered URIs count, and each individual URI",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/RedirectUrisModal.test.tsx",
+          "lineNumber": 44,
+          "testName": "copies individual URI and all URIs to clipboard",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/RedirectUrisModal.test.tsx",
+          "lineNumber": 71,
+          "testName": "calls onClose when close button or dismiss is clicked",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/RedirectUrisModal.test.tsx",
+          "lineNumber": 93,
+          "testName": "renders nothing when isOpen is false",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-140",
+      "category": "UI",
+      "type": "Positive",
+      "description": "Navigation tabs maintain static 1px baseline border to eliminate vertical height jumps across active toggles",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/LayoutCentering.test.tsx",
+          "lineNumber": 132,
+          "testName": "defines baseline 1px transparent border and box-sizing on navigation tab buttons to prevent layout shifts",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-141",
+      "category": "UI",
+      "type": "Positive",
+      "description": "verifies deterministic data-testid attributes and interactive flow across test bench tabs including dedicated semantic router",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 473,
+          "testName": "renders and interacts with test bench elements via deterministic data-testid attributes",
           "details": null
         }
       ]

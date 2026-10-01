@@ -244,69 +244,84 @@ export const TestBenchView: React.FC = () => {
         >
           <i className="fa-solid fa-file-invoice"></i> Resources
         </button>
+        <button
+          type="button"
+          className={`tester-tab-btn ${activeTab === 'semantic' ? 'active' : ''}`}
+          data-testid="testbench-tab-semantic"
+          onClick={() => setActiveTab('semantic')}
+        >
+          <i className="fa-solid fa-magnifying-glass-chart"></i> Semantic Router
+        </button>
       </div>
 
-      <div className="tester-container">
-        {/* Left Column: Form execution */}
-        <div className="tester-panel">
-          {activeTab === 'tools' && (
-            <ToolTesterCard
-              tools={tools}
-              selectedServer={selectedToolServer}
-              selectedToolName={selectedToolName}
-              toolArguments={toolArguments}
-              rawToolJson={rawToolJson}
-              onServerChange={handleToolServerChange}
-              onToolChange={handleToolNameChange}
-              onArgChange={handleArgInputChange}
-              onRawJsonChange={setRawToolJson}
-              onSubmit={runToolCall}
+      {activeTab === 'semantic' ? (
+        <div className="tester-container single-column">
+          <div className="tester-panel">
+            <SemanticRouterCard
+              semanticQuery={semanticQuery}
+              semanticResults={semanticResults}
+              isSearchingSemantic={isSearchingSemantic}
+              onQueryChange={setSemanticQuery}
+              onSearch={runSemanticSearch}
             />
-          )}
-
-          {activeTab === 'prompts' && (
-            <PromptTesterCard
-              prompts={prompts}
-              selectedServer={selectedPromptServer}
-              selectedPromptName={selectedPromptName}
-              promptArguments={promptArguments}
-              onServerChange={handlePromptServerChange}
-              onPromptChange={handlePromptNameChange}
-              onArgChange={handlePromptArgChange}
-              onSubmit={runPromptGet}
-            />
-          )}
-
-          {activeTab === 'resources' && (
-            <ResourceTesterCard
-              resourcesData={resourcesData}
-              selectedServer={selectedResourceServer}
-              selectedResourceUri={selectedResourceUri}
-              selectedResourceValue={selectedResourceValue}
-              onServerChange={handleResourceServerChange}
-              onSelectChange={handleResourceSelectChange}
-              onUriChange={setSelectedResourceUri}
-              onSubmit={runResourceRead}
-            />
-          )}
+          </div>
+          <LogsTerminalCard />
         </div>
+      ) : (
+        <div className="tester-container">
+          {/* Left Column: Form execution */}
+          <div className="tester-panel">
+            {activeTab === 'tools' && (
+              <ToolTesterCard
+                tools={tools}
+                selectedServer={selectedToolServer}
+                selectedToolName={selectedToolName}
+                toolArguments={toolArguments}
+                rawToolJson={rawToolJson}
+                onServerChange={handleToolServerChange}
+                onToolChange={handleToolNameChange}
+                onArgChange={handleArgInputChange}
+                onRawJsonChange={setRawToolJson}
+                onSubmit={runToolCall}
+              />
+            )}
 
-        {/* Right Column: Console & Semantic */}
-        <div className="tester-panel">
-          <SemanticRouterCard
-            semanticQuery={semanticQuery}
-            semanticResults={semanticResults}
-            isSearchingSemantic={isSearchingSemantic}
-            onQueryChange={setSemanticQuery}
-            onSearch={runSemanticSearch}
-          />
+            {activeTab === 'prompts' && (
+              <PromptTesterCard
+                prompts={prompts}
+                selectedServer={selectedPromptServer}
+                selectedPromptName={selectedPromptName}
+                promptArguments={promptArguments}
+                onServerChange={handlePromptServerChange}
+                onPromptChange={handlePromptNameChange}
+                onArgChange={handlePromptArgChange}
+                onSubmit={runPromptGet}
+              />
+            )}
 
-          <ConsoleCard consoleRequest={consoleRequest} consoleResponse={consoleResponse} />
+            {activeTab === 'resources' && (
+              <ResourceTesterCard
+                resourcesData={resourcesData}
+                selectedServer={selectedResourceServer}
+                selectedResourceUri={selectedResourceUri}
+                selectedResourceValue={selectedResourceValue}
+                onServerChange={handleResourceServerChange}
+                onSelectChange={handleResourceSelectChange}
+                onUriChange={setSelectedResourceUri}
+                onSubmit={runResourceRead}
+              />
+            )}
+          </div>
+
+          {/* Right Column: Dedicated Sticky Execution Console */}
+          <div className="tester-panel tester-sticky-console">
+            <ConsoleCard consoleRequest={consoleRequest} consoleResponse={consoleResponse} />
+          </div>
+
+          {/* Bottom Full Width System logs */}
+          <LogsTerminalCard />
         </div>
-
-        {/* Bottom Full Width System logs */}
-        <LogsTerminalCard />
-      </div>
+      )}
     </div>
   );
 };

@@ -81,6 +81,9 @@ describe('TestBenchView Component', () => {
 
     render(<TestBenchView />);
 
+    const semanticTab = screen.getByRole('button', { name: /Semantic Router/i });
+    fireEvent.click(semanticTab);
+
     await waitFor(() => {
       expect(screen.getByPlaceholderText(/e\.g\. search matrix in plex/i)).toBeInTheDocument();
     });
@@ -297,7 +300,7 @@ describe('TestBenchView Component', () => {
       expect(screen.getByText('Get Radarr/Sonarr queue status')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('[MCP-ARR-HD]')).toBeInTheDocument();
+    expect(screen.getByText('MCP-ARR-HD')).toBeInTheDocument();
     expect(screen.getByText(/ready to execute|no arguments/i)).toBeInTheDocument();
   });
 
@@ -463,15 +466,15 @@ describe('TestBenchView Component', () => {
       expect(screen.getByText('Diagnose Sonarr queue status')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('[MCP-ARR-HD]')).toBeInTheDocument();
+    expect(screen.getByText('MCP-ARR-HD')).toBeInTheDocument();
     expect(screen.getByText(/1 required argument/i)).toBeInTheDocument();
   });
 
   /**
-   * @requirement UI-133
+   * @requirement UI-141
    * @category UI
-   * @type Positive
-   * @description verifies deterministic data-testid attributes and interactive flow across test bench tabs
+   * @type PositiveFeature
+   * @description verifies deterministic data-testid attributes and interactive flow across test bench tabs including dedicated semantic router
    */
   it('renders and interacts with test bench elements via deterministic data-testid attributes', async () => {
     render(<TestBenchView />);
@@ -484,9 +487,6 @@ describe('TestBenchView Component', () => {
       expect(screen.getByTestId('console-card')).toBeInTheDocument();
       expect(screen.getByTestId('console-request-output')).toBeInTheDocument();
       expect(screen.getByTestId('console-response-output')).toBeInTheDocument();
-      expect(screen.getByTestId('semantic-router-card')).toBeInTheDocument();
-      expect(screen.getByTestId('semantic-query-input')).toBeInTheDocument();
-      expect(screen.getByTestId('semantic-search-btn')).toBeInTheDocument();
     });
 
     // Switch to Prompts tab via data-testid
@@ -501,5 +501,11 @@ describe('TestBenchView Component', () => {
     expect(screen.getByTestId('resource-server-select')).toBeInTheDocument();
     expect(screen.getByTestId('resource-name-select')).toBeInTheDocument();
     expect(screen.getByTestId('resource-uri-input')).toBeInTheDocument();
+
+    // Switch to Semantic Router tab via data-testid
+    fireEvent.click(screen.getByTestId('testbench-tab-semantic'));
+    expect(screen.getByTestId('semantic-router-card')).toBeInTheDocument();
+    expect(screen.getByTestId('semantic-query-input')).toBeInTheDocument();
+    expect(screen.getByTestId('semantic-search-btn')).toBeInTheDocument();
   });
 });

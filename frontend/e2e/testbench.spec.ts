@@ -31,7 +31,8 @@ test.describe('Test Bench View Flow', () => {
     await expect(page.locator('[data-testid="console-request-output"]')).toBeVisible();
     await expect(page.locator('[data-testid="console-response-output"]')).toBeVisible();
 
-    // Verify Semantic Router Search Card and execute query
+    // Switch to Semantic Router Tab and execute query
+    await page.locator('[data-testid="testbench-tab-semantic"]').click();
     await expect(page.locator('[data-testid="semantic-router-card"]')).toBeVisible();
     const searchInput = page.locator('[data-testid="semantic-query-input"]');
     await expect(searchInput).toBeVisible();

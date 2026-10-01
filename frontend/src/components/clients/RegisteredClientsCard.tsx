@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
-import { useClientStore } from '../../stores/useClientStore';
+import React, { useState, useEffect } from 'react';
+import { RegisteredClient, useClientStore } from '../../stores/useClientStore';
 import { showToast } from '../../stores/useToastStore';
 import { formatRelativeTime } from '../../utils/dateUtils';
+import { RedirectUrisModal } from './RedirectUrisModal';
 
 export const RegisteredClientsCard: React.FC = () => {
   const { clients, fetchClients, deleteClient, cleanupClients, openAddClientModal, rotateClientSecret } = useClientStore();
+  const [selectedClientForUris, setSelectedClientForUris] = useState<RegisteredClient | null>(null);
 
   useEffect(() => {
     fetchClients();
@@ -93,12 +95,46 @@ export const RegisteredClientsCard: React.FC = () => {
                   </td>
                   <td>
                     {c.redirectUris && c.redirectUris.length > 0 ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '240px', wordBreak: 'break-all' }}>
-                        {c.redirectUris.map((uri, idx) => (
-                          <span key={idx} className="server-badge" style={{ fontSize: '11px', textAlign: 'left' }}>
-                            {uri}
-                          </span>
-                        ))}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        <span
+                          className="server-badge"
+                          style={{
+                            fontSize: '11px',
+                            maxWidth: '180px',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            display: 'inline-block',
+                            verticalAlign: 'middle',
+                            cursor: 'pointer',
+                          }}
+                          onClick={() => setSelectedClientForUris(c)}
+                          title={`Click to view: ${c.redirectUris[0]}`}
+                          data-testid={`badge-redirect-uri-${c.id}`}
+                        >
+                          {c.redirectUris[0]}
+                        </span>
+                        {c.redirectUris.length > 1 && (
+                          <button
+                            type="button"
+                            className="badge badge-primary"
+                            style={{
+                              cursor: 'pointer',
+                              border: 'none',
+                              padding: '2px 6px',
+                              fontSize: '11px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                            }}
+                            onClick={() => setSelectedClientForUris(c)}
+                            title={`View all ${c.redirectUris.length} redirect URIs`}
+                            aria-label={`View all ${c.redirectUris.length} redirect URIs for ${c.displayName}`}
+                            data-testid={`btn-view-uris-${c.id}`}
+                          >
+                            +{c.redirectUris.length - 1} more
+                          </button>
+                        )}
                       </div>
                     ) : (
                       <span style={{ color: 'var(--secondary)' }}>&mdash;</span>
@@ -152,6 +188,15 @@ export const RegisteredClientsCard: React.FC = () => {
           </tbody>
         </table>
       </div>
+
+      {selectedClientForUris && (
+        <RedirectUrisModal
+          isOpen={true}
+          onClose={() => setSelectedClientForUris(null)}
+          clientName={selectedClientForUris.displayName}
+          redirectUris={selectedClientForUris.redirectUris || []}
+        />
+      )}
     </div>
   );
 };

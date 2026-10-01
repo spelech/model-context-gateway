@@ -195,4 +195,72 @@ describe('RegisteredClientsCard component', () => {
 
     expect(rotateSpy).toHaveBeenCalledWith('c-1');
   });
+
+  /**
+   * @requirement UI-139
+   * @category UI
+   * @type PositiveFeature
+   * @description Compacts multiple redirect URIs with +N more button and opens RedirectUrisModal on click.
+   */
+  it('compacts multiple redirect URIs and opens detail modal on +N more click', () => {
+    useClientStore.setState({
+      clients: [
+        {
+          id: 'c-multi',
+          clientId: 'app-multi',
+          displayName: 'Multi URI Client',
+          clientType: 'public',
+          isDynamic: true,
+          grantTypes: ['authorization_code'],
+          redirectUris: [
+            'http://localhost:3000/callback',
+            'http://127.0.0.1:3000/callback',
+            'vscode://my-ext/callback',
+          ],
+          scopes: ['mcp_client'],
+          createdAt: '2026-09-01T10:00:00Z',
+          expiresAt: null,
+        },
+        {
+          id: 'c-empty',
+          clientId: 'app-empty',
+          displayName: 'No URIs Client',
+          clientType: 'confidential',
+          isDynamic: false,
+          grantTypes: ['client_credentials'],
+          redirectUris: [],
+          scopes: ['mcp_client'],
+          createdAt: '2026-09-01T10:00:00Z',
+          expiresAt: null,
+        }
+      ],
+      fetchClients: vi.fn(),
+    });
+
+    render(<RegisteredClientsCard />);
+
+    // Multi-URI client renders first URI and +2 more button
+    expect(screen.getByText('http://localhost:3000/callback')).toBeInTheDocument();
+    const moreBtn = screen.getByTestId('btn-view-uris-c-multi');
+    expect(moreBtn).toBeInTheDocument();
+    expect(moreBtn).toHaveTextContent('+2 more');
+
+    // Empty URI client renders dash
+    expect(screen.getByText('—')).toBeInTheDocument();
+
+    // Click +2 more button to open modal
+    fireEvent.click(moreBtn);
+
+    // Modal is now visible with all URIs
+    expect(screen.getByText(/Redirect URIs — Multi URI Client/i)).toBeInTheDocument();
+    expect(screen.getByText('http://127.0.0.1:3000/callback')).toBeInTheDocument();
+    expect(screen.getByText('vscode://my-ext/callback')).toBeInTheDocument();
+
+    // Close modal
+    const closeBtn = screen.getByTestId('btn-close-redirect-uris-modal');
+    fireEvent.click(closeBtn);
+
+    expect(screen.queryByText(/Redirect URIs — Multi URI Client/i)).not.toBeInTheDocument();
+  });
 });
+
