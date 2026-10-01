@@ -27,8 +27,10 @@ export class TestBenchPage {
     this.semanticQueryInput = page.locator('[data-testid="semantic-query-input"], #semantic-search-query');
     this.searchToolsBtn = page.locator('[data-testid="semantic-search-btn"]');
 
+    this.toolTabBtn = page.locator('[data-testid="testbench-tab-tools"], button:has-text("Tools")');
     this.promptTabBtn = page.locator('[data-testid="testbench-tab-prompts"]');
     this.resourceTabBtn = page.locator('[data-testid="testbench-tab-resources"]');
+    this.semanticTabBtn = page.locator('[data-testid="testbench-tab-semantic"], button:has-text("Semantic Router")');
     this.promptServerSelect = page.locator('[data-testid="prompt-server-select"]');
     this.promptNameSelect = page.locator('[data-testid="prompt-name-select"]');
     this.promptExecuteBtn = page.locator('[data-testid="prompt-execute-btn"]');
@@ -39,6 +41,9 @@ export class TestBenchPage {
   }
 
   async selectServerAndTool(serverId: string, toolName?: string) {
+    if (await this.toolTabBtn.isVisible() && !(await this.serverSelect.isVisible())) {
+      await this.toolTabBtn.click();
+    }
     await this.serverSelect.waitFor({ state: 'visible' });
     await this.serverSelect.selectOption(serverId);
     if (toolName) {
@@ -52,6 +57,10 @@ export class TestBenchPage {
   }
 
   async searchTools(query: string) {
+    if (await this.semanticTabBtn.isVisible()) {
+      await this.semanticTabBtn.click();
+    }
+    await this.semanticQueryInput.waitFor({ state: 'visible' });
     await this.semanticQueryInput.fill(query);
     await this.searchToolsBtn.click();
   }

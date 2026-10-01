@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **458 Requirements Verified** across **1051 Test Proofs** (363 Functional Capabilities, 95 Safety Guardrails).
+> **Catalog Statistics:** **459 Requirements Verified** across **1054 Test Proofs** (364 Functional Capabilities, 95 Safety Guardrails).
 
 ---
 
@@ -18,7 +18,7 @@
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **117** | 110 | 7 | 251 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **37** | 31 | 6 | 194 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **38** | 32 | 6 | 197 proofs |
 
 ---
 
@@ -2342,9 +2342,9 @@
   - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L311`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L311) (`renders custom files table with edit and delete actions`)
   - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L354`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L354) (`renders access policies and group mappings with CRUD actions`)
   - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L71`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L71) (`handles semantic search queries in SemanticRouterCard`)
-  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L99`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L99) (`executes tool and updates console`)
-  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L130`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L130) (`executes prompt get in prompt tester tab`)
-  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L164`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L164) (`executes resource read in resource inspector tab`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L102`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L102) (`executes tool and updates console`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L133`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L133) (`executes prompt get in prompt tester tab`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L167`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L167) (`executes resource read in resource inspector tab`)
   - [Frontend Vitest] [`frontend/src/test/components/SharedComponents.test.tsx#L26`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SharedComponents.test.tsx#L26) (`renders title, children, and handles close button click`)
   - [Frontend Vitest] [`frontend/src/test/components/SharedComponents.test.tsx#L50`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SharedComponents.test.tsx#L50) (`renders various statuses correctly with indicators`)
   - [Frontend Vitest] [`frontend/src/test/components/SharedComponents.test.tsx#L72`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SharedComponents.test.tsx#L72) (`returns null when totalItems is 0`)
@@ -2415,7 +2415,7 @@
 ### `[UI-07]` Audits desktop viewport layout for zero horizontal overflow and high UX score.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (34):**
+* **Verification Proofs (36):**
   - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L255`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L255) (`should pass layout audit on desktop 1080p viewport`)
   - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L276`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L276) (`should pass layout audit on Samsung Galaxy S25+ mobile viewport`)
   - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L321`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L321) (`should pass layout audit on Samsung Galaxy Tab S10 Lite tablet viewport (portrait)`)
@@ -2431,25 +2431,27 @@
   - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L662`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L662) (`should pass layout audit on Test Bench tab on Samsung Galaxy S25+ mobile viewport`)
   - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L693`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L693) (`should pass layout audit on Test Bench tab on Samsung Galaxy Tab S10 Lite tablet viewport`)
   - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L724`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L724) (`should pass layout audit on Test Bench Prompts and Resources tabs`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L776`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L776) (`should pass layout audit on App Keys & Security sub-tabs on Samsung Galaxy S25+ mobile viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L833`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L833) (`should pass layout audit on App Keys & Security sub-tabs on Samsung Galaxy Tab S10 Lite tablet viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L886`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L886) (`should pass layout audit on Settings sub-tabs on Samsung Galaxy S25+ mobile viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L953`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L953) (`should pass layout audit on Settings sub-tabs on Samsung Galaxy Tab S10 Lite tablet viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1019`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1019) (`should pass layout audit on My MCP Servers tab on desktop 1080p viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1046`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1046) (`should pass layout audit on My MCP Servers tab on Samsung Galaxy S25+ mobile viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1074`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1074) (`should pass layout audit on My MCP Servers tab on Samsung Galaxy Tab S10 Lite tablet viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1101`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1101) (`should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy S25+ mobile viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1168`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1168) (`should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy Tab S10 Lite tablet viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1235`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1235) (`should pass layout audit for AppKey modal on desktop 1080p viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1279`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1279) (`should pass layout audit for AppKey modal on Samsung Galaxy S25+ mobile viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1324`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1324) (`should pass layout audit for Client modal on desktop 1080p viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1368`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1368) (`should pass layout audit for Client modal on Samsung Galaxy S25+ mobile viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1413`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1413) (`should pass layout audit for CustomFile modal on desktop 1080p viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1462`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1462) (`should pass layout audit for CustomFile modal on Samsung Galaxy S25+ mobile viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1512`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1512) (`should pass layout audit for Policy modal on desktop 1080p viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1561`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1561) (`should pass layout audit for Policy modal on Samsung Galaxy S25+ mobile viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1611`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1611) (`should pass layout audit for Mapping modal on desktop 1080p viewport`)
-  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1660`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1660) (`should pass layout audit for Mapping modal on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L776`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L776) (`should pass layout audit on Test Bench across Half-Ultrawide viewports`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L817`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L817) (`should pass layout audit on Test Bench Semantic Router tab`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L848`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L848) (`should pass layout audit on App Keys & Security sub-tabs on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L905`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L905) (`should pass layout audit on App Keys & Security sub-tabs on Samsung Galaxy Tab S10 Lite tablet viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L958`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L958) (`should pass layout audit on Settings sub-tabs on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1025`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1025) (`should pass layout audit on Settings sub-tabs on Samsung Galaxy Tab S10 Lite tablet viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1091`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1091) (`should pass layout audit on My MCP Servers tab on desktop 1080p viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1118`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1118) (`should pass layout audit on My MCP Servers tab on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1146`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1146) (`should pass layout audit on My MCP Servers tab on Samsung Galaxy Tab S10 Lite tablet viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1173`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1173) (`should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1240`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1240) (`should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy Tab S10 Lite tablet viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1307`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1307) (`should pass layout audit for AppKey modal on desktop 1080p viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1351`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1351) (`should pass layout audit for AppKey modal on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1396`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1396) (`should pass layout audit for Client modal on desktop 1080p viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1440`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1440) (`should pass layout audit for Client modal on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1485`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1485) (`should pass layout audit for CustomFile modal on desktop 1080p viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1534`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1534) (`should pass layout audit for CustomFile modal on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1584`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1584) (`should pass layout audit for Policy modal on desktop 1080p viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1633`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1633) (`should pass layout audit for Policy modal on Samsung Galaxy S25+ mobile viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1683`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1683) (`should pass layout audit for Mapping modal on desktop 1080p viewport`)
+  - [Playwright E2E] [`frontend/e2e/layout-inspector.spec.ts#L1732`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L1732) (`should pass layout audit for Mapping modal on Samsung Galaxy S25+ mobile viewport`)
 
 ### `[UI-102]` Dashboard renders stats card, connected server list, and setup instructions
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -2558,22 +2560,16 @@
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (10):**
-  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L198`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L198) (`groups slash-namespaced tools into distinct backend servers without grouping under custom`)
-  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L232`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L232) (`filters tools by selected server and displays clean tool names`)
-  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L269`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L269) (`displays tool hint banner with clean name, server badge, full description, and parameter badge when tool is selected`)
-  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L304`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L304) (`renders enum parameters as select dropdown with placeholder and options`)
-  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L349`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L349) (`populates argument values in interactive form and submits tool execution`)
-  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L418`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L418) (`groups slash and dunder namespaced prompts into servers and displays prompt hint banner`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L201`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L201) (`groups slash-namespaced tools into distinct backend servers without grouping under custom`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L235`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L235) (`filters tools by selected server and displays clean tool names`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L272`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L272) (`displays tool hint banner with clean name, server badge, full description, and parameter badge when tool is selected`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L307`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L307) (`renders enum parameters as select dropdown with placeholder and options`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L352`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L352) (`populates argument values in interactive form and submits tool execution`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L421`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L421) (`groups slash and dunder namespaced prompts into servers and displays prompt hint banner`)
   - [Frontend Vitest] [`frontend/src/test/utils/mcpNaming.test.ts#L5`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/utils/mcpNaming.test.ts#L5) (`parses tool names with slash delimiter`)
   - [Frontend Vitest] [`frontend/src/test/utils/mcpNaming.test.ts#L18`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/utils/mcpNaming.test.ts#L18) (`parses tool names with dunder delimiter`)
   - [Frontend Vitest] [`frontend/src/test/utils/mcpNaming.test.ts#L31`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/utils/mcpNaming.test.ts#L31) (`parses tool names with colon delimiter`)
   - [Frontend Vitest] [`frontend/src/test/utils/mcpNaming.test.ts#L44`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/utils/mcpNaming.test.ts#L44) (`identifies un-namespaced custom tools`)
-
-### `[UI-133]` verifies deterministic data-testid attributes and interactive flow across test bench tabs
-* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
-  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L470`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L470) (`renders and interacts with test bench elements via deterministic data-testid attributes`)
 
 ### `[UI-134]` verifies server modal exposes deterministic data-testid attributes
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -2594,6 +2590,18 @@
 * **Verification Proofs (2):**
   - [Frontend Vitest] [`frontend/src/test/components/RegisteredClientsCard.test.tsx#L158`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L158) (`renders Last Used column and triggers Rotate Secret action`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L278`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L278) (`renders Last Used column and triggers Rotate Key modal`)
+
+### `[UI-140]` Navigation tabs maintain static 1px baseline border to eliminate vertical height jumps across active toggles
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/LayoutCentering.test.tsx#L132`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LayoutCentering.test.tsx#L132) (`defines baseline 1px transparent border and box-sizing on navigation tab buttons to prevent layout shifts`)
+
+### `[UI-141]` verifies deterministic data-testid attributes and interactive flow across test bench tabs including dedicated semantic router
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L473`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L473) (`renders and interacts with test bench elements via deterministic data-testid attributes`)
 
 ### `[UI-30]` Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -3823,14 +3831,15 @@
 | `UI-128` | Positive | `UI` | should navigate to Test Bench view, render tester cards, and test semantic search | [`testbench.spec.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/testbench.spec.ts#L1) | Playwright E2E |
 | `UI-130` | Positive | `UI` | Renders Connect Account button for OAuth-enabled servers directing to authorization URL. | [`MyMcpServers.test.tsx:L121`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L121) | Frontend Vitest |
 | `UI-131` | Positive | `UI` | Renders Connected (OAuth) badge and supports account disconnection. | [`MyMcpServers.test.tsx:L157`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L157) | Frontend Vitest |
-| `UI-132` | Positive | `UI` | groups slash-namespaced tools into distinct backend servers without grouping under custom | [`TestBenchView.test.tsx:L198`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L198) | Frontend Vitest |
-| `UI-133` | Positive | `UI` | verifies deterministic data-testid attributes and interactive flow across test bench tabs | [`TestBenchView.test.tsx:L470`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L470) | Frontend Vitest |
+| `UI-132` | Positive | `UI` | groups slash-namespaced tools into distinct backend servers without grouping under custom | [`TestBenchView.test.tsx:L201`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L201) | Frontend Vitest |
 | `UI-134` | Positive | `UI` | verifies server modal exposes deterministic data-testid attributes | [`ServerModal.test.tsx:L225`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L225) | Frontend Vitest |
 | `UI-135` | Positive | `UI` | toggles 3LO OAuth fields and submits with complete OAuth configuration | [`ServerModal.test.tsx:L249`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L249) | Frontend Vitest |
 | `UI-136` | **Guardrail** | `UI` | Disables backdrop click dismissal on the key rotation modal to protect plaintext credentials. | [`AppKeyRotateModal.test.tsx:L67`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeyRotateModal.test.tsx#L67) | Frontend Vitest |
 | `UI-137` | Positive | `UI` | Renders Last Used column and triggers Rotate Secret action for registered clients. | [`RegisteredClientsCard.test.tsx:L158`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L158) | Frontend Vitest |
 | `UI-138` | **Guardrail** | `UI` | cleans redundant server prefix from descriptions | [`FormattedDescription.test.tsx:L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/FormattedDescription.test.tsx#L6) | Frontend Vitest |
 | `UI-139` | **Guardrail** | `UI` | Compacts multiple redirect URIs with +N more button and opens RedirectUrisModal on click. | [`RegisteredClientsCard.test.tsx:L199`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L199) | Frontend Vitest |
+| `UI-140` | Positive | `UI` | Navigation tabs maintain static 1px baseline border to eliminate vertical height jumps across active toggles | [`LayoutCentering.test.tsx:L132`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LayoutCentering.test.tsx#L132) | Frontend Vitest |
+| `UI-141` | Positive | `UI` | verifies deterministic data-testid attributes and interactive flow across test bench tabs including dedicated semantic router | [`TestBenchView.test.tsx:L473`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L473) | Frontend Vitest |
 | `UI-30` | Positive | `UI` | Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration. | [`ClientModal.test.tsx:L27`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientModal.test.tsx#L27) | Frontend Vitest |
 | `UI-31` | **Guardrail** | `UI` | Fetches registered OAuth clients and updates store state. | [`useClientStore.test.ts:L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L37) | Frontend Vitest |
 | `UI-32` | Positive | `UI` | Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials. | [`useClientStore.test.ts:L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L76) | Frontend Vitest |

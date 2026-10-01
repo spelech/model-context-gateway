@@ -3,7 +3,7 @@ import { ToolItem, PromptItem, ResourceItem, TemplateItem } from '../../shared/t
 import { fetchTestToolsApi, fetchTestPromptsApi, fetchTestResourcesApi } from '../../api/testbenchApi';
 
 export const useTestBenchState = () => {
-  const [activeTab, setActiveTab] = useState<'tools' | 'prompts' | 'resources'>('tools');
+  const [activeTab, setActiveTab] = useState<'tools' | 'prompts' | 'resources' | 'semantic'>('tools');
 
   // Lists
   const [tools, setTools] = useState<ToolItem[]>([]);

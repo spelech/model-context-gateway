@@ -128,5 +128,28 @@ describe('Layout and Sub-Navigation Centering', () => {
     expect(cssContent).toContain('outline: 2px solid var(--primary);');
     expect(cssContent).toContain('outline-offset: 2px;');
   });
+
+  /**
+   * @requirement UI-140
+   * @category UI
+   * @type PositiveFeature
+   * @description Navigation tabs maintain static 1px baseline border to eliminate vertical height jumps across active toggles
+   */
+  it('defines baseline 1px transparent border and box-sizing on navigation tab buttons to prevent layout shifts', () => {
+    const layoutCss = fs.readFileSync(path.resolve(__dirname, '../../styles/layout.css'), 'utf-8');
+    const tabBtnMatch = layoutCss.match(/\.tab-btn\s*\{([^}]+)\}/);
+    expect(tabBtnMatch).not.toBeNull();
+    expect(tabBtnMatch![1]).toContain('border: 1px solid transparent;');
+    expect(tabBtnMatch![1]).toContain('box-sizing: border-box;');
+
+    const testerCss = fs.readFileSync(path.resolve(__dirname, '../../styles/tester.css'), 'utf-8');
+    const testerTabBtnMatch = testerCss.match(/\.tester-tab-btn\s*\{([^}]+)\}/);
+    expect(testerTabBtnMatch).not.toBeNull();
+    expect(testerTabBtnMatch![1]).toContain('border: 1px solid transparent;');
+    expect(testerTabBtnMatch![1]).toContain('box-sizing: border-box;');
+
+    expect(testerCss).toContain('.tester-sticky-console');
+    expect(testerCss).toContain('position: sticky;');
+  });
 });
 

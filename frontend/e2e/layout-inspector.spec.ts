@@ -777,6 +777,78 @@ test.describe('Dashboard Layout & UX Audit', () => {
    * @requirement UI-07
    * @category UI
    * @type PositiveFeature
+   * @description Audits Test Bench layout on Half-Ultrawide viewports (1720x1440 and 1280x1080) for zero overflow and high UX score.
+   */
+  test('should pass layout audit on Test Bench across Half-Ultrawide viewports', async ({ page }) => {
+    // Audit at 1720x1440 (half of 3440x1440 ultrawide)
+    await page.setViewportSize({ width: 1720, height: 1440 });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const testBenchNavBtn = page.locator('.tabs-nav button:has-text("Test Bench")');
+    await expect(testBenchNavBtn).toBeVisible();
+    await testBenchNavBtn.click();
+    await expect(page.locator('#view-testbench')).toBeVisible();
+
+    await page.locator('#tester-server').selectOption('mock-docker');
+    await page.locator('#tester-tool').selectOption('mock-docker/docker_ps');
+    await expect(page.locator('#view-testbench .tool-hint-banner')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+    let result = await inspector.audit({
+      viewport: { width: 1720, height: 1440 },
+      includeScreenshot: false,
+    });
+
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
+
+    // Audit at 1280x1080 (half of 2560x1080 ultrawide)
+    await page.setViewportSize({ width: 1280, height: 1080 });
+    result = await inspector.audit({
+      viewport: { width: 1280, height: 1080 },
+      includeScreenshot: false,
+    });
+
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
+   * @description Audits Test Bench Semantic Router tab on Desktop 1080p and Half-Ultrawide viewports for zero overflow and high UX score.
+   */
+  test('should pass layout audit on Test Bench Semantic Router tab', async ({ page }) => {
+    await page.setViewportSize({ width: 1720, height: 1440 });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const testBenchNavBtn = page.locator('.tabs-nav button:has-text("Test Bench")');
+    await expect(testBenchNavBtn).toBeVisible();
+    await testBenchNavBtn.click();
+    await expect(page.locator('#view-testbench')).toBeVisible();
+
+    const semanticTabBtn = page.locator('#view-testbench .tester-tabs button:has-text("Semantic Router")');
+    await expect(semanticTabBtn).toBeVisible();
+    await semanticTabBtn.click();
+    await expect(page.locator('#view-testbench [data-testid="semantic-router-card"]')).toBeVisible();
+
+    const inspector = new LayoutInspector(page);
+    const result = await inspector.audit({
+      viewport: { width: 1720, height: 1440 },
+      includeScreenshot: false,
+    });
+
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
+  });
+
+  /**
+   * @requirement UI-07
+   * @category UI
+   * @type PositiveFeature
    * @description Audits App Keys & Security sub-tabs (Personal Keys, System Keys, User Quotas) on Samsung Galaxy S25+ mobile viewport for zero horizontal overflow and high UX score.
    */
   test('should pass layout audit on App Keys & Security sub-tabs on Samsung Galaxy S25+ mobile viewport', async ({ page }) => {
