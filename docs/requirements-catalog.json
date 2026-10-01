@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-30T21:03:02.7056642Z",
+    "generatedAt": "2026-10-01T04:01:21.4288948Z",
     "totalRequirements": 458,
     "positiveCount": 363,
     "guardrailCount": 95,
@@ -11125,28 +11125,28 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
-          "lineNumber": 22,
+          "lineNumber": 23,
           "testName": "renders structured paragraphs and inline code/bold markdown formatting",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
-          "lineNumber": 57,
+          "lineNumber": 58,
           "testName": "renders unordered and ordered lists with inline formatting",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
-          "lineNumber": 85,
+          "lineNumber": 86,
           "testName": "renders safe external links",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
-          "lineNumber": 103,
+          "lineNumber": 104,
           "testName": "renders null when text is empty or blank",
           "details": null
         }

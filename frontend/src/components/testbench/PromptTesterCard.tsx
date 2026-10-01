@@ -127,7 +127,7 @@ export const PromptTesterCard: React.FC<PromptTesterCardProps> = ({
             <div className="tool-hint-header">
               <div className="tool-hint-title-group">
                 <span className="tool-hint-name">{parsedCurrentPrompt.cleanName}</span>
-                <span className="badge badge-primary">[{parsedCurrentPrompt.serverId.toUpperCase()}]</span>
+                <span className="badge badge-primary">{parsedCurrentPrompt.serverId.toUpperCase()}</span>
               </div>
               <span className="badge">{renderArgumentSummary()}</span>
             </div>

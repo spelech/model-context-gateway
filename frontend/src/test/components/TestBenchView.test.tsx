@@ -297,7 +297,7 @@ describe('TestBenchView Component', () => {
       expect(screen.getByText('Get Radarr/Sonarr queue status')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('[MCP-ARR-HD]')).toBeInTheDocument();
+    expect(screen.getByText('MCP-ARR-HD')).toBeInTheDocument();
     expect(screen.getByText(/ready to execute|no arguments/i)).toBeInTheDocument();
   });
 
@@ -463,7 +463,7 @@ describe('TestBenchView Component', () => {
       expect(screen.getByText('Diagnose Sonarr queue status')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('[MCP-ARR-HD]')).toBeInTheDocument();
+    expect(screen.getByText('MCP-ARR-HD')).toBeInTheDocument();
     expect(screen.getByText(/1 required argument/i)).toBeInTheDocument();
   });
 

@@ -3311,10 +3311,10 @@
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (5):**
   - [Frontend Vitest] [`frontend/src/test/components/FormattedDescription.test.tsx#L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/FormattedDescription.test.tsx#L6) (`cleans redundant server prefix from descriptions`)
-  - [Frontend Vitest] [`frontend/src/test/components/FormattedDescription.test.tsx#L22`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/FormattedDescription.test.tsx#L22) (`renders structured paragraphs and inline code/bold markdown formatting`)
-  - [Frontend Vitest] [`frontend/src/test/components/FormattedDescription.test.tsx#L57`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/FormattedDescription.test.tsx#L57) (`renders unordered and ordered lists with inline formatting`)
-  - [Frontend Vitest] [`frontend/src/test/components/FormattedDescription.test.tsx#L85`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/FormattedDescription.test.tsx#L85) (`renders safe external links`)
-  - [Frontend Vitest] [`frontend/src/test/components/FormattedDescription.test.tsx#L103`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/FormattedDescription.test.tsx#L103) (`renders null when text is empty or blank`)
+  - [Frontend Vitest] [`frontend/src/test/components/FormattedDescription.test.tsx#L23`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/FormattedDescription.test.tsx#L23) (`renders structured paragraphs and inline code/bold markdown formatting`)
+  - [Frontend Vitest] [`frontend/src/test/components/FormattedDescription.test.tsx#L58`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/FormattedDescription.test.tsx#L58) (`renders unordered and ordered lists with inline formatting`)
+  - [Frontend Vitest] [`frontend/src/test/components/FormattedDescription.test.tsx#L86`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/FormattedDescription.test.tsx#L86) (`renders safe external links`)
+  - [Frontend Vitest] [`frontend/src/test/components/FormattedDescription.test.tsx#L104`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/FormattedDescription.test.tsx#L104) (`renders null when text is empty or blank`)
 
 ### `[UI-139]` Compacts multiple redirect URIs with +N more button and opens RedirectUrisModal on click.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)

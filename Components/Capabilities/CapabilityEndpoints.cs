@@ -15,6 +15,19 @@ namespace ModelContextGateway.Components.Capabilities
                 var identity = await identityProvider.ResolveIdentityAsync(context);
                 if (identity == null || identity.Username == "guest" || identity.Username == "anonymous")
                 {
+                    var config = context.RequestServices.GetService<IConfiguration>();
+                    if (SecurityValidationHelper.IsAdmin(identity, config, context))
+                    {
+                        return Results.Ok(new
+                        {
+                            authenticated = true,
+                            username = "admin",
+                            name = "Standalone Administrator",
+                            email = "",
+                            groups = new[] { "full_admin" }
+                        });
+                    }
+
                     return Results.Ok(new { authenticated = false });
                 }
 

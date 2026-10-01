@@ -1,4 +1,5 @@
 import React from 'react';
+import { cleanDescription } from './FormattedDescription';
 
 interface SemanticRouterCardProps {
   semanticQuery: string;
@@ -49,7 +50,7 @@ export const SemanticRouterCard: React.FC<SemanticRouterCardProps> = ({
                 <span className="search-result-name">{tool.name}</span>
                 <span className="search-result-score">Rank #{idx + 1}</span>
               </div>
-              <span className="search-result-desc">{tool.description || 'No description provided.'}</span>
+              <span className="search-result-desc">{cleanDescription(tool.description) || 'No description provided.'}</span>
             </div>
           ))
         )}

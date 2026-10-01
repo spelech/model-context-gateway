@@ -18,8 +18,13 @@ export function cleanDescription(text?: string, serverId?: string): string {
     cleaned = cleaned.replace(new RegExp(`^\\[${escaped}\\]\\s*`, 'i'), '');
   }
 
-  // Also remove generic leading bracketed server tag if present
-  cleaned = cleaned.replace(/^\[[a-zA-Z0-9_\-.:/]+\]\s*/, '');
+  // Repeatedly remove leading bracketed server tags, including nested brackets (e.g. [MySQL MCP Server [vundefined]])
+  let prev = '';
+  while (cleaned !== prev && cleaned.startsWith('[')) {
+    prev = cleaned;
+    cleaned = cleaned.replace(/^\[(?:[^[\]]|\[[^\]]*\])*\]\s*/, '').trim();
+  }
+
   return cleaned.trim();
 }
 

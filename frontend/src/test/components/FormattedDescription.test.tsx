@@ -14,6 +14,7 @@ describe('FormattedDescription Component', () => {
     expect(cleanDescription('[DOCKER] Run a container', 'docker')).toBe('Run a container');
     expect(cleanDescription('[context7] Resolves a package', 'context7')).toBe('Resolves a package');
     expect(cleanDescription('[custom-server] Some tool')).toBe('Some tool');
+    expect(cleanDescription('[mysql-homeassistant] [MySQL MCP Server [vundefined]] Run SQL queries against HA', 'mysql-homeassistant')).toBe('Run SQL queries against HA');
     expect(cleanDescription('Normal description without prefix', 'docker')).toBe('Normal description without prefix');
     expect(cleanDescription('')).toBe('');
     expect(cleanDescription(undefined)).toBe('');

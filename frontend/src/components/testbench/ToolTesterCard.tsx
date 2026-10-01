@@ -134,7 +134,7 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
             <div className="tool-hint-header">
               <div className="tool-hint-title-group">
                 <span className="tool-hint-name">{parsedCurrentTool.cleanName}</span>
-                <span className="badge badge-primary">[{parsedCurrentTool.serverId.toUpperCase()}]</span>
+                <span className="badge badge-primary">{parsedCurrentTool.serverId.toUpperCase()}</span>
               </div>
               <span className="badge">{renderParameterSummary()}</span>
             </div>
