@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { FormattedDescription, cleanDescription } from '../../components/testbench/FormattedDescription';
+import { FormattedDescription } from '../../components/testbench/FormattedDescription';
+import { cleanDescription } from '../../components/testbench/descriptionUtils';
 
 describe('FormattedDescription Component', () => {
   /**

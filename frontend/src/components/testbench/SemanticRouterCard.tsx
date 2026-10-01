@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanDescription } from './FormattedDescription';
+import { cleanDescription } from './descriptionUtils';
 
 interface SemanticRouterCardProps {
   semanticQuery: string;

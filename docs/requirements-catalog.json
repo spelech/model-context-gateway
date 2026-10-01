@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-01T05:35:22.0952260Z",
+    "generatedAt": "2026-10-01T05:55:06.3348768Z",
     "totalRequirements": 459,
     "positiveCount": 364,
     "guardrailCount": 95,
@@ -11116,35 +11116,35 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
-          "lineNumber": 6,
+          "lineNumber": 7,
           "testName": "cleans redundant server prefix from descriptions",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
-          "lineNumber": 23,
+          "lineNumber": 24,
           "testName": "renders structured paragraphs and inline code/bold markdown formatting",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
-          "lineNumber": 58,
+          "lineNumber": 59,
           "testName": "renders unordered and ordered lists with inline formatting",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
-          "lineNumber": 86,
+          "lineNumber": 87,
           "testName": "renders safe external links",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/FormattedDescription.test.tsx",
-          "lineNumber": 104,
+          "lineNumber": 105,
           "testName": "renders null when text is empty or blank",
           "details": null
         }
