@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-03T03:25:47.7030169Z",
+    "generatedAt": "2026-10-03T03:35:39.8638350Z",
     "totalRequirements": 464,
     "positiveCount": 368,
     "guardrailCount": 96,
@@ -6441,14 +6441,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 46,
+          "lineNumber": 43,
           "testName": "SemanticSearchEndpoint_ReturnsCalibratedHybridResultsWithDiagnostics",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 98,
+          "lineNumber": 95,
           "testName": "SemanticSearchEndpoint_RespectsSearchModeAndDenseWeightParameters",
           "details": null
         }
@@ -6464,14 +6464,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 132,
+          "lineNumber": 129,
           "testName": "MetaModeTools_SearchToolsSchema_ExposesModeAndDenseWeight",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 164,
+          "lineNumber": 161,
           "testName": "SearchTools_CustomToolCall_ExecutesWithModeAndDenseWeight",
           "details": null
         }

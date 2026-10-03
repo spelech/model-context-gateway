@@ -156,13 +156,13 @@ sequenceDiagram
     participant BackendConn as BackendConnection
     participant Downstream as MCP Backend
 
-    Client->>Router: POST /message?sessionId=1 (search_tools)
-    Router->>RoutingMgr: SearchToolsAsync("restart container")
+    Client->>Router: POST /message?sessionId=1 (search_tools: query, mode, dense_weight)
+    Router->>RoutingMgr: SearchToolsDetailedAsync("restart container", mode, denseWeight)
     RoutingMgr->>RoutingMgr: Compute Lexical Keyword Scoring (name, desc, tags, params)
     RoutingMgr->>VectorStore: SearchSimilarAsync(queryEmbedding) via .NET 10 SIMD
     VectorStore-->>RoutingMgr: Return Ranked Vector Similarities
-    RoutingMgr->>RoutingMgr: Fuse Ranks via Reciprocal Rank Fusion (RRF, k=60)
-    RoutingMgr-->>Router: Return Top Ranked Tools
+    RoutingMgr->>RoutingMgr: Calibrated Fusion: Score = alpha * DenseScore + (1 - alpha) * SparseScore
+    RoutingMgr-->>Router: Return Top Ranked Tools with Decomposed Scores
     Router-->>Client: Return namespaced search result JSON
 
     Client->>Router: POST /message?sessionId=1 (execute_tool: docker/restart_container)

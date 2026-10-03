@@ -6,10 +6,7 @@ using Dapper;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using ModelContextGateway.Core.Routing;
-using ModelContextGateway.Tests.Attributes;
 
 namespace ModelContextGateway.Tests
 {
@@ -194,7 +191,7 @@ namespace ModelContextGateway.Tests
                 dbFactory,
                 connections,
                 servers,
-                NullLogger.Instance,
+                Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance,
                 new HttpClient(),
                 mockEmbedding.Object,
                 () => Task.CompletedTask,
