@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **461 Requirements Verified** across **1059 Test Proofs** (366 Functional Capabilities, 95 Safety Guardrails).
+> **Catalog Statistics:** **462 Requirements Verified** across **1063 Test Proofs** (367 Functional Capabilities, 95 Safety Guardrails).
 
 ---
 
@@ -15,7 +15,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **66** | 3 | 63 | 138 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **119** | 112 | 7 | 256 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **120** | 113 | 7 | 260 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **38** | 32 | 6 | 197 proofs |
@@ -1268,10 +1268,19 @@
 ### `[MCP-41]` Explicit search modes (hybrid, semantic, lexical) and decomposed score diagnostics in ToolRoutingManager.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (3):**
+* **Verification Proofs (5):**
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L203`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L203) (`HybridSearch_WithSemanticMode_OnlyScoresDenseSimilarity`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L248`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L248) (`HybridSearch_WithLexicalMode_OnlyScoresLexicalMatch`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L293`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L293) (`HybridSearch_ReturnsDecomposedScores`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L46`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L46) (`SemanticSearchEndpoint_ReturnsCalibratedHybridResultsWithDiagnostics`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L98`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L98) (`SemanticSearchEndpoint_RespectsSearchModeAndDenseWeightParameters`)
+
+### `[MCP-42]` Meta-mode search_tools MCP tool accepts optional mode and dense_weight arguments and executes calibrated tool retrieval.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (2):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L132`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L132) (`MetaModeTools_SearchToolsSchema_ExposesModeAndDenseWeight`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L164`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L164) (`SearchTools_CustomToolCall_ExecutesWithModeAndDenseWeight`)
 
 ### `[MCP-ADMIN-ENDPOINT-CALL-TOOL]` Admin endpoint /admin/message executes tools/call for manage_system diagnostics.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -3646,6 +3655,7 @@
 | `MCP-39` | Positive | `MCP` | CapabilityEndpoints test bench APIs return 404 Not Found gracefully when target server is missing. | [`PromptAndResourceResilienceTests.cs:L165`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L165) | Backend xUnit |
 | `MCP-40` | Positive | `MCP` | Calibrated hybrid semantic search scoring with configurable dense weight and normalized linear combination. | [`ToolRoutingManagerHybridSearchTests.cs:L39`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39) | Backend xUnit |
 | `MCP-41` | Positive | `MCP` | Explicit search modes (hybrid, semantic, lexical) and decomposed score diagnostics in ToolRoutingManager. | [`ToolRoutingManagerHybridSearchTests.cs:L203`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L203) | Backend xUnit |
+| `MCP-42` | Positive | `MCP` | Meta-mode search_tools MCP tool accepts optional mode and dense_weight arguments and executes calibrated tool retrieval. | [`SemanticSearchEndpointTests.cs:L132`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L132) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-CALL-TOOL` | Positive | `MCP` | Admin endpoint /admin/message executes tools/call for manage_system diagnostics. | [`AdminEndpointsTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L294) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-HEAD-REQUEST` | Positive | `MCP` | Admin endpoint /admin handles HEAD request returning text/event-stream headers. | [`AdminEndpointsTests.cs:L212`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L212) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-LIST-TOOLS` | Positive | `MCP` | Admin endpoint /admin/message executes tools/list over active SSE session and returns 10 admin tools. | [`AdminEndpointsTests.cs:L224`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L224) | Backend xUnit |

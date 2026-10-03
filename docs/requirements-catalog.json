@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-03T02:54:02.4018019Z",
-    "totalRequirements": 461,
-    "positiveCount": 366,
+    "generatedAt": "2026-10-03T03:05:11.1293091Z",
+    "totalRequirements": 462,
+    "positiveCount": 367,
     "guardrailCount": 95,
-    "totalProofs": 1059
+    "totalProofs": 1063
   },
   "requirements": [
     {
@@ -6415,7 +6415,7 @@
       "category": "MCP",
       "type": "Positive",
       "description": "Explicit search modes (hybrid, semantic, lexical) and decomposed score diagnostics in ToolRoutingManager.",
-      "proofCount": 3,
+      "proofCount": 5,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -6436,6 +6436,43 @@
           "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
           "lineNumber": 293,
           "testName": "HybridSearch_ReturnsDecomposedScores",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
+          "lineNumber": 46,
+          "testName": "SemanticSearchEndpoint_ReturnsCalibratedHybridResultsWithDiagnostics",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
+          "lineNumber": 98,
+          "testName": "SemanticSearchEndpoint_RespectsSearchModeAndDenseWeightParameters",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-42",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Meta-mode search_tools MCP tool accepts optional mode and dense_weight arguments and executes calibrated tool retrieval.",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
+          "lineNumber": 132,
+          "testName": "MetaModeTools_SearchToolsSchema_ExposesModeAndDenseWeight",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
+          "lineNumber": 164,
+          "testName": "SearchTools_CustomToolCall_ExecutesWithModeAndDenseWeight",
           "details": null
         }
       ]

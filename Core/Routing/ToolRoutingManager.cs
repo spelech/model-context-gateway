@@ -58,7 +58,9 @@ namespace ModelContextGateway.Core.Routing
                         type = "object",
                         properties = new
                         {
-                            query = new { type = "string", description = "The natural language query describing what you want to do (e.g. 'read Excel file data', 'restart Docker container')." }
+                            query = new { type = "string", description = "The natural language query or intent to find relevant tools." },
+                            mode = new { type = "string", @enum = new[] { "hybrid", "semantic", "lexical" }, description = "Search mode: 'hybrid' (default), 'semantic' (pure vector), or 'lexical' (pure keyword)." },
+                            dense_weight = new { type = "number", description = "Weight between 0.0 (pure lexical) and 1.0 (pure semantic). Default is 0.5 (balanced)." }
                         },
                         required = new[] { "query" }
                     }
