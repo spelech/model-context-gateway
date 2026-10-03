@@ -208,7 +208,7 @@ namespace ModelContextGateway.Core.Routing
                 }
 
                 var effectiveProvider = _embeddingProvider ?? (embeddingService != null ? new ModelContextGateway.Core.VectorSearch.EmbeddingServiceAdapter(embeddingService) : null);
-                var effectiveStore = _vectorStore ?? new ModelContextGateway.Core.VectorSearch.InMemorySimdToolVectorStore();
+                var effectiveStore = _vectorStore;
                 var detailedResults = await SearchToolsDetailedAsync(
                     query,
                     tools,

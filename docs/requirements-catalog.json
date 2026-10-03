@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-03T03:35:39.8638350Z",
+    "generatedAt": "2026-10-03T03:52:25.4441412Z",
     "totalRequirements": 464,
     "positiveCount": 368,
     "guardrailCount": 96,
-    "totalProofs": 1078
+    "totalProofs": 1082
   },
   "requirements": [
     {
@@ -6385,7 +6385,7 @@
       "category": "MCP",
       "type": "Positive",
       "description": "Calibrated hybrid semantic search scoring with configurable dense weight and normalized linear combination.",
-      "proofCount": 3,
+      "proofCount": 5,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -6407,6 +6407,20 @@
           "lineNumber": 293,
           "testName": "HybridSearch_ReturnsDecomposedScores",
           "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 355,
+          "testName": "HybridSearch_WithClampedDenseWeight_HandlesNegativeExcessiveAndNaN",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 391,
+          "testName": "HybridSearch_WithIdenticalLexicalScores_NormalizesWithoutDivideByZero",
+          "details": null
         }
       ]
     },
@@ -6415,7 +6429,7 @@
       "category": "MCP",
       "type": "Positive",
       "description": "Explicit search modes (hybrid, semantic, lexical) and decomposed score diagnostics in ToolRoutingManager.",
-      "proofCount": 5,
+      "proofCount": 7,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -6440,6 +6454,20 @@
         },
         {
           "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 427,
+          "testName": "HybridSearch_WithEmptyQueryOrEmptyTools_ReturnsSafeGracefulList",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 451,
+          "testName": "HybridSearch_ResolveServerId_ResolvesVariousConventions",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
           "lineNumber": 43,
           "testName": "SemanticSearchEndpoint_ReturnsCalibratedHybridResultsWithDiagnostics",
@@ -6448,7 +6476,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 95,
+          "lineNumber": 126,
           "testName": "SemanticSearchEndpoint_RespectsSearchModeAndDenseWeightParameters",
           "details": null
         }
@@ -6464,14 +6492,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 129,
+          "lineNumber": 185,
           "testName": "MetaModeTools_SearchToolsSchema_ExposesModeAndDenseWeight",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 161,
+          "lineNumber": 217,
           "testName": "SearchTools_CustomToolCall_ExecutesWithModeAndDenseWeight",
           "details": null
         }

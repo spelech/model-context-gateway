@@ -505,8 +505,8 @@ namespace ModelContextGateway.Components.Capabilities
                 }
 
                 var effectiveProvider = embeddingService != null ? new ModelContextGateway.Core.VectorSearch.EmbeddingServiceAdapter(embeddingService) : null;
-                var effectiveStore = new ModelContextGateway.Core.VectorSearch.InMemorySimdToolVectorStore();
-                var routingManager = new ToolRoutingManager();
+                var effectiveStore = httpContext.RequestServices.GetService<ModelContextGateway.Core.VectorSearch.IToolVectorStore>();
+                var routingManager = new ToolRoutingManager(effectiveProvider, effectiveStore);
                 var scoredResults = await routingManager.SearchToolsDetailedAsync(
                     model.Query ?? "",
                     allTools,

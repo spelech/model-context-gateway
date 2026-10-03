@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **464 Requirements Verified** across **1078 Test Proofs** (368 Functional Capabilities, 96 Safety Guardrails).
+> **Catalog Statistics:** **464 Requirements Verified** across **1082 Test Proofs** (368 Functional Capabilities, 96 Safety Guardrails).
 
 ---
 
@@ -15,7 +15,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **66** | 3 | 63 | 138 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **120** | 113 | 7 | 260 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **120** | 113 | 7 | 264 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **40** | 33 | 7 | 212 proofs |
@@ -1260,27 +1260,31 @@
 ### `[MCP-40]` Calibrated hybrid semantic search scoring with configurable dense weight and normalized linear combination.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (3):**
+* **Verification Proofs (5):**
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39) (`SearchToolsAsync_CombinesKeywordAndVectorRanks_UsingRRF`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L158`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L158) (`HybridSearch_WithBalancedWeight_ComputesLinearCombinationScore`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L293`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L293) (`HybridSearch_ReturnsDecomposedScores`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L355`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L355) (`HybridSearch_WithClampedDenseWeight_HandlesNegativeExcessiveAndNaN`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L391`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L391) (`HybridSearch_WithIdenticalLexicalScores_NormalizesWithoutDivideByZero`)
 
 ### `[MCP-41]` Explicit search modes (hybrid, semantic, lexical) and decomposed score diagnostics in ToolRoutingManager.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (5):**
+* **Verification Proofs (7):**
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L203`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L203) (`HybridSearch_WithSemanticMode_OnlyScoresDenseSimilarity`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L248`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L248) (`HybridSearch_WithLexicalMode_OnlyScoresLexicalMatch`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L293`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L293) (`HybridSearch_ReturnsDecomposedScores`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L427`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L427) (`HybridSearch_WithEmptyQueryOrEmptyTools_ReturnsSafeGracefulList`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L451`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L451) (`HybridSearch_ResolveServerId_ResolvesVariousConventions`)
   - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L43`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L43) (`SemanticSearchEndpoint_ReturnsCalibratedHybridResultsWithDiagnostics`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L95`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L95) (`SemanticSearchEndpoint_RespectsSearchModeAndDenseWeightParameters`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L126`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L126) (`SemanticSearchEndpoint_RespectsSearchModeAndDenseWeightParameters`)
 
 ### `[MCP-42]` Meta-mode search_tools MCP tool accepts optional mode and dense_weight arguments and executes calibrated tool retrieval.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (2):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L129`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L129) (`MetaModeTools_SearchToolsSchema_ExposesModeAndDenseWeight`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L161`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L161) (`SearchTools_CustomToolCall_ExecutesWithModeAndDenseWeight`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L185`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L185) (`MetaModeTools_SearchToolsSchema_ExposesModeAndDenseWeight`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L217`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L217) (`SearchTools_CustomToolCall_ExecutesWithModeAndDenseWeight`)
 
 ### `[MCP-ADMIN-ENDPOINT-CALL-TOOL]` Admin endpoint /admin/message executes tools/call for manage_system diagnostics.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -3680,7 +3684,7 @@
 | `MCP-39` | Positive | `MCP` | CapabilityEndpoints test bench APIs return 404 Not Found gracefully when target server is missing. | [`PromptAndResourceResilienceTests.cs:L165`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L165) | Backend xUnit |
 | `MCP-40` | Positive | `MCP` | Calibrated hybrid semantic search scoring with configurable dense weight and normalized linear combination. | [`ToolRoutingManagerHybridSearchTests.cs:L39`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39) | Backend xUnit |
 | `MCP-41` | Positive | `MCP` | Explicit search modes (hybrid, semantic, lexical) and decomposed score diagnostics in ToolRoutingManager. | [`ToolRoutingManagerHybridSearchTests.cs:L203`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L203) | Backend xUnit |
-| `MCP-42` | Positive | `MCP` | Meta-mode search_tools MCP tool accepts optional mode and dense_weight arguments and executes calibrated tool retrieval. | [`SemanticSearchEndpointTests.cs:L129`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L129) | Backend xUnit |
+| `MCP-42` | Positive | `MCP` | Meta-mode search_tools MCP tool accepts optional mode and dense_weight arguments and executes calibrated tool retrieval. | [`SemanticSearchEndpointTests.cs:L185`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L185) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-CALL-TOOL` | Positive | `MCP` | Admin endpoint /admin/message executes tools/call for manage_system diagnostics. | [`AdminEndpointsTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L294) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-HEAD-REQUEST` | Positive | `MCP` | Admin endpoint /admin handles HEAD request returning text/event-stream headers. | [`AdminEndpointsTests.cs:L212`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L212) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-LIST-TOOLS` | Positive | `MCP` | Admin endpoint /admin/message executes tools/list over active SSE session and returns 10 admin tools. | [`AdminEndpointsTests.cs:L224`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L224) | Backend xUnit |

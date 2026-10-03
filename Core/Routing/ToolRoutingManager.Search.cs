@@ -68,7 +68,12 @@ namespace ModelContextGateway.Core.Routing
             }
             else
             {
-                alpha = Math.Clamp(denseWeight ?? 0.5, 0.0, 1.0);
+                double rawWeight = denseWeight ?? 0.5;
+                if (double.IsNaN(rawWeight) || double.IsInfinity(rawWeight))
+                {
+                    rawWeight = 0.5;
+                }
+                alpha = Math.Clamp(rawWeight, 0.0, 1.0);
             }
 
             // 1. Lexical / Keyword Scoring
@@ -93,6 +98,7 @@ namespace ModelContextGateway.Core.Routing
 
                 var keywordRanked = keywordScored
                     .OrderByDescending(x => x.Score)
+                    .ThenBy(x => x.Meta.Name, StringComparer.Ordinal)
                     .ToList();
 
                 for (int i = 0; i < keywordRanked.Count; i++)
@@ -102,9 +108,7 @@ namespace ModelContextGateway.Core.Routing
 
                 if (keywordScored.Count > 0)
                 {
-                    double minLexical = keywordScored.Min(x => x.Score);
                     double maxLexical = keywordScored.Max(x => x.Score);
-                    double range = maxLexical - minLexical;
 
                     foreach (var meta in toolMetas)
                     {
@@ -113,13 +117,13 @@ namespace ModelContextGateway.Core.Routing
                         {
                             normalizedSparseScores[meta] = 0.0;
                         }
-                        else if (range <= 0.0)
+                        else if (maxLexical <= 0.0)
                         {
                             normalizedSparseScores[meta] = 1.0;
                         }
                         else
                         {
-                            normalizedSparseScores[meta] = (raw - minLexical) / range;
+                            normalizedSparseScores[meta] = Math.Clamp(raw / maxLexical, 0.0, 1.0);
                         }
                     }
                 }
@@ -224,6 +228,7 @@ namespace ModelContextGateway.Core.Routing
                 .OrderByDescending(r => r.Score)
                 .ThenBy(r => r.SparseRank ?? int.MaxValue)
                 .ThenBy(r => r.DenseRank ?? int.MaxValue)
+                .ThenBy(r => r.ToolName, StringComparer.Ordinal)
                 .Take(limit)
                 .ToList();
         }

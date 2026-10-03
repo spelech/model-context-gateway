@@ -45,7 +45,7 @@ namespace ModelContextGateway.Tests
         public async Task SemanticSearchEndpoint_ReturnsCalibratedHybridResultsWithDiagnostics()
         {
             var sessionManager = _factory.Services.GetRequiredService<SessionManager>();
-            var testTool = new Dictionary<string, object>
+            var tool1 = new Dictionary<string, object>
             {
                 ["name"] = "docker__restart_container",
                 ["description"] = "Restart an active docker container service",
@@ -58,7 +58,20 @@ namespace ModelContextGateway.Tests
                     }
                 }
             };
-            sessionManager.SetServerToolsCache("docker", new List<object> { testTool });
+            var tool2 = new Dictionary<string, object>
+            {
+                ["name"] = "docker__inspect_container",
+                ["description"] = "Inspect container attributes",
+                ["inputSchema"] = new Dictionary<string, object> { ["type"] = "object" }
+            };
+            var tool3 = new Dictionary<string, object>
+            {
+                ["name"] = "media__get_status",
+                ["description"] = "Get status of active media transcoder",
+                ["inputSchema"] = new Dictionary<string, object> { ["type"] = "object" }
+            };
+            sessionManager.SetServerToolsCache("docker", new List<object> { tool1, tool2 });
+            sessionManager.SetServerToolsCache("media", new List<object> { tool3 });
 
             var client = CreateAuthenticatedClient();
             var payload = new
@@ -82,14 +95,32 @@ namespace ModelContextGateway.Tests
 
             // Verify decomposed score diagnostics in results
             var results = root.GetProperty("results");
-            results.GetArrayLength().Should().BeGreaterThan(0);
+            results.GetArrayLength().Should().Be(3);
 
             var first = results[0];
             first.GetProperty("toolName").GetString().Should().Be("docker__restart_container");
             first.GetProperty("serverId").GetString().Should().Be("docker");
-            first.TryGetProperty("score", out _).Should().BeTrue();
-            first.TryGetProperty("denseScore", out _).Should().BeTrue();
-            first.TryGetProperty("sparseScore", out _).Should().BeTrue();
+            
+            // Validate real numerical bounds and mathematical consistency
+            var score = first.GetProperty("score").GetDouble();
+            score.Should().BeInRange(0.0, 1.0);
+            score.Should().BeGreaterThan(0.0);
+
+            var sparseScore = first.GetProperty("sparseScore").GetDouble();
+            sparseScore.Should().BeInRange(0.0, 1.0);
+            sparseScore.Should().BeApproximately(1.0, 0.01); // Top keyword hit
+
+            // In absence of configured vector store in mock DI, denseScore is null and score equals sparseScore
+            if (first.TryGetProperty("denseScore", out var denseProp) && denseProp.ValueKind != JsonValueKind.Null)
+            {
+                var denseScore = denseProp.GetDouble();
+                denseScore.Should().BeInRange(0.0, 1.0);
+                score.Should().BeApproximately(0.6 * denseScore + 0.4 * sparseScore, 0.01);
+            }
+            else
+            {
+                score.Should().BeApproximately(sparseScore, 0.01);
+            }
         }
 
         [Fact]
@@ -97,18 +128,31 @@ namespace ModelContextGateway.Tests
         public async Task SemanticSearchEndpoint_RespectsSearchModeAndDenseWeightParameters()
         {
             var sessionManager = _factory.Services.GetRequiredService<SessionManager>();
-            var testTool = new Dictionary<string, object>
+            var tool1 = new Dictionary<string, object>
             {
-                ["name"] = "plex__scan_library",
+                ["name"] = "media__scan_library",
                 ["description"] = "Trigger media refresh and index library sections",
                 ["inputSchema"] = new Dictionary<string, object> { ["type"] = "object" }
             };
-            sessionManager.SetServerToolsCache("plex", new List<object> { testTool });
+            var tool2 = new Dictionary<string, object>
+            {
+                ["name"] = "docker__list_containers",
+                ["description"] = "List active running containers",
+                ["inputSchema"] = new Dictionary<string, object> { ["type"] = "object" }
+            };
+            var tool3 = new Dictionary<string, object>
+            {
+                ["name"] = "media__reboot_server",
+                ["description"] = "Bounce physical server host",
+                ["inputSchema"] = new Dictionary<string, object> { ["type"] = "object" }
+            };
+            sessionManager.SetServerToolsCache("media", new List<object> { tool1, tool3 });
+            sessionManager.SetServerToolsCache("docker", new List<object> { tool2 });
 
             var client = CreateAuthenticatedClient();
             var payload = new
             {
-                query = "scan media library",
+                query = "scan library",
                 mode = "lexical",
                 denseWeight = 0.0,
                 limit = 5
@@ -123,7 +167,19 @@ namespace ModelContextGateway.Tests
             root.GetProperty("mode").GetString().Should().Be("lexical");
             root.GetProperty("denseWeight").GetDouble().Should().Be(0.0);
             var results = root.GetProperty("results");
-            results.GetArrayLength().Should().BeGreaterThan(0);
+            results.GetArrayLength().Should().Be(3);
+
+            // In lexical mode, media__scan_library MUST rank first with sparseScore = 1.0 and denseScore = null
+            var first = results[0];
+            first.GetProperty("toolName").GetString().Should().Be("media__scan_library");
+            first.GetProperty("denseScore").ValueKind.Should().Be(JsonValueKind.Null);
+            first.GetProperty("sparseScore").GetDouble().Should().BeApproximately(1.0, 0.01);
+            first.GetProperty("score").GetDouble().Should().BeApproximately(1.0, 0.01);
+
+            // Other tools with zero keyword matches must have sparseScore = 0.0 and score = 0.0
+            var second = results[1];
+            second.GetProperty("sparseScore").GetDouble().Should().Be(0.0);
+            second.GetProperty("score").GetDouble().Should().Be(0.0);
         }
 
         [Fact]
@@ -175,16 +231,28 @@ namespace ModelContextGateway.Tests
                          .ReturnsAsync(new float[128]);
 
             var sessionManager = _factory.Services.GetRequiredService<SessionManager>();
-            var testTool = new Dictionary<string, object>
+            var tool1 = new Dictionary<string, object>
             {
                 ["name"] = "docker__list_containers",
                 ["description"] = "List active running containers",
                 ["inputSchema"] = new Dictionary<string, object> { ["type"] = "object" }
             };
-            sessionManager.SetServerToolsCache("docker", new List<object> { testTool });
+            var tool2 = new Dictionary<string, object>
+            {
+                ["name"] = "docker__prune_volumes",
+                ["description"] = "Remove all unused local volumes",
+                ["inputSchema"] = new Dictionary<string, object> { ["type"] = "object" }
+            };
+            var tool3 = new Dictionary<string, object>
+            {
+                ["name"] = "weather__forecast",
+                ["description"] = "Retrieve meteorology forecast",
+                ["inputSchema"] = new Dictionary<string, object> { ["type"] = "object" }
+            };
+            sessionManager.SetServerToolsCache("docker", new List<object> { tool1, tool2, tool3 });
 
-            // Call search_tools with explicit mode and dense_weight
-            var body = "{\"params\":{\"arguments\":{\"query\":\"list containers\",\"mode\":\"lexical\",\"dense_weight\":0.2}}}";
+            // Call search_tools with explicit lexical mode and dense_weight
+            var body = "{\"params\":{\"arguments\":{\"query\":\"list containers\",\"mode\":\"lexical\",\"dense_weight\":0.0}}}";
             var result = await manager.CallToolAsync(
                 "search_tools",
                 body,
@@ -205,7 +273,14 @@ namespace ModelContextGateway.Tests
             doc.RootElement.GetProperty("resultType").GetString().Should().Be("complete");
             var text = doc.RootElement.GetProperty("content")[0].GetProperty("text").GetString();
             text.Should().NotBeNull();
-            text.Should().Contain("docker__list_containers");
+            
+            // Prove differential ranking: matching tool must rank #1
+            var toolSchemas = JsonSerializer.Deserialize<List<JsonElement>>(text!);
+            toolSchemas.Should().NotBeNull();
+            toolSchemas![0].GetProperty("name").GetString().Should().Be("docker__list_containers");
+
+            // Prove lexical mode bypassed embedding generation entirely (anti-theater)
+            mockEmbedding.Verify(e => e.GetEmbeddingAsync(It.IsAny<string>()), Times.Never);
         }
     }
 }
