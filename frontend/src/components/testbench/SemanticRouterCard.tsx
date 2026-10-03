@@ -81,6 +81,7 @@ export const SemanticRouterCard: React.FC<SemanticRouterCardProps> = ({
             max={1}
             step={0.05}
             value={denseWeight}
+            aria-label="Dense / Lexical Balance"
             onChange={(e) => onDenseWeightChange(parseFloat(e.target.value))}
             data-testid="hybrid-weight-slider"
           />

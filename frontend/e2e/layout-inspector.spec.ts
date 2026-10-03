@@ -115,6 +115,27 @@ test.describe('Dashboard Layout & UX Audit', () => {
           },
         });
       }
+      if (path === '/api/test/semantic-search') {
+        return route.fulfill({
+          json: {
+            query: 'restart container',
+            mode: 'hybrid',
+            denseWeight: 0.7,
+            results: [
+              {
+                tool: { name: 'mock-docker/docker_restart', description: 'Restart a running container' },
+                toolName: 'mock-docker/docker_restart',
+                serverId: 'mock-docker',
+                score: 0.885,
+                denseScore: 0.92,
+                sparseScore: 0.80,
+                denseRank: 1,
+                sparseRank: 1,
+              },
+            ],
+          },
+        });
+      }
       if (path === '/api/logs') {
         return route.fulfill({ json: [] });
       }
@@ -821,6 +842,7 @@ test.describe('Dashboard Layout & UX Audit', () => {
    * @description Audits Test Bench Semantic Router tab on Desktop 1080p and Half-Ultrawide viewports for zero overflow and high UX score.
    */
   test('should pass layout audit on Test Bench Semantic Router tab', async ({ page }) => {
+    // 1. Audit on 1720x1440 (Half-Ultrawide 1440p)
     await page.setViewportSize({ width: 1720, height: 1440 });
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
@@ -836,8 +858,18 @@ test.describe('Dashboard Layout & UX Audit', () => {
     await expect(page.locator('#view-testbench [data-testid="semantic-router-card"]')).toBeVisible();
 
     const inspector = new LayoutInspector(page);
-    const result = await inspector.audit({
+    let result = await inspector.audit({
       viewport: { width: 1720, height: 1440 },
+      includeScreenshot: false,
+    });
+
+    expect(result.overflowIssues.length).toBe(0);
+    expect(result.uxScore.totalScore).toBeGreaterThanOrEqual(85);
+
+    // 2. Audit on 1280x1080 (Half-Ultrawide 1080p)
+    await page.setViewportSize({ width: 1280, height: 1080 });
+    result = await inspector.audit({
+      viewport: { width: 1280, height: 1080 },
       includeScreenshot: false,
     });
 

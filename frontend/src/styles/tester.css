@@ -244,6 +244,8 @@
     accent-color: var(--primary);
     cursor: pointer;
     margin: 4px 0;
+    min-height: 24px;
+    height: 24px;
 }
 
 .slider-presets {
@@ -263,6 +265,10 @@
     cursor: pointer;
     box-sizing: border-box;
     transition: all var(--transition-fast);
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .preset-chip:hover {

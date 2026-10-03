@@ -51,4 +51,98 @@ test.describe('Test Bench View Flow', () => {
     await expect(page.locator('[data-testid="resource-server-select"]')).toBeVisible();
   });
 
+  /**
+   * @requirement UI-141
+   * @category UI
+   * @type PositiveFeature
+   * @description should interact with semantic router simulator, change modes and presets, and test tool transition
+   */
+  test('should interact with semantic router simulator, change modes and presets, and test tool transition', async ({ page }) => {
+    await page.route('**/api/test/tools', async (route) => {
+      return route.fulfill({
+        json: [
+          {
+            name: 'mock-docker/docker_restart',
+            description: 'Restart a running container',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                container_id: { type: 'string', description: 'Target container ID' },
+              },
+              required: ['container_id'],
+            },
+          },
+        ],
+      });
+    });
+
+    await page.route('**/api/test/semantic-search', async (route) => {
+      return route.fulfill({
+        json: {
+          query: 'restart container',
+          mode: 'hybrid',
+          denseWeight: 0.7,
+          results: [
+            {
+              tool: { name: 'mock-docker/docker_restart', description: 'Restart a running container' },
+              toolName: 'mock-docker/docker_restart',
+              serverId: 'mock-docker',
+              score: 0.885,
+              denseScore: 0.92,
+              sparseScore: 0.80,
+              denseRank: 1,
+              sparseRank: 1,
+            },
+          ],
+        },
+      });
+    });
+
+    await page.goto('/');
+
+    // Switch to Test Bench view
+    const testbenchTab = page.locator('[data-testid="tab-testbench"]');
+    await expect(testbenchTab).toBeVisible();
+    await testbenchTab.click();
+    await expect(page.locator('[data-testid="view-testbench"]')).toBeVisible();
+
+    // Switch to Semantic Router Tab
+    await page.locator('[data-testid="testbench-tab-semantic"]').click();
+    await expect(page.locator('[data-testid="semantic-router-card"]')).toBeVisible();
+
+    // Test mode toggling: click semantic mode -> slider disappears
+    await page.locator('[data-testid="mode-btn-semantic"]').click();
+    await expect(page.locator('[data-testid="hybrid-weight-slider"]')).toBeHidden();
+
+    // Click hybrid mode -> slider reappears
+    await page.locator('[data-testid="mode-btn-hybrid"]').click();
+    await expect(page.locator('[data-testid="hybrid-weight-slider"]')).toBeVisible();
+
+    // Test preset button: click Semantic Bias -> denseWeight becomes 0.7
+    await page.locator('[data-testid="preset-semantic-bias"]').click();
+    await expect(page.locator('[data-testid="hybrid-weight-slider"]')).toHaveValue('0.7');
+
+    // Fill query and execute search
+    const searchInput = page.locator('[data-testid="semantic-query-input"]');
+    await expect(searchInput).toBeVisible();
+    await searchInput.fill('restart container');
+    await expect(searchInput).toHaveValue('restart container');
+    await page.locator('[data-testid="semantic-search-btn"]').click();
+
+    // Verify score badges appear
+    await expect(page.locator('[data-testid="score-total"]')).toBeVisible();
+    await expect(page.locator('[data-testid="score-dense"]')).toBeVisible();
+    await expect(page.locator('[data-testid="score-sparse"]')).toBeVisible();
+
+    // Click "Test Tool" transition button
+    const testToolBtn = page.locator('[data-testid="test-tool-btn-mock-docker/docker_restart"]');
+    await expect(testToolBtn).toBeVisible();
+    await testToolBtn.click();
+
+    // Verify active tab switches to Tools card with selected server
+    await expect(page.locator('[data-testid="tool-tester-card"]')).toBeVisible();
+    await expect(page.locator('[data-testid="tool-server-select"]')).toHaveValue('mock-docker');
+  });
+
 });
+

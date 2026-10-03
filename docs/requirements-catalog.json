@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-03T03:18:38.2202881Z",
+    "generatedAt": "2026-10-03T03:25:47.7030169Z",
     "totalRequirements": 464,
     "positiveCount": 368,
     "guardrailCount": 96,
-    "totalProofs": 1077
+    "totalProofs": 1078
   },
   "requirements": [
     {
@@ -10509,252 +10509,252 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 255,
+          "lineNumber": 276,
           "testName": "should pass layout audit on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 276,
+          "lineNumber": 297,
           "testName": "should pass layout audit on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 321,
+          "lineNumber": 342,
           "testName": "should pass layout audit on Samsung Galaxy Tab S10 Lite tablet viewport (portrait)",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 342,
+          "lineNumber": 363,
           "testName": "should pass layout audit on Samsung Galaxy Tab S10 Lite tablet viewport (landscape)",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 363,
+          "lineNumber": 384,
           "testName": "should pass layout audit for Add Server modal on Samsung Galaxy Tab S10 Lite tablet",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 404,
+          "lineNumber": 425,
           "testName": "should pass layout audit for Add Server modal on desktop 1080p",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 444,
+          "lineNumber": 465,
           "testName": "should pass layout audit for Add Server modal on Samsung Galaxy S25\u002B mobile",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 486,
+          "lineNumber": 507,
           "testName": "should pass layout audit across Capabilities Inspect modal tabs",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 542,
+          "lineNumber": 563,
           "testName": "should pass layout audit on App Keys \u0026 Security tab",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 570,
+          "lineNumber": 591,
           "testName": "should pass layout audit on Settings tab",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 598,
+          "lineNumber": 619,
           "testName": "should maintain layout stability during tab navigation",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 620,
+          "lineNumber": 641,
           "testName": "should pass layout audit on Test Bench tab on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 662,
+          "lineNumber": 683,
           "testName": "should pass layout audit on Test Bench tab on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 693,
+          "lineNumber": 714,
           "testName": "should pass layout audit on Test Bench tab on Samsung Galaxy Tab S10 Lite tablet viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 724,
+          "lineNumber": 745,
           "testName": "should pass layout audit on Test Bench Prompts and Resources tabs",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 776,
+          "lineNumber": 797,
           "testName": "should pass layout audit on Test Bench across Half-Ultrawide viewports",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 817,
+          "lineNumber": 838,
           "testName": "should pass layout audit on Test Bench Semantic Router tab",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 848,
+          "lineNumber": 880,
           "testName": "should pass layout audit on App Keys \u0026 Security sub-tabs on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 905,
+          "lineNumber": 937,
           "testName": "should pass layout audit on App Keys \u0026 Security sub-tabs on Samsung Galaxy Tab S10 Lite tablet viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 958,
+          "lineNumber": 990,
           "testName": "should pass layout audit on Settings sub-tabs on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1025,
+          "lineNumber": 1057,
           "testName": "should pass layout audit on Settings sub-tabs on Samsung Galaxy Tab S10 Lite tablet viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1091,
+          "lineNumber": 1123,
           "testName": "should pass layout audit on My MCP Servers tab on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1118,
+          "lineNumber": 1150,
           "testName": "should pass layout audit on My MCP Servers tab on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1146,
+          "lineNumber": 1178,
           "testName": "should pass layout audit on My MCP Servers tab on Samsung Galaxy Tab S10 Lite tablet viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1173,
+          "lineNumber": 1205,
           "testName": "should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1240,
+          "lineNumber": 1272,
           "testName": "should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy Tab S10 Lite tablet viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1307,
+          "lineNumber": 1339,
           "testName": "should pass layout audit for AppKey modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1351,
+          "lineNumber": 1383,
           "testName": "should pass layout audit for AppKey modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1396,
+          "lineNumber": 1428,
           "testName": "should pass layout audit for Client modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1440,
+          "lineNumber": 1472,
           "testName": "should pass layout audit for Client modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1485,
+          "lineNumber": 1517,
           "testName": "should pass layout audit for CustomFile modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1534,
+          "lineNumber": 1566,
           "testName": "should pass layout audit for CustomFile modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1584,
+          "lineNumber": 1616,
           "testName": "should pass layout audit for Policy modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1633,
+          "lineNumber": 1665,
           "testName": "should pass layout audit for Policy modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1683,
+          "lineNumber": 1715,
           "testName": "should pass layout audit for Mapping modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1732,
+          "lineNumber": 1764,
           "testName": "should pass layout audit for Mapping modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         }
@@ -11305,13 +11305,20 @@
       "category": "UI",
       "type": "Positive",
       "description": "verifies deterministic data-testid attributes and interactive flow across test bench tabs including dedicated semantic router",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
           "lineNumber": 473,
           "testName": "renders and interacts with test bench elements via deterministic data-testid attributes",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/testbench.spec.ts",
+          "lineNumber": 54,
+          "testName": "should interact with semantic router simulator, change modes and presets, and test tool transition",
           "details": null
         }
       ]
