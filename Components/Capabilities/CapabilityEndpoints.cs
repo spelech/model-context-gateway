@@ -504,8 +504,27 @@ namespace ModelContextGateway.Components.Capabilities
                     }
                 }
 
-                var scoredResults = await SemanticSearchService.SearchToolsSemanticAsync(model.Query, allTools, embeddingService, logger);
-                return Results.Ok(scoredResults);
+                var effectiveProvider = embeddingService != null ? new ModelContextGateway.Core.VectorSearch.EmbeddingServiceAdapter(embeddingService) : null;
+                var effectiveStore = httpContext.RequestServices.GetService<ModelContextGateway.Core.VectorSearch.IToolVectorStore>();
+                var routingManager = new ToolRoutingManager(effectiveProvider, effectiveStore);
+                var scoredResults = await routingManager.SearchToolsDetailedAsync(
+                    model.Query ?? "",
+                    allTools,
+                    effectiveProvider,
+                    effectiveStore,
+                    logger,
+                    model.Limit ?? 15,
+                    searchMode: model.Mode ?? "hybrid",
+                    denseWeight: model.DenseWeight ?? 0.5,
+                    cancellationToken: httpContext.RequestAborted);
+
+                return Results.Ok(new
+                {
+                    query = model.Query ?? "",
+                    mode = model.Mode ?? "hybrid",
+                    denseWeight = model.DenseWeight ?? 0.5,
+                    results = scoredResults
+                });
             });
 
             // 2b. Test Prompts List API

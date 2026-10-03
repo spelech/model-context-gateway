@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ToolItem, PromptItem, ResourceItem, TemplateItem } from '../../shared/types';
-import { fetchTestToolsApi, fetchTestPromptsApi, fetchTestResourcesApi } from '../../api/testbenchApi';
+import { ToolItem, PromptItem, ResourceItem, TemplateItem, SearchMode, ToolSearchResultItem } from '../../shared/types';
+import { fetchTestToolsApi, fetchTestPromptsApi, fetchTestResourcesApi, semanticSearchApi } from '../../api/testbenchApi';
 
 export const useTestBenchState = () => {
   const [activeTab, setActiveTab] = useState<'tools' | 'prompts' | 'resources' | 'semantic'>('tools');
@@ -28,12 +28,29 @@ export const useTestBenchState = () => {
 
   // Semantic
   const [semanticQuery, setSemanticQuery] = useState('');
-  const [semanticResults, setSemanticResults] = useState<any[]>([]);
+  const [searchMode, setSearchMode] = useState<SearchMode>('hybrid');
+  const [denseWeight, setDenseWeight] = useState<number>(0.5);
+  const [searchLimit, setSearchLimit] = useState<number>(15);
+  const [semanticResults, setSemanticResults] = useState<ToolSearchResultItem[]>([]);
   const [isSearchingSemantic, setIsSearchingSemantic] = useState(false);
 
   // Console
   const [consoleRequest, setConsoleRequest] = useState('Ready');
   const [consoleResponse, setConsoleResponse] = useState('Waiting for execution...');
+
+  const handleSemanticSearch = async () => {
+    if (!semanticQuery.trim()) return;
+    setIsSearchingSemantic(true);
+    try {
+      const res = await semanticSearchApi(semanticQuery, searchMode, denseWeight, searchLimit);
+      setSemanticResults(res?.results || []);
+    } catch (err) {
+      console.error('Semantic search failed:', err);
+      setSemanticResults([]);
+    } finally {
+      setIsSearchingSemantic(false);
+    }
+  };
 
   useEffect(() => {
     let ignore = false;
@@ -82,9 +99,14 @@ export const useTestBenchState = () => {
     selectedResourceUri, setSelectedResourceUri,
     selectedResourceValue, setSelectedResourceValue,
     semanticQuery, setSemanticQuery,
+    searchMode, setSearchMode,
+    denseWeight, setDenseWeight,
+    searchLimit, setSearchLimit,
     semanticResults, setSemanticResults,
     isSearchingSemantic, setIsSearchingSemantic,
+    handleSemanticSearch,
     consoleRequest, setConsoleRequest,
     consoleResponse, setConsoleResponse
   };
 };
+

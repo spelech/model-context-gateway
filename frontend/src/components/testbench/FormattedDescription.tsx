@@ -4,16 +4,18 @@ import { cleanDescription, renderInline, parseBlocks } from './descriptionUtils'
 
 interface FormattedDescriptionProps {
   text?: string;
+  description?: string;
   serverId?: string;
   className?: string;
 }
 
 export const FormattedDescription: React.FC<FormattedDescriptionProps> = ({
   text,
+  description,
   serverId,
   className,
 }) => {
-  const cleaned = cleanDescription(text, serverId);
+  const cleaned = cleanDescription(text ?? description, serverId);
   if (!cleaned) return null;
 
   const blocks = parseBlocks(cleaned);

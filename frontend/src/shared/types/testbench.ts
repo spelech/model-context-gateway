@@ -44,3 +44,23 @@ export interface LogEntry {
   message: string;
   exception?: string;
 }
+
+export type SearchMode = 'hybrid' | 'semantic' | 'lexical';
+
+export interface ToolSearchResultItem {
+  tool: ToolItem;
+  toolName: string;
+  serverId?: string;
+  score: number;
+  denseScore?: number;
+  sparseScore?: number;
+  denseRank?: number;
+  sparseRank?: number;
+}
+
+export interface SemanticSearchResponse {
+  query: string;
+  mode: SearchMode;
+  denseWeight: number;
+  results: ToolSearchResultItem[];
+}

@@ -508,4 +508,54 @@ describe('TestBenchView Component', () => {
     expect(screen.getByTestId('semantic-query-input')).toBeInTheDocument();
     expect(screen.getByTestId('semantic-search-btn')).toBeInTheDocument();
   });
+
+  /**
+   * @requirement UI-143
+   * @category UI
+   * @type PositiveFeature
+   * @description clicking Test Tool in semantic search results switches to Tools tab with tool and server preselected
+   */
+  it('clicking Test Tool in semantic search results switches to Tools tab with tool and server preselected', async () => {
+    vi.spyOn(api, 'apiRequest').mockResolvedValue({
+      query: 'containers',
+      mode: 'hybrid',
+      denseWeight: 0.5,
+      results: [
+        {
+          tool: { name: 'docker__list_containers', description: 'List containers' },
+          toolName: 'docker__list_containers',
+          serverId: 'docker',
+          score: 0.95,
+        },
+      ],
+    });
+
+    render(<TestBenchView />);
+
+    const semanticTab = screen.getByRole('button', { name: /Semantic Router/i });
+    fireEvent.click(semanticTab);
+
+    const searchInput = screen.getByTestId('semantic-query-input');
+    fireEvent.change(searchInput, { target: { value: 'containers' } });
+
+    const searchBtn = screen.getByTestId('semantic-search-btn');
+    fireEvent.click(searchBtn);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('test-tool-btn-docker__list_containers')).toBeInTheDocument();
+    });
+
+    const testToolBtn = screen.getByTestId('test-tool-btn-docker__list_containers');
+    fireEvent.click(testToolBtn);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('tool-tester-card')).toBeInTheDocument();
+    });
+
+    const serverSelect = screen.getByLabelText('Server') as HTMLSelectElement;
+    expect(serverSelect.value).toBe('docker');
+
+    const toolSelect = screen.getByLabelText('Tool') as HTMLSelectElement;
+    expect(toolSelect.value).toBe('docker__list_containers');
+  });
 });

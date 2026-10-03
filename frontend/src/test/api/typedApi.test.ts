@@ -277,9 +277,14 @@ describe('Typed API Client Layer', () => {
       const resResult = await readResourceApi('srv1', 'mcp://srv1/res');
       expect(resResult.content).toBe('res_output');
 
-      mockApiResponse('/api/test/semantic-search', [{ name: 'tool1', score: 0.9 }]);
+      mockApiResponse('/api/test/semantic-search', {
+        query: 'query',
+        mode: 'hybrid',
+        denseWeight: 0.5,
+        results: [{ toolName: 'tool1', score: 0.9 }],
+      });
       const searchRes = await semanticSearchApi('query');
-      expect(searchRes).toHaveLength(1);
+      expect(searchRes.results).toHaveLength(1);
     });
   });
 });

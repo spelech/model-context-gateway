@@ -38,5 +38,8 @@ namespace ModelContextGateway.Components.Capabilities
     public class SearchModel
     {
         public string Query { get; set; } = string.Empty;
+        public string? Mode { get; set; } = "hybrid";
+        public double? DenseWeight { get; set; } = 0.5;
+        public int? Limit { get; set; } = 15;
     }
 }

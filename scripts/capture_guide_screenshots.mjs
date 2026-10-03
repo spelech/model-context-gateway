@@ -111,6 +111,24 @@ async function capture() {
     await testbenchTab.click();
     await page.waitForTimeout(1000);
     await page.screenshot({ path: path.join(outputDir, 'test_bench_view.jpg'), quality: 90, type: 'jpeg' });
+
+    // 8b. Semantic Router Simulator
+    console.log('Capturing Semantic Router Simulator...');
+    const semanticTabBtn = page.locator('[data-testid="testbench-tab-semantic"], button:has-text("Semantic Router")').first();
+    if (await semanticTabBtn.isVisible()) {
+      await semanticTabBtn.click();
+      await page.waitForTimeout(1000);
+      const queryInput = page.locator('[data-testid="semantic-query-input"]');
+      if (await queryInput.isVisible()) {
+        await queryInput.fill('search media in plex');
+        const searchBtn = page.locator('[data-testid="semantic-search-btn"]');
+        if (await searchBtn.isVisible()) {
+          await searchBtn.click();
+          await page.waitForTimeout(1500);
+        }
+      }
+      await page.screenshot({ path: path.join(outputDir, 'semantic_router_simulator.jpg'), quality: 90, type: 'jpeg' });
+    }
   }
 
   // 9. Settings View & Tabs

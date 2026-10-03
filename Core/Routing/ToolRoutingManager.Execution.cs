@@ -67,11 +67,27 @@ namespace ModelContextGateway.Core.Routing
                 var root = doc.RootElement;
 
                 string query = "";
+                string mode = "hybrid";
+                double denseWeight = 0.5;
+
                 if (root.TryGetProperty("params", out var paramsProp) &&
-                    paramsProp.TryGetProperty("arguments", out var argsProp) &&
-                    argsProp.TryGetProperty("query", out var queryProp))
+                    paramsProp.TryGetProperty("arguments", out var argsProp))
                 {
-                    query = queryProp.GetString() ?? "";
+                    if (argsProp.TryGetProperty("query", out var queryProp))
+                    {
+                        query = queryProp.GetString() ?? "";
+                    }
+                    if (argsProp.TryGetProperty("mode", out var modeProp) && modeProp.ValueKind == JsonValueKind.String)
+                    {
+                        mode = modeProp.GetString() ?? "hybrid";
+                    }
+                    if (argsProp.TryGetProperty("dense_weight", out var dwProp) || argsProp.TryGetProperty("denseWeight", out dwProp))
+                    {
+                        if (dwProp.ValueKind == JsonValueKind.Number && dwProp.TryGetDouble(out var dwVal))
+                        {
+                            denseWeight = dwVal;
+                        }
+                    }
                 }
 
                 var tools = new List<object>();
@@ -192,9 +208,19 @@ namespace ModelContextGateway.Core.Routing
                 }
 
                 var effectiveProvider = _embeddingProvider ?? (embeddingService != null ? new ModelContextGateway.Core.VectorSearch.EmbeddingServiceAdapter(embeddingService) : null);
-                var effectiveStore = _vectorStore ?? new ModelContextGateway.Core.VectorSearch.InMemorySimdToolVectorStore();
-                var results = await SearchToolsAsync(query, tools, effectiveProvider, effectiveStore, logger, 15, cancellationToken);
-                var serialized = JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true });
+                var effectiveStore = _vectorStore;
+                var detailedResults = await SearchToolsDetailedAsync(
+                    query,
+                    tools,
+                    effectiveProvider,
+                    effectiveStore,
+                    logger,
+                    15,
+                    searchMode: mode,
+                    denseWeight: denseWeight,
+                    cancellationToken: cancellationToken);
+                var toolSchemas = detailedResults.Select(r => r.Tool).ToList();
+                var serialized = JsonSerializer.Serialize(toolSchemas, new JsonSerializerOptions { WriteIndented = true });
                 return new
                 {
                     resultType = "complete",

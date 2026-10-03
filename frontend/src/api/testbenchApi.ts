@@ -1,5 +1,5 @@
 import { apiRequest } from '../shared/api/api';
-import { ToolItem, PromptItem, ResourcesData, LogEntry } from '../shared/types';
+import { ToolItem, PromptItem, ResourcesData, LogEntry, SearchMode, SemanticSearchResponse } from '../shared/types';
 
 export async function fetchTestToolsApi(): Promise<ToolItem[]> {
   const data = await apiRequest<ToolItem[]>('/api/test/tools');
@@ -59,10 +59,18 @@ export async function readResourceApi(serverId: string, uri: string): Promise<an
   });
 }
 
-export async function semanticSearchApi(query: string): Promise<any[]> {
-  const data = await apiRequest<any[]>('/api/test/semantic-search', {
+export async function semanticSearchApi(
+  query: string,
+  mode: SearchMode = 'hybrid',
+  denseWeight: number = 0.5,
+  limit: number = 15
+): Promise<SemanticSearchResponse> {
+  const data = await apiRequest<SemanticSearchResponse | any[]>('/api/test/semantic-search', {
     method: 'POST',
-    body: { query }
+    body: { query, mode, denseWeight, limit }
   });
-  return data || [];
+  if (Array.isArray(data)) {
+    return { query, mode, denseWeight, results: data as any };
+  }
+  return data || { query, mode, denseWeight, results: [] };
 }

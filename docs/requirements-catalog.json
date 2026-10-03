@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-01T05:55:06.3348768Z",
-    "totalRequirements": 459,
-    "positiveCount": 364,
-    "guardrailCount": 95,
-    "totalProofs": 1054
+    "generatedAt": "2026-10-03T03:52:25.4441412Z",
+    "totalRequirements": 464,
+    "positiveCount": 368,
+    "guardrailCount": 96,
+    "totalProofs": 1082
   },
   "requirements": [
     {
@@ -6182,7 +6182,7 @@
       "category": "MCP",
       "type": "Positive",
       "description": "OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints.",
-      "proofCount": 5,
+      "proofCount": 4,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -6196,13 +6196,6 @@
           "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
           "lineNumber": 75,
           "testName": "GenerateEmbeddingsAsync_PreservesInputOrder_AcrossBatch",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
-          "lineNumber": 39,
-          "testName": "SearchToolsAsync_CombinesKeywordAndVectorRanks_UsingRRF",
           "details": null
         },
         {
@@ -6383,6 +6376,131 @@
           "filePath": "ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs",
           "lineNumber": 165,
           "testName": "CapabilityEndpoints_TestBench_HandlesMissingServer_GracefullyWith404",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-40",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Calibrated hybrid semantic search scoring with configurable dense weight and normalized linear combination.",
+      "proofCount": 5,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 39,
+          "testName": "SearchToolsAsync_CombinesKeywordAndVectorRanks_UsingRRF",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 158,
+          "testName": "HybridSearch_WithBalancedWeight_ComputesLinearCombinationScore",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 293,
+          "testName": "HybridSearch_ReturnsDecomposedScores",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 355,
+          "testName": "HybridSearch_WithClampedDenseWeight_HandlesNegativeExcessiveAndNaN",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 391,
+          "testName": "HybridSearch_WithIdenticalLexicalScores_NormalizesWithoutDivideByZero",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-41",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Explicit search modes (hybrid, semantic, lexical) and decomposed score diagnostics in ToolRoutingManager.",
+      "proofCount": 7,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 203,
+          "testName": "HybridSearch_WithSemanticMode_OnlyScoresDenseSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 248,
+          "testName": "HybridSearch_WithLexicalMode_OnlyScoresLexicalMatch",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 293,
+          "testName": "HybridSearch_ReturnsDecomposedScores",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 427,
+          "testName": "HybridSearch_WithEmptyQueryOrEmptyTools_ReturnsSafeGracefulList",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 451,
+          "testName": "HybridSearch_ResolveServerId_ResolvesVariousConventions",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
+          "lineNumber": 43,
+          "testName": "SemanticSearchEndpoint_ReturnsCalibratedHybridResultsWithDiagnostics",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
+          "lineNumber": 126,
+          "testName": "SemanticSearchEndpoint_RespectsSearchModeAndDenseWeightParameters",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-42",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Meta-mode search_tools MCP tool accepts optional mode and dense_weight arguments and executes calibrated tool retrieval.",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
+          "lineNumber": 185,
+          "testName": "MetaModeTools_SearchToolsSchema_ExposesModeAndDenseWeight",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
+          "lineNumber": 217,
+          "testName": "SearchTools_CustomToolCall_ExecutesWithModeAndDenseWeight",
           "details": null
         }
       ]
@@ -10419,252 +10537,252 @@
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 255,
+          "lineNumber": 276,
           "testName": "should pass layout audit on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 276,
+          "lineNumber": 297,
           "testName": "should pass layout audit on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 321,
+          "lineNumber": 342,
           "testName": "should pass layout audit on Samsung Galaxy Tab S10 Lite tablet viewport (portrait)",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 342,
+          "lineNumber": 363,
           "testName": "should pass layout audit on Samsung Galaxy Tab S10 Lite tablet viewport (landscape)",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 363,
+          "lineNumber": 384,
           "testName": "should pass layout audit for Add Server modal on Samsung Galaxy Tab S10 Lite tablet",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 404,
+          "lineNumber": 425,
           "testName": "should pass layout audit for Add Server modal on desktop 1080p",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 444,
+          "lineNumber": 465,
           "testName": "should pass layout audit for Add Server modal on Samsung Galaxy S25\u002B mobile",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 486,
+          "lineNumber": 507,
           "testName": "should pass layout audit across Capabilities Inspect modal tabs",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 542,
+          "lineNumber": 563,
           "testName": "should pass layout audit on App Keys \u0026 Security tab",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 570,
+          "lineNumber": 591,
           "testName": "should pass layout audit on Settings tab",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 598,
+          "lineNumber": 619,
           "testName": "should maintain layout stability during tab navigation",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 620,
+          "lineNumber": 641,
           "testName": "should pass layout audit on Test Bench tab on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 662,
+          "lineNumber": 683,
           "testName": "should pass layout audit on Test Bench tab on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 693,
+          "lineNumber": 714,
           "testName": "should pass layout audit on Test Bench tab on Samsung Galaxy Tab S10 Lite tablet viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 724,
+          "lineNumber": 745,
           "testName": "should pass layout audit on Test Bench Prompts and Resources tabs",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 776,
+          "lineNumber": 797,
           "testName": "should pass layout audit on Test Bench across Half-Ultrawide viewports",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 817,
+          "lineNumber": 838,
           "testName": "should pass layout audit on Test Bench Semantic Router tab",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 848,
+          "lineNumber": 880,
           "testName": "should pass layout audit on App Keys \u0026 Security sub-tabs on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 905,
+          "lineNumber": 937,
           "testName": "should pass layout audit on App Keys \u0026 Security sub-tabs on Samsung Galaxy Tab S10 Lite tablet viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 958,
+          "lineNumber": 990,
           "testName": "should pass layout audit on Settings sub-tabs on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1025,
+          "lineNumber": 1057,
           "testName": "should pass layout audit on Settings sub-tabs on Samsung Galaxy Tab S10 Lite tablet viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1091,
+          "lineNumber": 1123,
           "testName": "should pass layout audit on My MCP Servers tab on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1118,
+          "lineNumber": 1150,
           "testName": "should pass layout audit on My MCP Servers tab on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1146,
+          "lineNumber": 1178,
           "testName": "should pass layout audit on My MCP Servers tab on Samsung Galaxy Tab S10 Lite tablet viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1173,
+          "lineNumber": 1205,
           "testName": "should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1240,
+          "lineNumber": 1272,
           "testName": "should pass layout audit across Capabilities Inspect modal tabs on Samsung Galaxy Tab S10 Lite tablet viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1307,
+          "lineNumber": 1339,
           "testName": "should pass layout audit for AppKey modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1351,
+          "lineNumber": 1383,
           "testName": "should pass layout audit for AppKey modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1396,
+          "lineNumber": 1428,
           "testName": "should pass layout audit for Client modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1440,
+          "lineNumber": 1472,
           "testName": "should pass layout audit for Client modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1485,
+          "lineNumber": 1517,
           "testName": "should pass layout audit for CustomFile modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1534,
+          "lineNumber": 1566,
           "testName": "should pass layout audit for CustomFile modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1584,
+          "lineNumber": 1616,
           "testName": "should pass layout audit for Policy modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1633,
+          "lineNumber": 1665,
           "testName": "should pass layout audit for Policy modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1683,
+          "lineNumber": 1715,
           "testName": "should pass layout audit for Mapping modal on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
           "filePath": "frontend/e2e/layout-inspector.spec.ts",
-          "lineNumber": 1732,
+          "lineNumber": 1764,
           "testName": "should pass layout audit for Mapping modal on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         }
@@ -11215,13 +11333,136 @@
       "category": "UI",
       "type": "Positive",
       "description": "verifies deterministic data-testid attributes and interactive flow across test bench tabs including dedicated semantic router",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
           "lineNumber": 473,
           "testName": "renders and interacts with test bench elements via deterministic data-testid attributes",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "frontend/e2e/testbench.spec.ts",
+          "lineNumber": 54,
+          "testName": "should interact with semantic router simulator, change modes and presets, and test tool transition",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-142",
+      "category": "UI",
+      "type": "Negative",
+      "description": "verifies search mode toggle renders buttons and switches between hybrid, semantic, and lexical modes",
+      "proofCount": 10,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SemanticRouterCard.test.tsx",
+          "lineNumber": 35,
+          "testName": "verifies search mode toggle renders buttons and switches between hybrid, semantic, and lexical modes",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SemanticRouterCard.test.tsx",
+          "lineNumber": 98,
+          "testName": "verifies hybrid split slider and quick preset chips appear in hybrid mode and update denseWeight",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SemanticRouterCard.test.tsx",
+          "lineNumber": 176,
+          "testName": "verifies search limit dropdown changes value",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/useTestBenchState.test.ts",
+          "lineNumber": 14,
+          "testName": "initializes semantic search state with defaults",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/useTestBenchState.test.ts",
+          "lineNumber": 34,
+          "testName": "updates searchMode, denseWeight, and searchLimit state",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/useTestBenchState.test.ts",
+          "lineNumber": 58,
+          "testName": "executes handleSemanticSearch using current state parameters",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/useTestBenchState.test.ts",
+          "lineNumber": 102,
+          "testName": "handles semantic search failures gracefully",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/api/testbenchApi.test.ts",
+          "lineNumber": 11,
+          "testName": "calls apiRequest with query, mode, denseWeight, and limit parameters",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/api/testbenchApi.test.ts",
+          "lineNumber": 53,
+          "testName": "uses default values for mode, denseWeight, and limit when not specified",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/api/testbenchApi.test.ts",
+          "lineNumber": 84,
+          "testName": "returns fallback object when apiRequest returns null or undefined",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-143",
+      "category": "UI",
+      "type": "Positive",
+      "description": "renders decomposed score badges with formatted percentages in hybrid mode",
+      "proofCount": 4,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SemanticRouterCard.test.tsx",
+          "lineNumber": 209,
+          "testName": "renders decomposed score badges with formatted percentages in hybrid mode",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SemanticRouterCard.test.tsx",
+          "lineNumber": 251,
+          "testName": "hides dense and sparse badges in pure semantic or lexical modes",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SemanticRouterCard.test.tsx",
+          "lineNumber": 279,
+          "testName": "clicking Test Tool button dispatches onSelectTool with serverId and toolName",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 512,
+          "testName": "clicking Test Tool in semantic search results switches to Tools tab with tool and server preselected",
           "details": null
         }
       ]
