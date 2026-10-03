@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **459 Requirements Verified** across **1054 Test Proofs** (364 Functional Capabilities, 95 Safety Guardrails).
+> **Catalog Statistics:** **461 Requirements Verified** across **1059 Test Proofs** (366 Functional Capabilities, 95 Safety Guardrails).
 
 ---
 
@@ -15,7 +15,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **66** | 3 | 63 | 138 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **117** | 110 | 7 | 251 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **119** | 112 | 7 | 256 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **38** | 32 | 6 | 197 proofs |
@@ -1216,10 +1216,9 @@
 ### `[MCP-33]` OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (5):**
+* **Verification Proofs (4):**
   - [Backend xUnit] [`ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L26) (`GenerateEmbeddingAsync_SendsValidPayload_AndParsesResponse`)
   - [Backend xUnit] [`ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L75`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L75) (`GenerateEmbeddingsAsync_PreservesInputOrder_AcrossBatch`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39) (`SearchToolsAsync_CombinesKeywordAndVectorRanks_UsingRRF`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L92`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L92) (`SearchToolsAsync_ScoresLexicalSignals_AcrossNameDescriptionTagsAndParameters`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L141`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L141) (`SearchTools_SynchronousMethod_ReturnsRankedCandidates`)
 
@@ -1257,6 +1256,22 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L165`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L165) (`CapabilityEndpoints_TestBench_HandlesMissingServer_GracefullyWith404`)
+
+### `[MCP-40]` Calibrated hybrid semantic search scoring with configurable dense weight and normalized linear combination.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (3):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39) (`SearchToolsAsync_CombinesKeywordAndVectorRanks_UsingRRF`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L158`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L158) (`HybridSearch_WithBalancedWeight_ComputesLinearCombinationScore`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L293`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L293) (`HybridSearch_ReturnsDecomposedScores`)
+
+### `[MCP-41]` Explicit search modes (hybrid, semantic, lexical) and decomposed score diagnostics in ToolRoutingManager.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (3):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L203`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L203) (`HybridSearch_WithSemanticMode_OnlyScoresDenseSimilarity`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L248`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L248) (`HybridSearch_WithLexicalMode_OnlyScoresLexicalMatch`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L293`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L293) (`HybridSearch_ReturnsDecomposedScores`)
 
 ### `[MCP-ADMIN-ENDPOINT-CALL-TOOL]` Admin endpoint /admin/message executes tools/call for manage_system diagnostics.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -3629,6 +3644,8 @@
 | `MCP-37` | Positive | `MCP` | ResourceRoutingManager resolves mcp:// URIs directly on cold-start without prior resources/list. | [`PromptAndResourceResilienceTests.cs:L120`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L120) | Backend xUnit |
 | `MCP-38` | Positive | `MCP` | PromptRoutingManager supports slash, colon, and double-underscore delimiters for prompts/get. | [`PromptAndResourceResilienceTests.cs:L56`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L56) | Backend xUnit |
 | `MCP-39` | Positive | `MCP` | CapabilityEndpoints test bench APIs return 404 Not Found gracefully when target server is missing. | [`PromptAndResourceResilienceTests.cs:L165`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L165) | Backend xUnit |
+| `MCP-40` | Positive | `MCP` | Calibrated hybrid semantic search scoring with configurable dense weight and normalized linear combination. | [`ToolRoutingManagerHybridSearchTests.cs:L39`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39) | Backend xUnit |
+| `MCP-41` | Positive | `MCP` | Explicit search modes (hybrid, semantic, lexical) and decomposed score diagnostics in ToolRoutingManager. | [`ToolRoutingManagerHybridSearchTests.cs:L203`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L203) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-CALL-TOOL` | Positive | `MCP` | Admin endpoint /admin/message executes tools/call for manage_system diagnostics. | [`AdminEndpointsTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L294) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-HEAD-REQUEST` | Positive | `MCP` | Admin endpoint /admin handles HEAD request returning text/event-stream headers. | [`AdminEndpointsTests.cs:L212`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L212) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-LIST-TOOLS` | Positive | `MCP` | Admin endpoint /admin/message executes tools/list over active SSE session and returns 10 admin tools. | [`AdminEndpointsTests.cs:L224`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L224) | Backend xUnit |

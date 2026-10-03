@@ -5,11 +5,232 @@ namespace ModelContextGateway.Core.Routing
 {
     public partial class ToolRoutingManager
     {
-        private const double RrfK = 60.0;
+        /// <summary>
+        /// Asynchronously performs calibrated hybrid semantic search across candidate tools, returning rich tool
+        /// search results with decomposed dense/sparse scores, ranks, and server metadata.
+        /// </summary>
+        /// <param name="query">The natural language intent query.</param>
+        /// <param name="candidateTools">Candidate tool list (defaults to cached tools if null).</param>
+        /// <param name="embeddingProvider">Optional embedding provider override.</param>
+        /// <param name="vectorStore">Optional tool vector store override.</param>
+        /// <param name="logger">Optional logger for telemetry and failure reporting.</param>
+        /// <param name="limit">Maximum number of tool schemas to return.</param>
+        /// <param name="searchMode">Search mode: "hybrid", "semantic", or "lexical" (defaults to "hybrid").</param>
+        /// <param name="denseWeight">Weight alpha for dense similarity between 0.0 and 1.0 (defaults to 0.5).</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Ranked tool search results with decomposed diagnostics.</returns>
+        public async Task<List<ToolSearchResult>> SearchToolsDetailedAsync(
+            string query,
+            List<object>? candidateTools = null,
+            IEmbeddingProvider? embeddingProvider = null,
+            IToolVectorStore? vectorStore = null,
+            ILogger? logger = null,
+            int limit = 15,
+            string searchMode = "hybrid",
+            double? denseWeight = 0.5,
+            CancellationToken cancellationToken = default)
+        {
+            var tools = candidateTools ?? GetCachedTools();
+            if (tools.Count == 0)
+            {
+                return new List<ToolSearchResult>();
+            }
+
+            var toolMetas = tools.Select(ExtractToolMetadata).ToList();
+
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return toolMetas.Take(limit).Select(m => new ToolSearchResult
+                {
+                    Tool = m.Tool,
+                    ToolName = m.Name,
+                    ServerId = ResolveServerId(m),
+                    Score = 0.0,
+                    DenseScore = null,
+                    SparseScore = null,
+                    DenseRank = null,
+                    SparseRank = null
+                }).ToList();
+            }
+
+            var mode = searchMode?.Trim().ToLowerInvariant() ?? "hybrid";
+            bool computeDense = mode == "hybrid" || mode == "semantic";
+            bool computeSparse = mode == "hybrid" || mode == "lexical";
+
+            double alpha;
+            if (mode == "semantic")
+            {
+                alpha = 1.0;
+            }
+            else if (mode == "lexical")
+            {
+                alpha = 0.0;
+            }
+            else
+            {
+                alpha = Math.Clamp(denseWeight ?? 0.5, 0.0, 1.0);
+            }
+
+            // 1. Lexical / Keyword Scoring
+            var rawLexicalScores = new Dictionary<ToolMetadata, double>();
+            var sparseRanks = new Dictionary<ToolMetadata, int>();
+            var normalizedSparseScores = new Dictionary<ToolMetadata, double>();
+
+            if (computeSparse)
+            {
+                var queryWords = TokenizeQuery(query);
+                var keywordScored = new List<(ToolMetadata Meta, double Score)>();
+
+                foreach (var meta in toolMetas)
+                {
+                    double score = CalculateLexicalScore(query, queryWords, meta);
+                    rawLexicalScores[meta] = score;
+                    if (score > 0)
+                    {
+                        keywordScored.Add((meta, score));
+                    }
+                }
+
+                var keywordRanked = keywordScored
+                    .OrderByDescending(x => x.Score)
+                    .ToList();
+
+                for (int i = 0; i < keywordRanked.Count; i++)
+                {
+                    sparseRanks[keywordRanked[i].Meta] = i + 1;
+                }
+
+                if (keywordScored.Count > 0)
+                {
+                    double minLexical = keywordScored.Min(x => x.Score);
+                    double maxLexical = keywordScored.Max(x => x.Score);
+                    double range = maxLexical - minLexical;
+
+                    foreach (var meta in toolMetas)
+                    {
+                        double raw = rawLexicalScores[meta];
+                        if (raw <= 0)
+                        {
+                            normalizedSparseScores[meta] = 0.0;
+                        }
+                        else if (range <= 0.0)
+                        {
+                            normalizedSparseScores[meta] = 1.0;
+                        }
+                        else
+                        {
+                            normalizedSparseScores[meta] = (raw - minLexical) / range;
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var meta in toolMetas)
+                    {
+                        normalizedSparseScores[meta] = 0.0;
+                    }
+                }
+            }
+
+            // 2. Vector Similarity Search (SIMD accelerated)
+            var denseScores = new Dictionary<ToolMetadata, double>();
+            var denseRanks = new Dictionary<ToolMetadata, int>();
+
+            if (computeDense)
+            {
+                var effectiveProvider = embeddingProvider ?? _embeddingProvider;
+                var effectiveStore = vectorStore ?? _vectorStore;
+
+                IReadOnlyList<(string ToolName, float Score)>? vectorMatches = null;
+
+                if (effectiveProvider != null && !(effectiveProvider is NoOpEmbeddingProvider) && effectiveStore != null)
+                {
+                    try
+                    {
+                        float[]? queryEmbedding = null;
+                        try
+                        {
+                            queryEmbedding = await effectiveProvider.GenerateEmbeddingAsync(query, cancellationToken);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger?.LogWarning(ex, "Failed to generate query embedding for '{Query}'. Falling back to keyword ranking.", query);
+                        }
+
+                        if (queryEmbedding != null && queryEmbedding.Length > 0)
+                        {
+                            await EnsureToolsIndexedAsync(toolMetas, effectiveProvider, effectiveStore, logger, cancellationToken);
+                            vectorMatches = await effectiveStore.SearchSimilarAsync(queryEmbedding, limit: 50, cancellationToken: cancellationToken);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger?.LogWarning(ex, "Vector search encountered an error. Falling back gracefully to keyword ranking.");
+                        vectorMatches = null;
+                    }
+                }
+
+                if (vectorMatches != null && vectorMatches.Count > 0)
+                {
+                    var vectorRanked = vectorMatches
+                        .Where(m => !float.IsNaN(m.Score) && m.Score > 0f)
+                        .ToList();
+
+                    for (int i = 0; i < vectorRanked.Count; i++)
+                    {
+                        var vec = vectorRanked[i];
+                        var matched = FindMatchingToolMeta(vec.ToolName, toolMetas);
+                        if (matched != null && !denseScores.ContainsKey(matched))
+                        {
+                            denseScores[matched] = Math.Clamp((double)vec.Score, 0.0, 1.0);
+                            denseRanks[matched] = i + 1;
+                        }
+                    }
+                }
+                else if (mode == "hybrid" && (effectiveProvider == null || effectiveProvider is NoOpEmbeddingProvider || effectiveStore == null))
+                {
+                    // Graceful fallback to pure keyword scoring if vector search is unconfigured or disabled
+                    alpha = 0.0;
+                }
+            }
+
+            // 3. Fused Linear Combination Scoring
+            var searchResults = new List<ToolSearchResult>(toolMetas.Count);
+
+            foreach (var meta in toolMetas)
+            {
+                double? denseScore = denseScores.TryGetValue(meta, out var ds) ? ds : null;
+                int? denseRank = denseRanks.TryGetValue(meta, out var dr) ? dr : null;
+
+                double? sparseScore = normalizedSparseScores.TryGetValue(meta, out var ss) ? ss : null;
+                int? sparseRank = sparseRanks.TryGetValue(meta, out var sr) ? sr : null;
+
+                double combinedScore = (alpha * (denseScore ?? 0.0)) + ((1.0 - alpha) * (sparseScore ?? 0.0));
+
+                searchResults.Add(new ToolSearchResult
+                {
+                    Tool = meta.Tool,
+                    ToolName = meta.Name,
+                    ServerId = ResolveServerId(meta),
+                    Score = combinedScore,
+                    DenseScore = denseScore,
+                    SparseScore = sparseScore,
+                    DenseRank = denseRank,
+                    SparseRank = sparseRank
+                });
+            }
+
+            return searchResults
+                .OrderByDescending(r => r.Score)
+                .ThenBy(r => r.SparseRank ?? int.MaxValue)
+                .ThenBy(r => r.DenseRank ?? int.MaxValue)
+                .Take(limit)
+                .ToList();
+        }
 
         /// <summary>
-        /// Asynchronously performs hybrid semantic search across candidate tools using lexical keyword scoring,
-        /// hardware-accelerated SIMD vector similarity, and Reciprocal Rank Fusion (RRF, k=60).
+        /// Asynchronously performs hybrid semantic search across candidate tools using calibrated linear combination
+        /// of dense vector similarity and sparse keyword scoring.
         /// Gracefully falls back to pure keyword matching if the embedding provider is unconfigured, disabled, or offline.
         /// </summary>
         /// <param name="query">The natural language intent query.</param>
@@ -29,131 +250,18 @@ namespace ModelContextGateway.Core.Routing
             int limit = 15,
             CancellationToken cancellationToken = default)
         {
-            var tools = candidateTools ?? GetCachedTools();
-            if (tools.Count == 0)
-            {
-                return new List<object>();
-            }
+            var detailedResults = await SearchToolsDetailedAsync(
+                query,
+                candidateTools,
+                embeddingProvider,
+                vectorStore,
+                logger,
+                limit,
+                searchMode: "hybrid",
+                denseWeight: 0.5,
+                cancellationToken: cancellationToken);
 
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                return tools.Take(limit).ToList();
-            }
-
-            // 1. Extract metadata from candidate tools
-            var toolMetas = tools.Select(ExtractToolMetadata).ToList();
-
-            // 2. Lexical / Keyword Scoring
-            var queryWords = TokenizeQuery(query);
-            var keywordScored = new List<(ToolMetadata Meta, double Score)>();
-
-            foreach (var meta in toolMetas)
-            {
-                double score = CalculateLexicalScore(query, queryWords, meta);
-                if (score > 0)
-                {
-                    keywordScored.Add((meta, score));
-                }
-            }
-
-            var keywordRanked = keywordScored
-                .OrderByDescending(x => x.Score)
-                .Select((item, index) => (item.Meta, item.Score, Rank: index + 1))
-                .ToList();
-
-            // 3. Vector Similarity Search (SIMD accelerated)
-            var effectiveProvider = embeddingProvider ?? _embeddingProvider;
-            var effectiveStore = vectorStore ?? _vectorStore;
-
-            IReadOnlyList<(string ToolName, float Score)>? vectorMatches = null;
-
-            if (effectiveProvider != null && !(effectiveProvider is NoOpEmbeddingProvider) && effectiveStore != null)
-            {
-                try
-                {
-                    float[]? queryEmbedding = null;
-                    try
-                    {
-                        queryEmbedding = await effectiveProvider.GenerateEmbeddingAsync(query, cancellationToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger?.LogWarning(ex, "Failed to generate query embedding for '{Query}'. Falling back to keyword ranking.", query);
-                    }
-
-                    if (queryEmbedding != null && queryEmbedding.Length > 0)
-                    {
-                        // Ensure tools are indexed in the vector store
-                        await EnsureToolsIndexedAsync(toolMetas, effectiveProvider, effectiveStore, logger, cancellationToken);
-
-                        vectorMatches = await effectiveStore.SearchSimilarAsync(queryEmbedding, limit: 50, cancellationToken: cancellationToken);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logger?.LogWarning(ex, "Vector search encountered an error. Falling back gracefully to keyword ranking.");
-                    vectorMatches = null;
-                }
-            }
-
-            // 4. Reciprocal Rank Fusion (RRF, k=60)
-            if (vectorMatches != null && vectorMatches.Count > 0)
-            {
-                var vectorRanked = vectorMatches
-                    .Where(m => !float.IsNaN(m.Score) && m.Score > 0f)
-                    .Select((item, index) => (item.ToolName, item.Score, Rank: index + 1))
-                    .ToList();
-
-                var rrfScores = new Dictionary<object, double>();
-                var toolMetaLookup = toolMetas.ToDictionary(m => m.Tool, m => m);
-
-                // Add reciprocal rank for keyword results
-                foreach (var kw in keywordRanked)
-                {
-                    double rrf = 1.0 / (RrfK + kw.Rank);
-                    rrfScores[kw.Meta.Tool] = rrf;
-                }
-
-                // Add reciprocal rank for vector results
-                foreach (var vec in vectorRanked)
-                {
-                    var matched = FindMatchingToolMeta(vec.ToolName, toolMetas);
-                    if (matched != null)
-                    {
-                        double rrf = 1.0 / (RrfK + vec.Rank);
-                        if (rrfScores.TryGetValue(matched.Tool, out var existing))
-                        {
-                            rrfScores[matched.Tool] = existing + rrf;
-                        }
-                        else
-                        {
-                            rrfScores[matched.Tool] = rrf;
-                        }
-                    }
-                }
-
-                if (rrfScores.Count > 0)
-                {
-                    var fused = rrfScores
-                        .OrderByDescending(kvp => kvp.Value)
-                        .Select(kvp => kvp.Key)
-                        .Take(limit)
-                        .ToList();
-
-                    return fused;
-                }
-            }
-
-            // 5. Graceful Fallback: Pure Keyword Ranking
-            if (keywordRanked.Count > 0)
-            {
-                return keywordRanked
-                    .Select(x => x.Meta.Tool)
-                    .Take(limit)
-                    .ToList();
-            }
-
-            return tools.Take(Math.Min(10, limit)).ToList();
+            return detailedResults.Select(r => r.Tool).ToList();
         }
 
         /// <summary>
@@ -352,6 +460,7 @@ namespace ModelContextGateway.Core.Routing
         {
             string name = "";
             string description = "";
+            string? serverId = null;
             var tags = new List<string>();
             var parameters = new List<(string Name, string Description)>();
 
@@ -365,14 +474,18 @@ namespace ModelContextGateway.Core.Routing
                 {
                     description = d.GetString() ?? "";
                 }
+                if (je.TryGetProperty("serverId", out var s) || je.TryGetProperty("server_id", out s))
+                {
+                    serverId = s.GetString();
+                }
                 if (je.TryGetProperty("tags", out var t) && t.ValueKind == JsonValueKind.Array)
                 {
                     foreach (var tag in t.EnumerateArray())
                     {
-                        var s = tag.GetString();
-                        if (!string.IsNullOrEmpty(s))
+                        var str = tag.GetString();
+                        if (!string.IsNullOrEmpty(str))
                         {
-                            tags.Add(s);
+                            tags.Add(str);
                         }
                     }
                 }
@@ -397,6 +510,10 @@ namespace ModelContextGateway.Core.Routing
                 {
                     description = d?.ToString() ?? "";
                 }
+                if (dict.TryGetValue("serverId", out var s) || dict.TryGetValue("server_id", out s))
+                {
+                    serverId = s?.ToString();
+                }
                 if (dict.TryGetValue("tags", out var t))
                 {
                     if (t is IEnumerable<string> strSeq)
@@ -407,10 +524,10 @@ namespace ModelContextGateway.Core.Routing
                     {
                         foreach (var tag in jeTags.EnumerateArray())
                         {
-                            var s = tag.GetString();
-                            if (!string.IsNullOrEmpty(s))
+                            var str = tag.GetString();
+                            if (!string.IsNullOrEmpty(str))
                             {
-                                tags.Add(s);
+                                tags.Add(str);
                             }
                         }
                     }
@@ -431,6 +548,14 @@ namespace ModelContextGateway.Core.Routing
                 {
                     description = legacyDict["description"]?.ToString() ?? "";
                 }
+                if (legacyDict.Contains("serverId"))
+                {
+                    serverId = legacyDict["serverId"]?.ToString();
+                }
+                else if (legacyDict.Contains("server_id"))
+                {
+                    serverId = legacyDict["server_id"]?.ToString();
+                }
             }
             else
             {
@@ -439,6 +564,8 @@ namespace ModelContextGateway.Core.Routing
                        type.GetProperty("Name")?.GetValue(tool)?.ToString() ?? "";
                 description = type.GetProperty("description")?.GetValue(tool)?.ToString() ??
                               type.GetProperty("Description")?.GetValue(tool)?.ToString() ?? "";
+                serverId = type.GetProperty("ServerId")?.GetValue(tool)?.ToString() ??
+                           type.GetProperty("serverId")?.GetValue(tool)?.ToString();
             }
 
             var textToEmbed = $"{name}: {description}";
@@ -447,7 +574,41 @@ namespace ModelContextGateway.Core.Routing
                 textToEmbed += " " + string.Join(" ", parameters.Select(p => $"{p.Name} {p.Description}"));
             }
 
-            return new ToolMetadata(tool, name, description, tags, parameters, textToEmbed);
+            return new ToolMetadata(tool, name, description, tags, parameters, textToEmbed, serverId);
+        }
+
+        private string? ResolveServerId(ToolMetadata meta)
+        {
+            if (!string.IsNullOrWhiteSpace(meta.ServerId))
+            {
+                return meta.ServerId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(meta.Name))
+            {
+                if (_toolRoutingTable.TryGetValue(meta.Name, out var mappedId))
+                {
+                    return mappedId;
+                }
+
+                var slashIdx = meta.Name.IndexOf('/');
+                if (slashIdx > 0)
+                {
+                    return meta.Name.Substring(0, slashIdx);
+                }
+                var underIdx = meta.Name.IndexOf("__", StringComparison.Ordinal);
+                if (underIdx > 0)
+                {
+                    return meta.Name.Substring(0, underIdx);
+                }
+                var colonIdx = meta.Name.IndexOf(':');
+                if (colonIdx > 0)
+                {
+                    return meta.Name.Substring(0, colonIdx);
+                }
+            }
+
+            return null;
         }
 
         private static void ExtractParametersFromSchemaObject(object? schemaObj, List<(string Name, string Description)> parameters)
@@ -484,6 +645,7 @@ namespace ModelContextGateway.Core.Routing
             string Description,
             List<string> Tags,
             List<(string Name, string Description)> Parameters,
-            string TextToEmbed);
+            string TextToEmbed,
+            string? ServerId = null);
     }
 }

@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-01T05:55:06.3348768Z",
-    "totalRequirements": 459,
-    "positiveCount": 364,
+    "generatedAt": "2026-10-03T02:54:02.4018019Z",
+    "totalRequirements": 461,
+    "positiveCount": 366,
     "guardrailCount": 95,
-    "totalProofs": 1054
+    "totalProofs": 1059
   },
   "requirements": [
     {
@@ -6182,7 +6182,7 @@
       "category": "MCP",
       "type": "Positive",
       "description": "OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints.",
-      "proofCount": 5,
+      "proofCount": 4,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -6196,13 +6196,6 @@
           "filePath": "ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs",
           "lineNumber": 75,
           "testName": "GenerateEmbeddingsAsync_PreservesInputOrder_AcrossBatch",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
-          "lineNumber": 39,
-          "testName": "SearchToolsAsync_CombinesKeywordAndVectorRanks_UsingRRF",
           "details": null
         },
         {
@@ -6383,6 +6376,66 @@
           "filePath": "ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs",
           "lineNumber": 165,
           "testName": "CapabilityEndpoints_TestBench_HandlesMissingServer_GracefullyWith404",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-40",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Calibrated hybrid semantic search scoring with configurable dense weight and normalized linear combination.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 39,
+          "testName": "SearchToolsAsync_CombinesKeywordAndVectorRanks_UsingRRF",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 158,
+          "testName": "HybridSearch_WithBalancedWeight_ComputesLinearCombinationScore",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 293,
+          "testName": "HybridSearch_ReturnsDecomposedScores",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-41",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Explicit search modes (hybrid, semantic, lexical) and decomposed score diagnostics in ToolRoutingManager.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 203,
+          "testName": "HybridSearch_WithSemanticMode_OnlyScoresDenseSimilarity",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 248,
+          "testName": "HybridSearch_WithLexicalMode_OnlyScoresLexicalMatch",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 293,
+          "testName": "HybridSearch_ReturnsDecomposedScores",
           "details": null
         }
       ]
