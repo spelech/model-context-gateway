@@ -1,5 +1,5 @@
 import React from 'react';
-import { executeToolApi, getPromptApi, readResourceApi, semanticSearchApi } from '../../api/testbenchApi';
+import { executeToolApi, getPromptApi, readResourceApi } from '../../api/testbenchApi';
 import { showToast } from '../../stores/useToastStore';
 import { useTestBenchState } from './useTestBenchState';
 
@@ -27,8 +27,12 @@ export const TestBenchView: React.FC = () => {
     selectedResourceUri, setSelectedResourceUri,
     selectedResourceValue, setSelectedResourceValue,
     semanticQuery, setSemanticQuery,
-    semanticResults, setSemanticResults,
-    isSearchingSemantic, setIsSearchingSemantic,
+    searchMode, setSearchMode,
+    denseWeight, setDenseWeight,
+    searchLimit, setSearchLimit,
+    semanticResults,
+    isSearchingSemantic,
+    handleSemanticSearch,
     consoleRequest, setConsoleRequest,
     consoleResponse, setConsoleResponse
   } = useTestBenchState();
@@ -199,21 +203,10 @@ export const TestBenchView: React.FC = () => {
     }
   };
 
-  // Semantic
-  const runSemanticSearch = async (e?: React.FormEvent) => {
-    if (e && e.preventDefault) e.preventDefault();
-    if (!semanticQuery.trim()) return;
-
-    setIsSearchingSemantic(true);
-    try {
-      const results = await semanticSearchApi(semanticQuery.trim());
-      setSemanticResults(results?.results || []);
-    } catch (err: any) {
-      showToast(`Semantic search failed: ${err.message}`, 'error');
-      setSemanticResults([]);
-    } finally {
-      setIsSearchingSemantic(false);
-    }
+  const handleSelectTool = (serverId: string, toolName: string) => {
+    setSelectedToolServer(serverId);
+    handleToolNameChange(toolName);
+    setActiveTab('tools');
   };
 
   return (
@@ -261,8 +254,15 @@ export const TestBenchView: React.FC = () => {
               semanticQuery={semanticQuery}
               semanticResults={semanticResults}
               isSearchingSemantic={isSearchingSemantic}
+              searchMode={searchMode}
+              denseWeight={denseWeight}
+              searchLimit={searchLimit}
               onQueryChange={setSemanticQuery}
-              onSearch={runSemanticSearch}
+              onModeChange={setSearchMode}
+              onDenseWeightChange={setDenseWeight}
+              onSearchLimitChange={setSearchLimit}
+              onSearch={handleSemanticSearch}
+              onSelectTool={handleSelectTool}
             />
           </div>
           <LogsTerminalCard />

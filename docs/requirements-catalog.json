@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-03T03:10:24.9228358Z",
-    "totalRequirements": 463,
-    "positiveCount": 367,
+    "generatedAt": "2026-10-03T03:18:38.2202881Z",
+    "totalRequirements": 464,
+    "positiveCount": 368,
     "guardrailCount": 96,
-    "totalProofs": 1070
+    "totalProofs": 1077
   },
   "requirements": [
     {
@@ -11320,9 +11320,30 @@
       "id": "UI-142",
       "category": "UI",
       "type": "Negative",
-      "description": "Initializes semantic search state with default mode, weight, limit, and empty results.",
-      "proofCount": 7,
+      "description": "verifies search mode toggle renders buttons and switches between hybrid, semantic, and lexical modes",
+      "proofCount": 10,
       "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SemanticRouterCard.test.tsx",
+          "lineNumber": 35,
+          "testName": "verifies search mode toggle renders buttons and switches between hybrid, semantic, and lexical modes",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SemanticRouterCard.test.tsx",
+          "lineNumber": 98,
+          "testName": "verifies hybrid split slider and quick preset chips appear in hybrid mode and update denseWeight",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SemanticRouterCard.test.tsx",
+          "lineNumber": 176,
+          "testName": "verifies search limit dropdown changes value",
+          "details": null
+        },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/useTestBenchState.test.ts",
@@ -11370,6 +11391,43 @@
           "filePath": "frontend/src/test/api/testbenchApi.test.ts",
           "lineNumber": 84,
           "testName": "returns fallback object when apiRequest returns null or undefined",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-143",
+      "category": "UI",
+      "type": "Positive",
+      "description": "renders decomposed score badges with formatted percentages in hybrid mode",
+      "proofCount": 4,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SemanticRouterCard.test.tsx",
+          "lineNumber": 209,
+          "testName": "renders decomposed score badges with formatted percentages in hybrid mode",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SemanticRouterCard.test.tsx",
+          "lineNumber": 251,
+          "testName": "hides dense and sparse badges in pure semantic or lexical modes",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/SemanticRouterCard.test.tsx",
+          "lineNumber": 279,
+          "testName": "clicking Test Tool button dispatches onSelectTool with serverId and toolName",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
+          "lineNumber": 512,
+          "testName": "clicking Test Tool in semantic search results switches to Tools tab with tool and server preselected",
           "details": null
         }
       ]

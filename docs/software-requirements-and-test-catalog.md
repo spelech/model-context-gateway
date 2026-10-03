@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **463 Requirements Verified** across **1070 Test Proofs** (367 Functional Capabilities, 96 Safety Guardrails).
+> **Catalog Statistics:** **464 Requirements Verified** across **1077 Test Proofs** (368 Functional Capabilities, 96 Safety Guardrails).
 
 ---
 
@@ -18,7 +18,7 @@
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **120** | 113 | 7 | 260 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **39** | 32 | 7 | 204 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **40** | 33 | 7 | 211 proofs |
 
 ---
 
@@ -2627,6 +2627,15 @@
 * **Verification Proofs (1):**
   - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L473`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L473) (`renders and interacts with test bench elements via deterministic data-testid attributes`)
 
+### `[UI-143]` renders decomposed score badges with formatted percentages in hybrid mode
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (4):**
+  - [Frontend Vitest] [`frontend/src/test/components/SemanticRouterCard.test.tsx#L209`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SemanticRouterCard.test.tsx#L209) (`renders decomposed score badges with formatted percentages in hybrid mode`)
+  - [Frontend Vitest] [`frontend/src/test/components/SemanticRouterCard.test.tsx#L251`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SemanticRouterCard.test.tsx#L251) (`hides dense and sparse badges in pure semantic or lexical modes`)
+  - [Frontend Vitest] [`frontend/src/test/components/SemanticRouterCard.test.tsx#L279`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SemanticRouterCard.test.tsx#L279) (`clicking Test Tool button dispatches onSelectTool with serverId and toolName`)
+  - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L512`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L512) (`clicking Test Tool in semantic search results switches to Tools tab with tool and server preselected`)
+
 ### `[UI-30]` Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
@@ -3358,10 +3367,13 @@
   - [Frontend Vitest] [`frontend/src/test/components/RedirectUrisModal.test.tsx#L71`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RedirectUrisModal.test.tsx#L71) (`calls onClose when close button or dismiss is clicked`)
   - [Frontend Vitest] [`frontend/src/test/components/RedirectUrisModal.test.tsx#L93`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RedirectUrisModal.test.tsx#L93) (`renders nothing when isOpen is false`)
 
-### `[UI-142]` Initializes semantic search state with default mode, weight, limit, and empty results.
+### `[UI-142]` verifies search mode toggle renders buttons and switches between hybrid, semantic, and lexical modes
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (7):**
+* **Verification Proofs (10):**
+  - [Frontend Vitest] [`frontend/src/test/components/SemanticRouterCard.test.tsx#L35`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SemanticRouterCard.test.tsx#L35) (`verifies search mode toggle renders buttons and switches between hybrid, semantic, and lexical modes`)
+  - [Frontend Vitest] [`frontend/src/test/components/SemanticRouterCard.test.tsx#L98`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SemanticRouterCard.test.tsx#L98) (`verifies hybrid split slider and quick preset chips appear in hybrid mode and update denseWeight`)
+  - [Frontend Vitest] [`frontend/src/test/components/SemanticRouterCard.test.tsx#L176`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SemanticRouterCard.test.tsx#L176) (`verifies search limit dropdown changes value`)
   - [Frontend Vitest] [`frontend/src/test/components/useTestBenchState.test.ts#L14`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/useTestBenchState.test.ts#L14) (`initializes semantic search state with defaults`)
   - [Frontend Vitest] [`frontend/src/test/components/useTestBenchState.test.ts#L34`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/useTestBenchState.test.ts#L34) (`updates searchMode, denseWeight, and searchLimit state`)
   - [Frontend Vitest] [`frontend/src/test/components/useTestBenchState.test.ts#L58`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/useTestBenchState.test.ts#L58) (`executes handleSemanticSearch using current state parameters`)
@@ -3879,7 +3891,8 @@
 | `UI-139` | **Guardrail** | `UI` | Compacts multiple redirect URIs with +N more button and opens RedirectUrisModal on click. | [`RegisteredClientsCard.test.tsx:L199`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L199) | Frontend Vitest |
 | `UI-140` | Positive | `UI` | Navigation tabs maintain static 1px baseline border to eliminate vertical height jumps across active toggles | [`LayoutCentering.test.tsx:L132`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LayoutCentering.test.tsx#L132) | Frontend Vitest |
 | `UI-141` | Positive | `UI` | verifies deterministic data-testid attributes and interactive flow across test bench tabs including dedicated semantic router | [`TestBenchView.test.tsx:L473`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L473) | Frontend Vitest |
-| `UI-142` | **Guardrail** | `UI` | Initializes semantic search state with default mode, weight, limit, and empty results. | [`useTestBenchState.test.ts:L14`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/useTestBenchState.test.ts#L14) | Frontend Vitest |
+| `UI-142` | **Guardrail** | `UI` | verifies search mode toggle renders buttons and switches between hybrid, semantic, and lexical modes | [`SemanticRouterCard.test.tsx:L35`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SemanticRouterCard.test.tsx#L35) | Frontend Vitest |
+| `UI-143` | Positive | `UI` | renders decomposed score badges with formatted percentages in hybrid mode | [`SemanticRouterCard.test.tsx:L209`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SemanticRouterCard.test.tsx#L209) | Frontend Vitest |
 | `UI-30` | Positive | `UI` | Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration. | [`ClientModal.test.tsx:L27`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientModal.test.tsx#L27) | Frontend Vitest |
 | `UI-31` | **Guardrail** | `UI` | Fetches registered OAuth clients and updates store state. | [`useClientStore.test.ts:L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L37) | Frontend Vitest |
 | `UI-32` | Positive | `UI` | Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials. | [`useClientStore.test.ts:L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L76) | Frontend Vitest |
