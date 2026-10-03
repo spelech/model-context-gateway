@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **462 Requirements Verified** across **1063 Test Proofs** (367 Functional Capabilities, 95 Safety Guardrails).
+> **Catalog Statistics:** **463 Requirements Verified** across **1070 Test Proofs** (367 Functional Capabilities, 96 Safety Guardrails).
 
 ---
 
@@ -18,7 +18,7 @@
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **120** | 113 | 7 | 260 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **38** | 32 | 6 | 197 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **39** | 32 | 7 | 204 proofs |
 
 ---
 
@@ -3358,6 +3358,18 @@
   - [Frontend Vitest] [`frontend/src/test/components/RedirectUrisModal.test.tsx#L71`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RedirectUrisModal.test.tsx#L71) (`calls onClose when close button or dismiss is clicked`)
   - [Frontend Vitest] [`frontend/src/test/components/RedirectUrisModal.test.tsx#L93`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RedirectUrisModal.test.tsx#L93) (`renders nothing when isOpen is false`)
 
+### `[UI-142]` Initializes semantic search state with default mode, weight, limit, and empty results.
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (7):**
+  - [Frontend Vitest] [`frontend/src/test/components/useTestBenchState.test.ts#L14`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/useTestBenchState.test.ts#L14) (`initializes semantic search state with defaults`)
+  - [Frontend Vitest] [`frontend/src/test/components/useTestBenchState.test.ts#L34`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/useTestBenchState.test.ts#L34) (`updates searchMode, denseWeight, and searchLimit state`)
+  - [Frontend Vitest] [`frontend/src/test/components/useTestBenchState.test.ts#L58`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/useTestBenchState.test.ts#L58) (`executes handleSemanticSearch using current state parameters`)
+  - [Frontend Vitest] [`frontend/src/test/components/useTestBenchState.test.ts#L102`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/useTestBenchState.test.ts#L102) (`handles semantic search failures gracefully`)
+  - [Frontend Vitest] [`frontend/src/test/api/testbenchApi.test.ts#L11`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/api/testbenchApi.test.ts#L11) (`calls apiRequest with query, mode, denseWeight, and limit parameters`)
+  - [Frontend Vitest] [`frontend/src/test/api/testbenchApi.test.ts#L53`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/api/testbenchApi.test.ts#L53) (`uses default values for mode, denseWeight, and limit when not specified`)
+  - [Frontend Vitest] [`frontend/src/test/api/testbenchApi.test.ts#L84`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/api/testbenchApi.test.ts#L84) (`returns fallback object when apiRequest returns null or undefined`)
+
 ### `[UI-31]` Fetches registered OAuth clients and updates store state.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
@@ -3867,6 +3879,7 @@
 | `UI-139` | **Guardrail** | `UI` | Compacts multiple redirect URIs with +N more button and opens RedirectUrisModal on click. | [`RegisteredClientsCard.test.tsx:L199`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/RegisteredClientsCard.test.tsx#L199) | Frontend Vitest |
 | `UI-140` | Positive | `UI` | Navigation tabs maintain static 1px baseline border to eliminate vertical height jumps across active toggles | [`LayoutCentering.test.tsx:L132`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LayoutCentering.test.tsx#L132) | Frontend Vitest |
 | `UI-141` | Positive | `UI` | verifies deterministic data-testid attributes and interactive flow across test bench tabs including dedicated semantic router | [`TestBenchView.test.tsx:L473`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L473) | Frontend Vitest |
+| `UI-142` | **Guardrail** | `UI` | Initializes semantic search state with default mode, weight, limit, and empty results. | [`useTestBenchState.test.ts:L14`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/useTestBenchState.test.ts#L14) | Frontend Vitest |
 | `UI-30` | Positive | `UI` | Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration. | [`ClientModal.test.tsx:L27`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientModal.test.tsx#L27) | Frontend Vitest |
 | `UI-31` | **Guardrail** | `UI` | Fetches registered OAuth clients and updates store state. | [`useClientStore.test.ts:L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L37) | Frontend Vitest |
 | `UI-32` | Positive | `UI` | Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials. | [`useClientStore.test.ts:L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L76) | Frontend Vitest |

@@ -207,7 +207,7 @@ export const TestBenchView: React.FC = () => {
     setIsSearchingSemantic(true);
     try {
       const results = await semanticSearchApi(semanticQuery.trim());
-      setSemanticResults(results || []);
+      setSemanticResults(results?.results || []);
     } catch (err: any) {
       showToast(`Semantic search failed: ${err.message}`, 'error');
       setSemanticResults([]);

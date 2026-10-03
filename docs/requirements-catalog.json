@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-03T03:05:11.1293091Z",
-    "totalRequirements": 462,
+    "generatedAt": "2026-10-03T03:10:24.9228358Z",
+    "totalRequirements": 463,
     "positiveCount": 367,
-    "guardrailCount": 95,
-    "totalProofs": 1063
+    "guardrailCount": 96,
+    "totalProofs": 1070
   },
   "requirements": [
     {
@@ -11312,6 +11312,64 @@
           "filePath": "frontend/src/test/components/TestBenchView.test.tsx",
           "lineNumber": 473,
           "testName": "renders and interacts with test bench elements via deterministic data-testid attributes",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-142",
+      "category": "UI",
+      "type": "Negative",
+      "description": "Initializes semantic search state with default mode, weight, limit, and empty results.",
+      "proofCount": 7,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/useTestBenchState.test.ts",
+          "lineNumber": 14,
+          "testName": "initializes semantic search state with defaults",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/useTestBenchState.test.ts",
+          "lineNumber": 34,
+          "testName": "updates searchMode, denseWeight, and searchLimit state",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/useTestBenchState.test.ts",
+          "lineNumber": 58,
+          "testName": "executes handleSemanticSearch using current state parameters",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/useTestBenchState.test.ts",
+          "lineNumber": 102,
+          "testName": "handles semantic search failures gracefully",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/api/testbenchApi.test.ts",
+          "lineNumber": 11,
+          "testName": "calls apiRequest with query, mode, denseWeight, and limit parameters",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/api/testbenchApi.test.ts",
+          "lineNumber": 53,
+          "testName": "uses default values for mode, denseWeight, and limit when not specified",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/api/testbenchApi.test.ts",
+          "lineNumber": 84,
+          "testName": "returns fallback object when apiRequest returns null or undefined",
           "details": null
         }
       ]
