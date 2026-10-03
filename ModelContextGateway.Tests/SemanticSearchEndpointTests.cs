@@ -100,7 +100,7 @@ namespace ModelContextGateway.Tests
             var first = results[0];
             first.GetProperty("toolName").GetString().Should().Be("docker__restart_container");
             first.GetProperty("serverId").GetString().Should().Be("docker");
-            
+
             // Validate real numerical bounds and mathematical consistency
             var score = first.GetProperty("score").GetDouble();
             score.Should().BeInRange(0.0, 1.0);
@@ -273,7 +273,7 @@ namespace ModelContextGateway.Tests
             doc.RootElement.GetProperty("resultType").GetString().Should().Be("complete");
             var text = doc.RootElement.GetProperty("content")[0].GetProperty("text").GetString();
             text.Should().NotBeNull();
-            
+
             // Prove differential ranking: matching tool must rank #1
             var toolSchemas = JsonSerializer.Deserialize<List<JsonElement>>(text!);
             toolSchemas.Should().NotBeNull();
