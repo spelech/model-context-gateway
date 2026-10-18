@@ -1201,6 +1201,21 @@ namespace ModelContextGateway.Core.Routing
                             {
                                 current.AllowOpenClientRegistration = aocrProp.GetBoolean();
                             }
+
+                            if (args.TryGetProperty("toolSearchDefaultLimit", out var tsdlProp) && tsdlProp.TryGetInt32(out var tsdl))
+                            {
+                                current.ToolSearchDefaultLimit = tsdl;
+                            }
+
+                            if (args.TryGetProperty("toolSearchMinScore", out var tsmsProp) && tsmsProp.TryGetDouble(out var tsms))
+                            {
+                                current.ToolSearchMinScore = tsms;
+                            }
+
+                            if (args.TryGetProperty("toolSearchScoreDropoffRatio", out var tssdrProp) && tssdrProp.TryGetDouble(out var tssdr))
+                            {
+                                current.ToolSearchScoreDropoffRatio = tssdr;
+                            }
                         }
 
                         _dynamicEmbeddingService.SaveSettings(current);

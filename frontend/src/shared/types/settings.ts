@@ -12,6 +12,9 @@ export interface EmbeddingSettings {
   globalMaxKeys?: number;
   userMaxKeys?: number;
   masterKeySource?: MasterKeySource;
+  toolSearchDefaultLimit?: number;
+  toolSearchMinScore?: number;
+  toolSearchScoreDropoffRatio?: number;
 }
 
 export interface AuthProviderConfig {

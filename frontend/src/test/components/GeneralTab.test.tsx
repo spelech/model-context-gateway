@@ -65,7 +65,65 @@ describe('GeneralTab component', () => {
       allowOpenClientRegistration: true,
       userMaxKeys: 10,
       globalMaxKeys: 250,
+      toolSearchDefaultLimit: 5,
+      toolSearchMinScore: 0.35,
+      toolSearchScoreDropoffRatio: 0.6,
     });
+  });
+
+  /**
+   * @requirement MCP-SEARCH-TOOL-LIMITS-AND-THRESHOLDS
+   * @category MCP
+   * @type PositiveFeature
+   * @description Renders GeneralTab with configurable tool search limits and thresholds and triggers save.
+   */
+  it('renders GeneralTab with tool search limit and threshold inputs and triggers save', async () => {
+    const saveSpy = vi.fn().mockResolvedValue(true);
+    render(
+      <GeneralTab
+        settings={{
+          embeddingProvider: 'local',
+          embeddingModelDir: 'data/models',
+          embeddingApiUrl: 'http://litellm:4000/v1/embeddings',
+          embeddingApiModel: 'all-MiniLM-L6-v2',
+          embeddingApiKey: '',
+          toolSearchDefaultLimit: 8,
+          toolSearchMinScore: 0.40,
+          toolSearchScoreDropoffRatio: 0.70,
+        }}
+        saveEmbeddingSettings={saveSpy}
+      />
+    );
+
+    const limitInput = screen.getByLabelText(/Default Tool Search Limit/i);
+    const minScoreInput = screen.getByLabelText(/Min Score Threshold/i);
+    const dropoffInput = screen.getByLabelText(/Relative Score Dropoff Ratio/i);
+
+    expect(limitInput).toHaveValue(8);
+    expect(minScoreInput).toHaveValue(0.4);
+    expect(dropoffInput).toHaveValue(0.7);
+
+    // Modify values
+    fireEvent.change(limitInput, { target: { value: '12' } });
+    fireEvent.change(minScoreInput, { target: { value: '0.45' } });
+    fireEvent.change(dropoffInput, { target: { value: '0.75' } });
+
+    expect(limitInput).toHaveValue(12);
+    expect(minScoreInput).toHaveValue(0.45);
+    expect(dropoffInput).toHaveValue(0.75);
+
+    const saveBtn = screen.getByRole('button', { name: /save settings/i });
+    await act(async () => {
+      fireEvent.click(saveBtn);
+    });
+
+    expect(saveSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        toolSearchDefaultLimit: 12,
+        toolSearchMinScore: 0.45,
+        toolSearchScoreDropoffRatio: 0.75,
+      })
+    );
   });
 
   /**

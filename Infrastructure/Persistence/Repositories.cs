@@ -117,8 +117,8 @@ namespace ModelContextGateway.Infrastructure.Persistence
             if (exists == 0)
             {
                 const string insertSql = @"
-                    INSERT INTO Settings (Id, DashboardTitle, DashboardIcon, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys)
-                    VALUES ('default', @DashboardTitle, @DashboardIcon, @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey, @EmbeddingApiModel, @EmbeddingModelDir, @GlobalMaxKeys, @UserMaxKeys);";
+                    INSERT INTO Settings (Id, DashboardTitle, DashboardIcon, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys, ToolSearchDefaultLimit, ToolSearchMinScore, ToolSearchScoreDropoffRatio)
+                    VALUES ('default', @DashboardTitle, @DashboardIcon, @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey, @EmbeddingApiModel, @EmbeddingModelDir, @GlobalMaxKeys, @UserMaxKeys, @ToolSearchDefaultLimit, @ToolSearchMinScore, @ToolSearchScoreDropoffRatio);";
                 await conn.ExecuteAsync(insertSql, settings);
             }
             else
@@ -133,7 +133,10 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         EmbeddingApiModel = @EmbeddingApiModel,
                         EmbeddingModelDir = @EmbeddingModelDir,
                         GlobalMaxKeys = @GlobalMaxKeys,
-                        UserMaxKeys = @UserMaxKeys
+                        UserMaxKeys = @UserMaxKeys,
+                        ToolSearchDefaultLimit = @ToolSearchDefaultLimit,
+                        ToolSearchMinScore = @ToolSearchMinScore,
+                        ToolSearchScoreDropoffRatio = @ToolSearchScoreDropoffRatio
                     WHERE Id = 'default';";
                 await conn.ExecuteAsync(updateSql, settings);
             }

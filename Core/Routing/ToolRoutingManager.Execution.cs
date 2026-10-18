@@ -69,6 +69,9 @@ namespace ModelContextGateway.Core.Routing
                 string query = "";
                 string mode = "hybrid";
                 double denseWeight = 0.5;
+                int? callerLimit = null;
+                double? callerMinScore = null;
+                double? callerScoreDropoffRatio = null;
 
                 if (root.TryGetProperty("params", out var paramsProp) &&
                     paramsProp.TryGetProperty("arguments", out var argsProp))
@@ -86,6 +89,27 @@ namespace ModelContextGateway.Core.Routing
                         if (dwProp.ValueKind == JsonValueKind.Number && dwProp.TryGetDouble(out var dwVal))
                         {
                             denseWeight = dwVal;
+                        }
+                    }
+                    if (argsProp.TryGetProperty("limit", out var limitProp))
+                    {
+                        if (limitProp.ValueKind == JsonValueKind.Number && limitProp.TryGetInt32(out var lVal) && lVal > 0)
+                        {
+                            callerLimit = lVal;
+                        }
+                    }
+                    if (argsProp.TryGetProperty("min_score", out var minScoreProp) || argsProp.TryGetProperty("minScore", out minScoreProp))
+                    {
+                        if (minScoreProp.ValueKind == JsonValueKind.Number && minScoreProp.TryGetDouble(out var msVal))
+                        {
+                            callerMinScore = msVal;
+                        }
+                    }
+                    if (argsProp.TryGetProperty("score_dropoff_ratio", out var sdrProp) || argsProp.TryGetProperty("scoreDropoffRatio", out sdrProp))
+                    {
+                        if (sdrProp.ValueKind == JsonValueKind.Number && sdrProp.TryGetDouble(out var sdrVal))
+                        {
+                            callerScoreDropoffRatio = sdrVal;
                         }
                     }
                 }
@@ -207,6 +231,15 @@ namespace ModelContextGateway.Core.Routing
                     tools = await filterAuthorizedToolsAsync(tools);
                 }
 
+                var routerSettings = (embeddingService as DynamicEmbeddingService)?.GetSettings();
+                int defaultLimit = routerSettings?.ToolSearchDefaultLimit ?? 5;
+                double defaultMinScore = routerSettings?.ToolSearchMinScore ?? 0.35;
+                double defaultDropoff = routerSettings?.ToolSearchScoreDropoffRatio ?? 0.60;
+
+                int effectiveLimit = callerLimit ?? defaultLimit;
+                double effectiveMinScore = callerMinScore ?? defaultMinScore;
+                double effectiveDropoff = callerScoreDropoffRatio ?? defaultDropoff;
+
                 var effectiveProvider = _embeddingProvider ?? (embeddingService != null ? new ModelContextGateway.Core.VectorSearch.EmbeddingServiceAdapter(embeddingService) : null);
                 var effectiveStore = _vectorStore;
                 var detailedResults = await SearchToolsDetailedAsync(
@@ -215,9 +248,11 @@ namespace ModelContextGateway.Core.Routing
                     effectiveProvider,
                     effectiveStore,
                     logger,
-                    15,
+                    effectiveLimit,
                     searchMode: mode,
                     denseWeight: denseWeight,
+                    minScore: effectiveMinScore,
+                    scoreDropoffRatio: effectiveDropoff,
                     cancellationToken: cancellationToken);
                 var toolSchemas = detailedResults.Select(r => r.Tool).ToList();
                 var serialized = JsonSerializer.Serialize(toolSchemas, new JsonSerializerOptions { WriteIndented = true });

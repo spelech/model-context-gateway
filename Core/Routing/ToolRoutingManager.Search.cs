@@ -17,6 +17,8 @@ namespace ModelContextGateway.Core.Routing
         /// <param name="limit">Maximum number of tool schemas to return.</param>
         /// <param name="searchMode">Search mode: "hybrid", "semantic", or "lexical" (defaults to "hybrid").</param>
         /// <param name="denseWeight">Weight alpha for dense similarity between 0.0 and 1.0 (defaults to 0.5).</param>
+        /// <param name="minScore">Optional minimum score threshold between 0.0 and 1.0.</param>
+        /// <param name="scoreDropoffRatio">Optional relative score dropoff ratio between 0.0 and 1.0.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Ranked tool search results with decomposed diagnostics.</returns>
         public async Task<List<ToolSearchResult>> SearchToolsDetailedAsync(
@@ -28,6 +30,8 @@ namespace ModelContextGateway.Core.Routing
             int limit = 15,
             string searchMode = "hybrid",
             double? denseWeight = 0.5,
+            double? minScore = null,
+            double? scoreDropoffRatio = null,
             CancellationToken cancellationToken = default)
         {
             var tools = candidateTools ?? GetCachedTools();
@@ -224,7 +228,25 @@ namespace ModelContextGateway.Core.Routing
                 });
             }
 
-            return searchResults
+            var filteredResults = searchResults;
+
+            if (minScore.HasValue || scoreDropoffRatio.HasValue)
+            {
+                var positiveMatches = searchResults.Where(r => r.Score > 0.0).ToList();
+                if (positiveMatches.Count == 0)
+                {
+                    return new List<ToolSearchResult>();
+                }
+
+                double topScore = positiveMatches.Max(r => r.Score);
+                double effectiveMin = minScore ?? 0.0;
+                double dropoffRatio = scoreDropoffRatio ?? 0.0;
+                double dynamicThreshold = Math.Max(effectiveMin, topScore * dropoffRatio);
+
+                filteredResults = positiveMatches.Where(r => r.Score >= dynamicThreshold).ToList();
+            }
+
+            return filteredResults
                 .OrderByDescending(r => r.Score)
                 .ThenBy(r => r.SparseRank ?? int.MaxValue)
                 .ThenBy(r => r.DenseRank ?? int.MaxValue)
@@ -244,6 +266,10 @@ namespace ModelContextGateway.Core.Routing
         /// <param name="vectorStore">Optional tool vector store override.</param>
         /// <param name="logger">Optional logger for telemetry and failure reporting.</param>
         /// <param name="limit">Maximum number of tool schemas to return.</param>
+        /// <param name="searchMode">Search mode: "hybrid", "semantic", or "lexical" (defaults to "hybrid").</param>
+        /// <param name="denseWeight">Weight alpha for dense similarity between 0.0 and 1.0 (defaults to 0.5).</param>
+        /// <param name="minScore">Optional minimum score threshold between 0.0 and 1.0.</param>
+        /// <param name="scoreDropoffRatio">Optional relative score dropoff ratio between 0.0 and 1.0.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Ranked candidate tool schemas.</returns>
         public async Task<List<object>> SearchToolsAsync(
@@ -253,6 +279,10 @@ namespace ModelContextGateway.Core.Routing
             IToolVectorStore? vectorStore = null,
             ILogger? logger = null,
             int limit = 15,
+            string searchMode = "hybrid",
+            double? denseWeight = 0.5,
+            double? minScore = null,
+            double? scoreDropoffRatio = null,
             CancellationToken cancellationToken = default)
         {
             var detailedResults = await SearchToolsDetailedAsync(
@@ -262,8 +292,10 @@ namespace ModelContextGateway.Core.Routing
                 vectorStore,
                 logger,
                 limit,
-                searchMode: "hybrid",
-                denseWeight: 0.5,
+                searchMode: searchMode,
+                denseWeight: denseWeight,
+                minScore: minScore,
+                scoreDropoffRatio: scoreDropoffRatio,
                 cancellationToken: cancellationToken);
 
             return detailedResults.Select(r => r.Tool).ToList();

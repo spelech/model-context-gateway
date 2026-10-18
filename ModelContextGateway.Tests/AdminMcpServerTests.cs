@@ -69,7 +69,8 @@ namespace ModelContextGateway.Tests
                 CREATE TABLE IF NOT EXISTS Settings (
                     Id TEXT PRIMARY KEY, DashboardTitle TEXT DEFAULT 'MCP Gateway', DashboardIcon TEXT DEFAULT 'fa-solid fa-network-wired',
                     EmbeddingProvider TEXT DEFAULT 'onnx', EmbeddingApiUrl TEXT, EmbeddingApiKey TEXT, EmbeddingApiModel TEXT,
-                    EmbeddingModelDir TEXT, GlobalMaxKeys INTEGER DEFAULT 100, UserMaxKeys INTEGER DEFAULT 5
+                    EmbeddingModelDir TEXT, GlobalMaxKeys INTEGER DEFAULT 100, UserMaxKeys INTEGER DEFAULT 5,
+                    ToolSearchDefaultLimit INTEGER DEFAULT 5, ToolSearchMinScore REAL DEFAULT 0.35, ToolSearchScoreDropoffRatio REAL DEFAULT 0.60
                 );
                 CREATE TABLE IF NOT EXISTS AccessPolicies (
                     Id TEXT PRIMARY KEY, TargetId TEXT, RequiredGroup TEXT, IsAllowed INTEGER DEFAULT 1
@@ -495,14 +496,26 @@ namespace ModelContextGateway.Tests
                 ""action"": ""update"",
                 ""dashboardTitle"": ""Custom MCG Hub"",
                 ""globalMaxKeys"": 200,
-                ""userMaxKeys"": 10
+                ""userMaxKeys"": 10,
+                ""toolSearchDefaultLimit"": 12,
+                ""toolSearchMinScore"": 0.45,
+                ""toolSearchScoreDropoffRatio"": 0.75
             }").RootElement;
 
             var updateRes = await _adminMcpServer.CallToolAsync("manage_settings", updateArgs, "admin_user");
             var updateJson = JsonSerializer.Serialize(updateRes);
             using var updateDoc = JsonDocument.Parse(updateJson);
             Assert.False(updateDoc.RootElement.GetProperty("isError").GetBoolean());
-            Assert.Contains("Custom MCG Hub", updateDoc.RootElement.GetProperty("content")[0].GetProperty("text").GetString());
+            var updateText = updateDoc.RootElement.GetProperty("content")[0].GetProperty("text").GetString();
+            Assert.Contains("Custom MCG Hub", updateText);
+            Assert.Contains("12", updateText);
+
+            // 3. Verify get reflects updated toolSearch settings
+            var getUpdatedRes = await _adminMcpServer.CallToolAsync("manage_settings", getArgs, "admin_user");
+            var getUpdatedJson = JsonSerializer.Serialize(getUpdatedRes);
+            using var getUpdatedDoc = JsonDocument.Parse(getUpdatedJson);
+            var getUpdatedText = getUpdatedDoc.RootElement.GetProperty("content")[0].GetProperty("text").GetString();
+            Assert.Contains("12", getUpdatedText);
         }
 
         [Fact]
