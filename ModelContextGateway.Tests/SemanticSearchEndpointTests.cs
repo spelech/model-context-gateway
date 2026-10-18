@@ -212,6 +212,18 @@ namespace ModelContextGateway.Tests
             // Verify dense_weight property
             props.TryGetProperty("dense_weight", out var weightProp).Should().BeTrue();
             weightProp.GetProperty("type").GetString().Should().Be("number");
+
+            // Verify limit property
+            props.TryGetProperty("limit", out var limitProp).Should().BeTrue();
+            limitProp.GetProperty("type").GetString().Should().Be("integer");
+
+            // Verify min_score property
+            props.TryGetProperty("min_score", out var minScoreProp).Should().BeTrue();
+            minScoreProp.GetProperty("type").GetString().Should().Be("number");
+
+            // Verify score_dropoff_ratio property
+            props.TryGetProperty("score_dropoff_ratio", out var dropoffProp).Should().BeTrue();
+            dropoffProp.GetProperty("type").GetString().Should().Be("number");
         }
 
         [Fact]
@@ -281,6 +293,92 @@ namespace ModelContextGateway.Tests
 
             // Prove lexical mode bypassed embedding generation entirely (anti-theater)
             mockEmbedding.Verify(e => e.GetEmbeddingAsync(It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        [Requirement("MCP-44", "MCP", RequirementType.Positive, "search_tools MCP tool call respects caller-supplied limit, min_score, and score_dropoff_ratio arguments.")]
+        public async Task SearchTools_CustomToolCall_ExecutesWithCallerLimitAndThresholds()
+        {
+            var manager = new ToolRoutingManager();
+            var (conn, dbFactory) = CreateDbFactory();
+            var connections = new ConcurrentDictionary<string, BackendConnection>();
+            var servers = new List<McpServer>
+            {
+                new McpServer { Id = "docker", Enabled = true }
+            };
+
+            var mockEmbedding = new Mock<IEmbeddingService>();
+            mockEmbedding.Setup(e => e.GetEmbeddingAsync(It.IsAny<string>()))
+                         .ReturnsAsync(new float[128]);
+
+            var sessionManager = _factory.Services.GetRequiredService<SessionManager>();
+            var tool1 = new Dictionary<string, object>
+            {
+                ["name"] = "docker__run_container",
+                ["description"] = "Run a new Docker container",
+                ["inputSchema"] = new Dictionary<string, object> { ["type"] = "object" }
+            };
+            var tool2 = new Dictionary<string, object>
+            {
+                ["name"] = "docker__stop_container",
+                ["description"] = "Stop a running Docker container",
+                ["inputSchema"] = new Dictionary<string, object> { ["type"] = "object" }
+            };
+            var tool3 = new Dictionary<string, object>
+            {
+                ["name"] = "docker__restart_container",
+                ["description"] = "Restart an active Docker container",
+                ["inputSchema"] = new Dictionary<string, object> { ["type"] = "object" }
+            };
+            sessionManager.SetServerToolsCache("docker", new List<object> { tool1, tool2, tool3 });
+
+            // Call search_tools with caller-specified limit: 2 and lexical mode
+            var bodyWithLimit = "{\"params\":{\"arguments\":{\"query\":\"container\",\"mode\":\"lexical\",\"limit\":2}}}";
+            var resultWithLimit = await manager.CallToolAsync(
+                "search_tools",
+                bodyWithLimit,
+                dbFactory,
+                connections,
+                servers,
+                Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance,
+                new HttpClient(),
+                mockEmbedding.Object,
+                () => Task.CompletedTask,
+                (b, k, v) => b,
+                sessionManager: sessionManager
+            );
+
+            resultWithLimit.Should().NotBeNull();
+            var jsonLimit = JsonSerializer.Serialize(resultWithLimit);
+            using var docLimit = JsonDocument.Parse(jsonLimit);
+            var textLimit = docLimit.RootElement.GetProperty("content")[0].GetProperty("text").GetString();
+            var toolSchemasLimit = JsonSerializer.Deserialize<List<JsonElement>>(textLimit!);
+            toolSchemasLimit.Should().NotBeNull();
+            toolSchemasLimit.Should().HaveCount(2);
+
+            // Call search_tools with min_score higher than any match (e.g. 2.0)
+            var bodyHighThreshold = "{\"params\":{\"arguments\":{\"query\":\"container\",\"mode\":\"lexical\",\"min_score\":2.0}}}";
+            var resultHighThreshold = await manager.CallToolAsync(
+                "search_tools",
+                bodyHighThreshold,
+                dbFactory,
+                connections,
+                servers,
+                Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance,
+                new HttpClient(),
+                mockEmbedding.Object,
+                () => Task.CompletedTask,
+                (b, k, v) => b,
+                sessionManager: sessionManager
+            );
+
+            resultHighThreshold.Should().NotBeNull();
+            var jsonHigh = JsonSerializer.Serialize(resultHighThreshold);
+            using var docHigh = JsonDocument.Parse(jsonHigh);
+            var textHigh = docHigh.RootElement.GetProperty("content")[0].GetProperty("text").GetString();
+            var toolSchemasHigh = JsonSerializer.Deserialize<List<JsonElement>>(textHigh!);
+            toolSchemasHigh.Should().NotBeNull();
+            toolSchemasHigh.Should().BeEmpty();
         }
     }
 }

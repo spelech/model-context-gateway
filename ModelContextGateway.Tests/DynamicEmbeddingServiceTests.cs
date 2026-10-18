@@ -44,7 +44,8 @@ namespace ModelContextGateway.Tests
                     EmbeddingApiModel TEXT,
                     EmbeddingModelDir TEXT,
                     DashboardTitle TEXT DEFAULT 'MCP Gateway', DashboardIcon TEXT DEFAULT 'fa-solid fa-network-wired', GlobalMaxKeys INTEGER DEFAULT 100,
-                    UserMaxKeys INTEGER DEFAULT 5
+                    UserMaxKeys INTEGER DEFAULT 5,
+                    ToolSearchDefaultLimit INTEGER DEFAULT 5, ToolSearchMinScore REAL DEFAULT 0.35, ToolSearchScoreDropoffRatio REAL DEFAULT 0.60
                 );
             ");
 

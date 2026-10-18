@@ -205,6 +205,21 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 {
                     conn.Execute("ALTER TABLE Settings ADD COLUMN UserSecretStorage TEXT DEFAULT 'Database';");
                 }
+
+                if (!cols.Contains("ToolSearchDefaultLimit"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN ToolSearchDefaultLimit INTEGER DEFAULT 5;");
+                }
+
+                if (!cols.Contains("ToolSearchMinScore"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN ToolSearchMinScore REAL DEFAULT 0.35;");
+                }
+
+                if (!cols.Contains("ToolSearchScoreDropoffRatio"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN ToolSearchScoreDropoffRatio REAL DEFAULT 0.60;");
+                }
             }
 
             // 4. AppKeys.OwnerSid and AppKeys.KeyType
@@ -795,6 +810,21 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 {
                     conn.Execute("ALTER TABLE `Settings` ADD COLUMN `UserMaxKeys` INT NOT NULL DEFAULT 5;");
                 }
+
+                if (!settingsCols.Contains("ToolSearchDefaultLimit"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `ToolSearchDefaultLimit` INT NOT NULL DEFAULT 5;");
+                }
+
+                if (!settingsCols.Contains("ToolSearchMinScore"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `ToolSearchMinScore` DOUBLE NOT NULL DEFAULT 0.35;");
+                }
+
+                if (!settingsCols.Contains("ToolSearchScoreDropoffRatio"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `ToolSearchScoreDropoffRatio` DOUBLE NOT NULL DEFAULT 0.60;");
+                }
             }
 
             // 2. Migrate Tools.ServerId if INT to VARCHAR(100)
@@ -1000,7 +1030,10 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         EmbeddingModelDir TEXT,
                         GlobalMaxKeys INTEGER DEFAULT 100,
                         UserMaxKeys INTEGER DEFAULT 5,
-                        UserSecretStorage TEXT DEFAULT 'Database'
+                        UserSecretStorage TEXT DEFAULT 'Database',
+                        ToolSearchDefaultLimit INTEGER DEFAULT 5,
+                        ToolSearchMinScore REAL DEFAULT 0.35,
+                        ToolSearchScoreDropoffRatio REAL DEFAULT 0.60
                     );
 
                     CREATE TABLE IF NOT EXISTS UserServerCredentials (
@@ -1160,7 +1193,10 @@ namespace ModelContextGateway.Infrastructure.Persistence
                             [RequireManualApproval]   BIT NOT NULL DEFAULT 0,
                             [GlobalMaxKeys]           INT NOT NULL DEFAULT 100,
                             [UserMaxKeys]             INT NOT NULL DEFAULT 5,
-                            [UserSecretStorage]       VARCHAR(50) NOT NULL DEFAULT 'Database'
+                            [UserSecretStorage]       VARCHAR(50) NOT NULL DEFAULT 'Database',
+                            [ToolSearchDefaultLimit]  INT NOT NULL DEFAULT 5,
+                            [ToolSearchMinScore]      FLOAT NOT NULL DEFAULT 0.35,
+                            [ToolSearchScoreDropoffRatio] FLOAT NOT NULL DEFAULT 0.60
                         );
                     END;
 
@@ -1337,7 +1373,10 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         `RequireManualApproval`   TINYINT(1) NOT NULL DEFAULT 0,
                         `GlobalMaxKeys`           INT NOT NULL DEFAULT 100,
                         `UserMaxKeys`             INT NOT NULL DEFAULT 5,
-                        `UserSecretStorage`       VARCHAR(50) NOT NULL DEFAULT 'Database'
+                        `UserSecretStorage`       VARCHAR(50) NOT NULL DEFAULT 'Database',
+                        `ToolSearchDefaultLimit`  INT NOT NULL DEFAULT 5,
+                        `ToolSearchMinScore`      DOUBLE NOT NULL DEFAULT 0.35,
+                        `ToolSearchScoreDropoffRatio` DOUBLE NOT NULL DEFAULT 0.60
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
                     CREATE TABLE IF NOT EXISTS `UserServerCredentials` (

@@ -71,14 +71,15 @@ namespace ModelContextGateway.Core.Routing
                     var exists = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM Settings WHERE Id = 'default'");
                     if (exists == 0)
                     {
-                        conn.Execute(@"INSERT INTO Settings (Id, DashboardTitle, DashboardIcon, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys)
-                            VALUES ('default', @DashboardTitle, @DashboardIcon, @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey, @EmbeddingApiModel, @EmbeddingModelDir, @GlobalMaxKeys, @UserMaxKeys)", _settings);
+                        conn.Execute(@"INSERT INTO Settings (Id, DashboardTitle, DashboardIcon, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys, ToolSearchDefaultLimit, ToolSearchMinScore, ToolSearchScoreDropoffRatio)
+                            VALUES ('default', @DashboardTitle, @DashboardIcon, @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey, @EmbeddingApiModel, @EmbeddingModelDir, @GlobalMaxKeys, @UserMaxKeys, @ToolSearchDefaultLimit, @ToolSearchMinScore, @ToolSearchScoreDropoffRatio)", _settings);
                     }
                     else
                     {
                         conn.Execute(@"UPDATE Settings SET DashboardTitle = @DashboardTitle, DashboardIcon = @DashboardIcon, EmbeddingProvider = @EmbeddingProvider, EmbeddingApiUrl = @EmbeddingApiUrl, EmbeddingApiKey = @EmbeddingApiKey,
                             EmbeddingApiModel = @EmbeddingApiModel, EmbeddingModelDir = @EmbeddingModelDir,
-                            GlobalMaxKeys = @GlobalMaxKeys, UserMaxKeys = @UserMaxKeys WHERE Id = 'default'", _settings);
+                            GlobalMaxKeys = @GlobalMaxKeys, UserMaxKeys = @UserMaxKeys,
+                            ToolSearchDefaultLimit = @ToolSearchDefaultLimit, ToolSearchMinScore = @ToolSearchMinScore, ToolSearchScoreDropoffRatio = @ToolSearchScoreDropoffRatio WHERE Id = 'default'", _settings);
                     }
                 }
                 catch (Exception ex)

@@ -59,6 +59,9 @@ namespace ModelContextGateway.Core.Routing
                         properties = new
                         {
                             query = new { type = "string", description = "The natural language query or intent to find relevant tools." },
+                            limit = new { type = "integer", description = "Optional maximum number of matching tools to return. Overrides the admin configured default limit." },
+                            min_score = new { type = "number", description = "Optional minimum score threshold between 0.0 and 1.0 to filter low-confidence noise." },
+                            score_dropoff_ratio = new { type = "number", description = "Optional relative score dropoff ratio between 0.0 and 1.0. Filters tools scoring below top_score * ratio." },
                             mode = new { type = "string", @enum = new[] { "hybrid", "semantic", "lexical" }, description = "Search mode: 'hybrid' (default), 'semantic' (pure vector), or 'lexical' (pure keyword)." },
                             dense_weight = new { type = "number", description = "Weight between 0.0 (pure lexical) and 1.0 (pure semantic). Default is 0.5 (balanced)." }
                         },

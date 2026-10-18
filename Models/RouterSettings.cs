@@ -17,6 +17,9 @@ namespace ModelContextGateway.Models
         public int UserMaxKeys { get; set; } = 0; // 0 = unlimited
         public string UserSecretStorage { get; set; } = "Database"; // "Database" or "Vault"
         public bool AllowOpenClientRegistration { get; set; } = true;
+        public int ToolSearchDefaultLimit { get; set; } = 5;
+        public double ToolSearchMinScore { get; set; } = 0.35;
+        public double ToolSearchScoreDropoffRatio { get; set; } = 0.60;
         public string MasterKeySource => DbKeyHelper.ActiveKeySource.ToString();
     }
 }

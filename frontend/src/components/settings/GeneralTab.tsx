@@ -29,6 +29,9 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
   const [allowOpenDCR, setAllowOpenDCR] = useState(settings?.allowOpenClientRegistration ?? true);
   const [userMaxKeys, setUserMaxKeys] = useState<number>(settings?.userMaxKeys ?? 5);
   const [globalMaxKeys, setGlobalMaxKeys] = useState<number>(settings?.globalMaxKeys ?? 100);
+  const [toolSearchDefaultLimit, setToolSearchDefaultLimit] = useState<number>(settings?.toolSearchDefaultLimit ?? 5);
+  const [toolSearchMinScore, setToolSearchMinScore] = useState<number>(settings?.toolSearchMinScore ?? 0.35);
+  const [toolSearchScoreDropoffRatio, setToolSearchScoreDropoffRatio] = useState<number>(settings?.toolSearchScoreDropoffRatio ?? 0.60);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [isMasterKeyModalOpen, setIsMasterKeyModalOpen] = useState(false);
 
@@ -77,6 +80,9 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
       allowOpenClientRegistration: allowOpenDCR,
       userMaxKeys: Number(userMaxKeys),
       globalMaxKeys: Number(globalMaxKeys),
+      toolSearchDefaultLimit: Number(toolSearchDefaultLimit),
+      toolSearchMinScore: Number(toolSearchMinScore),
+      toolSearchScoreDropoffRatio: Number(toolSearchScoreDropoffRatio),
     });
     setSaveStatus(success ? 'saved' : 'error');
     setTimeout(() => setSaveStatus('idle'), 2500);
@@ -358,6 +364,59 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
               </div>
             </div>
           )}
+
+          <div className="form-row" style={{ marginTop: '15px' }}>
+            <div className="form-group">
+              <label htmlFor="settings-tool-search-limit">Default Tool Search Limit</label>
+              <input
+                type="number"
+                id="settings-tool-search-limit"
+                data-testid="settings-tool-search-limit-input"
+                min="1"
+                max="50"
+                placeholder="5"
+                value={toolSearchDefaultLimit}
+                onChange={(e) => setToolSearchDefaultLimit(parseInt(e.target.value, 10) || 5)}
+              />
+              <small style={{ color: 'var(--text-muted)' }}>
+                Default maximum matching tools returned per search if caller does not specify limit (default: 5).
+              </small>
+            </div>
+            <div className="form-group">
+              <label htmlFor="settings-tool-search-min-score">Min Score Threshold</label>
+              <input
+                type="number"
+                id="settings-tool-search-min-score"
+                data-testid="settings-tool-search-min-score-input"
+                step="any"
+                min="0"
+                max="1"
+                placeholder="0.35"
+                value={toolSearchMinScore}
+                onChange={(e) => setToolSearchMinScore(parseFloat(e.target.value) || 0)}
+              />
+              <small style={{ color: 'var(--text-muted)' }}>
+                Minimum confidence score (0.0 - 1.0) to filter irrelevant tools (default: 0.35).
+              </small>
+            </div>
+            <div className="form-group">
+              <label htmlFor="settings-tool-search-dropoff">Relative Score Dropoff Ratio</label>
+              <input
+                type="number"
+                id="settings-tool-search-dropoff"
+                data-testid="settings-tool-search-dropoff-input"
+                step="any"
+                min="0"
+                max="1"
+                placeholder="0.60"
+                value={toolSearchScoreDropoffRatio}
+                onChange={(e) => setToolSearchScoreDropoffRatio(parseFloat(e.target.value) || 0)}
+              />
+              <small style={{ color: 'var(--text-muted)' }}>
+                Elbow cutoff ratio (top_score * ratio) to discard trailing low-scoring tools (default: 0.60).
+              </small>
+            </div>
+          </div>
           
           <div className="form-group">
             <h3 style={{ fontSize: '14px', marginBottom: '10px', marginTop: '20px', color: 'var(--primary)' }}><i className="fa-solid fa-shield-halved"></i> Security Defaults</h3>

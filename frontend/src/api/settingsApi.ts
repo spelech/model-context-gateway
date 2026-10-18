@@ -21,6 +21,9 @@ export async function fetchEmbeddingSettingsApi(): Promise<EmbeddingSettings | n
     globalMaxKeys: settings.globalMaxKeys ?? 0,
     userMaxKeys: settings.userMaxKeys ?? 0,
     masterKeySource: settings.masterKeySource,
+    toolSearchDefaultLimit: settings.toolSearchDefaultLimit ?? 5,
+    toolSearchMinScore: settings.toolSearchMinScore ?? 0.35,
+    toolSearchScoreDropoffRatio: settings.toolSearchScoreDropoffRatio ?? 0.60,
   };
 }
 
@@ -36,6 +39,9 @@ export async function saveEmbeddingSettingsApi(settings: EmbeddingSettings): Pro
     allowOpenClientRegistration: settings.allowOpenClientRegistration,
     globalMaxKeys: settings.globalMaxKeys,
     userMaxKeys: settings.userMaxKeys,
+    toolSearchDefaultLimit: settings.toolSearchDefaultLimit,
+    toolSearchMinScore: settings.toolSearchMinScore,
+    toolSearchScoreDropoffRatio: settings.toolSearchScoreDropoffRatio,
   };
   const result = await apiRequest<{ success: boolean }>('/api/settings', {
     method: 'POST',

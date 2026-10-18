@@ -469,5 +469,77 @@ namespace ModelContextGateway.Tests
             results.First(r => r.ToolName == "k8s:get_pods").ServerId.Should().Be("k8s");
             results.First(r => r.ToolName == "custom_tool").ServerId.Should().Be("custom_srv");
         }
+
+        [Fact]
+        [Requirement("MCP-43", "MCP", RequirementType.Positive, "SearchToolsDetailedAsync applies configurable result limit.")]
+        public async Task SearchToolsDetailedAsync_AppliesConfigurableLimit()
+        {
+            var manager = new ToolRoutingManager();
+            var candidates = new List<object>
+            {
+                new Dictionary<string, object> { ["name"] = "tool_1", ["description"] = "Deploy service alpha" },
+                new Dictionary<string, object> { ["name"] = "tool_2", ["description"] = "Deploy service beta" },
+                new Dictionary<string, object> { ["name"] = "tool_3", ["description"] = "Deploy service gamma" },
+                new Dictionary<string, object> { ["name"] = "tool_4", ["description"] = "Deploy service delta" },
+            };
+
+            var results = await manager.SearchToolsDetailedAsync("deploy", candidates, searchMode: "lexical", limit: 2);
+
+            results.Should().HaveCount(2);
+        }
+
+        [Fact]
+        [Requirement("MCP-43", "MCP", RequirementType.Positive, "SearchToolsDetailedAsync filters out tools below minScore threshold.")]
+        public async Task SearchToolsDetailedAsync_AppliesMinScoreThreshold()
+        {
+            var provider = new MockDeterministicEmbeddingProvider();
+            var vectorStore = new InMemorySimdToolVectorStore();
+
+            var tool1 = new Dictionary<string, object> { ["name"] = "docker__start", ["description"] = "Start container" };
+            var tool2 = new Dictionary<string, object> { ["name"] = "music__play", ["description"] = "Play audio song" };
+            var candidates = new List<object> { tool1, tool2 };
+
+            provider.SetEmbedding("start container", new float[] { 1.0f, 0.0f, 0.0f });
+            await vectorStore.UpsertToolEmbeddingAsync("docker__start", new float[] { 0.95f, 0.0f, 0.0f });
+            await vectorStore.UpsertToolEmbeddingAsync("music__play", new float[] { 0.20f, 0.98f, 0.0f });
+
+            var manager = new ToolRoutingManager(provider, vectorStore);
+
+            // With minScore = 0.50, music__play (score ~0.20) must be discarded
+            var results = await manager.SearchToolsDetailedAsync("start container", candidates, searchMode: "semantic", minScore: 0.50);
+
+            results.Should().HaveCount(1);
+            results[0].ToolName.Should().Be("docker__start");
+        }
+
+        [Fact]
+        [Requirement("MCP-43", "MCP", RequirementType.Positive, "SearchToolsDetailedAsync filters out tools below dynamic elbow score dropoff ratio.")]
+        public async Task SearchToolsDetailedAsync_AppliesScoreDropoffRatio()
+        {
+            var provider = new MockDeterministicEmbeddingProvider();
+            var vectorStore = new InMemorySimdToolVectorStore();
+
+            // Setup 3 tools with descending semantic scores: 0.90, 0.70, 0.35
+            var toolTop = new Dictionary<string, object> { ["name"] = "ha__light_on", ["description"] = "Turn light on" };
+            var toolMid = new Dictionary<string, object> { ["name"] = "ha__switch_on", ["description"] = "Turn switch on" };
+            var toolWeak = new Dictionary<string, object> { ["name"] = "docker__logs", ["description"] = "Container logs" };
+            var candidates = new List<object> { toolTop, toolMid, toolWeak };
+
+            provider.SetEmbedding("turn on lights", new float[] { 1.0f, 0.0f, 0.0f });
+            await vectorStore.UpsertToolEmbeddingAsync("ha__light_on", new float[] { 0.90f, 0.4359f, 0.0f });
+            await vectorStore.UpsertToolEmbeddingAsync("ha__switch_on", new float[] { 0.70f, 0.7141f, 0.0f });
+            await vectorStore.UpsertToolEmbeddingAsync("docker__logs", new float[] { 0.35f, 0.9367f, 0.0f });
+
+            var manager = new ToolRoutingManager(provider, vectorStore);
+
+            // Top score is 0.90. With dropoff ratio 0.60: threshold is max(0.0, 0.90 * 0.60) = 0.54.
+            // toolTop (0.90) and toolMid (0.70) >= 0.54 -> keep
+            // toolWeak (0.35) < 0.54 -> prune!
+            var results = await manager.SearchToolsDetailedAsync("turn on lights", candidates, searchMode: "semantic", scoreDropoffRatio: 0.60);
+
+            results.Should().HaveCount(2);
+            results.Select(r => r.ToolName).Should().Contain(new[] { "ha__light_on", "ha__switch_on" });
+            results.Select(r => r.ToolName).Should().NotContain("docker__logs");
+        }
     }
 }

@@ -51,6 +51,7 @@ namespace ModelContextGateway.Tests
 
         public AdminToolsParityTests()
         {
+            Environment.SetEnvironmentVariable("MCG_ALLOW_PRIVATE_IPS", "true");
             _rawConnection = new SqliteConnection($"DataSource=file:mem_parity_{Guid.NewGuid():N}?mode=memory&cache=shared");
             _rawConnection.Open();
 
@@ -68,7 +69,8 @@ namespace ModelContextGateway.Tests
                 CREATE TABLE IF NOT EXISTS Settings (
                     Id TEXT PRIMARY KEY, DashboardTitle TEXT DEFAULT 'MCP Gateway', DashboardIcon TEXT DEFAULT 'fa-solid fa-network-wired',
                     EmbeddingProvider TEXT DEFAULT 'onnx', EmbeddingApiUrl TEXT, EmbeddingApiKey TEXT, EmbeddingApiModel TEXT,
-                    EmbeddingModelDir TEXT, GlobalMaxKeys INTEGER DEFAULT 100, UserMaxKeys INTEGER DEFAULT 5
+                    EmbeddingModelDir TEXT, GlobalMaxKeys INTEGER DEFAULT 100, UserMaxKeys INTEGER DEFAULT 5,
+                    ToolSearchDefaultLimit INTEGER DEFAULT 5, ToolSearchMinScore REAL DEFAULT 0.35, ToolSearchScoreDropoffRatio REAL DEFAULT 0.60
                 );
                 CREATE TABLE IF NOT EXISTS AccessPolicies (
                     Id TEXT PRIMARY KEY, TargetId TEXT, RequiredGroup TEXT, IsAllowed INTEGER DEFAULT 1
@@ -186,6 +188,7 @@ namespace ModelContextGateway.Tests
         public void Dispose()
         {
             _rawConnection.Dispose();
+            Environment.SetEnvironmentVariable("MCG_ALLOW_PRIVATE_IPS", null);
         }
 
         [Theory]
