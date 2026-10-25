@@ -92,7 +92,13 @@ export const defaultMockData = {
     embeddingApiUrl: '',
     embeddingApiModel: 'all-MiniLM-L6-v2',
     embeddingApiKey: '',
-    requireManualApproval: false
+    requireManualApproval: false,
+    enableCodeMode: true,
+    codeModeExecutionTimeoutSeconds: 30,
+    codeModeMaxToolCalls: 50,
+    codeModeMaxMemoryMb: 64,
+    codeModeMaxStatements: 100000,
+    codeModeAllowedGroups: '',
   },
   authProviders: [
     {

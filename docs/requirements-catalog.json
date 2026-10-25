@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-25T22:17:03.4531789Z",
-    "totalRequirements": 475,
-    "positiveCount": 373,
+    "generatedAt": "2026-10-25T22:26:32.4064483Z",
+    "totalRequirements": 477,
+    "positiveCount": 375,
     "guardrailCount": 102,
-    "totalProofs": 1108
+    "totalProofs": 1110
   },
   "requirements": [
     {
@@ -10414,35 +10414,35 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 144,
+          "lineNumber": 151,
           "testName": "saves embedding settings and displays success feedback",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 183,
+          "lineNumber": 190,
           "testName": "saves Auth Provider configurations including Active Directory and OIDC header mappings",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 240,
+          "lineNumber": 247,
           "testName": "saves secret providers while preserving Vault config and secrets",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 311,
+          "lineNumber": 318,
           "testName": "renders custom files table with edit and delete actions",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 354,
+          "lineNumber": 361,
           "testName": "renders access policies and group mappings with CRUD actions",
           "details": null
         },
@@ -11848,6 +11848,38 @@
           "filePath": "frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 76,
           "testName": "creates client with one-time secret result and refreshes list",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-CODE-01",
+      "category": "UI",
+      "type": "Positive",
+      "description": "CodeModeTab renders master toggle, quota sliders, and group selector.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/CodeModeTab.test.tsx",
+          "lineNumber": 6,
+          "testName": "renders code mode settings and triggers update on toggle",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-CODE-02",
+      "category": "UI",
+      "type": "Positive",
+      "description": "CodeModeTab allows adding and removing allowed groups and saves changes.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/CodeModeTab.test.tsx",
+          "lineNumber": 45,
+          "testName": "allows adding and removing allowed groups and triggers onSave",
           "details": null
         }
       ]

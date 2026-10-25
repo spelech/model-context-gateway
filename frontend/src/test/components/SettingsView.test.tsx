@@ -111,6 +111,7 @@ describe('SettingsView component', () => {
     expect(screen.getByRole('button', { name: /secret providers/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /prompts & resources/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /access control/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /code mode/i })).toBeInTheDocument();
 
     // Default active subview is search
     expect(screen.getByRole('heading', { name: /general settings/i })).toBeInTheDocument();
@@ -138,6 +139,12 @@ describe('SettingsView component', () => {
       fireEvent.click(screen.getByRole('button', { name: /access control/i }));
     });
     expect(screen.getByRole('heading', { name: /access control policies/i })).toBeInTheDocument();
+
+    // Switch to Code Mode subview
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /code mode/i }));
+    });
+    expect(screen.getByRole('heading', { name: /code mode/i })).toBeInTheDocument();
   });
 
   describe('Vector & Search Subview', () => {

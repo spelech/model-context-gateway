@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **475 Requirements Verified** across **1108 Test Proofs** (373 Functional Capabilities, 102 Safety Guardrails).
+> **Catalog Statistics:** **477 Requirements Verified** across **1110 Test Proofs** (375 Functional Capabilities, 102 Safety Guardrails).
 
 ---
 
@@ -18,7 +18,7 @@
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **125** | 118 | 7 | 277 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **67** | 56 | 11 | 143 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **40** | 33 | 7 | 212 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **42** | 35 | 7 | 214 proofs |
 
 ---
 
@@ -2402,11 +2402,11 @@
   - [Frontend Vitest] [`frontend/src/test/components/SettingsTabs.test.tsx#L77`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsTabs.test.tsx#L77) (`renders CustomFilesTab and triggers modal open and delete`)
   - [Frontend Vitest] [`frontend/src/test/components/SettingsTabs.test.tsx#L110`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsTabs.test.tsx#L110) (`renders AccessControlTab with policies and mappings`)
   - [Frontend Vitest] [`frontend/src/test/components/SettingsTabs.test.tsx#L139`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsTabs.test.tsx#L139) (`renders BackupsTab`)
-  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L144`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L144) (`saves embedding settings and displays success feedback`)
-  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L183`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L183) (`saves Auth Provider configurations including Active Directory and OIDC header mappings`)
-  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L240`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L240) (`saves secret providers while preserving Vault config and secrets`)
-  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L311`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L311) (`renders custom files table with edit and delete actions`)
-  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L354`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L354) (`renders access policies and group mappings with CRUD actions`)
+  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L151`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L151) (`saves embedding settings and displays success feedback`)
+  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L190`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L190) (`saves Auth Provider configurations including Active Directory and OIDC header mappings`)
+  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L247`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L247) (`saves secret providers while preserving Vault config and secrets`)
+  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L318`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L318) (`renders custom files table with edit and delete actions`)
+  - [Frontend Vitest] [`frontend/src/test/components/SettingsView.test.tsx#L361`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SettingsView.test.tsx#L361) (`renders access policies and group mappings with CRUD actions`)
   - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L71`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L71) (`handles semantic search queries in SemanticRouterCard`)
   - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L102`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L102) (`executes tool and updates console`)
   - [Frontend Vitest] [`frontend/src/test/components/TestBenchView.test.tsx#L133`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/TestBenchView.test.tsx#L133) (`executes prompt get in prompt tester tab`)
@@ -2692,6 +2692,18 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L76) (`creates client with one-time secret result and refreshes list`)
+
+### `[UI-CODE-01]` CodeModeTab renders master toggle, quota sliders, and group selector.
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/CodeModeTab.test.tsx#L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CodeModeTab.test.tsx#L6) (`renders code mode settings and triggers update on toggle`)
+
+### `[UI-CODE-02]` CodeModeTab allows adding and removing allowed groups and saves changes.
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/CodeModeTab.test.tsx#L45`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CodeModeTab.test.tsx#L45) (`allows adding and removing allowed groups and triggers onSave`)
 
 ---
 
@@ -3993,5 +4005,7 @@
 | `UI-30` | Positive | `UI` | Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration. | [`ClientModal.test.tsx:L27`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ClientModal.test.tsx#L27) | Frontend Vitest |
 | `UI-31` | **Guardrail** | `UI` | Fetches registered OAuth clients and updates store state. | [`useClientStore.test.ts:L37`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L37) | Frontend Vitest |
 | `UI-32` | Positive | `UI` | Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials. | [`useClientStore.test.ts:L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L76) | Frontend Vitest |
+| `UI-CODE-01` | Positive | `UI` | CodeModeTab renders master toggle, quota sliders, and group selector. | [`CodeModeTab.test.tsx:L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CodeModeTab.test.tsx#L6) | Frontend Vitest |
+| `UI-CODE-02` | Positive | `UI` | CodeModeTab allows adding and removing allowed groups and saves changes. | [`CodeModeTab.test.tsx:L45`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CodeModeTab.test.tsx#L45) | Frontend Vitest |
 | `UI-CONFIRM-MODAL` | **Guardrail** | `UI` | Centralized promise-based confirmation store resolves true on confirmation and false on cancellation. | [`useConfirmStore.test.ts:L4`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useConfirmStore.test.ts#L4) | Frontend Vitest |
 | `UI-TOAST-TRANSITION` | **Guardrail** | `UI` | Displays error toast notification when saving invalid JSON credentials for user-provided server. | [`MyMcpServers.test.tsx:L25`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L25) | Frontend Vitest |
