@@ -40,6 +40,7 @@
     <PackageReference Include="System.DirectoryServices.Protocols" Version="10.0.11" />
     <PackageReference Include="System.Numerics.Tensors" Version="10.0.11" />
     <PackageReference Include="VaultSharp" Version="1.17.5.1" />
+    <PackageReference Include="Jint" Version="4.17.0" />
   </ItemGroup>
 
 </Project>
