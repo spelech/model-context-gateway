@@ -72,6 +72,7 @@ namespace ModelContextGateway.Tests
             var handler = new MockHttpMessageHandler(req =>
             {
                 Assert.Equal("Bearer secret123", req.Headers.Authorization?.ToString());
+                Assert.Equal("http://localhost:9999/", req.RequestUri?.ToString());
                 return new HttpResponseMessage(HttpStatusCode.OK);
             });
             var client = new HttpClient(handler);
@@ -89,6 +90,7 @@ namespace ModelContextGateway.Tests
             await healthService.ProbeServerAsync(server);
 
             var status = sessionManager.BackendStatuses["test-1"];
+            Assert.True(status.Status == "Connected", $"Probe failed with: {status.Error}");
             Assert.Equal("Connected", status.Status);
             Assert.Equal(1, status.Attempts);
             Assert.Empty(status.Error);

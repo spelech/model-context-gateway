@@ -38,7 +38,7 @@ namespace ModelContextGateway.Components.Servers
             // Immediate probe on startup
             await ProbeAllServersAsync();
 
-            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(15));
+            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
             while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken))
             {
                 await ProbeAllServersAsync();
@@ -116,7 +116,15 @@ namespace ModelContextGateway.Components.Servers
                 var client = _httpClientFactory.CreateClient("McpClient");
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
 
-                var request = new HttpRequestMessage(HttpMethod.Get, server.Url);
+                var probeUrl = server.Url;
+                if (Uri.TryCreate(server.Url, UriKind.Absolute, out var uri))
+                {
+                    // Probe the base authority root (e.g. http://frigate-mcp:8086/) rather than /mcp or /sse
+                    // to avoid initiating unbounded client streaming sessions on downstream Python MCP SDK transports.
+                    probeUrl = $"{uri.Scheme}://{uri.Authority}/";
+                }
+
+                var request = new HttpRequestMessage(HttpMethod.Get, probeUrl);
                 if (!string.IsNullOrEmpty(server.ApiKey))
                 {
                     request.Headers.Add("Authorization", $"Bearer {server.ApiKey}");
