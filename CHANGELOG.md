@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.22.2`** | 2026-10-25 | fix(healthcheck): Add \`text/event-stream\` to probe \`Accept\` header per MCP specification and persist \`HealthCheckMode\` across SQL repositories. |
 | **`v5.22.1`** | 2026-10-25 | fix(healthcheck): probe base origin and support dual-mode ping to prevent downstream MCP session memory leaks |
 | **`v5.22.0`** | 2026-10-18 | feat(search): configurable tool search limits, thresholding and dropoff filtering |
 | **`v5.21.0`** | 2026-10-02 | feat(routing): calibrated hybrid semantic search scoring, explicit search modes, and test bench simulator overhaul |
