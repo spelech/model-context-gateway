@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using Dapper;
+using ModelContextGateway.Core.CodeMode;
 
 namespace ModelContextGateway.Core.Routing
 {
@@ -19,11 +21,13 @@ namespace ModelContextGateway.Core.Routing
             CancellationToken cancellationToken = default,
             SessionManager? sessionManager = null,
             string? clientSessionId = null,
-            Func<List<object>, Task<List<object>>>? filterAuthorizedToolsAsync = null)
+            Func<List<object>, Task<List<object>>>? filterAuthorizedToolsAsync = null,
+            IEnumerable<string>? callerGroups = null,
+            bool? isCallerAdmin = null)
         {
             try
             {
-                var task = CallToolInternalAsync(toolName, body, dbFactory, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId, filterAuthorizedToolsAsync);
+                var task = CallToolInternalAsync(toolName, body, dbFactory, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId, filterAuthorizedToolsAsync, callerGroups, isCallerAdmin);
                 return await task.WaitAsync(cancellationToken);
             }
             catch (OperationCanceledException)
@@ -57,7 +61,9 @@ namespace ModelContextGateway.Core.Routing
             CancellationToken cancellationToken,
             SessionManager? sessionManager,
             string? clientSessionId,
-            Func<List<object>, Task<List<object>>>? filterAuthorizedToolsAsync = null)
+            Func<List<object>, Task<List<object>>>? filterAuthorizedToolsAsync = null,
+            IEnumerable<string>? callerGroups = null,
+            bool? isCallerAdmin = null)
         {
             await ensureBackendsInitializedAsync();
 
@@ -376,6 +382,228 @@ namespace ModelContextGateway.Core.Routing
                         }
                     };
                 }
+            }
+            else if (toolName == "execute_script")
+            {
+                var settings = (embeddingService as DynamicEmbeddingService)?.GetSettings();
+                if (settings == null && dbFactory != null)
+                {
+                    try
+                    {
+                        using var conn = dbFactory.CreateConnection();
+                        settings = conn.QueryFirstOrDefault<RouterSettings>("SELECT * FROM Settings WHERE Id = 'default'");
+                    }
+                    catch (Exception exSettings)
+                    {
+                        logger.LogWarning(exSettings, "Failed to load RouterSettings for execute_script");
+                    }
+                }
+                settings ??= new RouterSettings();
+
+                if (!settings.EnableCodeMode)
+                {
+                    return new
+                    {
+                        resultType = "complete",
+                        isError = true,
+                        content = new[] {
+                            new {
+                                type = "text",
+                                text = "Code mode is currently disabled in gateway settings."
+                            }
+                        }
+                    };
+                }
+
+                IEnumerable<string>? resolvedGroups = callerGroups;
+                bool resolvedIsAdmin = isCallerAdmin ?? false;
+
+                if (callerGroups == null && !isCallerAdmin.HasValue && sessionManager != null && !string.IsNullOrEmpty(clientSessionId))
+                {
+                    var session = sessionManager.GetSession(clientSessionId);
+                    if (session != null)
+                    {
+                        var identity = await session.ResolveUserIdentityAsync();
+                        resolvedGroups = identity.GroupNames;
+                        var contextToUse = session.GetClientResponse()?.HttpContext;
+                        var config = contextToUse?.RequestServices?.GetService<IConfiguration>();
+                        resolvedIsAdmin = SecurityValidationHelper.IsAdmin(identity, config, contextToUse);
+                    }
+                }
+
+                if (!IsCodeModeAuthorized(settings, resolvedGroups, resolvedIsAdmin))
+                {
+                    return new
+                    {
+                        resultType = "complete",
+                        isError = true,
+                        content = new[] {
+                            new {
+                                type = "text",
+                                text = "Security Error: User is not authorized to execute code mode scripts."
+                            }
+                        }
+                    };
+                }
+
+                using var doc = JsonDocument.Parse(body);
+                var root = doc.RootElement;
+
+                string? script = null;
+                JsonElement? scriptArgs = null;
+
+                if (root.TryGetProperty("params", out var paramsProp) &&
+                    paramsProp.TryGetProperty("arguments", out var argsProp) &&
+                    argsProp.ValueKind == JsonValueKind.Object)
+                {
+                    if ((argsProp.TryGetProperty("script", out var scriptProp) || argsProp.TryGetProperty("code", out scriptProp)) && scriptProp.ValueKind == JsonValueKind.String)
+                    {
+                        script = scriptProp.GetString();
+                    }
+                    if (argsProp.TryGetProperty("arguments", out var argumentsProp) && argumentsProp.ValueKind == JsonValueKind.Object)
+                    {
+                        scriptArgs = argumentsProp.Clone();
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(script))
+                {
+                    return new
+                    {
+                        resultType = "complete",
+                        isError = true,
+                        content = new[] {
+                            new {
+                                type = "text",
+                                text = "Error: script parameter is required."
+                            }
+                        }
+                    };
+                }
+
+                Func<string, JsonElement, string?, Task<object>> toolDispatcher = async (targetName, targetArgs, targetAuthToken) =>
+                {
+                    var (normalizedTargetName, ambiguityError) = NormalizeTargetToolName(targetName, servers, logger);
+                    if (!string.IsNullOrEmpty(ambiguityError))
+                    {
+                        return new
+                        {
+                            resultType = "complete",
+                            isError = true,
+                            content = new[] {
+                                new {
+                                    type = "text",
+                                    text = ambiguityError
+                                }
+                            }
+                        };
+                    }
+                    targetName = normalizedTargetName;
+
+                    if (sessionManager != null && !string.IsNullOrEmpty(clientSessionId))
+                    {
+                        var session = sessionManager.GetSession(clientSessionId);
+                        if (session != null)
+                        {
+                            var isTargetAuth = await session.IsUserAuthorizedAsync("tools/call", targetName, session.GetClientResponse()?.HttpContext);
+                            if (!isTargetAuth)
+                            {
+                                var identity = await session.ResolveUserIdentityAsync();
+                                return new
+                                {
+                                    resultType = "complete",
+                                    isError = true,
+                                    content = new[] {
+                                        new {
+                                            type = "text",
+                                            text = $"Security Error: User '{identity.Username}' does not have permission to execute tool '{targetName}'."
+                                        }
+                                    }
+                                };
+                            }
+                        }
+                    }
+
+                    var activeServerIds = servers.Where(s => s.Enabled)
+                        .SelectMany(s => string.IsNullOrWhiteSpace(s.Alias) ? new[] { s.Id } : new[] { s.Id, s.Alias })
+                        .Distinct()
+                        .ToList();
+                    if (!SecurityValidationHelper.ValidateToolOrPromptName(targetName, activeServerIds))
+                    {
+                        return new
+                        {
+                            resultType = "complete",
+                            isError = true,
+                            content = new[] {
+                                new {
+                                    type = "text",
+                                    text = $"Security Error: Invalid or unknown namespaced identifier in execute_script: '{targetName}'. Available servers: {string.Join(", ", activeServerIds)}."
+                                }
+                            }
+                        };
+                    }
+
+                    var targetPayload = new
+                    {
+                        jsonrpc = "2.0",
+                        id = Guid.NewGuid().ToString("N"),
+                        method = "tools/call",
+                        @params = new
+                        {
+                            name = targetName,
+                            arguments = targetArgs.ValueKind == JsonValueKind.Undefined ? (object)new Dictionary<string, object>() : targetArgs
+                        }
+                    };
+                    var targetBody = JsonSerializer.Serialize(targetPayload);
+
+                    if (targetName == "search_tools")
+                    {
+                        return await CallToolAsync("search_tools", targetBody, dbFactory!, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId, filterAuthorizedToolsAsync, callerGroups, isCallerAdmin);
+                    }
+
+                    return await ExecuteTargetToolAsync(targetName, targetBody, targetAuthToken, dbFactory!, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);
+                };
+
+                var engine = _codeModeEngine ?? new CodeModeExecutionEngine();
+                var execResult = await engine.ExecuteAsync(script, scriptArgs, settings, toolDispatcher, cancellationToken);
+
+                object? resultPayload = null;
+                if (execResult.IsError)
+                {
+                    resultPayload = execResult.ErrorMessage;
+                }
+                else if (!string.IsNullOrEmpty(execResult.ResultJson))
+                {
+                    try
+                    {
+                        resultPayload = JsonSerializer.Deserialize<JsonElement>(execResult.ResultJson);
+                    }
+                    catch
+                    {
+                        resultPayload = execResult.ResultJson;
+                    }
+                }
+
+                var envelope = new
+                {
+                    result = resultPayload,
+                    logs = execResult.Logs,
+                    executionTimeMs = execResult.ExecutionTimeMs,
+                    toolCallsCount = execResult.ToolCallsCount
+                };
+
+                var serializedEnvelope = JsonSerializer.Serialize(envelope);
+                return new
+                {
+                    resultType = "complete",
+                    isError = execResult.IsError,
+                    content = new[] {
+                        new {
+                            type = "text",
+                            text = serializedEnvelope
+                        }
+                    }
+                };
             }
 
             return await ExecuteTargetToolAsync(toolName, body, null, dbFactory, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);

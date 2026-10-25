@@ -293,7 +293,7 @@ namespace ModelContextGateway.Components.Authorization
             }
 
             // Allow native router tools and prompts
-            if (name == "search_tools" || name == "execute_tool" || name.StartsWith("router__"))
+            if (name == "search_tools" || name == "execute_tool" || name == "execute_script" || name.StartsWith("router__"))
             {
                 return true;
             }

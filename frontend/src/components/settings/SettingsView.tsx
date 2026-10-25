@@ -6,9 +6,10 @@ import { IdentityAuthTab } from './IdentityAuthTab';
 import { SecretProvidersTab } from './SecretProvidersTab';
 import { CustomFilesTab } from './CustomFilesTab';
 import { AccessControlTab } from './AccessControlTab';
+import { CodeModeTab } from './CodeModeTab';
 
 export const SettingsView: React.FC = () => {
-  const [activeSubview, setActiveSubview] = useState<'search' | 'identity' | 'secrets' | 'files' | 'permissions'>('search');
+  const [activeSubview, setActiveSubview] = useState<'search' | 'identity' | 'secrets' | 'files' | 'permissions' | 'codemode'>('search');
 
   const {
     embeddingSettings,
@@ -42,6 +43,14 @@ export const SettingsView: React.FC = () => {
     fetchPolicies();
     fetchMappings();
   }, [fetchEmbeddingSettings, fetchProviders, fetchCustomFiles, fetchPolicies, fetchMappings]);
+
+  const availableGroups = Array.from(
+    new Set([
+      'full_admin',
+      ...(Array.isArray(policies) ? policies.map((p) => p.requiredGroup) : []),
+      ...(Array.isArray(mappings) ? mappings.map((m) => m.internalGroup) : []),
+    ].filter(Boolean))
+  );
 
   return (
     <div id="view-settings" className="view-panel active">
@@ -100,6 +109,14 @@ export const SettingsView: React.FC = () => {
         >
           <i className="fa-solid fa-user-lock"></i> Access Control
         </button>
+        <button
+          type="button"
+          data-testid="settings-tab-codemode"
+          className={`tester-tab-btn settings-tab-btn ${activeSubview === 'codemode' ? 'active' : ''}`}
+          onClick={() => setActiveSubview('codemode')}
+        >
+          <i className="fa-solid fa-code"></i> Code Mode
+        </button>
       </div>
 
       {/* Subview 1: Vector & Search */}
@@ -148,6 +165,16 @@ export const SettingsView: React.FC = () => {
           deletePolicy={deletePolicy}
           openMappingModal={openMappingModal}
           deleteMapping={deleteMapping}
+        />
+      )}
+
+      {/* Subview 6: Code Mode */}
+      {activeSubview === 'codemode' && (
+        <CodeModeTab
+          key={embeddingSettings ? `${embeddingSettings.enableCodeMode}-${embeddingSettings.codeModeExecutionTimeoutSeconds}-${embeddingSettings.codeModeAllowedGroups}` : 'loading'}
+          settings={embeddingSettings}
+          availableGroups={availableGroups}
+          onSave={saveEmbeddingSettings}
         />
       )}
     </div>

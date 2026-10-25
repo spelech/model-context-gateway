@@ -15,7 +15,16 @@ export interface EmbeddingSettings {
   toolSearchDefaultLimit?: number;
   toolSearchMinScore?: number;
   toolSearchScoreDropoffRatio?: number;
+  enableCodeMode?: boolean;
+  codeModeExecutionTimeoutSeconds?: number;
+  codeModeMaxToolCalls?: number;
+  codeModeMaxMemoryMb?: number;
+  codeModeMaxStatements?: number;
+  codeModeAllowedGroups?: string;
 }
+
+export type RouterSettings = EmbeddingSettings;
+export type SettingsDto = EmbeddingSettings;
 
 export interface AuthProviderConfig {
   id?: string;

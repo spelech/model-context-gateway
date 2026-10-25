@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-25T23:03:37.0711542Z",
-    "totalRequirements": 471,
-    "positiveCount": 375,
-    "guardrailCount": 96,
-    "totalProofs": 1091
+    "generatedAt": "2026-10-25T23:28:20.3800935Z",
+    "totalRequirements": 481,
+    "positiveCount": 379,
+    "guardrailCount": 102,
+    "totalProofs": 1116
   },
   "requirements": [
     {
@@ -4275,6 +4275,98 @@
       ]
     },
     {
+      "id": "GUARD-CODE-01",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "Statement cap terminates infinite loops within allotted execution budget.",
+      "proofCount": 4,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs",
+          "lineNumber": 10,
+          "testName": "ExecuteAsync_InfiniteLoop_TerminatesOnStatementLimit",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs",
+          "lineNumber": 49,
+          "testName": "ExecuteAsync_MemoryLimit_TerminatesOnMemoryExceeded",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs",
+          "lineNumber": 63,
+          "testName": "ExecuteAsync_ConsoleLogging_CapturesLogs",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 69,
+          "testName": "ExecuteScript_DisabledCodeMode_ReturnsError",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "GUARD-CODE-02",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "Execution timeout terminates long-running script.",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs",
+          "lineNumber": 23,
+          "testName": "ExecuteAsync_Timeout_TerminatesExecution",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 117,
+          "testName": "ExecuteScript_MissingScript_ReturnsError",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "GUARD-CODE-03",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "ExecuteScript returns structured envelope with isError on script runtime exception.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 372,
+          "testName": "ExecuteScript_RuntimeError_ReturnsStructuredErrorEnvelope",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "GUARD-CODE-04",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "Exceeding MaxToolCalls aborts execution.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
+          "lineNumber": 46,
+          "testName": "ExecuteAsync_ToolCallsQuotaExceeded_FailsClosed",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "GUARD-DISPOSED-01",
       "category": "GUARD",
       "type": "Positive",
@@ -7256,6 +7348,94 @@
       ]
     },
     {
+      "id": "MCP-CODE-01",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "RouterSettings provides default Code Mode configuration values.",
+      "proofCount": 8,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeSettingsTests.cs",
+          "lineNumber": 7,
+          "testName": "RouterSettings_HasSensibleCodeModeDefaults",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
+          "lineNumber": 11,
+          "testName": "ExecuteAsync_DualDispatcherAndUnboxing_WorksSuccessfully",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
+          "lineNumber": 68,
+          "testName": "ExecuteAsync_PreInjectedArgs_AccessibleInScript",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
+          "lineNumber": 96,
+          "testName": "ExecuteAsync_CallToolAndMcgCallTool_ForwardArgumentsAndOptions",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
+          "lineNumber": 137,
+          "testName": "ExecuteAsync_NonJsonContent_ReturnsRawText",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 13,
+          "testName": "GetMetaTools_IncludesExecuteScript_WhenEnabled",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 25,
+          "testName": "GetMetaTools_OmitsExecuteScript_WhenDisabled",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 420,
+          "testName": "ExecuteScript_ChainingSearchTools_ExecutesSuccessfully",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-CODE-02",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "ExecuteScript returns structured execution envelope with result and telemetry.",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 162,
+          "testName": "ExecuteScript_ValidExecution_ReturnsStructuredEnvelope",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 215,
+          "testName": "ExecuteScript_WithCodeParameter_ExecutesSuccessfully",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-COLDSTART-01",
       "category": "MCP",
       "type": "Positive",
@@ -8820,6 +9000,59 @@
       ]
     },
     {
+      "id": "SEC-CODE-01",
+      "category": "SEC",
+      "type": "Negative",
+      "description": "ExecuteScript rejects unauthorized SSO groups.",
+      "proofCount": 4,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 37,
+          "testName": "ExecuteScript_UnauthorizedGroup_ReturnsSecurityError",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 48,
+          "testName": "IsCodeModeAuthorized_PermitsAdminWildcardAndMatchingGroups",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 265,
+          "testName": "ExecuteScript_UnauthorizedCallerGroup_ReturnsSecurityErrorEnvelope",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 318,
+          "testName": "ExecuteScript_AdminBypass_ExecutesSuccessfully",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-CODE-02",
+      "category": "SEC",
+      "type": "Negative",
+      "description": "Sandbox prevents CLR reflection and process spawning.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs",
+          "lineNumber": 36,
+          "testName": "ExecuteAsync_ReflectionAttempt_IsBlocked",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "SEC-GATEWAY-ZERO-CONFIG-BOOT",
       "category": "SEC",
       "type": "Positive",
@@ -10259,35 +10492,35 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 144,
+          "lineNumber": 151,
           "testName": "saves embedding settings and displays success feedback",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 183,
+          "lineNumber": 190,
           "testName": "saves Auth Provider configurations including Active Directory and OIDC header mappings",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 240,
+          "lineNumber": 247,
           "testName": "saves secret providers while preserving Vault config and secrets",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 311,
+          "lineNumber": 318,
           "testName": "renders custom files table with edit and delete actions",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/SettingsView.test.tsx",
-          "lineNumber": 354,
+          "lineNumber": 361,
           "testName": "renders access policies and group mappings with CRUD actions",
           "details": null
         },
@@ -11693,6 +11926,38 @@
           "filePath": "frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 76,
           "testName": "creates client with one-time secret result and refreshes list",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-CODE-01",
+      "category": "UI",
+      "type": "Positive",
+      "description": "CodeModeTab renders master toggle, quota sliders, and group selector.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/CodeModeTab.test.tsx",
+          "lineNumber": 6,
+          "testName": "renders code mode settings and triggers update on toggle",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-CODE-02",
+      "category": "UI",
+      "type": "Positive",
+      "description": "CodeModeTab allows adding and removing allowed groups and saves changes.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/CodeModeTab.test.tsx",
+          "lineNumber": 45,
+          "testName": "allows adding and removing allowed groups and triggers onSave",
           "details": null
         }
       ]

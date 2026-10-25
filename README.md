@@ -1,6 +1,6 @@
 # Model Context Gateway (MCG)
 
-![Version](https://img.shields.io/badge/version-v5.22.2-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v5.23.0-orange?style=for-the-badge)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://spelech.github.io/model-context-gateway/)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
@@ -32,7 +32,7 @@ When you connect an AI assistant directly to many individual tools, you face com
 **Model Context Gateway (MCG) solves these problems:**
 
 * **One Connection Endpoint (`/sse`)**: Connect your AI assistant to a single gateway URL. MCG routes requests to the correct tool.
-* **Context Optimization (Meta-Mode)**: By default, the gateway exposes only two tools: `search_tools` and `execute_tool`. The AI searches for tools when needed and executes them on demand. This saves context memory and reduces token costs.
+* **Context Optimization (Meta-Mode)**: By default, the gateway exposes only two tools: `search_tools` and `execute_tool` (with optional `execute_script` in Code Mode). The AI searches for tools when needed and executes them on demand. This saves context memory and reduces token costs.
 * **Central Security**: MCG keeps credentials secure on the server with AES-256 encryption. The gateway checks user permissions before tools run.
 * **Universal Tool Support**: Route requests across Docker containers, remote HTTP/SSE services, and local scripts (Node.js, Python) without reconfiguring clients.
 
@@ -43,6 +43,7 @@ When you connect an AI assistant directly to many individual tools, you face com
 * **Admin MCP Control Plane (`/admin`, `/mcg-admin`)**: Control the gateway programmatically through standard MCP tools (`manage_servers`, `manage_appkeys`, `manage_clients`, `manage_policies`, `manage_group_mappings`, `manage_providers`, `manage_settings`, `manage_custom_files`, `manage_system`, `test_tool_call`). See [Admin Guide](docs/admin-guide.md).
 * **Autonomous Setup & Administration**: Built-in agent skills (`mcg-setup` and `mcg-admin`) let AI agents configure servers, secret stores, and access policies automatically. See [User Guide](docs/user-guide/index.md).
 * **Meta-Mode Context Saving**: Hides tool schemas during startup to prevent context memory exhaustion and model hallucinations.
+* **MCP Code Mode (JavaScript Sandbox)**: Execute multi-tool scripts and complex orchestrations directly on the gateway via `execute_script` in an isolated Jint sandbox, featuring dual dispatchers (`await mcg.callTool()`, `await tools.<server>.<tool>()`), automatic JSON unboxing, and strict resource quotas.
 * **Modern Slash Tool Routing**: Use modern slash format (`{namespace}/{tool_name}`) with backwards-compatible format (`{serverId}__{toolName}`) and collision checks.
 * **Dynamic Docker Discovery**: Automatically discovers containers labeled `mcp.enabled=true` through `/var/run/docker.sock`. See [Features Guide](docs/features-guide.md).
 * **Identity and Single Sign-On**: Authenticate users through **Active Directory** (Windows SIDs) or **OIDC / Reverse Proxy Headers** (Authentik, Keycloak, Authelia). See [Authentication Architecture](docs/authentication-architecture.md).
@@ -84,6 +85,7 @@ For homelab instructions, see the [Single-User & Home-Lab Setup Guide](docs/depl
 Connect your AI assistant to `/sse`:
 1. **Search Tools**: The AI calls `search_tools` with a plain text query (for example: `"restart container"`).
 2. **Execute Tool**: The AI runs the returned tool (for example: `docker/restart_container`) with `execute_tool(name, arguments)`.
+3. **Execute Script (Code Mode)**: When enabled, run composite multi-tool JavaScript directly on the gateway via `execute_script(script)` (or `code`) using `await mcg.callTool()` or `await tools.<server>.<tool>()`.
 
 ### 2. Connect Your AI Application
 
@@ -175,11 +177,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v5.22.2`** | 2026-10-25 | --help |
+| **`v5.23.0`** | 2026-10-25 | feat(codemode): MCP Code Mode JavaScript Sandbox Engine, Dual Dispatcher, Auto-Unboxing, Multi-Select Tag Groups UI, and Resource Guardrails. |
+| **`v5.22.2`** | 2026-10-25 | fix(healthcheck): Add `text/event-stream` to probe `Accept` header per MCP specification and persist `HealthCheckMode` across SQL repositories. |
 | **`v5.22.1`** | 2026-10-25 | fix(healthcheck): probe base origin and support dual-mode ping to prevent downstream MCP session memory leaks |
 | **`v5.22.0`** | 2026-10-18 | feat(search): configurable tool search limits, thresholding and dropoff filtering |
 | **`v5.21.0`** | 2026-10-02 | feat(routing): calibrated hybrid semantic search scoring, explicit search modes, and test bench simulator overhaul |
-| **`v5.20.1`** | 2026-09-30 | refactor(testbench): Remove Pre-fill Example Button and Streamline Dynamic Argument Handling. Removed the legacy Pre-fill Example button and unused bulk argument modification plumbing from the Test Bench tool tester card, eliminating brittle and unhelpful parameter mocks while preserving interactive form validation and tool execution coverage. |
 
 ---
 

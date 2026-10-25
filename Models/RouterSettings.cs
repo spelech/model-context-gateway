@@ -20,6 +20,12 @@ namespace ModelContextGateway.Models
         public int ToolSearchDefaultLimit { get; set; } = 5;
         public double ToolSearchMinScore { get; set; } = 0.35;
         public double ToolSearchScoreDropoffRatio { get; set; } = 0.60;
+        public bool EnableCodeMode { get; set; } = true;
+        public int CodeModeExecutionTimeoutSeconds { get; set; } = 30;
+        public int CodeModeMaxToolCalls { get; set; } = 50;
+        public int CodeModeMaxMemoryMb { get; set; } = 64;
+        public int CodeModeMaxStatements { get; set; } = 100000;
+        public string CodeModeAllowedGroups { get; set; } = "";
         public string MasterKeySource => DbKeyHelper.ActiveKeySource.ToString();
     }
 }

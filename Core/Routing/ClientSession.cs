@@ -62,6 +62,12 @@ namespace ModelContextGateway.Core.Routing
                 {
                     _toolRoutingManager.VectorStore = store;
                 }
+
+                var codeMode = _rootServices.GetService(typeof(ModelContextGateway.Core.CodeMode.ICodeModeExecutionEngine)) as ModelContextGateway.Core.CodeMode.ICodeModeExecutionEngine;
+                if (codeMode != null)
+                {
+                    _toolRoutingManager.CodeModeEngine = codeMode;
+                }
             }
         }
 
@@ -87,7 +93,9 @@ namespace ModelContextGateway.Core.Routing
 
         public async Task<List<object>> ListToolsAsync(string body, HttpContext? httpContext = null)
         {
-            var tools = await _toolRoutingManager.ListToolsAsync(body, IsMetaMode, _backendConnections, _logger, EnsureBackendsInitializedAsync, _servers, _sessionManager);
+            var settings = (_embeddingService as DynamicEmbeddingService)?.GetSettings();
+            bool enableCodeMode = settings?.EnableCodeMode ?? false;
+            var tools = await _toolRoutingManager.ListToolsAsync(body, IsMetaMode, _backendConnections, _logger, EnsureBackendsInitializedAsync, _servers, _sessionManager, enableCodeMode);
             return await FilterAuthorizedAsync(tools, "tools/list", "name", httpContext);
         }
 
@@ -255,8 +263,14 @@ namespace ModelContextGateway.Core.Routing
 
                     try
                     {
+                        var identity = await ResolveUserIdentityAsync(contextToUse);
+                        var config = contextToUse?.RequestServices?.GetService<IConfiguration>();
+                        bool isCallerAdmin = SecurityValidationHelper.IsAdmin(identity, config, contextToUse);
+
                         var res = await _toolRoutingManager.CallToolAsync(toolName, body, dbFactory, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson, cts.Token, _sessionManager, _sessionId,
-                            filterAuthorizedToolsAsync: async (tools) => await FilterAuthorizedAsync(tools, "tools/list", "name", httpContext));
+                            filterAuthorizedToolsAsync: async (tools) => await FilterAuthorizedAsync(tools, "tools/list", "name", httpContext),
+                            callerGroups: identity.GroupNames,
+                            isCallerAdmin: isCallerAdmin);
                         responsePayload = res != null ? JsonSerializer.Serialize(res) : null;
                         return res;
                     }

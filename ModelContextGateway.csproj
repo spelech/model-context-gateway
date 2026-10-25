@@ -6,9 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>mcg</AssemblyName>
     <RootNamespace>ModelContextGateway</RootNamespace>
-    <Version>5.22.2</Version>
-    <AssemblyVersion>5.22.2.0</AssemblyVersion>
-    <FileVersion>5.22.2.0</FileVersion>
+    <Version>5.23.0</Version>
+    <AssemblyVersion>5.23.0.0</AssemblyVersion>
+    <FileVersion>5.23.0.0</FileVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
     <NoWarn>$(NoWarn);1591</NoWarn>
@@ -26,6 +26,7 @@
   </ItemGroup>
   
   <ItemGroup>
+    <PackageReference Include="Jint" Version="4.17.0" />
     <PackageReference Include="OpenIddict.AspNetCore" Version="7.6.1" />
     <PackageReference Include="OpenIddict.Quartz" Version="7.6.1" />
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.11" />

@@ -81,6 +81,55 @@ Detailed technical specifications, parameter matrices, and API references.
 * [**AppKey Taxonomy & Scopes**](appkey-scopes.md)
   Base62 AppKey character formats, entropy, fast lookup design, and scope granularity (`all`, `server:<id>`, `category:<name>`, `tool:<name>`).
 
+### MCP Code Mode (JavaScript Sandbox Engine)
+
+Model Context Gateway provides **MCP Code Mode**, an in-gateway orchestration engine powered by an isolated [Jint](https://github.com/sebastienros/jint) JavaScript runtime. Rather than requiring connected AI models to perform multiple serial tool-call round-trips over the network with large JSON-RPC overhead, agents can write and execute JavaScript workflows directly on the gateway via the `execute_script` meta-tool.
+
+#### 1. Invoking `execute_script` in Meta-Mode
+When Code Mode is enabled in settings (`CodeMode:Enabled = true`), the gateway exposes `execute_script` alongside `search_tools` and `execute_tool` on Meta-Mode endpoints (`/sse` and `/mcp`).
+
+**Tool Definition:**
+- **Name**: `execute_script`
+- **Description**: Executes JavaScript within an isolated sandbox with direct access to backend MCP tools.
+- **Parameters**:
+  - `script` (or `code`) (string, required): JavaScript snippet to execute. Top-level statements and return values are captured as tool output.
+  - `arguments` (object, optional): Optional JSON object with caller parameters accessible in the script as global `args` (and `mcg.args`).
+
+#### 2. Dual Dispatcher Syntax
+Scripts running inside the sandbox have two ergonomic ways to invoke downstream backend MCP tools:
+
+1. **Direct Gateway Dispatcher (`mcg.callTool`)**:
+   ```javascript
+   const status = await mcg.callTool("docker/inspect_container", { id: "web" });
+   return status;
+   ```
+   Supports modern slash (`server/tool`) and canonical underscore (`server__tool`) namespacing.
+
+2. **Hierarchical Proxy Object (`tools.<server>.<tool>`)**:
+   ```javascript
+   const containers = await tools.docker.list_containers({ all: true });
+   const running = containers.filter(c => c.state === 'running');
+   return { count: running.length, names: running.map(c => c.name) };
+   ```
+   Both dot-notation (`tools.docker.list_containers(...)`) and bracket-notation (`tools["docker"]["list_containers"](...)`) are dynamically resolved through hierarchical JavaScript proxies.
+
+#### 3. Auto-Unboxing & JSON Parsing
+Tools executed within the sandbox automatically unbox MCP JSON-RPC content envelopes:
+- If a downstream tool returns a single JSON text object in its content array (`[{ type: "text", text: "{\"key\": \"val\"}" }]`), MCG transparently parses the payload into a native JavaScript object or array.
+- This allows immediate property access, array manipulation, and filtering without manual `JSON.parse()` boilerplate. Plain text or non-JSON payloads remain strings.
+
+#### 4. Sandbox Security & Resource Guardrails
+The Code Mode engine executes scripts in a fully isolated Jint engine with strict fail-closed resource limits:
+- **Strict Isolation**: No access to CLR types, file system, network sockets, reflection, threading, or Node.js/browser globals (`process`, `require`, `window`, `document`).
+- **Execution Timeout**: Configurable wall-clock cancellation timeout (default: `30 seconds`, range: 1–120s).
+- **Statement Limit**: Maximum AST statement count to prevent infinite loops (default: `100,000` statements, range: 10,000–1,000,000).
+- **Memory Ceiling**: Strict heap memory limit allocated to the engine (default: `64 MB`, range: 16–512 MB).
+- **Max Tool Calls Quota**: Limits the number of downstream tool invocations allowed per script execution to prevent amplification attacks (default: `50` calls, range: 1–500).
+
+#### 5. Group-Based RBAC & Settings UI
+- **Authorization**: Access to `execute_script` can be restricted to specific user groups via `CodeMode:AllowedGroups`. If configured, only users possessing at least one matching group claim (via Windows AD SIDs, OIDC tokens, or reverse proxy SSO headers) are permitted to discover and execute scripts. Unauthorized users receive access-denied errors and do not see `execute_script` in `tools/list`.
+- **Settings Management**: Administrators can toggle Code Mode, adjust timeout, statement, memory, and tool-call limits, and select allowed groups via the **Code Mode** tab in the Settings dashboard or via Admin MCP (`manage_settings`).
+
 ### Protocols & Standards Alignment
 * [**MCP 2026-07-28 Specification Alignment**](architecture/transports-and-subprocesses.md)
   Support for `resultType`, Multi Round-Trip Requests (MRTR), `ttlMs`/`cacheScope` cacheable metadata, and JSON-RPC error taxonomy.
@@ -110,6 +159,8 @@ Deep-dive explanations of core architectural concepts, security pipelines, and s
   High-level system topology, module boundaries, and request lifecycle.
 * [**Routing & Meta-Mode Engine**](architecture/routing-and-meta-mode.md)
   Slash formatting (`{serverId}/{toolName}`), dual-key routing, context window token reduction in Meta-Mode, and Reciprocal Rank Fusion (RRF) hybrid search combining SIMD vector embeddings with lexical search.
+* **MCP Code Mode Execution Engine**
+  Client-side JavaScript multi-tool workflow orchestration directly within MCG, featuring an isolated Jint sandbox, dual dispatchers (`mcg.callTool`, `tools.<server>.<tool>`), automatic JSON unboxing, statement/memory ceilings, and group-based RBAC.
 * [**Transports & Subprocess Execution**](architecture/transports-and-subprocesses.md)
   Stateful SSE, stateless HTTP, and STDIO subprocess execution models (including the batteries-included `latest-full` container image).
 

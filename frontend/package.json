@@ -1,7 +1,9 @@
 {
   "name": "model-context-gateway-ui",
   "private": true,
-  "version": "5.22.2",
+  "name": "model-context-gateway-ui",
+  "private": true,
+  "version": "5.23.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

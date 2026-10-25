@@ -24,6 +24,12 @@ export async function fetchEmbeddingSettingsApi(): Promise<EmbeddingSettings | n
     toolSearchDefaultLimit: settings.toolSearchDefaultLimit ?? 5,
     toolSearchMinScore: settings.toolSearchMinScore ?? 0.35,
     toolSearchScoreDropoffRatio: settings.toolSearchScoreDropoffRatio ?? 0.60,
+    enableCodeMode: settings.enableCodeMode ?? true,
+    codeModeExecutionTimeoutSeconds: settings.codeModeExecutionTimeoutSeconds ?? 30,
+    codeModeMaxToolCalls: settings.codeModeMaxToolCalls ?? 50,
+    codeModeMaxMemoryMb: settings.codeModeMaxMemoryMb ?? 64,
+    codeModeMaxStatements: settings.codeModeMaxStatements ?? 100000,
+    codeModeAllowedGroups: settings.codeModeAllowedGroups ?? '',
   };
 }
 
@@ -42,6 +48,12 @@ export async function saveEmbeddingSettingsApi(settings: EmbeddingSettings): Pro
     toolSearchDefaultLimit: settings.toolSearchDefaultLimit,
     toolSearchMinScore: settings.toolSearchMinScore,
     toolSearchScoreDropoffRatio: settings.toolSearchScoreDropoffRatio,
+    enableCodeMode: settings.enableCodeMode,
+    codeModeExecutionTimeoutSeconds: settings.codeModeExecutionTimeoutSeconds,
+    codeModeMaxToolCalls: settings.codeModeMaxToolCalls,
+    codeModeMaxMemoryMb: settings.codeModeMaxMemoryMb,
+    codeModeMaxStatements: settings.codeModeMaxStatements,
+    codeModeAllowedGroups: settings.codeModeAllowedGroups,
   };
   const result = await apiRequest<{ success: boolean }>('/api/settings', {
     method: 'POST',
