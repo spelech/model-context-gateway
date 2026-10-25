@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-25T23:03:37.0711542Z",
+    "generatedAt": "2026-10-25T21:46:42.4299692Z",
     "totalRequirements": 471,
-    "positiveCount": 375,
-    "guardrailCount": 96,
-    "totalProofs": 1091
+    "positiveCount": 372,
+    "guardrailCount": 99,
+    "totalProofs": 1093
   },
   "requirements": [
     {
@@ -3758,7 +3758,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 352,
+          "lineNumber": 232,
           "testName": "ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command",
           "details": null
         },
@@ -4270,6 +4270,52 @@
           "filePath": "ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 270,
           "testName": "CreateClient_ReturnsBadRequest_WhenDisplayNameMissing",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "GUARD-CODE-01",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "Statement cap terminates infinite loops within allotted execution budget.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs",
+          "lineNumber": 10,
+          "testName": "ExecuteAsync_InfiniteLoop_TerminatesOnStatementLimit",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs",
+          "lineNumber": 49,
+          "testName": "ExecuteAsync_MemoryLimit_TerminatesOnMemoryExceeded",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs",
+          "lineNumber": 63,
+          "testName": "ExecuteAsync_ConsoleLogging_CapturesLogs",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "GUARD-CODE-02",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "Execution timeout terminates long-running script.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs",
+          "lineNumber": 23,
+          "testName": "ExecuteAsync_Timeout_TerminatesExecution",
           "details": null
         }
       ]
@@ -4938,7 +4984,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 281,
+          "lineNumber": 161,
           "testName": "ProbeAllServersAsync_Probes_All_Enabled_Servers",
           "details": null
         }
@@ -4954,7 +5000,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 384,
+          "lineNumber": 264,
           "testName": "ProbeServerAsync_Sets_Connected_For_Custom_Server",
           "details": null
         }
@@ -4970,8 +5016,24 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 252,
+          "lineNumber": 132,
           "testName": "ProbeServerAsync_Sets_Disabled_When_Server_Not_Enabled",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "HEALTH-PROBE-HTTP-CONNECTED-200",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "BackendHealthCheckService marks server as Connected when downstream HTTP/SSE endpoint returns 200 OK.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
+          "lineNumber": 57,
+          "testName": "ProbeServerAsync_Sets_Connected_When_Endpoint_Responds_200",
           "details": null
         }
       ]
@@ -4986,88 +5048,8 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 217,
+          "lineNumber": 97,
           "testName": "ProbeServerAsync_Sets_Failed_When_Endpoint_Throws_Exception",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "HEALTH-PROBE-HTTP-PING-CONNECTED-200",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "BackendHealthCheckService marks server as Connected when downstream JSON-RPC ping returns 200 OK.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 41,
-          "testName": "ProbeServerAsync_Sets_Connected_When_JsonRpc_Ping_Responds_200",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "HEALTH-PROBE-HTTP-PING-FALLBACK-ROOT",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "BackendHealthCheckService falls back to base authority root probe when downstream JSON-RPC ping returns 405 Method Not Allowed.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 87,
-          "testName": "ProbeServerAsync_Falls_Back_To_Root_Probe_When_Ping_Returns_405",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "HEALTH-PROBE-NONE-MODE-NOOP",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "BackendHealthCheckService marks server as Connected without HTTP requests when HealthCheckMode is none.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 178,
-          "testName": "ProbeServerAsync_Marks_Connected_Without_Http_When_Mode_Is_None",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "HEALTH-PROBE-REPO-PERSISTS-HEALTHCHECKMODE",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "Server repository persists and retrieves HealthCheckMode setting accurately.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 416,
-          "testName": "ServerRepository_Persists_And_Retrieves_HealthCheckMode",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "HEALTH-PROBE-ROOT-MODE-BYPASSES-PING",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "BackendHealthCheckService directly probes base authority root when HealthCheckMode is root or server is postgres.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 136,
-          "testName": "ProbeServerAsync_Probes_Root_Directly_When_Mode_Is_Root_Or_Postgres",
           "details": null
         }
       ]
@@ -5082,7 +5064,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 310,
+          "lineNumber": 190,
           "testName": "ProbeServerAsync_Sets_Connected_For_Valid_Stdio_Server_Without_Http_Probe",
           "details": null
         }
@@ -7256,6 +7238,22 @@
       ]
     },
     {
+      "id": "MCP-CODE-01",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "RouterSettings provides default Code Mode configuration values.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeSettingsTests.cs",
+          "lineNumber": 7,
+          "testName": "RouterSettings_HasSensibleCodeModeDefaults",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-COLDSTART-01",
       "category": "MCP",
       "type": "Positive",
@@ -8815,6 +8813,22 @@
           "filePath": "ModelContextGateway.Tests/AuditQueryApiTests.cs",
           "lineNumber": 60,
           "testName": "AuditQuery_ReturnsFilteredRows_AndLogsAuditAction",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-CODE-02",
+      "category": "SEC",
+      "type": "Negative",
+      "description": "Sandbox prevents CLR reflection and process spawning.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs",
+          "lineNumber": 36,
+          "testName": "ExecuteAsync_ReflectionAttempt_IsBlocked",
           "details": null
         }
       ]
