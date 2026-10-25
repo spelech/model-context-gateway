@@ -85,7 +85,7 @@ For homelab instructions, see the [Single-User & Home-Lab Setup Guide](docs/depl
 Connect your AI assistant to `/sse`:
 1. **Search Tools**: The AI calls `search_tools` with a plain text query (for example: `"restart container"`).
 2. **Execute Tool**: The AI runs the returned tool (for example: `docker/restart_container`) with `execute_tool(name, arguments)`.
-3. **Execute Script (Code Mode)**: When enabled, run composite multi-tool JavaScript directly on the gateway via `execute_script(code)` using `await mcg.callTool()` or `await tools.<server>.<tool>()`.
+3. **Execute Script (Code Mode)**: When enabled, run composite multi-tool JavaScript directly on the gateway via `execute_script(script)` (or `code`) using `await mcg.callTool()` or `await tools.<server>.<tool>()`.
 
 ### 2. Connect Your AI Application
 

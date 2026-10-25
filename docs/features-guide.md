@@ -92,7 +92,8 @@ When Code Mode is enabled in settings (`CodeMode:Enabled = true`), the gateway e
 - **Name**: `execute_script`
 - **Description**: Executes JavaScript within an isolated sandbox with direct access to backend MCP tools.
 - **Parameters**:
-  - `code` (string, required): JavaScript snippet to execute. Top-level statements and return values are captured as tool output.
+  - `script` (or `code`) (string, required): JavaScript snippet to execute. Top-level statements and return values are captured as tool output.
+  - `arguments` (object, optional): Optional JSON object with caller parameters accessible in the script as global `args` (and `mcg.args`).
 
 #### 2. Dual Dispatcher Syntax
 Scripts running inside the sandbox have two ergonomic ways to invoke downstream backend MCP tools:
@@ -120,10 +121,10 @@ Tools executed within the sandbox automatically unbox MCP JSON-RPC content envel
 #### 4. Sandbox Security & Resource Guardrails
 The Code Mode engine executes scripts in a fully isolated Jint engine with strict fail-closed resource limits:
 - **Strict Isolation**: No access to CLR types, file system, network sockets, reflection, threading, or Node.js/browser globals (`process`, `require`, `window`, `document`).
-- **Execution Timeout**: Configurable wall-clock cancellation timeout (default: `5,000 ms`, range: 1,000–60,000 ms).
-- **Statement Limit**: Maximum AST statement count to prevent infinite loops (default: `100,000` statements).
-- **Memory Ceiling**: Strict heap memory limit allocated to the engine (default: `32 MB`, range: 4–256 MB).
-- **Max Tool Calls Quota**: Limits the number of downstream tool invocations allowed per script execution to prevent amplification attacks (default: `25` calls, range: 1–500).
+- **Execution Timeout**: Configurable wall-clock cancellation timeout (default: `30 seconds`, range: 1–120s).
+- **Statement Limit**: Maximum AST statement count to prevent infinite loops (default: `100,000` statements, range: 10,000–1,000,000).
+- **Memory Ceiling**: Strict heap memory limit allocated to the engine (default: `64 MB`, range: 16–512 MB).
+- **Max Tool Calls Quota**: Limits the number of downstream tool invocations allowed per script execution to prevent amplification attacks (default: `50` calls, range: 1–500).
 
 #### 5. Group-Based RBAC & Settings UI
 - **Authorization**: Access to `execute_script` can be restricted to specific user groups via `CodeMode:AllowedGroups`. If configured, only users possessing at least one matching group claim (via Windows AD SIDs, OIDC tokens, or reverse proxy SSO headers) are permitted to discover and execute scripts. Unauthorized users receive access-denied errors and do not see `execute_script` in `tools/list`.

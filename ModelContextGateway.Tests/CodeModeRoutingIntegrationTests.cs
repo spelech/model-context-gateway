@@ -213,6 +213,56 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-CODE-02", "MCP", RequirementType.Positive, "ExecuteScript accepts both code and script argument parameter names.")]
+        public async Task ExecuteScript_WithCodeParameter_ExecutesSuccessfully()
+        {
+            var router = new ToolRoutingManager();
+
+            var mockDbFactory = new Mock<IDbConnectionFactory>();
+            var settings = new RouterSettings { EnableCodeMode = true };
+            var embeddingServiceMock = new Mock<DynamicEmbeddingService>(new HttpClient(), NullLoggerFactory.Instance, new ServiceCollection().BuildServiceProvider());
+            embeddingServiceMock.Setup(s => s.GetSettings()).Returns(settings);
+
+            var payload = new
+            {
+                jsonrpc = "2.0",
+                id = "req-code-alias",
+                method = "tools/call",
+                @params = new
+                {
+                    name = "execute_script",
+                    arguments = new
+                    {
+                        code = "return 42;"
+                    }
+                }
+            };
+            var body = JsonSerializer.Serialize(payload);
+
+            var result = await router.CallToolAsync(
+                "execute_script",
+                body,
+                mockDbFactory.Object,
+                new ConcurrentDictionary<string, BackendConnection>(),
+                new List<McpServer>(),
+                NullLogger.Instance,
+                new HttpClient(),
+                embeddingServiceMock.Object,
+                () => Task.CompletedTask,
+                (b, k, v) => b
+            );
+
+            var json = JsonSerializer.Serialize(result);
+            using var doc = JsonDocument.Parse(json);
+            doc.RootElement.GetProperty("isError").GetBoolean().Should().BeFalse();
+            var text = doc.RootElement.GetProperty("content")[0].GetProperty("text").GetString();
+            text.Should().NotBeNullOrEmpty();
+
+            using var envelopeDoc = JsonDocument.Parse(text!);
+            envelopeDoc.RootElement.GetProperty("result").GetInt32().Should().Be(42);
+        }
+
+        [Fact]
         [Requirement("SEC-CODE-01", "SEC", RequirementType.FailClosedGuardrail, "ExecuteScript CallToolAsync fails closed when caller lacks authorized group.")]
         public async Task ExecuteScript_UnauthorizedCallerGroup_ReturnsSecurityErrorEnvelope()
         {

@@ -456,7 +456,7 @@ namespace ModelContextGateway.Core.Routing
                     paramsProp.TryGetProperty("arguments", out var argsProp) &&
                     argsProp.ValueKind == JsonValueKind.Object)
                 {
-                    if (argsProp.TryGetProperty("script", out var scriptProp) && scriptProp.ValueKind == JsonValueKind.String)
+                    if ((argsProp.TryGetProperty("script", out var scriptProp) || argsProp.TryGetProperty("code", out scriptProp)) && scriptProp.ValueKind == JsonValueKind.String)
                     {
                         script = scriptProp.GetString();
                     }

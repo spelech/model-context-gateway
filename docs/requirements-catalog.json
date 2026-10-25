@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-25T22:30:29.4938690Z",
+    "generatedAt": "2026-10-25T22:46:24.8331584Z",
     "totalRequirements": 477,
     "positiveCount": 375,
     "guardrailCount": 102,
-    "totalProofs": 1110
+    "totalProofs": 1111
   },
   "requirements": [
     {
@@ -4344,7 +4344,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 322,
+          "lineNumber": 372,
           "testName": "ExecuteScript_RuntimeError_ReturnsStructuredErrorEnvelope",
           "details": null
         }
@@ -7346,13 +7346,20 @@
       "category": "MCP",
       "type": "Positive",
       "description": "ExecuteScript returns structured execution envelope with result and telemetry.",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
           "lineNumber": 162,
           "testName": "ExecuteScript_ValidExecution_ReturnsStructuredEnvelope",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 215,
+          "testName": "ExecuteScript_WithCodeParameter_ExecutesSuccessfully",
           "details": null
         }
       ]
@@ -8945,14 +8952,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 215,
+          "lineNumber": 265,
           "testName": "ExecuteScript_UnauthorizedCallerGroup_ReturnsSecurityErrorEnvelope",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 268,
+          "lineNumber": 318,
           "testName": "ExecuteScript_AdminBypass_ExecutesSuccessfully",
           "details": null
         }
