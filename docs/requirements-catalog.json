@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-25T21:46:42.4299692Z",
-    "totalRequirements": 471,
+    "generatedAt": "2026-10-25T22:01:12.0333567Z",
+    "totalRequirements": 472,
     "positiveCount": 372,
-    "guardrailCount": 99,
-    "totalProofs": 1093
+    "guardrailCount": 100,
+    "totalProofs": 1098
   },
   "requirements": [
     {
@@ -4321,6 +4321,22 @@
       ]
     },
     {
+      "id": "GUARD-CODE-04",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "Exceeding MaxToolCalls aborts execution.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
+          "lineNumber": 46,
+          "testName": "ExecuteAsync_ToolCallsQuotaExceeded_FailsClosed",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "GUARD-DISPOSED-01",
       "category": "GUARD",
       "type": "Positive",
@@ -7242,13 +7258,41 @@
       "category": "MCP",
       "type": "Positive",
       "description": "RouterSettings provides default Code Mode configuration values.",
-      "proofCount": 1,
+      "proofCount": 5,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeSettingsTests.cs",
           "lineNumber": 7,
           "testName": "RouterSettings_HasSensibleCodeModeDefaults",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
+          "lineNumber": 11,
+          "testName": "ExecuteAsync_DualDispatcherAndUnboxing_WorksSuccessfully",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
+          "lineNumber": 68,
+          "testName": "ExecuteAsync_PreInjectedArgs_AccessibleInScript",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
+          "lineNumber": 96,
+          "testName": "ExecuteAsync_CallToolAndMcgCallTool_ForwardArgumentsAndOptions",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
+          "lineNumber": 137,
+          "testName": "ExecuteAsync_NonJsonContent_ReturnsRawText",
           "details": null
         }
       ]

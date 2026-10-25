@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **471 Requirements Verified** across **1093 Test Proofs** (372 Functional Capabilities, 99 Safety Guardrails).
+> **Catalog Statistics:** **472 Requirements Verified** across **1098 Test Proofs** (372 Functional Capabilities, 100 Safety Guardrails).
 
 ---
 
@@ -14,8 +14,8 @@
 | **`CORE`** | CORE | **8** | 7 | 1 | 14 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
-| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **68** | 3 | 65 | 142 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **124** | 117 | 7 | 270 proofs |
+| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **69** | 3 | 66 | 143 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **124** | 117 | 7 | 274 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **66** | 56 | 10 | 139 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **40** | 33 | 7 | 212 proofs |
@@ -1543,8 +1543,12 @@
 ### `[MCP-CODE-01]` RouterSettings provides default Code Mode configuration values.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (5):**
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeSettingsTests.cs#L7`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeSettingsTests.cs#L7) (`RouterSettings_HasSensibleCodeModeDefaults`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L11) (`ExecuteAsync_DualDispatcherAndUnboxing_WorksSuccessfully`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L68`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L68) (`ExecuteAsync_PreInjectedArgs_AccessibleInScript`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L96`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L96) (`ExecuteAsync_CallToolAndMcgCallTool_ForwardArgumentsAndOptions`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L137`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L137) (`ExecuteAsync_NonJsonContent_ReturnsRawText`)
 
 ### `[MCP-COLDSTART-01]` Full cold-start cycle: SessionManager cache seeded -> search_tools -> execute_tool dispatches to downstream mock server and returns output.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -3015,6 +3019,12 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L23`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L23) (`ExecuteAsync_Timeout_TerminatesExecution`)
 
+### `[GUARD-CODE-04]` Exceeding MaxToolCalls aborts execution.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L46`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L46) (`ExecuteAsync_ToolCallsQuotaExceeded_FailsClosed`)
+
 ### `[GUARD-HTTP-NO-SECRET-RETRIEVER]` HTTP stateless transport fails closed with InvalidOperationException when no secret retriever is configured
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
@@ -3657,6 +3667,7 @@
 | `GUARD-CLIENT-MISSING-NAME` | **Guardrail** | `GUARD` | CreateClient fails closed when DisplayName is missing | [`ClientsControllerTests.cs:L270`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L270) | Backend xUnit |
 | `GUARD-CODE-01` | **Guardrail** | `GUARD` | Statement cap terminates infinite loops within allotted execution budget. | [`CodeModeEngineSandboxTests.cs:L10`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L10) | Backend xUnit |
 | `GUARD-CODE-02` | **Guardrail** | `GUARD` | Execution timeout terminates long-running script. | [`CodeModeEngineSandboxTests.cs:L23`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L23) | Backend xUnit |
+| `GUARD-CODE-04` | **Guardrail** | `GUARD` | Exceeding MaxToolCalls aborts execution. | [`CodeModeRuntimeInteropTests.cs:L46`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L46) | Backend xUnit |
 | `GUARD-DISPOSED-01` | Positive | `GUARD` | Stateless HTTP POST lifecycle: HTTP response completes, HttpContext is marked disposed, background backend initialization completes successfully without ObjectDisposedException. | [`DownstreamSessionIntegrationTests.cs:L225`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L225) | Backend xUnit |
 | `GUARD-HTTP-NO-SECRET-RETRIEVER` | **Guardrail** | `GUARD` | HTTP stateless transport fails closed with InvalidOperationException when no secret retriever is configured | [`HttpTransportTests.cs:L54`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/HttpTransportTests.cs#L54) | Backend xUnit |
 | `GUARD-HTTP-SECRET-RETRIEVAL-FAIL-CLOSED` | **Guardrail** | `GUARD` | HTTP stateless transport fails closed with SecurityException when secret resolution fails | [`HttpTransportTests.cs:L31`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/HttpTransportTests.cs#L31) | Backend xUnit |
