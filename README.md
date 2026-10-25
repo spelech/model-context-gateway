@@ -1,6 +1,6 @@
 # Model Context Gateway (MCG)
 
-![Version](https://img.shields.io/badge/version-v5.22.1-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v5.22.2-orange?style=for-the-badge)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://spelech.github.io/model-context-gateway/)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
@@ -175,11 +175,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.22.2`** | 2026-10-25 | --help |
 | **`v5.22.1`** | 2026-10-25 | fix(healthcheck): probe base origin and support dual-mode ping to prevent downstream MCP session memory leaks |
 | **`v5.22.0`** | 2026-10-18 | feat(search): configurable tool search limits, thresholding and dropoff filtering |
 | **`v5.21.0`** | 2026-10-02 | feat(routing): calibrated hybrid semantic search scoring, explicit search modes, and test bench simulator overhaul |
 | **`v5.20.1`** | 2026-09-30 | refactor(testbench): Remove Pre-fill Example Button and Streamline Dynamic Argument Handling. Removed the legacy Pre-fill Example button and unused bulk argument modification plumbing from the Test Bench tool tester card, eliminating brittle and unhelpful parameter mocks while preserving interactive form validation and tool execution coverage. |
-| **`v5.20.0`** | 2026-09-30 | feat(auth,ui,docs,ci): AppKey & OAuth Client Last-Used Tracking, Safe Secret Rotation Workflow, Multi-Client Config Generator, VitePress Documentation Architecture Overhaul, and 30-Day Dependabot Stability Cooldown. Implemented `LastUsedAt` audit tracking for AppKeys and OAuth clients across SQLite, MySQL, and MSSQL with an in-memory 60-second sliding debounce `ActivityTracker`; added atomic credential rotation endpoints (`POST /api/appkeys/{id}/rotate`, `POST /api/clients/{id}/rotate-secret`) returning plaintext keys once with SHA-256 hashing at rest; built two-stage `AppKeyRotateModal` with backdrop click-away protection and multi-client configuration generator (Claude Desktop, Cursor, Windsurf, generic JSON); overhauled VitePress documentation architecture with Diátaxis decomposition, path-scoped multi-sidebars, purged legacy ASCII art to responsive Mermaid diagrams, modernized typography rhythm, and link integrity CI quality gates; updated GitHub Actions to v7/v5; and configured a 30-day stability cooldown across all Dependabot ecosystems (`AUTH-118` through `AUTH-123`, `UI-135` through `UI-137`). |
 
 ---
 
