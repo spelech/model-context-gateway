@@ -26,31 +26,14 @@ namespace ModelContextGateway.Tests
 
         private (SqliteConnection conn, IDbConnectionFactory factory) CreateDbFactory()
         {
-            var connection = new SqliteConnection("Filename=:memory:");
+            var cs = $"Data Source=HealthCheckTests_{Guid.NewGuid():N};Mode=Memory;Cache=Shared";
+            var connection = new SqliteConnection(cs);
             connection.Open();
 
-            connection.Execute(@"
-                CREATE TABLE IF NOT EXISTS Servers (
-                    Id TEXT PRIMARY KEY,
-                    DisplayName TEXT,
-                    Url TEXT,
-                    Enabled INTEGER DEFAULT 1,
-                    Hidden INTEGER DEFAULT 0,
-                    Type TEXT DEFAULT 'sse',
-                    SecretProvider TEXT DEFAULT 'None',
-                    SecretItemKey TEXT,
-                    AuthShape TEXT DEFAULT 'bearer',
-                    CustomHeaderName TEXT,
-                    Categories TEXT DEFAULT '[]',
-                    ApiKey TEXT,
-                    HeadersJson TEXT,
-                    AutoDiscovered INTEGER DEFAULT 0,
-                    HealthCheckMode TEXT DEFAULT 'ping'
-                );
-            ");
+            DatabaseInitializer.InitializeDatabase(connection);
 
             var mockDbFactory = new Mock<IDbConnectionFactory>();
-            mockDbFactory.Setup(f => f.CreateConnection()).Returns(connection);
+            mockDbFactory.Setup(f => f.CreateConnection()).Returns(() => new SqliteConnection(cs));
             mockDbFactory.Setup(f => f.ProviderName).Returns("sqlite");
             return (connection, mockDbFactory.Object);
         }
@@ -77,6 +60,7 @@ namespace ModelContextGateway.Tests
                 Assert.Equal(HttpMethod.Post, req.Method);
                 Assert.Equal("http://localhost:9999/mcp", req.RequestUri?.ToString());
                 Assert.Contains("application/json", req.Headers.Accept.ToString());
+                Assert.Contains("text/event-stream", req.Headers.Accept.ToString());
                 return new HttpResponseMessage(HttpStatusCode.OK);
             });
             var client = new HttpClient(handler);
@@ -427,6 +411,34 @@ namespace ModelContextGateway.Tests
             Assert.Equal("Connected", status.Status);
             Assert.Equal(1, status.Attempts);
             Assert.Empty(status.Error);
+        }
+
+        [Fact]
+        [Requirement("HEALTH-PROBE-REPO-PERSISTS-HEALTHCHECKMODE", "MCP", RequirementType.Positive, "Server repository persists and retrieves HealthCheckMode setting accurately.")]
+        public async Task ServerRepository_Persists_And_Retrieves_HealthCheckMode()
+        {
+            var (_, dbFactory) = CreateDbFactory();
+            var repo = new DatabaseRepository(dbFactory);
+
+            var server = new McpServer
+            {
+                Id = "test-repo-health-mode",
+                DisplayName = "Test Health Mode Repo",
+                Url = "http://localhost:8080/mcp",
+                Enabled = true,
+                HealthCheckMode = "root"
+            };
+
+            await repo.SaveServerAsync(server);
+
+            var retrieved = await repo.GetServerByIdAsync("test-repo-health-mode");
+            Assert.NotNull(retrieved);
+            Assert.Equal("root", retrieved.HealthCheckMode);
+
+            var allServers = (await repo.GetServersAsync()).ToList();
+            var fromAll = allServers.FirstOrDefault(s => s.Id == "test-repo-health-mode");
+            Assert.NotNull(fromAll);
+            Assert.Equal("root", fromAll.HealthCheckMode);
         }
 
         private class MockHttpClientFactory : IHttpClientFactory
