@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.22.1`** | 2026-10-25 | fix(healthcheck): probe base origin and support dual-mode ping to prevent downstream MCP session memory leaks |
 | **`v5.22.0`** | 2026-10-18 | feat(search): configurable tool search limits, thresholding and dropoff filtering |
 | **`v5.21.0`** | 2026-10-02 | feat(routing): calibrated hybrid semantic search scoring, explicit search modes, and test bench simulator overhaul |
 | **`v5.20.1`** | 2026-09-30 | refactor(testbench): Remove Pre-fill Example Button and Streamline Dynamic Argument Handling. Removed the legacy Pre-fill Example button and unused bulk argument modification plumbing from the Test Bench tool tester card, eliminating brittle and unhelpful parameter mocks while preserving interactive form validation and tool execution coverage. |
