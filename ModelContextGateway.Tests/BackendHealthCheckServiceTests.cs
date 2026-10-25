@@ -44,7 +44,8 @@ namespace ModelContextGateway.Tests
                     Categories TEXT DEFAULT '[]',
                     ApiKey TEXT,
                     HeadersJson TEXT,
-                    AutoDiscovered INTEGER DEFAULT 0
+                    AutoDiscovered INTEGER DEFAULT 0,
+                    HealthCheckMode TEXT DEFAULT 'ping'
                 );
             ");
 
@@ -55,24 +56,27 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("HEALTH-PROBE-HTTP-CONNECTED-200", "MCP", RequirementType.Positive, "BackendHealthCheckService marks server as Connected when downstream HTTP/SSE endpoint returns 200 OK.")]
-        public async Task ProbeServerAsync_Sets_Connected_When_Endpoint_Responds_200()
+        [Requirement("HEALTH-PROBE-HTTP-PING-CONNECTED-200", "MCP", RequirementType.Positive, "BackendHealthCheckService marks server as Connected when downstream JSON-RPC ping returns 200 OK.")]
+        public async Task ProbeServerAsync_Sets_Connected_When_JsonRpc_Ping_Responds_200()
         {
             var (conn, dbFactory) = CreateDbFactory();
             var server = new McpServer
             {
-                Id = "test-1",
-                DisplayName = "Test Server 1",
-                Url = "http://localhost:9999/sse",
+                Id = "test-ping-1",
+                DisplayName = "Test Server Ping",
+                Url = "http://localhost:9999/mcp",
                 Enabled = true,
-                ApiKey = "secret123"
+                ApiKey = "secret123",
+                HealthCheckMode = "ping"
             };
             conn.Execute("INSERT INTO Servers (Id, DisplayName, Url, Enabled, ApiKey) VALUES (@Id, @DisplayName, @Url, 1, @ApiKey)", server);
 
             var handler = new MockHttpMessageHandler(req =>
             {
                 Assert.Equal("Bearer secret123", req.Headers.Authorization?.ToString());
-                Assert.Equal("http://localhost:9999/", req.RequestUri?.ToString());
+                Assert.Equal(HttpMethod.Post, req.Method);
+                Assert.Equal("http://localhost:9999/mcp", req.RequestUri?.ToString());
+                Assert.Contains("application/json", req.Headers.Accept.ToString());
                 return new HttpResponseMessage(HttpStatusCode.OK);
             });
             var client = new HttpClient(handler);
@@ -89,11 +93,141 @@ namespace ModelContextGateway.Tests
 
             await healthService.ProbeServerAsync(server);
 
-            var status = sessionManager.BackendStatuses["test-1"];
+            var status = sessionManager.BackendStatuses["test-ping-1"];
             Assert.True(status.Status == "Connected", $"Probe failed with: {status.Error}");
             Assert.Equal("Connected", status.Status);
             Assert.Equal(1, status.Attempts);
             Assert.Empty(status.Error);
+        }
+
+        [Fact]
+        [Requirement("HEALTH-PROBE-HTTP-PING-FALLBACK-ROOT", "MCP", RequirementType.Positive, "BackendHealthCheckService falls back to base authority root probe when downstream JSON-RPC ping returns 405 Method Not Allowed.")]
+        public async Task ProbeServerAsync_Falls_Back_To_Root_Probe_When_Ping_Returns_405()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var server = new McpServer
+            {
+                Id = "test-ping-fallback",
+                DisplayName = "Test Fallback Server",
+                Url = "http://localhost:9999/sse",
+                Enabled = true,
+                ApiKey = "secret123",
+                HealthCheckMode = "ping"
+            };
+            conn.Execute("INSERT INTO Servers (Id, DisplayName, Url, Enabled, ApiKey) VALUES (@Id, @DisplayName, @Url, 1, @ApiKey)", server);
+
+            int callCount = 0;
+            var handler = new MockHttpMessageHandler(req =>
+            {
+                callCount++;
+                if (callCount == 1)
+                {
+                    Assert.Equal(HttpMethod.Post, req.Method);
+                    Assert.Equal("http://localhost:9999/sse", req.RequestUri?.ToString());
+                    return new HttpResponseMessage(HttpStatusCode.MethodNotAllowed);
+                }
+                Assert.Equal(HttpMethod.Get, req.Method);
+                Assert.Equal("http://localhost:9999/", req.RequestUri?.ToString());
+                return new HttpResponseMessage(HttpStatusCode.NotFound); // Any response means server is alive
+            });
+            var client = new HttpClient(handler);
+
+            var services = new ServiceCollection();
+            services.AddSingleton(dbFactory);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var httpClientFactory = new MockHttpClientFactory(client);
+            var sessionManager = new SessionManager(serviceProvider, httpClientFactory, NullLogger<SessionManager>.Instance);
+            var logger = NullLogger<BackendHealthCheckService>.Instance;
+
+            var healthService = new BackendHealthCheckService(serviceProvider, httpClientFactory, sessionManager, logger);
+
+            await healthService.ProbeServerAsync(server);
+
+            var status = sessionManager.BackendStatuses["test-ping-fallback"];
+            Assert.Equal("Connected", status.Status);
+            Assert.Equal(2, callCount);
+        }
+
+        [Fact]
+        [Requirement("HEALTH-PROBE-ROOT-MODE-BYPASSES-PING", "MCP", RequirementType.Positive, "BackendHealthCheckService directly probes base authority root when HealthCheckMode is root or server is postgres.")]
+        public async Task ProbeServerAsync_Probes_Root_Directly_When_Mode_Is_Root_Or_Postgres()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var server = new McpServer
+            {
+                Id = "postgres-mcp-ha",
+                DisplayName = "Postgres HA MCP",
+                Url = "http://postgres-ha:8000/sse",
+                Enabled = true,
+                HealthCheckMode = "root"
+            };
+            conn.Execute("INSERT INTO Servers (Id, DisplayName, Url, Enabled) VALUES (@Id, @DisplayName, @Url, 1)", server);
+
+            int callCount = 0;
+            var handler = new MockHttpMessageHandler(req =>
+            {
+                callCount++;
+                Assert.Equal(HttpMethod.Get, req.Method);
+                Assert.Equal("http://postgres-ha:8000/", req.RequestUri?.ToString());
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
+            });
+            var client = new HttpClient(handler);
+
+            var services = new ServiceCollection();
+            services.AddSingleton(dbFactory);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var httpClientFactory = new MockHttpClientFactory(client);
+            var sessionManager = new SessionManager(serviceProvider, httpClientFactory, NullLogger<SessionManager>.Instance);
+            var logger = NullLogger<BackendHealthCheckService>.Instance;
+
+            var healthService = new BackendHealthCheckService(serviceProvider, httpClientFactory, sessionManager, logger);
+
+            await healthService.ProbeServerAsync(server);
+
+            var status = sessionManager.BackendStatuses["postgres-mcp-ha"];
+            Assert.Equal("Connected", status.Status);
+            Assert.Equal(1, callCount);
+        }
+
+        [Fact]
+        [Requirement("HEALTH-PROBE-NONE-MODE-NOOP", "MCP", RequirementType.Positive, "BackendHealthCheckService marks server as Connected without HTTP requests when HealthCheckMode is none.")]
+        public async Task ProbeServerAsync_Marks_Connected_Without_Http_When_Mode_Is_None()
+        {
+            var (_, dbFactory) = CreateDbFactory();
+            var server = new McpServer
+            {
+                Id = "server-none",
+                DisplayName = "No Probe Server",
+                Url = "http://localhost:9999/mcp",
+                Enabled = true,
+                HealthCheckMode = "none"
+            };
+
+            bool httpCalled = false;
+            var handler = new MockHttpMessageHandler(req =>
+            {
+                httpCalled = true;
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            });
+            var client = new HttpClient(handler);
+
+            var services = new ServiceCollection();
+            services.AddSingleton(dbFactory);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var httpClientFactory = new MockHttpClientFactory(client);
+            var sessionManager = new SessionManager(serviceProvider, httpClientFactory, NullLogger<SessionManager>.Instance);
+            var logger = NullLogger<BackendHealthCheckService>.Instance;
+
+            var healthService = new BackendHealthCheckService(serviceProvider, httpClientFactory, sessionManager, logger);
+
+            await healthService.ProbeServerAsync(server);
+
+            Assert.False(httpCalled);
+            var status = sessionManager.BackendStatuses["server-none"];
+            Assert.Equal("Connected", status.Status);
         }
 
         [Fact]

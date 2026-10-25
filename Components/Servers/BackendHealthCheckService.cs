@@ -57,7 +57,7 @@ namespace ModelContextGateway.Components.Servers
                     if (dbFactory != null)
                     {
                         using var conn = dbFactory.CreateConnection();
-                        var rawServers = (await conn.QueryAsync(@"SELECT Id, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson FROM Servers")).ToList();
+                        var rawServers = (await conn.QueryAsync(@"SELECT * FROM Servers")).ToList();
 
                         servers = rawServers.Select(s => new McpServer
                         {
@@ -67,7 +67,10 @@ namespace ModelContextGateway.Components.Servers
                             Enabled = s.Enabled is long l ? l != 0L : Convert.ToBoolean(s.Enabled),
                             Hidden = s.Hidden is long lh ? lh != 0L : Convert.ToBoolean(s.Hidden),
                             Type = Convert.ToString(s.Type) ?? "sse",
-                            ApiKey = Convert.ToString(s.ApiKey)
+                            ApiKey = Convert.ToString(s.ApiKey),
+                            HealthCheckMode = (s as IDictionary<string, object>)?.ContainsKey("HealthCheckMode") == true
+                                ? (Convert.ToString((s as dynamic).HealthCheckMode) ?? "ping")
+                                : "ping"
                         }).Where(s => s.Enabled).ToList();
                     }
                 }
@@ -111,10 +114,44 @@ namespace ModelContextGateway.Components.Servers
                 return;
             }
 
+            if (string.Equals(server.HealthCheckMode, "none", StringComparison.OrdinalIgnoreCase))
+            {
+                _sessionManager.UpdateBackendStatus(server.Id, "Connected", 1, "");
+                return;
+            }
+
             try
             {
                 var client = _httpClientFactory.CreateClient("McpClient");
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+
+                bool useRootProbe = string.Equals(server.HealthCheckMode, "root", StringComparison.OrdinalIgnoreCase) ||
+                                    server.Id.StartsWith("postgres-", StringComparison.OrdinalIgnoreCase);
+
+                if (!useRootProbe && Uri.TryCreate(server.Url, UriKind.Absolute, out var targetUri))
+                {
+                    var pingPayload = "{\"jsonrpc\":\"2.0\",\"id\":\"health-ping\",\"method\":\"ping\"}";
+                    using var pingRequest = new HttpRequestMessage(HttpMethod.Post, server.Url)
+                    {
+                        Content = new StringContent(pingPayload, System.Text.Encoding.UTF8, "application/json")
+                    };
+                    pingRequest.Headers.Accept.Clear();
+                    pingRequest.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                    if (!string.IsNullOrEmpty(server.ApiKey))
+                    {
+                        pingRequest.Headers.Add("Authorization", $"Bearer {server.ApiKey}");
+                        pingRequest.Headers.Add("X-API-Key", server.ApiKey);
+                    }
+
+                    using var pingResponse = await client.SendAsync(pingRequest, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                    if (pingResponse.IsSuccessStatusCode)
+                    {
+                        _sessionManager.UpdateBackendStatus(server.Id, "Connected", 1, "");
+                        return;
+                    }
+
+                    _logger.LogDebug("Server {ServerId} returned {StatusCode} on JSON-RPC ping; falling back to root probe.", server.Id, pingResponse.StatusCode);
+                }
 
                 var probeUrl = server.Url;
                 if (Uri.TryCreate(server.Url, UriKind.Absolute, out var uri))
