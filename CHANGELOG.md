@@ -8,7 +8,8 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v5.22.2`** | 2026-10-25 | fix(healthcheck): Add \`text/event-stream\` to probe \`Accept\` header per MCP specification and persist \`HealthCheckMode\` across SQL repositories. |
+| **`v5.23.0`** | 2026-10-25 | feat(codemode): MCP Code Mode JavaScript Sandbox Engine, Dual Dispatcher, Auto-Unboxing, Multi-Select Tag Groups UI, and Resource Guardrails. Added in-gateway JavaScript execution engine powered by isolated Jint runtime exposing `execute_script` in Meta-Mode; implemented dual dispatcher syntax with direct gateway routing (`await mcg.callTool()`) and ergonomic hierarchical proxy (`await tools.<server>.<tool>()`); transparent auto-unboxing of tool JSON text envelopes into native JS objects/arrays; strict sandbox resource guardrails (execution timeout, statement count ceiling, memory limit, and max downstream tool call quota); group-based authorization filtering via `CodeMode:AllowedGroups`; and added dedicated Code Mode configuration tab in Web UI Settings with multi-select tag group management and form validation (`MCP-CODE-01` through `MCP-CODE-02`, `GUARD-CODE-01` through `GUARD-CODE-04`, `SEC-CODE-01` through `SEC-CODE-02`, `UI-CODE-01` through `UI-CODE-02`). |
+| **`v5.22.2`** | 2026-10-25 | fix(healthcheck): Add `text/event-stream` to probe `Accept` header per MCP specification and persist `HealthCheckMode` across SQL repositories. |
 | **`v5.22.1`** | 2026-10-25 | fix(healthcheck): probe base origin and support dual-mode ping to prevent downstream MCP session memory leaks |
 | **`v5.22.0`** | 2026-10-18 | feat(search): configurable tool search limits, thresholding and dropoff filtering |
 | **`v5.21.0`** | 2026-10-02 | feat(routing): calibrated hybrid semantic search scoring, explicit search modes, and test bench simulator overhaul |
