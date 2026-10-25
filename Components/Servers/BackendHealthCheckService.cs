@@ -38,7 +38,7 @@ namespace ModelContextGateway.Components.Servers
             // Immediate probe on startup
             await ProbeAllServersAsync();
 
-            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(15));
+            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
             while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken))
             {
                 await ProbeAllServersAsync();
@@ -57,7 +57,7 @@ namespace ModelContextGateway.Components.Servers
                     if (dbFactory != null)
                     {
                         using var conn = dbFactory.CreateConnection();
-                        var rawServers = (await conn.QueryAsync(@"SELECT Id, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson FROM Servers")).ToList();
+                        var rawServers = (await conn.QueryAsync(@"SELECT * FROM Servers")).ToList();
 
                         servers = rawServers.Select(s => new McpServer
                         {
@@ -67,7 +67,10 @@ namespace ModelContextGateway.Components.Servers
                             Enabled = s.Enabled is long l ? l != 0L : Convert.ToBoolean(s.Enabled),
                             Hidden = s.Hidden is long lh ? lh != 0L : Convert.ToBoolean(s.Hidden),
                             Type = Convert.ToString(s.Type) ?? "sse",
-                            ApiKey = Convert.ToString(s.ApiKey)
+                            ApiKey = Convert.ToString(s.ApiKey),
+                            HealthCheckMode = (s as IDictionary<string, object>)?.ContainsKey("HealthCheckMode") == true
+                                ? (Convert.ToString((s as dynamic).HealthCheckMode) ?? "ping")
+                                : "ping"
                         }).Where(s => s.Enabled).ToList();
                     }
                 }
@@ -111,12 +114,54 @@ namespace ModelContextGateway.Components.Servers
                 return;
             }
 
+            if (string.Equals(server.HealthCheckMode, "none", StringComparison.OrdinalIgnoreCase))
+            {
+                _sessionManager.UpdateBackendStatus(server.Id, "Connected", 1, "");
+                return;
+            }
+
             try
             {
                 var client = _httpClientFactory.CreateClient("McpClient");
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
 
-                var request = new HttpRequestMessage(HttpMethod.Get, server.Url);
+                bool useRootProbe = string.Equals(server.HealthCheckMode, "root", StringComparison.OrdinalIgnoreCase) ||
+                                    server.Id.StartsWith("postgres-", StringComparison.OrdinalIgnoreCase);
+
+                if (!useRootProbe && Uri.TryCreate(server.Url, UriKind.Absolute, out var targetUri))
+                {
+                    var pingPayload = "{\"jsonrpc\":\"2.0\",\"id\":\"health-ping\",\"method\":\"ping\"}";
+                    using var pingRequest = new HttpRequestMessage(HttpMethod.Post, server.Url)
+                    {
+                        Content = new StringContent(pingPayload, System.Text.Encoding.UTF8, "application/json")
+                    };
+                    pingRequest.Headers.Accept.Clear();
+                    pingRequest.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                    if (!string.IsNullOrEmpty(server.ApiKey))
+                    {
+                        pingRequest.Headers.Add("Authorization", $"Bearer {server.ApiKey}");
+                        pingRequest.Headers.Add("X-API-Key", server.ApiKey);
+                    }
+
+                    using var pingResponse = await client.SendAsync(pingRequest, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                    if (pingResponse.IsSuccessStatusCode)
+                    {
+                        _sessionManager.UpdateBackendStatus(server.Id, "Connected", 1, "");
+                        return;
+                    }
+
+                    _logger.LogDebug("Server {ServerId} returned {StatusCode} on JSON-RPC ping; falling back to root probe.", server.Id, pingResponse.StatusCode);
+                }
+
+                var probeUrl = server.Url;
+                if (Uri.TryCreate(server.Url, UriKind.Absolute, out var uri))
+                {
+                    // Probe the base authority root (e.g. http://frigate-mcp:8086/) rather than /mcp or /sse
+                    // to avoid initiating unbounded client streaming sessions on downstream Python MCP SDK transports.
+                    probeUrl = $"{uri.Scheme}://{uri.Authority}/";
+                }
+
+                var request = new HttpRequestMessage(HttpMethod.Get, probeUrl);
                 if (!string.IsNullOrEmpty(server.ApiKey))
                 {
                     request.Headers.Add("Authorization", $"Bearer {server.ApiKey}");

@@ -151,6 +151,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
 
             EnsureAliasColumn(conn);
             EnsureOAuthColumns(conn);
+            EnsureHealthCheckModeColumn(conn);
         }
 
         public static void EnsureAliasColumn(IDbConnection conn)
@@ -188,6 +189,18 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 {
                     // Column already exists
                 }
+            }
+        }
+
+        public static void EnsureHealthCheckModeColumn(IDbConnection conn)
+        {
+            try
+            {
+                conn.Execute("ALTER TABLE Servers ADD COLUMN HealthCheckMode TEXT DEFAULT 'ping';");
+            }
+            catch
+            {
+                // Column already exists
             }
         }
     }

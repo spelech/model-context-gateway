@@ -29,6 +29,7 @@ namespace ModelContextGateway.Components.Servers
         public string? OAuthTokenUrl { get; set; }
         public string? OAuthScopes { get; set; }
         public string? OAuthRedirectUri { get; set; }
+        public string HealthCheckMode { get; set; } = "ping"; // "ping", "root", "none"
     }
 
     public class BackendStatus
