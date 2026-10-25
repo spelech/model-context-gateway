@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-25T22:46:24.8331584Z",
-    "totalRequirements": 477,
-    "positiveCount": 375,
+    "generatedAt": "2026-10-25T23:24:07.9993603Z",
+    "totalRequirements": 481,
+    "positiveCount": 379,
     "guardrailCount": 102,
-    "totalProofs": 1111
+    "totalProofs": 1115
   },
   "requirements": [
     {
@@ -3758,7 +3758,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 232,
+          "lineNumber": 352,
           "testName": "ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command",
           "details": null
         },
@@ -5030,7 +5030,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 161,
+          "lineNumber": 281,
           "testName": "ProbeAllServersAsync_Probes_All_Enabled_Servers",
           "details": null
         }
@@ -5046,7 +5046,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 264,
+          "lineNumber": 384,
           "testName": "ProbeServerAsync_Sets_Connected_For_Custom_Server",
           "details": null
         }
@@ -5062,24 +5062,8 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 132,
+          "lineNumber": 252,
           "testName": "ProbeServerAsync_Sets_Disabled_When_Server_Not_Enabled",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "HEALTH-PROBE-HTTP-CONNECTED-200",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "BackendHealthCheckService marks server as Connected when downstream HTTP/SSE endpoint returns 200 OK.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 57,
-          "testName": "ProbeServerAsync_Sets_Connected_When_Endpoint_Responds_200",
           "details": null
         }
       ]
@@ -5094,8 +5078,88 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 97,
+          "lineNumber": 217,
           "testName": "ProbeServerAsync_Sets_Failed_When_Endpoint_Throws_Exception",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "HEALTH-PROBE-HTTP-PING-CONNECTED-200",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "BackendHealthCheckService marks server as Connected when downstream JSON-RPC ping returns 200 OK.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
+          "lineNumber": 41,
+          "testName": "ProbeServerAsync_Sets_Connected_When_JsonRpc_Ping_Responds_200",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "HEALTH-PROBE-HTTP-PING-FALLBACK-ROOT",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "BackendHealthCheckService falls back to base authority root probe when downstream JSON-RPC ping returns 405 Method Not Allowed.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
+          "lineNumber": 87,
+          "testName": "ProbeServerAsync_Falls_Back_To_Root_Probe_When_Ping_Returns_405",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "HEALTH-PROBE-NONE-MODE-NOOP",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "BackendHealthCheckService marks server as Connected without HTTP requests when HealthCheckMode is none.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
+          "lineNumber": 178,
+          "testName": "ProbeServerAsync_Marks_Connected_Without_Http_When_Mode_Is_None",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "HEALTH-PROBE-REPO-PERSISTS-HEALTHCHECKMODE",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Server repository persists and retrieves HealthCheckMode setting accurately.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
+          "lineNumber": 416,
+          "testName": "ServerRepository_Persists_And_Retrieves_HealthCheckMode",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "HEALTH-PROBE-ROOT-MODE-BYPASSES-PING",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "BackendHealthCheckService directly probes base authority root when HealthCheckMode is root or server is postgres.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
+          "lineNumber": 136,
+          "testName": "ProbeServerAsync_Probes_Root_Directly_When_Mode_Is_Root_Or_Postgres",
           "details": null
         }
       ]
@@ -5110,7 +5174,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 190,
+          "lineNumber": 310,
           "testName": "ProbeServerAsync_Sets_Connected_For_Valid_Stdio_Server_Without_Http_Probe",
           "details": null
         }

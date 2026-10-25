@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **477 Requirements Verified** across **1111 Test Proofs** (375 Functional Capabilities, 102 Safety Guardrails).
+> **Catalog Statistics:** **481 Requirements Verified** across **1115 Test Proofs** (379 Functional Capabilities, 102 Safety Guardrails).
 
 ---
 
@@ -15,7 +15,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **70** | 3 | 67 | 146 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **125** | 118 | 7 | 278 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **129** | 122 | 7 | 282 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **67** | 56 | 11 | 143 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **42** | 35 | 7 | 214 proofs |
@@ -1016,37 +1016,61 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L161`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L161) (`ProbeAllServersAsync_Probes_All_Enabled_Servers`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L281`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L281) (`ProbeAllServersAsync_Probes_All_Enabled_Servers`)
 
 ### `[HEALTH-PROBE-CUSTOM-SERVER-CONNECTED]` BackendHealthCheckService marks registered custom servers as Connected.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L264`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L264) (`ProbeServerAsync_Sets_Connected_For_Custom_Server`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L384`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L384) (`ProbeServerAsync_Sets_Connected_For_Custom_Server`)
 
 ### `[HEALTH-PROBE-DISABLED-SERVER]` BackendHealthCheckService marks disabled servers as Disabled.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L132`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L132) (`ProbeServerAsync_Sets_Disabled_When_Server_Not_Enabled`)
-
-### `[HEALTH-PROBE-HTTP-CONNECTED-200]` BackendHealthCheckService marks server as Connected when downstream HTTP/SSE endpoint returns 200 OK.
-* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L57`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L57) (`ProbeServerAsync_Sets_Connected_When_Endpoint_Responds_200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L252`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L252) (`ProbeServerAsync_Sets_Disabled_When_Server_Not_Enabled`)
 
 ### `[HEALTH-PROBE-HTTP-FAILED-EXCEPTION]` BackendHealthCheckService marks server as Failed when downstream HTTP connection fails.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L97`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L97) (`ProbeServerAsync_Sets_Failed_When_Endpoint_Throws_Exception`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L217`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L217) (`ProbeServerAsync_Sets_Failed_When_Endpoint_Throws_Exception`)
+
+### `[HEALTH-PROBE-HTTP-PING-CONNECTED-200]` BackendHealthCheckService marks server as Connected when downstream JSON-RPC ping returns 200 OK.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L41`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L41) (`ProbeServerAsync_Sets_Connected_When_JsonRpc_Ping_Responds_200`)
+
+### `[HEALTH-PROBE-HTTP-PING-FALLBACK-ROOT]` BackendHealthCheckService falls back to base authority root probe when downstream JSON-RPC ping returns 405 Method Not Allowed.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L87`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L87) (`ProbeServerAsync_Falls_Back_To_Root_Probe_When_Ping_Returns_405`)
+
+### `[HEALTH-PROBE-NONE-MODE-NOOP]` BackendHealthCheckService marks server as Connected without HTTP requests when HealthCheckMode is none.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L178`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L178) (`ProbeServerAsync_Marks_Connected_Without_Http_When_Mode_Is_None`)
+
+### `[HEALTH-PROBE-REPO-PERSISTS-HEALTHCHECKMODE]` Server repository persists and retrieves HealthCheckMode setting accurately.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L416`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L416) (`ServerRepository_Persists_And_Retrieves_HealthCheckMode`)
+
+### `[HEALTH-PROBE-ROOT-MODE-BYPASSES-PING]` BackendHealthCheckService directly probes base authority root when HealthCheckMode is root or server is postgres.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L136`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L136) (`ProbeServerAsync_Probes_Root_Directly_When_Mode_Is_Root_Or_Postgres`)
 
 ### `[HEALTH-PROBE-STDIO-VALID-CONNECTED]` BackendHealthCheckService sets valid STDIO servers to Connected without making network HTTP probes.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L190`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L190) (`ProbeServerAsync_Sets_Connected_For_Valid_Stdio_Server_Without_Http_Probe`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L310`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L310) (`ProbeServerAsync_Sets_Connected_For_Valid_Stdio_Server_Without_Http_Probe`)
 
 ### `[MCP-01]` initializes with default state
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -2862,7 +2886,7 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L397`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L397) (`SaveSecretProvider_HttpUrl_RejectedForExternal`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L28`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L28) (`IsValidServerUrl_Rejects_Invalid_Http_Urls`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L53`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L53) (`Validation_Rejects_TypeOnly_Update_Leaving_Incompatible_Url`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L232`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L232) (`ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L352`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L352) (`ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command`)
   - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L59`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L59) (`DockerDiscovery_SkipsContainer_ResolvingToPrivateIp`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EmbeddingServiceTests.cs#L83`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EmbeddingServiceTests.cs#L83) (`ApiEmbeddingService_GetEmbeddingAsync_Throws_On_Http_Error`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L58`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L58) (`McpClient_NamedHttpClient_Applies_SsrfConnectCallback_AndBlocksPrivateIps`)
@@ -3747,12 +3771,16 @@
 | `API-PIPELINE-POST-MESSAGE-PROTOCOL` | Positive | `MCP` | Full end-to-end JSON-RPC session message suite executes over HTTP POST. | [`PipelineIntegrationTests.cs:L143`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L143) | Backend xUnit |
 | `API-PIPELINE-POST-SSE-PROTOCOL` | Positive | `MCP` | Full end-to-end JSON-RPC protocol suite executes across SSE pipeline. | [`PipelineIntegrationTests.cs:L86`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L86) | Backend xUnit |
 | `API-PIPELINE-SERVER-CRUD` | Positive | `MCP` | Backend server CRUD pipeline endpoints persist and manage downstream servers. | [`PipelineIntegrationTests.cs:L277`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L277) | Backend xUnit |
-| `HEALTH-PROBE-ALL-ENABLED-FLEET` | Positive | `MCP` | BackendHealthCheckService probes all enabled backend servers in the fleet. | [`BackendHealthCheckServiceTests.cs:L161`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L161) | Backend xUnit |
-| `HEALTH-PROBE-CUSTOM-SERVER-CONNECTED` | Positive | `MCP` | BackendHealthCheckService marks registered custom servers as Connected. | [`BackendHealthCheckServiceTests.cs:L264`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L264) | Backend xUnit |
-| `HEALTH-PROBE-DISABLED-SERVER` | Positive | `MCP` | BackendHealthCheckService marks disabled servers as Disabled. | [`BackendHealthCheckServiceTests.cs:L132`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L132) | Backend xUnit |
-| `HEALTH-PROBE-HTTP-CONNECTED-200` | Positive | `MCP` | BackendHealthCheckService marks server as Connected when downstream HTTP/SSE endpoint returns 200 OK. | [`BackendHealthCheckServiceTests.cs:L57`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L57) | Backend xUnit |
-| `HEALTH-PROBE-HTTP-FAILED-EXCEPTION` | Positive | `MCP` | BackendHealthCheckService marks server as Failed when downstream HTTP connection fails. | [`BackendHealthCheckServiceTests.cs:L97`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L97) | Backend xUnit |
-| `HEALTH-PROBE-STDIO-VALID-CONNECTED` | Positive | `MCP` | BackendHealthCheckService sets valid STDIO servers to Connected without making network HTTP probes. | [`BackendHealthCheckServiceTests.cs:L190`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L190) | Backend xUnit |
+| `HEALTH-PROBE-ALL-ENABLED-FLEET` | Positive | `MCP` | BackendHealthCheckService probes all enabled backend servers in the fleet. | [`BackendHealthCheckServiceTests.cs:L281`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L281) | Backend xUnit |
+| `HEALTH-PROBE-CUSTOM-SERVER-CONNECTED` | Positive | `MCP` | BackendHealthCheckService marks registered custom servers as Connected. | [`BackendHealthCheckServiceTests.cs:L384`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L384) | Backend xUnit |
+| `HEALTH-PROBE-DISABLED-SERVER` | Positive | `MCP` | BackendHealthCheckService marks disabled servers as Disabled. | [`BackendHealthCheckServiceTests.cs:L252`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L252) | Backend xUnit |
+| `HEALTH-PROBE-HTTP-FAILED-EXCEPTION` | Positive | `MCP` | BackendHealthCheckService marks server as Failed when downstream HTTP connection fails. | [`BackendHealthCheckServiceTests.cs:L217`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L217) | Backend xUnit |
+| `HEALTH-PROBE-HTTP-PING-CONNECTED-200` | Positive | `MCP` | BackendHealthCheckService marks server as Connected when downstream JSON-RPC ping returns 200 OK. | [`BackendHealthCheckServiceTests.cs:L41`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L41) | Backend xUnit |
+| `HEALTH-PROBE-HTTP-PING-FALLBACK-ROOT` | Positive | `MCP` | BackendHealthCheckService falls back to base authority root probe when downstream JSON-RPC ping returns 405 Method Not Allowed. | [`BackendHealthCheckServiceTests.cs:L87`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L87) | Backend xUnit |
+| `HEALTH-PROBE-NONE-MODE-NOOP` | Positive | `MCP` | BackendHealthCheckService marks server as Connected without HTTP requests when HealthCheckMode is none. | [`BackendHealthCheckServiceTests.cs:L178`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L178) | Backend xUnit |
+| `HEALTH-PROBE-REPO-PERSISTS-HEALTHCHECKMODE` | Positive | `MCP` | Server repository persists and retrieves HealthCheckMode setting accurately. | [`BackendHealthCheckServiceTests.cs:L416`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L416) | Backend xUnit |
+| `HEALTH-PROBE-ROOT-MODE-BYPASSES-PING` | Positive | `MCP` | BackendHealthCheckService directly probes base authority root when HealthCheckMode is root or server is postgres. | [`BackendHealthCheckServiceTests.cs:L136`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L136) | Backend xUnit |
+| `HEALTH-PROBE-STDIO-VALID-CONNECTED` | Positive | `MCP` | BackendHealthCheckService sets valid STDIO servers to Connected without making network HTTP probes. | [`BackendHealthCheckServiceTests.cs:L310`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L310) | Backend xUnit |
 | `MCP-01` | Positive | `MCP` | initializes with default state | [`useServerStore.test.ts:L24`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useServerStore.test.ts#L24) | Frontend Vitest |
 | `MCP-02` | Positive | `MCP` | All MCP protocol capabilities enforce caller role authorizations consistently | [`PairwiseIntegrationMatrixTests.cs:L385`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385) | Backend xUnit |
 | `MCP-05` | Positive | `MCP` | ResourceRoutingManager returns all registered resources when search query is empty. | [`ResourceRoutingManagerTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L8) | Backend xUnit |
