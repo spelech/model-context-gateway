@@ -556,6 +556,11 @@ namespace ModelContextGateway.Core.Routing
                     };
                     var targetBody = JsonSerializer.Serialize(targetPayload);
 
+                    if (targetName == "search_tools")
+                    {
+                        return await CallToolAsync("search_tools", targetBody, dbFactory!, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId, filterAuthorizedToolsAsync, callerGroups, isCallerAdmin);
+                    }
+
                     return await ExecuteTargetToolAsync(targetName, targetBody, targetAuthToken, dbFactory!, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);
                 };
 

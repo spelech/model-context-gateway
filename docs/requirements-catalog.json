@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-25T23:24:07.9993603Z",
+    "generatedAt": "2026-10-25T23:28:20.3800935Z",
     "totalRequirements": 481,
     "positiveCount": 379,
     "guardrailCount": 102,
-    "totalProofs": 1115
+    "totalProofs": 1116
   },
   "requirements": [
     {
@@ -7352,7 +7352,7 @@
       "category": "MCP",
       "type": "Positive",
       "description": "RouterSettings provides default Code Mode configuration values.",
-      "proofCount": 7,
+      "proofCount": 8,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -7401,6 +7401,13 @@
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
           "lineNumber": 25,
           "testName": "GetMetaTools_OmitsExecuteScript_WhenDisabled",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 420,
+          "testName": "ExecuteScript_ChainingSearchTools_ExecutesSuccessfully",
           "details": null
         }
       ]

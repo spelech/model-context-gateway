@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **481 Requirements Verified** across **1115 Test Proofs** (379 Functional Capabilities, 102 Safety Guardrails).
+> **Catalog Statistics:** **481 Requirements Verified** across **1116 Test Proofs** (379 Functional Capabilities, 102 Safety Guardrails).
 
 ---
 
@@ -15,7 +15,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **70** | 3 | 67 | 146 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **129** | 122 | 7 | 282 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **129** | 122 | 7 | 283 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **67** | 56 | 11 | 143 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **42** | 35 | 7 | 214 proofs |
@@ -1567,7 +1567,7 @@
 ### `[MCP-CODE-01]` RouterSettings provides default Code Mode configuration values.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (7):**
+* **Verification Proofs (8):**
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeSettingsTests.cs#L7`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeSettingsTests.cs#L7) (`RouterSettings_HasSensibleCodeModeDefaults`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L11) (`ExecuteAsync_DualDispatcherAndUnboxing_WorksSuccessfully`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L68`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L68) (`ExecuteAsync_PreInjectedArgs_AccessibleInScript`)
@@ -1575,6 +1575,7 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L137`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L137) (`ExecuteAsync_NonJsonContent_ReturnsRawText`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L13`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L13) (`GetMetaTools_IncludesExecuteScript_WhenEnabled`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L25`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L25) (`GetMetaTools_OmitsExecuteScript_WhenDisabled`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L420`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L420) (`ExecuteScript_ChainingSearchTools_ExecutesSuccessfully`)
 
 ### `[MCP-CODE-02]` ExecuteScript returns structured execution envelope with result and telemetry.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)

@@ -416,5 +416,52 @@ namespace ModelContextGateway.Tests
             using var envDoc = JsonDocument.Parse(text!);
             envDoc.RootElement.GetProperty("result").GetString().Should().Contain("Custom execution error");
         }
+
+        [Fact]
+        [Requirement("MCP-CODE-01", "MCP", RequirementType.Positive, "execute_script allows scripts to chain search_tools internally and unbox the results.")]
+        public async Task ExecuteScript_ChainingSearchTools_ExecutesSuccessfully()
+        {
+            var router = new ToolRoutingManager();
+            var settings = new RouterSettings { EnableCodeMode = true };
+            var mockDbFactory = new Mock<IDbConnectionFactory>();
+            var embeddingServiceMock = new Mock<DynamicEmbeddingService>(new HttpClient(), NullLoggerFactory.Instance, new ServiceCollection().BuildServiceProvider());
+            embeddingServiceMock.Setup(s => s.GetSettings()).Returns(settings);
+
+            var payload = new
+            {
+                jsonrpc = "2.0",
+                id = "req-chain-search",
+                method = "tools/call",
+                @params = new
+                {
+                    name = "execute_script",
+                    arguments = new
+                    {
+                        script = "const res = await callTool('search_tools', { query: 'test' }); return { count: res ? (res.length || 0) : 0 };"
+                    }
+                }
+            };
+            var body = JsonSerializer.Serialize(payload);
+
+            var result = await router.CallToolAsync(
+                "execute_script",
+                body,
+                mockDbFactory.Object,
+                new ConcurrentDictionary<string, BackendConnection>(),
+                new List<McpServer>(),
+                NullLogger.Instance,
+                new HttpClient(),
+                embeddingServiceMock.Object,
+                () => Task.CompletedTask,
+                (b, k, v) => b
+            );
+
+            var json = JsonSerializer.Serialize(result);
+            using var doc = JsonDocument.Parse(json);
+            doc.RootElement.GetProperty("isError").GetBoolean().Should().BeFalse();
+            var text = doc.RootElement.GetProperty("content")[0].GetProperty("text").GetString();
+            using var envDoc = JsonDocument.Parse(text!);
+            envDoc.RootElement.GetProperty("toolCallsCount").GetInt32().Should().Be(1);
+        }
     }
 }
