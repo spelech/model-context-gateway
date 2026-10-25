@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-03T03:52:25.4441412Z",
-    "totalRequirements": 464,
-    "positiveCount": 368,
+    "generatedAt": "2026-10-25T23:03:37.0711542Z",
+    "totalRequirements": 471,
+    "positiveCount": 375,
     "guardrailCount": 96,
-    "totalProofs": 1082
+    "totalProofs": 1091
   },
   "requirements": [
     {
@@ -1760,7 +1760,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/GeneralTab.test.tsx",
-          "lineNumber": 71,
+          "lineNumber": 129,
           "testName": "updates form state when settings prop changes",
           "details": null
         },
@@ -3709,7 +3709,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs",
-          "lineNumber": 84,
+          "lineNumber": 85,
           "testName": "PrivateOrLoopback_Blocked_When_AllowPrivateIps_False",
           "details": null
         },
@@ -3758,7 +3758,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 232,
+          "lineNumber": 352,
           "testName": "ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command",
           "details": null
         },
@@ -3932,7 +3932,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 779,
+          "lineNumber": 782,
           "testName": "ManageCustomFiles_ValidationGuardrails",
           "details": null
         }
@@ -3964,7 +3964,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 513,
+          "lineNumber": 516,
           "testName": "ManagePolicies_WildcardDenyGuardrail",
           "details": null
         }
@@ -3980,7 +3980,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 650,
+          "lineNumber": 653,
           "testName": "ManageProviders_LdapPlaintextGuardrail",
           "details": null
         }
@@ -3996,7 +3996,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 324,
+          "lineNumber": 327,
           "testName": "ManageServers_ValidationGuardrails",
           "details": null
         }
@@ -4012,7 +4012,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 596,
+          "lineNumber": 609,
           "testName": "CallToolAsync_UnknownToolOrAction_ReturnsErrorResponse",
           "details": null
         }
@@ -4810,7 +4810,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 637,
+          "lineNumber": 650,
           "testName": "CallToolAsync_TestToolCall_MissingServer_ReturnsError",
           "details": null
         }
@@ -4938,7 +4938,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 161,
+          "lineNumber": 281,
           "testName": "ProbeAllServersAsync_Probes_All_Enabled_Servers",
           "details": null
         }
@@ -4954,7 +4954,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 264,
+          "lineNumber": 384,
           "testName": "ProbeServerAsync_Sets_Connected_For_Custom_Server",
           "details": null
         }
@@ -4970,24 +4970,8 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 132,
+          "lineNumber": 252,
           "testName": "ProbeServerAsync_Sets_Disabled_When_Server_Not_Enabled",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "HEALTH-PROBE-HTTP-CONNECTED-200",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "BackendHealthCheckService marks server as Connected when downstream HTTP/SSE endpoint returns 200 OK.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 57,
-          "testName": "ProbeServerAsync_Sets_Connected_When_Endpoint_Responds_200",
           "details": null
         }
       ]
@@ -5002,8 +4986,88 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 97,
+          "lineNumber": 217,
           "testName": "ProbeServerAsync_Sets_Failed_When_Endpoint_Throws_Exception",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "HEALTH-PROBE-HTTP-PING-CONNECTED-200",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "BackendHealthCheckService marks server as Connected when downstream JSON-RPC ping returns 200 OK.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
+          "lineNumber": 41,
+          "testName": "ProbeServerAsync_Sets_Connected_When_JsonRpc_Ping_Responds_200",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "HEALTH-PROBE-HTTP-PING-FALLBACK-ROOT",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "BackendHealthCheckService falls back to base authority root probe when downstream JSON-RPC ping returns 405 Method Not Allowed.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
+          "lineNumber": 87,
+          "testName": "ProbeServerAsync_Falls_Back_To_Root_Probe_When_Ping_Returns_405",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "HEALTH-PROBE-NONE-MODE-NOOP",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "BackendHealthCheckService marks server as Connected without HTTP requests when HealthCheckMode is none.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
+          "lineNumber": 178,
+          "testName": "ProbeServerAsync_Marks_Connected_Without_Http_When_Mode_Is_None",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "HEALTH-PROBE-REPO-PERSISTS-HEALTHCHECKMODE",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Server repository persists and retrieves HealthCheckMode setting accurately.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
+          "lineNumber": 416,
+          "testName": "ServerRepository_Persists_And_Retrieves_HealthCheckMode",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "HEALTH-PROBE-ROOT-MODE-BYPASSES-PING",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "BackendHealthCheckService directly probes base authority root when HealthCheckMode is root or server is postgres.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
+          "lineNumber": 136,
+          "testName": "ProbeServerAsync_Probes_Root_Directly_When_Mode_Is_Root_Or_Postgres",
           "details": null
         }
       ]
@@ -5018,7 +5082,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs",
-          "lineNumber": 190,
+          "lineNumber": 310,
           "testName": "ProbeServerAsync_Sets_Connected_For_Valid_Stdio_Server_Without_Http_Probe",
           "details": null
         }
@@ -5536,42 +5600,42 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs",
-          "lineNumber": 62,
+          "lineNumber": 63,
           "testName": "DynamicEmbeddingService_Gets_And_Saves_Settings",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs",
-          "lineNumber": 108,
+          "lineNumber": 109,
           "testName": "ReloadSettings_UpdatesSettingsAndActiveService",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs",
-          "lineNumber": 125,
+          "lineNumber": 126,
           "testName": "DynamicEmbeddingService_GetEmbeddingAsync_Uses_ApiProvider_When_Configured",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs",
-          "lineNumber": 149,
+          "lineNumber": 150,
           "testName": "CosineSimilarity_Calculates_Correct_Vector_Distance",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs",
-          "lineNumber": 173,
+          "lineNumber": 174,
           "testName": "PreWarmAsync_Executes_Without_Throwing",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs",
-          "lineNumber": 199,
+          "lineNumber": 200,
           "testName": "GenerateEmbeddingAsync_Uses_UnderlyingProvider",
           "details": null
         },
@@ -5815,7 +5879,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 686,
+          "lineNumber": 699,
           "testName": "ProcessRequestAsync_Handles_Server_Discover",
           "details": null
         },
@@ -5852,14 +5916,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 655,
+          "lineNumber": 668,
           "testName": "HandleInitializeAsync_Advertises_Subscriptions_Capability",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 667,
+          "lineNumber": 680,
           "testName": "ProcessRequestAsync_Handles_Subscriptions_Listen",
           "details": null
         },
@@ -6499,8 +6563,54 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 217,
+          "lineNumber": 229,
           "testName": "SearchTools_CustomToolCall_ExecutesWithModeAndDenseWeight",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-43",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "SearchToolsDetailedAsync applies configurable result limit.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 473,
+          "testName": "SearchToolsDetailedAsync_AppliesConfigurableLimit",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 491,
+          "testName": "SearchToolsDetailedAsync_AppliesMinScoreThreshold",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs",
+          "lineNumber": 515,
+          "testName": "SearchToolsDetailedAsync_AppliesScoreDropoffRatio",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-44",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "search_tools MCP tool call respects caller-supplied limit, min_score, and score_dropoff_ratio arguments.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
+          "lineNumber": 298,
+          "testName": "SearchTools_CustomToolCall_ExecutesWithCallerLimitAndThresholds",
           "details": null
         }
       ]
@@ -6595,7 +6705,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 199,
+          "lineNumber": 200,
           "testName": "HandleInitializeAsync_NegotiatesProtocolVersion",
           "details": null
         }
@@ -6611,7 +6721,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 370,
+          "lineNumber": 373,
           "testName": "ManageAppKeys_Parity_AllActions",
           "details": null
         }
@@ -6627,7 +6737,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 423,
+          "lineNumber": 426,
           "testName": "ManageClients_Parity_AllActions",
           "details": null
         }
@@ -6643,7 +6753,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 716,
+          "lineNumber": 719,
           "testName": "ManageCustomFiles_Parity_AllActions",
           "details": null
         }
@@ -6659,7 +6769,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 530,
+          "lineNumber": 533,
           "testName": "ManageGroupMappings_Parity_AllActions",
           "details": null
         }
@@ -6675,7 +6785,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 873,
+          "lineNumber": 876,
           "testName": "AdminTools_ProcessRequest_JsonRpcProtocol",
           "details": null
         }
@@ -6691,7 +6801,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 464,
+          "lineNumber": 467,
           "testName": "ManagePolicies_Parity_AllActions",
           "details": null
         }
@@ -6707,7 +6817,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 577,
+          "lineNumber": 580,
           "testName": "ManageProviders_Parity_AllActions",
           "details": null
         }
@@ -6723,7 +6833,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 948,
+          "lineNumber": 961,
           "testName": "AdminMcpServer_ManageServers_Supports_Alias",
           "details": null
         }
@@ -6739,7 +6849,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 234,
+          "lineNumber": 237,
           "testName": "ManageServers_Parity_AllActions",
           "details": null
         }
@@ -6755,7 +6865,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 667,
+          "lineNumber": 670,
           "testName": "ManageSettings_Parity_AllActions",
           "details": null
         }
@@ -6771,7 +6881,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 816,
+          "lineNumber": 819,
           "testName": "ManageSystem_Parity_AllActions",
           "details": null
         }
@@ -6787,7 +6897,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 846,
+          "lineNumber": 849,
           "testName": "TestToolCall_Execution_Parity",
           "details": null
         }
@@ -6803,7 +6913,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminToolsParityTests.cs",
-          "lineNumber": 191,
+          "lineNumber": 194,
           "testName": "AdminTools_ExecuteSuccessfully",
           "details": null
         }
@@ -6819,7 +6929,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 730,
+          "lineNumber": 743,
           "testName": "ManageServers_ReconnectAll_TriggersSessionBackendInitialization",
           "details": null
         }
@@ -6963,7 +7073,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 270,
+          "lineNumber": 271,
           "testName": "CallToolAsync_RecordsAuditLog",
           "details": null
         }
@@ -6979,7 +7089,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 287,
+          "lineNumber": 288,
           "testName": "CallToolAsync_ManageAppKeys_Lifecycle",
           "details": null
         }
@@ -6995,7 +7105,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 334,
+          "lineNumber": 335,
           "testName": "CallToolAsync_ManageClients_Lifecycle",
           "details": null
         }
@@ -7011,7 +7121,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 508,
+          "lineNumber": 521,
           "testName": "CallToolAsync_ManageCustomFiles_Lifecycle",
           "details": null
         }
@@ -7027,7 +7137,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 406,
+          "lineNumber": 407,
           "testName": "CallToolAsync_ManageGroupMappings_Lifecycle",
           "details": null
         }
@@ -7043,7 +7153,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 372,
+          "lineNumber": 373,
           "testName": "CallToolAsync_ManagePolicies_Lifecycle",
           "details": null
         }
@@ -7059,7 +7169,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 439,
+          "lineNumber": 440,
           "testName": "CallToolAsync_ManageProviders_Lifecycle",
           "details": null
         }
@@ -7075,7 +7185,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 218,
+          "lineNumber": 219,
           "testName": "CallToolAsync_ManageServers_ListAndCreate",
           "details": null
         }
@@ -7091,7 +7201,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 482,
+          "lineNumber": 483,
           "testName": "CallToolAsync_ManageSettings_Lifecycle",
           "details": null
         }
@@ -7107,7 +7217,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 562,
+          "lineNumber": 575,
           "testName": "CallToolAsync_ManageSystem_Lifecycle",
           "details": null
         }
@@ -7123,7 +7233,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 151,
+          "lineNumber": 152,
           "testName": "ListToolsAsync_ReturnsTenConsolidatedTools",
           "details": null
         }
@@ -7445,6 +7555,22 @@
           "filePath": "ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs",
           "lineNumber": 294,
           "testName": "PrefixBasedResilientRouting_DynamicallyRegistersAndDispatchesTool",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-SEARCH-TOOL-LIMITS-AND-THRESHOLDS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Renders GeneralTab with configurable tool search limits and thresholds and triggers save.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/GeneralTab.test.tsx",
+          "lineNumber": 74,
+          "testName": "renders GeneralTab with tool search limit and threshold inputs and triggers save",
           "details": null
         }
       ]
@@ -8039,7 +8165,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 765,
+          "lineNumber": 778,
           "testName": "TestToolCall_ResolvesSecretsViaInjectedSecretRetriever",
           "details": null
         }
@@ -8055,7 +8181,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 856,
+          "lineNumber": 869,
           "testName": "TestToolCall_ResolvesUserCredentialsViaInjectedUserSecretStore",
           "details": null
         }
@@ -8559,7 +8685,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 613,
+          "lineNumber": 626,
           "testName": "CallToolAsync_AuditLog_RedactsSensitivePayloadData",
           "details": null
         }
@@ -9019,7 +9145,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/GeneralTab.test.tsx",
-          "lineNumber": 192,
+          "lineNumber": 250,
           "testName": "renders configured badge and rotate key button when master key is Configured",
           "details": null
         }
@@ -9065,7 +9191,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/GeneralTab.test.tsx",
-          "lineNumber": 149,
+          "lineNumber": 207,
           "testName": "renders locked badge when master key is managed externally",
           "details": null
         }
@@ -9081,7 +9207,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/GeneralTab.test.tsx",
-          "lineNumber": 115,
+          "lineNumber": 173,
           "testName": "renders AutoGenerated warning banner and opens MasterKeyModal",
           "details": null
         }

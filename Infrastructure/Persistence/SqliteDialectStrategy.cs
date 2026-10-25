@@ -11,9 +11,10 @@ namespace ModelContextGateway.Infrastructure.Persistence
         {
             DatabaseInitializer.EnsureAliasColumn(conn);
             DatabaseInitializer.EnsureOAuthColumns(conn);
+            DatabaseInitializer.EnsureHealthCheckModeColumn(conn);
             await conn.ExecuteAsync(@"
-                INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri)
-                VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri)
+                INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri, HealthCheckMode)
+                VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri, @HealthCheckMode)
                 ON CONFLICT(Id) DO UPDATE SET
                     Alias = @Alias,
                     DisplayName = @DisplayName,
@@ -37,7 +38,8 @@ namespace ModelContextGateway.Infrastructure.Persistence
                     OAuthAuthorizationUrl = @OAuthAuthorizationUrl,
                     OAuthTokenUrl = @OAuthTokenUrl,
                     OAuthScopes = @OAuthScopes,
-                    OAuthRedirectUri = @OAuthRedirectUri;
+                    OAuthRedirectUri = @OAuthRedirectUri,
+                    HealthCheckMode = @HealthCheckMode;
             ", server);
         }
 

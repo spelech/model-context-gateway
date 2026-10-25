@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **464 Requirements Verified** across **1082 Test Proofs** (368 Functional Capabilities, 96 Safety Guardrails).
+> **Catalog Statistics:** **471 Requirements Verified** across **1091 Test Proofs** (375 Functional Capabilities, 96 Safety Guardrails).
 
 ---
 
@@ -15,7 +15,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **66** | 3 | 63 | 138 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **120** | 113 | 7 | 264 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **127** | 120 | 7 | 273 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **65** | 56 | 9 | 138 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **40** | 33 | 7 | 212 proofs |
@@ -458,7 +458,7 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L223`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L223) (`CreateAppKey_CustomQuotaOverride_AllowsHigherLimit`)
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L594`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L594) (`sets user quota override and refreshes quota list`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L6) (`renders GeneralTab with security default quota inputs and triggers save`)
-  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L71`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L71) (`updates form state when settings prop changes`)
+  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L129`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L129) (`updates form state when settings prop changes`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L215`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L215) (`manages custom user quotas in admin quotas tab`)
   - [Playwright E2E] [`frontend/e2e/personal-appkeys-and-quotas.spec.ts#L134`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L134) (`Admin Context: configures custom user quota override`)
 
@@ -1016,37 +1016,61 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L161`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L161) (`ProbeAllServersAsync_Probes_All_Enabled_Servers`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L281`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L281) (`ProbeAllServersAsync_Probes_All_Enabled_Servers`)
 
 ### `[HEALTH-PROBE-CUSTOM-SERVER-CONNECTED]` BackendHealthCheckService marks registered custom servers as Connected.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L264`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L264) (`ProbeServerAsync_Sets_Connected_For_Custom_Server`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L384`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L384) (`ProbeServerAsync_Sets_Connected_For_Custom_Server`)
 
 ### `[HEALTH-PROBE-DISABLED-SERVER]` BackendHealthCheckService marks disabled servers as Disabled.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L132`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L132) (`ProbeServerAsync_Sets_Disabled_When_Server_Not_Enabled`)
-
-### `[HEALTH-PROBE-HTTP-CONNECTED-200]` BackendHealthCheckService marks server as Connected when downstream HTTP/SSE endpoint returns 200 OK.
-* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L57`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L57) (`ProbeServerAsync_Sets_Connected_When_Endpoint_Responds_200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L252`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L252) (`ProbeServerAsync_Sets_Disabled_When_Server_Not_Enabled`)
 
 ### `[HEALTH-PROBE-HTTP-FAILED-EXCEPTION]` BackendHealthCheckService marks server as Failed when downstream HTTP connection fails.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L97`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L97) (`ProbeServerAsync_Sets_Failed_When_Endpoint_Throws_Exception`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L217`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L217) (`ProbeServerAsync_Sets_Failed_When_Endpoint_Throws_Exception`)
+
+### `[HEALTH-PROBE-HTTP-PING-CONNECTED-200]` BackendHealthCheckService marks server as Connected when downstream JSON-RPC ping returns 200 OK.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L41`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L41) (`ProbeServerAsync_Sets_Connected_When_JsonRpc_Ping_Responds_200`)
+
+### `[HEALTH-PROBE-HTTP-PING-FALLBACK-ROOT]` BackendHealthCheckService falls back to base authority root probe when downstream JSON-RPC ping returns 405 Method Not Allowed.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L87`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L87) (`ProbeServerAsync_Falls_Back_To_Root_Probe_When_Ping_Returns_405`)
+
+### `[HEALTH-PROBE-NONE-MODE-NOOP]` BackendHealthCheckService marks server as Connected without HTTP requests when HealthCheckMode is none.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L178`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L178) (`ProbeServerAsync_Marks_Connected_Without_Http_When_Mode_Is_None`)
+
+### `[HEALTH-PROBE-REPO-PERSISTS-HEALTHCHECKMODE]` Server repository persists and retrieves HealthCheckMode setting accurately.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L416`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L416) (`ServerRepository_Persists_And_Retrieves_HealthCheckMode`)
+
+### `[HEALTH-PROBE-ROOT-MODE-BYPASSES-PING]` BackendHealthCheckService directly probes base authority root when HealthCheckMode is root or server is postgres.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L136`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L136) (`ProbeServerAsync_Probes_Root_Directly_When_Mode_Is_Root_Or_Postgres`)
 
 ### `[HEALTH-PROBE-STDIO-VALID-CONNECTED]` BackendHealthCheckService sets valid STDIO servers to Connected without making network HTTP probes.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L190`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L190) (`ProbeServerAsync_Sets_Connected_For_Valid_Stdio_Server_Without_Http_Probe`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L310`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L310) (`ProbeServerAsync_Sets_Connected_For_Valid_Stdio_Server_Without_Http_Probe`)
 
 ### `[MCP-01]` initializes with default state
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1168,8 +1192,8 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (3):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L655`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L655) (`HandleInitializeAsync_Advertises_Subscriptions_Capability`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L667`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L667) (`ProcessRequestAsync_Handles_Subscriptions_Listen`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L668`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L668) (`HandleInitializeAsync_Advertises_Subscriptions_Capability`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L680`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L680) (`ProcessRequestAsync_Handles_Subscriptions_Listen`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpSpecMiddlewareTests.cs#L194`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs#L194) (`Middleware_Parses_Subscriptions_Listen_Request`)
 
 ### `[MCP-24]` McpSpecMiddleware extracts OpenTelemetry W3C traceparent, tracestate, and baggage from headers and _meta.
@@ -1284,7 +1308,21 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (2):**
   - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L185`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L185) (`MetaModeTools_SearchToolsSchema_ExposesModeAndDenseWeight`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L217`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L217) (`SearchTools_CustomToolCall_ExecutesWithModeAndDenseWeight`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L229`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L229) (`SearchTools_CustomToolCall_ExecutesWithModeAndDenseWeight`)
+
+### `[MCP-43]` SearchToolsDetailedAsync applies configurable result limit.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (3):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L473`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L473) (`SearchToolsDetailedAsync_AppliesConfigurableLimit`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L491`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L491) (`SearchToolsDetailedAsync_AppliesMinScoreThreshold`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L515`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L515) (`SearchToolsDetailedAsync_AppliesScoreDropoffRatio`)
+
+### `[MCP-44]` search_tools MCP tool call respects caller-supplied limit, min_score, and score_dropoff_ratio arguments.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L298`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L298) (`SearchTools_CustomToolCall_ExecutesWithCallerLimitAndThresholds`)
 
 ### `[MCP-ADMIN-ENDPOINT-CALL-TOOL]` Admin endpoint /admin/message executes tools/call for manage_system diagnostics.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1320,91 +1358,91 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L199`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L199) (`HandleInitializeAsync_NegotiatesProtocolVersion`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L200`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L200) (`HandleInitializeAsync_NegotiatesProtocolVersion`)
 
 ### `[MCP-ADMIN-PARITY-APPKEYS]` manage_appkeys supports full parity for list, get_limits, create, and revoke actions.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L370`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L370) (`ManageAppKeys_Parity_AllActions`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L373`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L373) (`ManageAppKeys_Parity_AllActions`)
 
 ### `[MCP-ADMIN-PARITY-CLIENTS]` manage_clients supports full parity for register, list, and delete actions.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L423`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L423) (`ManageClients_Parity_AllActions`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L426`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L426) (`ManageClients_Parity_AllActions`)
 
 ### `[MCP-ADMIN-PARITY-CUSTOM-FILES]` manage_custom_files supports full parity for list, get, save, and delete prompt and resource files.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L716`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L716) (`ManageCustomFiles_Parity_AllActions`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L719`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L719) (`ManageCustomFiles_Parity_AllActions`)
 
 ### `[MCP-ADMIN-PARITY-GROUP-MAPPINGS]` manage_group_mappings supports full parity for list, save, and delete external-to-internal group mappings.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L530`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L530) (`ManageGroupMappings_Parity_AllActions`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L533`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L533) (`ManageGroupMappings_Parity_AllActions`)
 
 ### `[MCP-ADMIN-PARITY-JSONRPC-DISPATCH]` AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, ping).
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L873`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L873) (`AdminTools_ProcessRequest_JsonRpcProtocol`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L876`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L876) (`AdminTools_ProcessRequest_JsonRpcProtocol`)
 
 ### `[MCP-ADMIN-PARITY-POLICIES]` manage_policies supports full parity for list, save, and delete access control policies.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L464`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L464) (`ManagePolicies_Parity_AllActions`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L467`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L467) (`ManagePolicies_Parity_AllActions`)
 
 ### `[MCP-ADMIN-PARITY-PROVIDERS]` manage_providers supports full parity for list, save_secret, test_vault, save_auth, and test_ldap actions.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L577`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L577) (`ManageProviders_Parity_AllActions`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L580`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L580) (`ManageProviders_Parity_AllActions`)
 
 ### `[MCP-ADMIN-PARITY-SERVER-ALIAS]` AdminMcpServer manage_servers supports server alias for add, update, and list actions with collision validation.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L948`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L948) (`AdminMcpServer_ManageServers_Supports_Alias`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L961`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L961) (`AdminMcpServer_ManageServers_Supports_Alias`)
 
 ### `[MCP-ADMIN-PARITY-SERVERS]` Validates that the manage_servers tool provides comprehensive administrative capabilities including listing, retrieving, creating, updating, toggling, deleting, and reconnecting servers.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L234`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L234) (`ManageServers_Parity_AllActions`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L237`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L237) (`ManageServers_Parity_AllActions`)
 
 ### `[MCP-ADMIN-PARITY-SETTINGS]` manage_settings supports full parity for get and update global router configurations.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L667`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L667) (`ManageSettings_Parity_AllActions`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L670`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L670) (`ManageSettings_Parity_AllActions`)
 
 ### `[MCP-ADMIN-PARITY-SYSTEM]` manage_system supports full parity for diagnostics, get_logs, clear_logs, and query_audit actions.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L816`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L816) (`ManageSystem_Parity_AllActions`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L819`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L819) (`ManageSystem_Parity_AllActions`)
 
 ### `[MCP-ADMIN-PARITY-TEST-TOOL-CALL]` test_tool_call executes test bench backend tool calls and formats responses.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L846`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L846) (`TestToolCall_Execution_Parity`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L849`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L849) (`TestToolCall_Execution_Parity`)
 
 ### `[MCP-ADMIN-PARITY-TOOLS-COVERAGE]` Ensures every UI management workflow is backed by a verified, equivalent action within the consolidated Admin MCP tools.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L191`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L191) (`AdminTools_ExecuteSuccessfully`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L194`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L194) (`AdminTools_ExecuteSuccessfully`)
 
 ### `[MCP-ADMIN-RECONNECT-ALL-PROPAGATION]` AdminMcpServer manage_servers reconnect_all triggers StartInitializationForBackend across active sessions.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L730`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L730) (`ManageServers_ReconnectAll_TriggersSessionBackendInitialization`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L743`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L743) (`ManageServers_ReconnectAll_TriggersSessionBackendInitialization`)
 
 ### `[MCP-ADMIN-REQUEST-WITHOUT-ID-NOT-DROPPED]` Admin endpoint executes requests without an ID and does not drop them as notifications.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1458,67 +1496,67 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L270`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L270) (`CallToolAsync_RecordsAuditLog`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L271`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L271) (`CallToolAsync_RecordsAuditLog`)
 
 ### `[MCP-ADMIN-TOOL-MANAGE-APPKEYS]` AdminMcpServer executes manage_appkeys create, list, limits, and revoke actions.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L287`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L287) (`CallToolAsync_ManageAppKeys_Lifecycle`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L288`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L288) (`CallToolAsync_ManageAppKeys_Lifecycle`)
 
 ### `[MCP-ADMIN-TOOL-MANAGE-CLIENTS]` AdminMcpServer executes manage_clients register, list, and delete actions.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L334`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L334) (`CallToolAsync_ManageClients_Lifecycle`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L335`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L335) (`CallToolAsync_ManageClients_Lifecycle`)
 
 ### `[MCP-ADMIN-TOOL-MANAGE-CUSTOM-FILES]` AdminMcpServer executes manage_custom_files save, get, list, and delete actions.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L508`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L508) (`CallToolAsync_ManageCustomFiles_Lifecycle`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L521`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L521) (`CallToolAsync_ManageCustomFiles_Lifecycle`)
 
 ### `[MCP-ADMIN-TOOL-MANAGE-GROUP-MAPPINGS]` AdminMcpServer executes manage_group_mappings save, list, and delete actions.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L406`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L406) (`CallToolAsync_ManageGroupMappings_Lifecycle`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L407`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L407) (`CallToolAsync_ManageGroupMappings_Lifecycle`)
 
 ### `[MCP-ADMIN-TOOL-MANAGE-POLICIES]` AdminMcpServer executes manage_policies save, list, and delete actions.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L372`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L372) (`CallToolAsync_ManagePolicies_Lifecycle`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L373`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L373) (`CallToolAsync_ManagePolicies_Lifecycle`)
 
 ### `[MCP-ADMIN-TOOL-MANAGE-PROVIDERS]` AdminMcpServer executes manage_providers list, save_secret, and save_auth actions.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L439`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L439) (`CallToolAsync_ManageProviders_Lifecycle`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L440`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L440) (`CallToolAsync_ManageProviders_Lifecycle`)
 
 ### `[MCP-ADMIN-TOOL-MANAGE-SERVERS]` AdminMcpServer executes manage_servers list, get, create, update, toggle, and delete actions.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L218`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L218) (`CallToolAsync_ManageServers_ListAndCreate`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L219`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L219) (`CallToolAsync_ManageServers_ListAndCreate`)
 
 ### `[MCP-ADMIN-TOOL-MANAGE-SETTINGS]` AdminMcpServer executes manage_settings get and update actions.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L482`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L482) (`CallToolAsync_ManageSettings_Lifecycle`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L483`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L483) (`CallToolAsync_ManageSettings_Lifecycle`)
 
 ### `[MCP-ADMIN-TOOL-MANAGE-SYSTEM]` AdminMcpServer executes manage_system diagnostics, get_logs, clear_logs, and query_audit actions.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L562`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L562) (`CallToolAsync_ManageSystem_Lifecycle`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L575`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L575) (`CallToolAsync_ManageSystem_Lifecycle`)
 
 ### `[MCP-ADMIN-TOOLS-LIST-COUNT]` AdminMcpServer tools/list returns all 10 consolidated tools with complete JSON schemas.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L151`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L151) (`ListToolsAsync_ReturnsTenConsolidatedTools`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L152`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L152) (`ListToolsAsync_ReturnsTenConsolidatedTools`)
 
 ### `[MCP-ADMIN-ZOD-STRICT-RESPONSE]` JsonRpcResponse serialization omits null result, error, and _meta fields completely to satisfy Zod strict validation.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1639,6 +1677,12 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L294) (`PrefixBasedResilientRouting_DynamicallyRegistersAndDispatchesTool`)
+
+### `[MCP-SEARCH-TOOL-LIMITS-AND-THRESHOLDS]` Renders GeneralTab with configurable tool search limits and thresholds and triggers save.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L74`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L74) (`renders GeneralTab with tool search limit and threshold inputs and triggers save`)
 
 ### `[MCP-SESSION-BUILTIN-PROMPTS]` ClientSession lists built-in diagnostic and routing prompts.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1791,13 +1835,13 @@
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L765`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L765) (`TestToolCall_ResolvesSecretsViaInjectedSecretRetriever`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L778`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L778) (`TestToolCall_ResolvesSecretsViaInjectedSecretRetriever`)
 
 ### `[MCP-ADMIN-TEST-TOOL-CALL-USER-SECRET-STORE]` AdminMcpServer test_tool_call resolves user credentials via injected IUserSecretStore and caller context.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L856`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L856) (`TestToolCall_ResolvesUserCredentialsViaInjectedUserSecretStore`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L869`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L869) (`TestToolCall_ResolvesUserCredentialsViaInjectedUserSecretStore`)
 
 ### `[SEC-02]` VaultSecretRetriever dynamically loads, applies, and reloads Vault configurations from database repository.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -1873,7 +1917,7 @@
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L613`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L613) (`CallToolAsync_AuditLog_RedactsSensitivePayloadData`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L626`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L626) (`CallToolAsync_AuditLog_RedactsSensitivePayloadData`)
 
 ### `[SEC-APPKEY-SANITIZE-METADATA-GET]` AppKeys API returns sanitized key metadata without leaking plaintext tokens.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -2039,7 +2083,7 @@
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L192`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L192) (`renders configured badge and rotate key button when master key is Configured`)
+  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L250`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L250) (`renders configured badge and rotate key button when master key is Configured`)
 
 ### `[SEC-MASTERKEY-CUSTOM-MODAL-REENCRYPTION]` Validates master key inputs (length, match) and triggers atomic re-encryption.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -2053,13 +2097,13 @@
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L149`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L149) (`renders locked badge when master key is managed externally`)
+  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L207`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L207) (`renders locked badge when master key is managed externally`)
 
 ### `[SEC-MASTERKEY-UI-STATUS-BANNER]` Displays warning banner when keySource is AutoGenerated and opens custom master key modal.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L115`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L115) (`renders AutoGenerated warning banner and opens MasterKeyModal`)
+  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L173`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L173) (`renders AutoGenerated warning banner and opens MasterKeyModal`)
 
 ### `[SEC-PII-BASIC-COOKIE-QUERY-USERINFO]` PiiSanitizer redacts Basic auth credentials, session cookies, query access tokens, and URL userinfo credentials.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -2804,14 +2848,14 @@
 * **Verification Proofs (16):**
   - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L730`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L730) (`Connect_BlocksPrivateOrLoopbackIPs_AtSocketLevel`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ChallengerTests.cs#L762`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L762) (`SecurityValidationHelper_IsBlockedIp_ValidatesAllBlockedAndAllowedRanges`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L84`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L84) (`PrivateOrLoopback_Blocked_When_AllowPrivateIps_False`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L85`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L85) (`PrivateOrLoopback_Blocked_When_AllowPrivateIps_False`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L256`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L256) (`FailClosedValidation_RejectsInvalidJson_AndInsecureUrls`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L103`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L103) (`SaveSecretProvider_ReturnsBadRequest_WhenHttpUrlPassedInConfig`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L330`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L330) (`SaveAuthProvidersBatch_ReturnsBadRequest_WhenAllProvidersDisabled`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ProvidersControllerTests.cs#L397`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProvidersControllerTests.cs#L397) (`SaveSecretProvider_HttpUrl_RejectedForExternal`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L28`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L28) (`IsValidServerUrl_Rejects_Invalid_Http_Urls`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L53`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L53) (`Validation_Rejects_TypeOnly_Update_Leaving_Incompatible_Url`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L232`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L232) (`ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L352`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L352) (`ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command`)
   - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L59`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L59) (`DockerDiscovery_SkipsContainer_ResolvingToPrivateIp`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EmbeddingServiceTests.cs#L83`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EmbeddingServiceTests.cs#L83) (`ApiEmbeddingService_GetEmbeddingAsync_Throws_On_Http_Error`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L58`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L58) (`McpClient_NamedHttpClient_Applies_SsrfConnectCallback_AndBlocksPrivateIps`)
@@ -2847,7 +2891,7 @@
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L779`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L779) (`ManageCustomFiles_ValidationGuardrails`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L782`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L782) (`ManageCustomFiles_ValidationGuardrails`)
 
 ### `[GUARD-ADMIN-ENDPOINT-UNAUTHORIZED]` Unauthenticated / non-admin client request to /admin receives 403 Forbidden.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
@@ -2859,25 +2903,25 @@
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L513`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L513) (`ManagePolicies_WildcardDenyGuardrail`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L516`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L516) (`ManagePolicies_WildcardDenyGuardrail`)
 
 ### `[GUARD-ADMIN-PROVIDERS-LDAP-PLAINTEXT]` manage_providers rejects unencrypted LDAP connections on port 389.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L650`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L650) (`ManageProviders_LdapPlaintextGuardrail`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L653`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L653) (`ManageProviders_LdapPlaintextGuardrail`)
 
 ### `[GUARD-ADMIN-SERVERS-VALIDATION]` Verifies that the manage_servers tool accurately enforces validation by rejecting malformed transport types, missing required parameters, and requests for non-existent servers.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L324`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L324) (`ManageServers_ValidationGuardrails`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminToolsParityTests.cs#L327`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L327) (`ManageServers_ValidationGuardrails`)
 
 ### `[GUARD-ADMIN-UNKNOWN-TOOL]` AdminMcpServer returns an error response for unknown tool or action invocations.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L596`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L596) (`CallToolAsync_UnknownToolOrAction_ReturnsErrorResponse`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L609`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L609) (`CallToolAsync_UnknownToolOrAction_ReturnsErrorResponse`)
 
 ### `[GUARD-APPKEY-EMPTY-CATEGORY]` AppKey creation with empty or whitespace category must fail closed with BadRequest
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
@@ -3155,18 +3199,18 @@
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L637`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L637) (`CallToolAsync_TestToolCall_MissingServer_ReturnsError`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L650`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L650) (`CallToolAsync_TestToolCall_MissingServer_ReturnsError`)
 
 ### `[MCP-12]` DynamicEmbeddingService retrieves and persists embedding provider configurations in Settings table.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (24):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L62`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L62) (`DynamicEmbeddingService_Gets_And_Saves_Settings`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L108`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L108) (`ReloadSettings_UpdatesSettingsAndActiveService`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L125`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L125) (`DynamicEmbeddingService_GetEmbeddingAsync_Uses_ApiProvider_When_Configured`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L149`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L149) (`CosineSimilarity_Calculates_Correct_Vector_Distance`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L173`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L173) (`PreWarmAsync_Executes_Without_Throwing`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L199`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L199) (`GenerateEmbeddingAsync_Uses_UnderlyingProvider`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L63`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L63) (`DynamicEmbeddingService_Gets_And_Saves_Settings`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L109`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L109) (`ReloadSettings_UpdatesSettingsAndActiveService`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L126`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L126) (`DynamicEmbeddingService_GetEmbeddingAsync_Uses_ApiProvider_When_Configured`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L150`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L150) (`CosineSimilarity_Calculates_Correct_Vector_Distance`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L174`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L174) (`PreWarmAsync_Executes_Without_Throwing`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L200`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L200) (`GenerateEmbeddingAsync_Uses_UnderlyingProvider`)
   - [Backend xUnit] [`ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs#L7`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs#L7) (`Service_InitializesAndSetsUpPaths`)
   - [Backend xUnit] [`ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs#L20`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs#L20) (`ReloadSettings_ClearsSessionAndTokenizerState`)
   - [Backend xUnit] [`ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs#L36`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OnnxEmbeddingServiceTests.cs#L36) (`CosineSimilarity_CalculatesOrthogonalAndIdenticalVectors`)
@@ -3190,7 +3234,7 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (4):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L686`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L686) (`ProcessRequestAsync_Handles_Server_Discover`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/AdminMcpServerTests.cs#L699`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L699) (`ProcessRequestAsync_Handles_Server_Discover`)
   - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L371`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L371) (`DownstreamBackend_ProtocolVersionMismatch_NegotiatesOlderVersionSuccessfully`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpSpecMiddlewareTests.cs#L124`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs#L124) (`Middleware_Extracts_Stateless_Capabilities_And_ClientInfo_In_Meta`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpSpecMiddlewareTests.cs#L162`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs#L162) (`Middleware_Rejects_Unsupported_Protocol_Version_With_32021_Error`)
@@ -3587,12 +3631,12 @@
 | `GUARD-05` | **Guardrail** | `GUARD` | Socket-level SSRF protection blocks private and loopback IP connections unless explicitly allowlisted. | [`ChallengerTests.cs:L730`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L730) | Backend xUnit |
 | `GUARD-06` | **Guardrail** | `GUARD` | Auth middleware enforces case-insensitive route matching preventing path bypass. | [`ChallengerTests.cs:L234`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ChallengerTests.cs#L234) | Backend xUnit |
 | `GUARD-07` | **Guardrail** | `GUARD` | Custom files endpoint validates file path ensuring sibling directory traversal and parent traversal fail closed. | [`CustomFilesSecurityTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CustomFilesSecurityTests.cs#L8) | Backend xUnit |
-| `GUARD-ADMIN-CUSTOM-FILES-VALIDATION` | **Guardrail** | `GUARD` | manage_custom_files rejects invalid prompt JSON syntax and unsupported file categories. | [`AdminToolsParityTests.cs:L779`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L779) | Backend xUnit |
+| `GUARD-ADMIN-CUSTOM-FILES-VALIDATION` | **Guardrail** | `GUARD` | manage_custom_files rejects invalid prompt JSON syntax and unsupported file categories. | [`AdminToolsParityTests.cs:L782`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L782) | Backend xUnit |
 | `GUARD-ADMIN-ENDPOINT-UNAUTHORIZED` | **Guardrail** | `GUARD` | Unauthenticated / non-admin client request to /admin receives 403 Forbidden. | [`AdminEndpointsTests.cs:L193`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L193) | Backend xUnit |
-| `GUARD-ADMIN-POLICIES-WILDCARD-DENY` | **Guardrail** | `GUARD` | manage_policies rejects wildcard deny policies to prevent global lockout. | [`AdminToolsParityTests.cs:L513`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L513) | Backend xUnit |
-| `GUARD-ADMIN-PROVIDERS-LDAP-PLAINTEXT` | **Guardrail** | `GUARD` | manage_providers rejects unencrypted LDAP connections on port 389. | [`AdminToolsParityTests.cs:L650`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L650) | Backend xUnit |
-| `GUARD-ADMIN-SERVERS-VALIDATION` | **Guardrail** | `GUARD` | Verifies that the manage_servers tool accurately enforces validation by rejecting malformed transport types, missing required parameters, and requests for non-existent servers. | [`AdminToolsParityTests.cs:L324`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L324) | Backend xUnit |
-| `GUARD-ADMIN-UNKNOWN-TOOL` | **Guardrail** | `GUARD` | AdminMcpServer returns an error response for unknown tool or action invocations. | [`AdminMcpServerTests.cs:L596`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L596) | Backend xUnit |
+| `GUARD-ADMIN-POLICIES-WILDCARD-DENY` | **Guardrail** | `GUARD` | manage_policies rejects wildcard deny policies to prevent global lockout. | [`AdminToolsParityTests.cs:L516`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L516) | Backend xUnit |
+| `GUARD-ADMIN-PROVIDERS-LDAP-PLAINTEXT` | **Guardrail** | `GUARD` | manage_providers rejects unencrypted LDAP connections on port 389. | [`AdminToolsParityTests.cs:L653`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L653) | Backend xUnit |
+| `GUARD-ADMIN-SERVERS-VALIDATION` | **Guardrail** | `GUARD` | Verifies that the manage_servers tool accurately enforces validation by rejecting malformed transport types, missing required parameters, and requests for non-existent servers. | [`AdminToolsParityTests.cs:L327`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L327) | Backend xUnit |
+| `GUARD-ADMIN-UNKNOWN-TOOL` | **Guardrail** | `GUARD` | AdminMcpServer returns an error response for unknown tool or action invocations. | [`AdminMcpServerTests.cs:L609`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L609) | Backend xUnit |
 | `GUARD-APPKEY-EMPTY-CATEGORY` | **Guardrail** | `GUARD` | AppKey creation with empty or whitespace category must fail closed with BadRequest | [`CategoryScopedAppKeysTests.cs:L239`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L239) | Backend xUnit |
 | `GUARD-APPKEY-MALFORMED-SCOPES` | **Guardrail** | `GUARD` | Corrupted AppKey scopes JSON must fail closed and reject execution | [`PairwiseIntegrationMatrixTests.cs:L490`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L490) | Backend xUnit |
 | `GUARD-APPKEY-MISSING-NAME` | **Guardrail** | `GUARD` | Rejects AppKey creation with BadRequest when name is missing. | [`AppKeysControllerTests.cs:L312`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L312) | Backend xUnit |
@@ -3641,7 +3685,7 @@
 | `GUARD-TOOL-MANDATORY-PARAMS` | **Guardrail** | `GUARD` | ToolRoutingManager returns an error when execute_tool is invoked without the mandatory tool name parameter. | [`ToolRoutingManagerTests.cs:L125`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L125) | Backend xUnit |
 | `GUARD-UNSUPPORTED-DB-PROVIDER` | **Guardrail** | `GUARD` | DbConnectionFactory fails closed and throws InvalidOperationException when configured with unsupported database provider. | [`MultiDatabaseProviderIntegrationTests.cs:L29`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MultiDatabaseProviderIntegrationTests.cs#L29) | Backend xUnit |
 | `GUARD-VALIDATION-STDIO-SHELL-OPERATORS` | **Guardrail** | `GUARD` | ServerValidationHelper validates stdio commands against unsafe shell operators, piping, and command injection. | [`ServerEndpointsValidationTests.cs:L7`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L7) | Backend xUnit |
-| `MCP-ADMIN-TOOL-TEST-CALL-ERROR` | **Guardrail** | `GUARD` | AdminMcpServer test_tool_call propagates downstream backend errors with visibility. | [`AdminMcpServerTests.cs:L637`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L637) | Backend xUnit |
+| `MCP-ADMIN-TOOL-TEST-CALL-ERROR` | **Guardrail** | `GUARD` | AdminMcpServer test_tool_call propagates downstream backend errors with visibility. | [`AdminMcpServerTests.cs:L650`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L650) | Backend xUnit |
 | `API-PIPELINE-GET-HEALTH` | Positive | `MCP` | GET /health returns gateway health status with 200 OK. | [`PipelineIntegrationTests.cs:L439`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L439) | Backend xUnit |
 | `API-PIPELINE-GET-SERVERS` | Positive | `MCP` | GET /api/servers returns backend servers list with 200 OK. | [`PipelineIntegrationTests.cs:L340`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L340) | Backend xUnit |
 | `API-PIPELINE-GET-STATS` | Positive | `MCP` | GET /api/stats returns server statistics with 200 OK. | [`PipelineIntegrationTests.cs:L430`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L430) | Backend xUnit |
@@ -3649,23 +3693,27 @@
 | `API-PIPELINE-POST-MESSAGE-PROTOCOL` | Positive | `MCP` | Full end-to-end JSON-RPC session message suite executes over HTTP POST. | [`PipelineIntegrationTests.cs:L143`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L143) | Backend xUnit |
 | `API-PIPELINE-POST-SSE-PROTOCOL` | Positive | `MCP` | Full end-to-end JSON-RPC protocol suite executes across SSE pipeline. | [`PipelineIntegrationTests.cs:L86`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L86) | Backend xUnit |
 | `API-PIPELINE-SERVER-CRUD` | Positive | `MCP` | Backend server CRUD pipeline endpoints persist and manage downstream servers. | [`PipelineIntegrationTests.cs:L277`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L277) | Backend xUnit |
-| `HEALTH-PROBE-ALL-ENABLED-FLEET` | Positive | `MCP` | BackendHealthCheckService probes all enabled backend servers in the fleet. | [`BackendHealthCheckServiceTests.cs:L161`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L161) | Backend xUnit |
-| `HEALTH-PROBE-CUSTOM-SERVER-CONNECTED` | Positive | `MCP` | BackendHealthCheckService marks registered custom servers as Connected. | [`BackendHealthCheckServiceTests.cs:L264`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L264) | Backend xUnit |
-| `HEALTH-PROBE-DISABLED-SERVER` | Positive | `MCP` | BackendHealthCheckService marks disabled servers as Disabled. | [`BackendHealthCheckServiceTests.cs:L132`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L132) | Backend xUnit |
-| `HEALTH-PROBE-HTTP-CONNECTED-200` | Positive | `MCP` | BackendHealthCheckService marks server as Connected when downstream HTTP/SSE endpoint returns 200 OK. | [`BackendHealthCheckServiceTests.cs:L57`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L57) | Backend xUnit |
-| `HEALTH-PROBE-HTTP-FAILED-EXCEPTION` | Positive | `MCP` | BackendHealthCheckService marks server as Failed when downstream HTTP connection fails. | [`BackendHealthCheckServiceTests.cs:L97`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L97) | Backend xUnit |
-| `HEALTH-PROBE-STDIO-VALID-CONNECTED` | Positive | `MCP` | BackendHealthCheckService sets valid STDIO servers to Connected without making network HTTP probes. | [`BackendHealthCheckServiceTests.cs:L190`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L190) | Backend xUnit |
+| `HEALTH-PROBE-ALL-ENABLED-FLEET` | Positive | `MCP` | BackendHealthCheckService probes all enabled backend servers in the fleet. | [`BackendHealthCheckServiceTests.cs:L281`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L281) | Backend xUnit |
+| `HEALTH-PROBE-CUSTOM-SERVER-CONNECTED` | Positive | `MCP` | BackendHealthCheckService marks registered custom servers as Connected. | [`BackendHealthCheckServiceTests.cs:L384`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L384) | Backend xUnit |
+| `HEALTH-PROBE-DISABLED-SERVER` | Positive | `MCP` | BackendHealthCheckService marks disabled servers as Disabled. | [`BackendHealthCheckServiceTests.cs:L252`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L252) | Backend xUnit |
+| `HEALTH-PROBE-HTTP-FAILED-EXCEPTION` | Positive | `MCP` | BackendHealthCheckService marks server as Failed when downstream HTTP connection fails. | [`BackendHealthCheckServiceTests.cs:L217`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L217) | Backend xUnit |
+| `HEALTH-PROBE-HTTP-PING-CONNECTED-200` | Positive | `MCP` | BackendHealthCheckService marks server as Connected when downstream JSON-RPC ping returns 200 OK. | [`BackendHealthCheckServiceTests.cs:L41`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L41) | Backend xUnit |
+| `HEALTH-PROBE-HTTP-PING-FALLBACK-ROOT` | Positive | `MCP` | BackendHealthCheckService falls back to base authority root probe when downstream JSON-RPC ping returns 405 Method Not Allowed. | [`BackendHealthCheckServiceTests.cs:L87`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L87) | Backend xUnit |
+| `HEALTH-PROBE-NONE-MODE-NOOP` | Positive | `MCP` | BackendHealthCheckService marks server as Connected without HTTP requests when HealthCheckMode is none. | [`BackendHealthCheckServiceTests.cs:L178`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L178) | Backend xUnit |
+| `HEALTH-PROBE-REPO-PERSISTS-HEALTHCHECKMODE` | Positive | `MCP` | Server repository persists and retrieves HealthCheckMode setting accurately. | [`BackendHealthCheckServiceTests.cs:L416`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L416) | Backend xUnit |
+| `HEALTH-PROBE-ROOT-MODE-BYPASSES-PING` | Positive | `MCP` | BackendHealthCheckService directly probes base authority root when HealthCheckMode is root or server is postgres. | [`BackendHealthCheckServiceTests.cs:L136`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L136) | Backend xUnit |
+| `HEALTH-PROBE-STDIO-VALID-CONNECTED` | Positive | `MCP` | BackendHealthCheckService sets valid STDIO servers to Connected without making network HTTP probes. | [`BackendHealthCheckServiceTests.cs:L310`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L310) | Backend xUnit |
 | `MCP-01` | Positive | `MCP` | initializes with default state | [`useServerStore.test.ts:L24`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useServerStore.test.ts#L24) | Frontend Vitest |
 | `MCP-02` | Positive | `MCP` | All MCP protocol capabilities enforce caller role authorizations consistently | [`PairwiseIntegrationMatrixTests.cs:L385`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385) | Backend xUnit |
 | `MCP-05` | Positive | `MCP` | ResourceRoutingManager returns all registered resources when search query is empty. | [`ResourceRoutingManagerTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L8) | Backend xUnit |
 | `MCP-06` | Positive | `MCP` | prompts/list aggregates, namespaces, and routes prompts to target backends. | [`McpIntegrationTests.cs:L499`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L499) | Backend xUnit |
 | `MCP-08` | Positive | `MCP` | completion/complete forwards prompt completions to backend when caller is authorized. | [`UnifiedMcpAuthorizationTests.cs:L473`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L473) | Backend xUnit |
 | `MCP-10` | Positive | `MCP` | DockerAutoDiscoveryService handles missing Docker socket gracefully without throwing unhandled exceptions. | [`SeederAndDiscoveryTests.cs:L83`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L83) | Backend xUnit |
-| `MCP-12` | **Guardrail** | `MCP` | DynamicEmbeddingService retrieves and persists embedding provider configurations in Settings table. | [`DynamicEmbeddingServiceTests.cs:L62`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L62) | Backend xUnit |
+| `MCP-12` | **Guardrail** | `MCP` | DynamicEmbeddingService retrieves and persists embedding provider configurations in Settings table. | [`DynamicEmbeddingServiceTests.cs:L63`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DynamicEmbeddingServiceTests.cs#L63) | Backend xUnit |
 | `MCP-15` | Positive | `MCP` | All JSON-RPC results return a resultType discriminator (complete or input_required) per MCP 2026-07-28 spec. | [`ProtocolResultTypeTests.cs:L7`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProtocolResultTypeTests.cs#L7) | Backend xUnit |
 | `MCP-21` | Positive | `MCP` | Admin endpoint handles direct Streamable HTTP POST tools/list request returning JSON even with Accept text/event-stream header. | [`AdminEndpointsTests.cs:L370`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L370) | Backend xUnit |
-| `MCP-22` | **Guardrail** | `MCP` | AdminMcpServer ProcessRequestAsync handles server/discover request returning supported versions and subscriptions capability. | [`AdminMcpServerTests.cs:L686`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L686) | Backend xUnit |
-| `MCP-23` | Positive | `MCP` | AdminMcpServer HandleInitializeAsync includes subscriptions capability in capabilities object. | [`AdminMcpServerTests.cs:L655`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L655) | Backend xUnit |
+| `MCP-22` | **Guardrail** | `MCP` | AdminMcpServer ProcessRequestAsync handles server/discover request returning supported versions and subscriptions capability. | [`AdminMcpServerTests.cs:L699`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L699) | Backend xUnit |
+| `MCP-23` | Positive | `MCP` | AdminMcpServer HandleInitializeAsync includes subscriptions capability in capabilities object. | [`AdminMcpServerTests.cs:L668`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L668) | Backend xUnit |
 | `MCP-24` | Positive | `MCP` | McpSpecMiddleware extracts OpenTelemetry W3C traceparent, tracestate, and baggage from headers and _meta. | [`McpSpecMiddlewareTests.cs:L219`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs#L219) | Backend xUnit |
 | `MCP-25` | Positive | `MCP` | ToolRoutingManager falls back to SessionManager global server tools cache during cold-start search_tools execution | [`ToolRoutingManagerTests.cs:L264`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L264) | Backend xUnit |
 | `MCP-26` | Positive | `MCP` | ToolRoutingManager dynamically registers prefix routes for tools with slash, colon, and double underscore delimiters | [`ToolRoutingManagerTests.cs:L434`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L434) | Backend xUnit |
@@ -3685,26 +3733,28 @@
 | `MCP-40` | Positive | `MCP` | Calibrated hybrid semantic search scoring with configurable dense weight and normalized linear combination. | [`ToolRoutingManagerHybridSearchTests.cs:L39`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39) | Backend xUnit |
 | `MCP-41` | Positive | `MCP` | Explicit search modes (hybrid, semantic, lexical) and decomposed score diagnostics in ToolRoutingManager. | [`ToolRoutingManagerHybridSearchTests.cs:L203`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L203) | Backend xUnit |
 | `MCP-42` | Positive | `MCP` | Meta-mode search_tools MCP tool accepts optional mode and dense_weight arguments and executes calibrated tool retrieval. | [`SemanticSearchEndpointTests.cs:L185`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L185) | Backend xUnit |
+| `MCP-43` | Positive | `MCP` | SearchToolsDetailedAsync applies configurable result limit. | [`ToolRoutingManagerHybridSearchTests.cs:L473`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L473) | Backend xUnit |
+| `MCP-44` | Positive | `MCP` | search_tools MCP tool call respects caller-supplied limit, min_score, and score_dropoff_ratio arguments. | [`SemanticSearchEndpointTests.cs:L298`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L298) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-CALL-TOOL` | Positive | `MCP` | Admin endpoint /admin/message executes tools/call for manage_system diagnostics. | [`AdminEndpointsTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L294) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-HEAD-REQUEST` | Positive | `MCP` | Admin endpoint /admin handles HEAD request returning text/event-stream headers. | [`AdminEndpointsTests.cs:L212`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L212) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-LIST-TOOLS` | Positive | `MCP` | Admin endpoint /admin/message executes tools/list over active SSE session and returns 10 admin tools. | [`AdminEndpointsTests.cs:L224`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L224) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-ROUTER-ADMIN-TARGET` | Positive | `MCP` | Target proxy endpoint /router-admin routes directly to the Admin MCP server. | [`AdminEndpointsTests.cs:L149`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L149) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-SSE-HANDSHAKE` | Positive | `MCP` | Admin endpoint /admin/sse performs initialize handshake with 2026-07-28 protocol version. | [`AdminEndpointsTests.cs:L62`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L62) | Backend xUnit |
-| `MCP-ADMIN-INITIALIZE-HANDSHAKE` | Positive | `MCP` | AdminMcpServer initialize handles protocol negotiation for 2026-07-28 and 2024-11-05. | [`AdminMcpServerTests.cs:L199`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L199) | Backend xUnit |
-| `MCP-ADMIN-PARITY-APPKEYS` | Positive | `MCP` | manage_appkeys supports full parity for list, get_limits, create, and revoke actions. | [`AdminToolsParityTests.cs:L370`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L370) | Backend xUnit |
-| `MCP-ADMIN-PARITY-CLIENTS` | Positive | `MCP` | manage_clients supports full parity for register, list, and delete actions. | [`AdminToolsParityTests.cs:L423`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L423) | Backend xUnit |
-| `MCP-ADMIN-PARITY-CUSTOM-FILES` | Positive | `MCP` | manage_custom_files supports full parity for list, get, save, and delete prompt and resource files. | [`AdminToolsParityTests.cs:L716`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L716) | Backend xUnit |
-| `MCP-ADMIN-PARITY-GROUP-MAPPINGS` | Positive | `MCP` | manage_group_mappings supports full parity for list, save, and delete external-to-internal group mappings. | [`AdminToolsParityTests.cs:L530`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L530) | Backend xUnit |
-| `MCP-ADMIN-PARITY-JSONRPC-DISPATCH` | Positive | `MCP` | AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, ping). | [`AdminToolsParityTests.cs:L873`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L873) | Backend xUnit |
-| `MCP-ADMIN-PARITY-POLICIES` | Positive | `MCP` | manage_policies supports full parity for list, save, and delete access control policies. | [`AdminToolsParityTests.cs:L464`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L464) | Backend xUnit |
-| `MCP-ADMIN-PARITY-PROVIDERS` | Positive | `MCP` | manage_providers supports full parity for list, save_secret, test_vault, save_auth, and test_ldap actions. | [`AdminToolsParityTests.cs:L577`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L577) | Backend xUnit |
-| `MCP-ADMIN-PARITY-SERVER-ALIAS` | Positive | `MCP` | AdminMcpServer manage_servers supports server alias for add, update, and list actions with collision validation. | [`AdminMcpServerTests.cs:L948`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L948) | Backend xUnit |
-| `MCP-ADMIN-PARITY-SERVERS` | Positive | `MCP` | Validates that the manage_servers tool provides comprehensive administrative capabilities including listing, retrieving, creating, updating, toggling, deleting, and reconnecting servers. | [`AdminToolsParityTests.cs:L234`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L234) | Backend xUnit |
-| `MCP-ADMIN-PARITY-SETTINGS` | Positive | `MCP` | manage_settings supports full parity for get and update global router configurations. | [`AdminToolsParityTests.cs:L667`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L667) | Backend xUnit |
-| `MCP-ADMIN-PARITY-SYSTEM` | Positive | `MCP` | manage_system supports full parity for diagnostics, get_logs, clear_logs, and query_audit actions. | [`AdminToolsParityTests.cs:L816`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L816) | Backend xUnit |
-| `MCP-ADMIN-PARITY-TEST-TOOL-CALL` | Positive | `MCP` | test_tool_call executes test bench backend tool calls and formats responses. | [`AdminToolsParityTests.cs:L846`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L846) | Backend xUnit |
-| `MCP-ADMIN-PARITY-TOOLS-COVERAGE` | Positive | `MCP` | Ensures every UI management workflow is backed by a verified, equivalent action within the consolidated Admin MCP tools. | [`AdminToolsParityTests.cs:L191`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L191) | Backend xUnit |
-| `MCP-ADMIN-RECONNECT-ALL-PROPAGATION` | Positive | `MCP` | AdminMcpServer manage_servers reconnect_all triggers StartInitializationForBackend across active sessions. | [`AdminMcpServerTests.cs:L730`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L730) | Backend xUnit |
+| `MCP-ADMIN-INITIALIZE-HANDSHAKE` | Positive | `MCP` | AdminMcpServer initialize handles protocol negotiation for 2026-07-28 and 2024-11-05. | [`AdminMcpServerTests.cs:L200`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L200) | Backend xUnit |
+| `MCP-ADMIN-PARITY-APPKEYS` | Positive | `MCP` | manage_appkeys supports full parity for list, get_limits, create, and revoke actions. | [`AdminToolsParityTests.cs:L373`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L373) | Backend xUnit |
+| `MCP-ADMIN-PARITY-CLIENTS` | Positive | `MCP` | manage_clients supports full parity for register, list, and delete actions. | [`AdminToolsParityTests.cs:L426`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L426) | Backend xUnit |
+| `MCP-ADMIN-PARITY-CUSTOM-FILES` | Positive | `MCP` | manage_custom_files supports full parity for list, get, save, and delete prompt and resource files. | [`AdminToolsParityTests.cs:L719`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L719) | Backend xUnit |
+| `MCP-ADMIN-PARITY-GROUP-MAPPINGS` | Positive | `MCP` | manage_group_mappings supports full parity for list, save, and delete external-to-internal group mappings. | [`AdminToolsParityTests.cs:L533`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L533) | Backend xUnit |
+| `MCP-ADMIN-PARITY-JSONRPC-DISPATCH` | Positive | `MCP` | AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, ping). | [`AdminToolsParityTests.cs:L876`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L876) | Backend xUnit |
+| `MCP-ADMIN-PARITY-POLICIES` | Positive | `MCP` | manage_policies supports full parity for list, save, and delete access control policies. | [`AdminToolsParityTests.cs:L467`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L467) | Backend xUnit |
+| `MCP-ADMIN-PARITY-PROVIDERS` | Positive | `MCP` | manage_providers supports full parity for list, save_secret, test_vault, save_auth, and test_ldap actions. | [`AdminToolsParityTests.cs:L580`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L580) | Backend xUnit |
+| `MCP-ADMIN-PARITY-SERVER-ALIAS` | Positive | `MCP` | AdminMcpServer manage_servers supports server alias for add, update, and list actions with collision validation. | [`AdminMcpServerTests.cs:L961`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L961) | Backend xUnit |
+| `MCP-ADMIN-PARITY-SERVERS` | Positive | `MCP` | Validates that the manage_servers tool provides comprehensive administrative capabilities including listing, retrieving, creating, updating, toggling, deleting, and reconnecting servers. | [`AdminToolsParityTests.cs:L237`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L237) | Backend xUnit |
+| `MCP-ADMIN-PARITY-SETTINGS` | Positive | `MCP` | manage_settings supports full parity for get and update global router configurations. | [`AdminToolsParityTests.cs:L670`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L670) | Backend xUnit |
+| `MCP-ADMIN-PARITY-SYSTEM` | Positive | `MCP` | manage_system supports full parity for diagnostics, get_logs, clear_logs, and query_audit actions. | [`AdminToolsParityTests.cs:L819`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L819) | Backend xUnit |
+| `MCP-ADMIN-PARITY-TEST-TOOL-CALL` | Positive | `MCP` | test_tool_call executes test bench backend tool calls and formats responses. | [`AdminToolsParityTests.cs:L849`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L849) | Backend xUnit |
+| `MCP-ADMIN-PARITY-TOOLS-COVERAGE` | Positive | `MCP` | Ensures every UI management workflow is backed by a verified, equivalent action within the consolidated Admin MCP tools. | [`AdminToolsParityTests.cs:L194`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminToolsParityTests.cs#L194) | Backend xUnit |
+| `MCP-ADMIN-RECONNECT-ALL-PROPAGATION` | Positive | `MCP` | AdminMcpServer manage_servers reconnect_all triggers StartInitializationForBackend across active sessions. | [`AdminMcpServerTests.cs:L743`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L743) | Backend xUnit |
 | `MCP-ADMIN-REQUEST-WITHOUT-ID-NOT-DROPPED` | Positive | `MCP` | Admin endpoint executes requests without an ID and does not drop them as notifications. | [`AdminEndpointsTests.cs:L550`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L550) | Backend xUnit |
 | `MCP-ADMIN-REVERSE-PROXY-X-FORWARDED-HOST` | Positive | `MCP` | Admin SSE endpoint prioritizes X-Forwarded-Host header over Request.Host in endpoint URI advertising. | [`AdminEndpointsTests.cs:L514`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L514) | Backend xUnit |
 | `MCP-ADMIN-SKILL-E2E-PROVISIONING` | Positive | `MCP` | Admin automation templates and JSON-RPC tool calls successfully provision a blank-slate gateway instance end-to-end via HTTP /admin/message. | [`AdminAutomationSkillTests.cs:L176`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminAutomationSkillTests.cs#L176) | Backend xUnit |
@@ -3713,17 +3763,17 @@
 | `MCP-ADMIN-SKILL-TEMPLATES` | Positive | `MCP` | All mcg-admin scaffold templates exist, are non-empty, and contain valid JSON or scripts for Authentik, Keycloak, Entra, ActiveDirectory, Cloudflare, Vault, Embeddings, Docker, and shell automation | [`AdminAutomationSkillTests.cs:L103`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminAutomationSkillTests.cs#L103) | Backend xUnit |
 | `MCP-ADMIN-SKILL-WORKFLOW` | Positive | `MCP` | mcg-admin skill contains all 7 administration phases including diagnostics, secrets, auth providers, RBAC/group mappings, settings/embeddings, servers/clients, and live tool verification | [`AdminAutomationSkillTests.cs:L47`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminAutomationSkillTests.cs#L47) | Backend xUnit |
 | `MCP-ADMIN-SSE-ZOD-COMPLIANT` | Positive | `MCP` | Admin endpoint direct POST response does not serialize null error or _meta fields. | [`AdminEndpointsTests.cs:L487`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L487) | Backend xUnit |
-| `MCP-ADMIN-TOOL-AUDIT-LOG` | Positive | `MCP` | AdminMcpServer tool calls record audit log entries with caller and tool name. | [`AdminMcpServerTests.cs:L270`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L270) | Backend xUnit |
-| `MCP-ADMIN-TOOL-MANAGE-APPKEYS` | Positive | `MCP` | AdminMcpServer executes manage_appkeys create, list, limits, and revoke actions. | [`AdminMcpServerTests.cs:L287`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L287) | Backend xUnit |
-| `MCP-ADMIN-TOOL-MANAGE-CLIENTS` | Positive | `MCP` | AdminMcpServer executes manage_clients register, list, and delete actions. | [`AdminMcpServerTests.cs:L334`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L334) | Backend xUnit |
-| `MCP-ADMIN-TOOL-MANAGE-CUSTOM-FILES` | Positive | `MCP` | AdminMcpServer executes manage_custom_files save, get, list, and delete actions. | [`AdminMcpServerTests.cs:L508`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L508) | Backend xUnit |
-| `MCP-ADMIN-TOOL-MANAGE-GROUP-MAPPINGS` | Positive | `MCP` | AdminMcpServer executes manage_group_mappings save, list, and delete actions. | [`AdminMcpServerTests.cs:L406`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L406) | Backend xUnit |
-| `MCP-ADMIN-TOOL-MANAGE-POLICIES` | Positive | `MCP` | AdminMcpServer executes manage_policies save, list, and delete actions. | [`AdminMcpServerTests.cs:L372`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L372) | Backend xUnit |
-| `MCP-ADMIN-TOOL-MANAGE-PROVIDERS` | Positive | `MCP` | AdminMcpServer executes manage_providers list, save_secret, and save_auth actions. | [`AdminMcpServerTests.cs:L439`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L439) | Backend xUnit |
-| `MCP-ADMIN-TOOL-MANAGE-SERVERS` | Positive | `MCP` | AdminMcpServer executes manage_servers list, get, create, update, toggle, and delete actions. | [`AdminMcpServerTests.cs:L218`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L218) | Backend xUnit |
-| `MCP-ADMIN-TOOL-MANAGE-SETTINGS` | Positive | `MCP` | AdminMcpServer executes manage_settings get and update actions. | [`AdminMcpServerTests.cs:L482`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L482) | Backend xUnit |
-| `MCP-ADMIN-TOOL-MANAGE-SYSTEM` | Positive | `MCP` | AdminMcpServer executes manage_system diagnostics, get_logs, clear_logs, and query_audit actions. | [`AdminMcpServerTests.cs:L562`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L562) | Backend xUnit |
-| `MCP-ADMIN-TOOLS-LIST-COUNT` | Positive | `MCP` | AdminMcpServer tools/list returns all 10 consolidated tools with complete JSON schemas. | [`AdminMcpServerTests.cs:L151`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L151) | Backend xUnit |
+| `MCP-ADMIN-TOOL-AUDIT-LOG` | Positive | `MCP` | AdminMcpServer tool calls record audit log entries with caller and tool name. | [`AdminMcpServerTests.cs:L271`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L271) | Backend xUnit |
+| `MCP-ADMIN-TOOL-MANAGE-APPKEYS` | Positive | `MCP` | AdminMcpServer executes manage_appkeys create, list, limits, and revoke actions. | [`AdminMcpServerTests.cs:L288`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L288) | Backend xUnit |
+| `MCP-ADMIN-TOOL-MANAGE-CLIENTS` | Positive | `MCP` | AdminMcpServer executes manage_clients register, list, and delete actions. | [`AdminMcpServerTests.cs:L335`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L335) | Backend xUnit |
+| `MCP-ADMIN-TOOL-MANAGE-CUSTOM-FILES` | Positive | `MCP` | AdminMcpServer executes manage_custom_files save, get, list, and delete actions. | [`AdminMcpServerTests.cs:L521`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L521) | Backend xUnit |
+| `MCP-ADMIN-TOOL-MANAGE-GROUP-MAPPINGS` | Positive | `MCP` | AdminMcpServer executes manage_group_mappings save, list, and delete actions. | [`AdminMcpServerTests.cs:L407`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L407) | Backend xUnit |
+| `MCP-ADMIN-TOOL-MANAGE-POLICIES` | Positive | `MCP` | AdminMcpServer executes manage_policies save, list, and delete actions. | [`AdminMcpServerTests.cs:L373`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L373) | Backend xUnit |
+| `MCP-ADMIN-TOOL-MANAGE-PROVIDERS` | Positive | `MCP` | AdminMcpServer executes manage_providers list, save_secret, and save_auth actions. | [`AdminMcpServerTests.cs:L440`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L440) | Backend xUnit |
+| `MCP-ADMIN-TOOL-MANAGE-SERVERS` | Positive | `MCP` | AdminMcpServer executes manage_servers list, get, create, update, toggle, and delete actions. | [`AdminMcpServerTests.cs:L219`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L219) | Backend xUnit |
+| `MCP-ADMIN-TOOL-MANAGE-SETTINGS` | Positive | `MCP` | AdminMcpServer executes manage_settings get and update actions. | [`AdminMcpServerTests.cs:L483`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L483) | Backend xUnit |
+| `MCP-ADMIN-TOOL-MANAGE-SYSTEM` | Positive | `MCP` | AdminMcpServer executes manage_system diagnostics, get_logs, clear_logs, and query_audit actions. | [`AdminMcpServerTests.cs:L575`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L575) | Backend xUnit |
+| `MCP-ADMIN-TOOLS-LIST-COUNT` | Positive | `MCP` | AdminMcpServer tools/list returns all 10 consolidated tools with complete JSON schemas. | [`AdminMcpServerTests.cs:L152`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L152) | Backend xUnit |
 | `MCP-ADMIN-ZOD-STRICT-RESPONSE` | Positive | `MCP` | JsonRpcResponse serialization omits null result, error, and _meta fields completely to satisfy Zod strict validation. | [`AdminEndpointsTests.cs:L452`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L452) | Backend xUnit |
 | `MCP-COLDSTART-01` | Positive | `MCP` | Full cold-start cycle: SessionManager cache seeded -> search_tools -> execute_tool dispatches to downstream mock server and returns output. | [`DownstreamSessionIntegrationTests.cs:L130`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L130) | Backend xUnit |
 | `MCP-DOWNSTREAM-INIT-DIAGNOSTICS` | Positive | `MCP` | Initializes downstream MCP backends with detailed diagnostic logging. | [`McpIntegrationTests.cs:L317`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L317) | Backend xUnit |
@@ -3744,6 +3794,7 @@
 | `MCP-MOCK-JSONRPC-FLOW` | Positive | `MCP` | MockDownstreamMcpServer handles initialize, initialized, tools/list, and tools/call JSON-RPC 2.0 protocol cycles. | [`MockDownstreamMcpServerTests.cs:L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L11) | Backend xUnit |
 | `MCP-MOCK-RESOURCES-PROMPTS-SUPPORT` | Positive | `MCP` | MockDownstreamMcpServer handles resources/list and prompts/list MCP protocol methods. | [`TransportResilienceTests.cs:L123`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportResilienceTests.cs#L123) | Backend xUnit |
 | `MCP-RESILIENT-01` | Positive | `MCP` | Prefix-based resilient routing: execute_tool called with unregistered but prefixed tool name dynamically resolves server and executes. | [`DownstreamSessionIntegrationTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L294) | Backend xUnit |
+| `MCP-SEARCH-TOOL-LIMITS-AND-THRESHOLDS` | Positive | `MCP` | Renders GeneralTab with configurable tool search limits and thresholds and triggers save. | [`GeneralTab.test.tsx:L74`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L74) | Frontend Vitest |
 | `MCP-SESSION-BUILTIN-PROMPTS` | Positive | `MCP` | ClientSession lists built-in diagnostic and routing prompts. | [`ClientSessionTests.cs:L115`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L115) | Backend xUnit |
 | `MCP-SESSION-BUILTIN-RESOURCES` | Positive | `MCP` | ClientSession lists built-in resources including router://status. | [`ClientSessionTests.cs:L99`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L99) | Backend xUnit |
 | `MCP-SESSION-CALL-SEARCH-TOOLS` | Positive | `MCP` | ClientSession calls built-in search_tools and returns structured search results. | [`ClientSessionTests.cs:L132`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L132) | Backend xUnit |
@@ -3775,15 +3826,15 @@
 | `AUTH-115` | Positive | `SEC` | RegisterClient dynamically binds requested scopes to OpenIddict application descriptor permissions. | [`AuthorizationControllerTests.cs:L435`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L435) | Backend xUnit |
 | `AUTH-116` | **Guardrail** | `SEC` | Exchange rejects client_credentials grant attempts by public clients with UnauthorizedClient error. | [`AuthorizationControllerTests.cs:L475`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L475) | Backend xUnit |
 | `AUTH-117` | **Guardrail** | `SEC` | RegisterClient returns 403 Forbidden with access_denied when open client registration is disabled and caller is unauthorized. | [`AuthorizationControllerTests.cs:L516`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L516) | Backend xUnit |
-| `MCP-ADMIN-TEST-TOOL-CALL-SECRET-RESOLUTION` | Positive | `SEC` | AdminMcpServer test_tool_call resolves server secrets via injected ISecretRetriever. | [`AdminMcpServerTests.cs:L765`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L765) | Backend xUnit |
-| `MCP-ADMIN-TEST-TOOL-CALL-USER-SECRET-STORE` | Positive | `SEC` | AdminMcpServer test_tool_call resolves user credentials via injected IUserSecretStore and caller context. | [`AdminMcpServerTests.cs:L856`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L856) | Backend xUnit |
+| `MCP-ADMIN-TEST-TOOL-CALL-SECRET-RESOLUTION` | Positive | `SEC` | AdminMcpServer test_tool_call resolves server secrets via injected ISecretRetriever. | [`AdminMcpServerTests.cs:L778`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L778) | Backend xUnit |
+| `MCP-ADMIN-TEST-TOOL-CALL-USER-SECRET-STORE` | Positive | `SEC` | AdminMcpServer test_tool_call resolves user credentials via injected IUserSecretStore and caller context. | [`AdminMcpServerTests.cs:L869`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L869) | Backend xUnit |
 | `SEC-01` | **Guardrail** | `SEC` | SQLite database is encrypted at rest using SQLCipher with DB_ENCRYPTION_KEY. | [`DatabaseEncryptionTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8) | Backend xUnit |
 | `SEC-02` | Positive | `SEC` | VaultSecretRetriever dynamically loads, applies, and reloads Vault configurations from database repository. | [`ProviderSettingsEncryptionTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L294) | Backend xUnit |
 | `SEC-03` | Positive | `SEC` | EnvironmentSecretRetriever retrieves configured environment variable value. | [`SecretRetrieverTests.cs:L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecretRetrieverTests.cs#L5) | Backend xUnit |
 | `SEC-04` | Positive | `SEC` | WindowsRegistrySecretRetriever handles non-Windows platforms gracefully and returns null. | [`SecretRetrieverTests.cs:L34`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SecretRetrieverTests.cs#L34) | Backend xUnit |
 | `SEC-05` | Positive | `SEC` | renders RPC message stream with formatted JSON | [`LogsTerminalCard.test.tsx:L61`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/LogsTerminalCard.test.tsx#L61) | Frontend Vitest |
 | `SEC-30` | Positive | `SEC` | Renders User Secret Storage options and toggles Vault with warning when disabled. | [`SecretProvidersTab.test.tsx:L136`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/SecretProvidersTab.test.tsx#L136) | Frontend Vitest |
-| `SEC-ADMIN-AUDIT-REDACTION` | Positive | `SEC` | AdminMcpServer redacts sensitive secrets from argument payloads before recording audit logs. | [`AdminMcpServerTests.cs:L613`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L613) | Backend xUnit |
+| `SEC-ADMIN-AUDIT-REDACTION` | Positive | `SEC` | AdminMcpServer redacts sensitive secrets from argument payloads before recording audit logs. | [`AdminMcpServerTests.cs:L626`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L626) | Backend xUnit |
 | `SEC-APPKEY-SANITIZE-METADATA-GET` | Positive | `SEC` | AppKeys API returns sanitized key metadata without leaking plaintext tokens. | [`AppKeysControllerTests.cs:L259`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L259) | Backend xUnit |
 | `SEC-AUDIT-LOG-ADMIN-ACTION-RECORD` | Positive | `SEC` | AuditLogger records administrative configuration changes and security events to AdminAuditLogs table. | [`AuditLoggerTests.cs:L75`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditLoggerTests.cs#L75) | Backend xUnit |
 | `SEC-AUDIT-LOG-INVOCATION-RECORD` | Positive | `SEC` | AuditLogger writes tool invocation audit records with actor attribution and duration to AuditLogs table. | [`AuditLoggerTests.cs:L60`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditLoggerTests.cs#L60) | Backend xUnit |
@@ -3810,10 +3861,10 @@
 | `SEC-LOG-PROVIDER-REDACT-EXCEPTIONS` | Positive | `SEC` | SanitizingLoggerProvider sanitizes exception messages and stack traces to prevent credential leaks in error logs. | [`SanitizingLoggerProviderTests.cs:L76`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SanitizingLoggerProviderTests.cs#L76) | Backend xUnit |
 | `SEC-LOG-PROVIDER-REDACT-SECRETS` | Positive | `SEC` | SanitizingLoggerProvider automatically redacts Bearer tokens, API keys, and credentials in log message strings. | [`SanitizingLoggerProviderTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SanitizingLoggerProviderTests.cs#L8) | Backend xUnit |
 | `SEC-MASTERKEY-ATOMIC-REENCRYPTION` | Positive | `SEC` | Atomically re-encrypts database credentials when setting a custom master key. | [`MasterKeyReEncryptionTests.cs:L142`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L142) | Backend xUnit |
-| `SEC-MASTERKEY-CONFIGURED-STATUS-BADGE` | Positive | `SEC` | Displays configured badge and rotate button when custom master key is configured. | [`GeneralTab.test.tsx:L192`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L192) | Frontend Vitest |
+| `SEC-MASTERKEY-CONFIGURED-STATUS-BADGE` | Positive | `SEC` | Displays configured badge and rotate button when custom master key is configured. | [`GeneralTab.test.tsx:L250`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L250) | Frontend Vitest |
 | `SEC-MASTERKEY-CUSTOM-MODAL-REENCRYPTION` | Positive | `SEC` | Validates master key inputs (length, match) and triggers atomic re-encryption. | [`MasterKeyModal.test.tsx:L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/MasterKeyModal.test.tsx#L6) | Frontend Vitest |
-| `SEC-MASTERKEY-EXTERNAL-LOCKED-BADGE` | Positive | `SEC` | Displays locked badge when master key is externally managed via Vault or Environment. | [`GeneralTab.test.tsx:L149`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L149) | Frontend Vitest |
-| `SEC-MASTERKEY-UI-STATUS-BANNER` | Positive | `SEC` | Displays warning banner when keySource is AutoGenerated and opens custom master key modal. | [`GeneralTab.test.tsx:L115`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L115) | Frontend Vitest |
+| `SEC-MASTERKEY-EXTERNAL-LOCKED-BADGE` | Positive | `SEC` | Displays locked badge when master key is externally managed via Vault or Environment. | [`GeneralTab.test.tsx:L207`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L207) | Frontend Vitest |
+| `SEC-MASTERKEY-UI-STATUS-BANNER` | Positive | `SEC` | Displays warning banner when keySource is AutoGenerated and opens custom master key modal. | [`GeneralTab.test.tsx:L173`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L173) | Frontend Vitest |
 | `SEC-PII-BASIC-COOKIE-QUERY-USERINFO` | Positive | `SEC` | PiiSanitizer redacts Basic auth credentials, session cookies, query access tokens, and URL userinfo credentials. | [`PiiSanitizerTests.cs:L53`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PiiSanitizerTests.cs#L53) | Backend xUnit |
 | `SEC-PII-BEARER-TOKEN` | Positive | `SEC` | PiiSanitizer redacts Bearer authentication tokens from payload strings. | [`PiiSanitizerTests.cs:L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PiiSanitizerTests.cs#L5) | Backend xUnit |
 | `SEC-PII-CONNECTION-STRING-PASSWORD` | Positive | `SEC` | PiiSanitizer redacts database connection string passwords. | [`PiiSanitizerTests.cs:L29`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PiiSanitizerTests.cs#L29) | Backend xUnit |

@@ -137,6 +137,7 @@ namespace ModelContextGateway.Components.Servers
                     };
                     pingRequest.Headers.Accept.Clear();
                     pingRequest.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                    pingRequest.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/event-stream"));
                     if (!string.IsNullOrEmpty(server.ApiKey))
                     {
                         pingRequest.Headers.Add("Authorization", $"Bearer {server.ApiKey}");
