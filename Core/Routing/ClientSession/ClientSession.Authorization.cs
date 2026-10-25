@@ -260,7 +260,7 @@ namespace ModelContextGateway.Core.Routing
                                     scopeAllowed = true;
                                     break;
                                 }
-                                if ((targetId == "search_tools" || targetId == "execute_tool") && (IsMetaMode || requestMethod.StartsWith("tools/")))
+                                if ((targetId == "search_tools" || targetId == "execute_tool" || targetId == "execute_script") && (IsMetaMode || requestMethod.StartsWith("tools/")))
                                 {
                                     scopeAllowed = true;
                                     break;

@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-25T22:01:12.0333567Z",
-    "totalRequirements": 472,
-    "positiveCount": 372,
-    "guardrailCount": 100,
-    "totalProofs": 1098
+    "generatedAt": "2026-10-25T22:17:03.4531789Z",
+    "totalRequirements": 475,
+    "positiveCount": 373,
+    "guardrailCount": 102,
+    "totalProofs": 1108
   },
   "requirements": [
     {
@@ -4279,7 +4279,7 @@
       "category": "GUARD",
       "type": "Negative",
       "description": "Statement cap terminates infinite loops within allotted execution budget.",
-      "proofCount": 3,
+      "proofCount": 4,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -4301,6 +4301,13 @@
           "lineNumber": 63,
           "testName": "ExecuteAsync_ConsoleLogging_CapturesLogs",
           "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 69,
+          "testName": "ExecuteScript_DisabledCodeMode_ReturnsError",
+          "details": null
         }
       ]
     },
@@ -4309,13 +4316,36 @@
       "category": "GUARD",
       "type": "Negative",
       "description": "Execution timeout terminates long-running script.",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs",
           "lineNumber": 23,
           "testName": "ExecuteAsync_Timeout_TerminatesExecution",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 117,
+          "testName": "ExecuteScript_MissingScript_ReturnsError",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "GUARD-CODE-03",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "ExecuteScript returns structured envelope with isError on script runtime exception.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 322,
+          "testName": "ExecuteScript_RuntimeError_ReturnsStructuredErrorEnvelope",
           "details": null
         }
       ]
@@ -7258,7 +7288,7 @@
       "category": "MCP",
       "type": "Positive",
       "description": "RouterSettings provides default Code Mode configuration values.",
-      "proofCount": 5,
+      "proofCount": 7,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -7293,6 +7323,36 @@
           "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
           "lineNumber": 137,
           "testName": "ExecuteAsync_NonJsonContent_ReturnsRawText",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 13,
+          "testName": "GetMetaTools_IncludesExecuteScript_WhenEnabled",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 25,
+          "testName": "GetMetaTools_OmitsExecuteScript_WhenDisabled",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-CODE-02",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "ExecuteScript returns structured execution envelope with result and telemetry.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 162,
+          "testName": "ExecuteScript_ValidExecution_ReturnsStructuredEnvelope",
           "details": null
         }
       ]
@@ -8857,6 +8917,43 @@
           "filePath": "ModelContextGateway.Tests/AuditQueryApiTests.cs",
           "lineNumber": 60,
           "testName": "AuditQuery_ReturnsFilteredRows_AndLogsAuditAction",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-CODE-01",
+      "category": "SEC",
+      "type": "Negative",
+      "description": "ExecuteScript rejects unauthorized SSO groups.",
+      "proofCount": 4,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 37,
+          "testName": "ExecuteScript_UnauthorizedGroup_ReturnsSecurityError",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 48,
+          "testName": "IsCodeModeAuthorized_PermitsAdminWildcardAndMatchingGroups",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 215,
+          "testName": "ExecuteScript_UnauthorizedCallerGroup_ReturnsSecurityErrorEnvelope",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 268,
+          "testName": "ExecuteScript_AdminBypass_ExecutesSuccessfully",
           "details": null
         }
       ]

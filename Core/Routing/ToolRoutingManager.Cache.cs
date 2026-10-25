@@ -7,11 +7,11 @@ namespace ModelContextGateway.Core.Routing
         /// <summary>
         /// Asynchronously lists available tools from connected backends or returns bootstrap Meta-Mode tools.
         /// </summary>
-        public async Task<List<object>> ListToolsAsync(string body, bool isMetaMode, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync, IEnumerable<McpServer> servers, SessionManager? sessionManager = null)
+        public async Task<List<object>> ListToolsAsync(string body, bool isMetaMode, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync, IEnumerable<McpServer> servers, SessionManager? sessionManager = null, bool enableCodeMode = false)
         {
             if (isMetaMode)
             {
-                return GetMetaModeTools();
+                return GetMetaModeTools(enableCodeMode).Cast<object>().ToList();
             }
 
             await ensureBackendsInitializedAsync();

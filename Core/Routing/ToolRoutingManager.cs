@@ -1,8 +1,16 @@
 using System.Collections.Concurrent;
+using ModelContextGateway.Core.CodeMode;
 using ModelContextGateway.Core.VectorSearch;
 
 namespace ModelContextGateway.Core.Routing
 {
+    public class MetaToolDefinition
+    {
+        public string name { get; set; } = string.Empty;
+        public string description { get; set; } = string.Empty;
+        public object inputSchema { get; set; } = new();
+    }
+
     /// <summary>
     /// Manages backend tool listing, caching, namespaced routing tables, and tool invocation execution.
     /// </summary>
@@ -15,11 +23,22 @@ namespace ModelContextGateway.Core.Routing
 
         private IEmbeddingProvider? _embeddingProvider;
         private IToolVectorStore? _vectorStore;
+        private ICodeModeExecutionEngine? _codeModeEngine;
 
-        public ToolRoutingManager(IEmbeddingProvider? embeddingProvider = null, IToolVectorStore? vectorStore = null)
+        public ToolRoutingManager(IEmbeddingProvider? embeddingProvider = null, IToolVectorStore? vectorStore = null, ICodeModeExecutionEngine? codeModeEngine = null)
         {
             _embeddingProvider = embeddingProvider;
             _vectorStore = vectorStore ?? new InMemorySimdToolVectorStore();
+            _codeModeEngine = codeModeEngine ?? new CodeModeExecutionEngine();
+        }
+
+        /// <summary>
+        /// Gets or sets the active code mode execution engine.
+        /// </summary>
+        public ICodeModeExecutionEngine? CodeModeEngine
+        {
+            get => _codeModeEngine;
+            set => _codeModeEngine = value;
         }
 
         /// <summary>
@@ -45,11 +64,13 @@ namespace ModelContextGateway.Core.Routing
         /// </summary>
         public ConcurrentDictionary<string, string> ToolRoutingTable => _toolRoutingTable;
 
-        public static List<object> GetMetaModeTools()
+        public List<MetaToolDefinition> GetMetaTools(bool enableCodeMode = true) => GetMetaModeTools(enableCodeMode);
+
+        public static List<MetaToolDefinition> GetMetaModeTools(bool enableCodeMode = false)
         {
-            return new List<object>
+            var tools = new List<MetaToolDefinition>
             {
-                new
+                new()
                 {
                     name = "search_tools",
                     description = "Semantically search across all registered internal MCP tools (Excel, Docker, Plex, Home Assistant, etc.) using keywords. Returns the matching tool names, descriptions, and input schemas. Use this first to discover what tools are available.",
@@ -68,7 +89,7 @@ namespace ModelContextGateway.Core.Routing
                         required = new[] { "query" }
                     }
                 },
-                new
+                new()
                 {
                     name = "execute_tool",
                     description = "Execute a specific internal MCP tool by name with arguments. Accepts namespaced tool names ('server/tool' or 'server__tool') or bare tool names ('tool') if unambiguous. Obtain available tools by calling search_tools first.",
@@ -85,6 +106,55 @@ namespace ModelContextGateway.Core.Routing
                     }
                 }
             };
+
+            if (enableCodeMode)
+            {
+                tools.Add(new MetaToolDefinition
+                {
+                    name = "execute_script",
+                    description = "Execute a JavaScript script to programmatically chain and orchestrate internal MCP tools using an in-memory sandbox. Tools can be called via await tools.<server>.<tool>(arguments) or await mcg.callTool(name, arguments). Returns a structured execution envelope with results, logs, and execution telemetry.",
+                    inputSchema = new
+                    {
+                        type = "object",
+                        properties = new
+                        {
+                            script = new { type = "string", description = "The JavaScript script content to execute." },
+                            arguments = new { type = "object", description = "Optional JSON object with caller parameters accessible in the script as global args." }
+                        },
+                        required = new[] { "script" }
+                    }
+                });
+            }
+
+            return tools;
+        }
+
+        /// <summary>
+        /// Evaluates whether the caller is authorized to execute Code Mode scripts based on gateway settings and user groups.
+        /// </summary>
+        public static bool IsCodeModeAuthorized(RouterSettings settings, IEnumerable<string>? userGroups, bool isAdmin)
+        {
+            if (isAdmin)
+            {
+                return true;
+            }
+
+            if (string.IsNullOrWhiteSpace(settings.CodeModeAllowedGroups) || settings.CodeModeAllowedGroups.Contains('*'))
+            {
+                return true;
+            }
+
+            if (userGroups == null)
+            {
+                return false;
+            }
+
+            var allowedGroups = settings.CodeModeAllowedGroups
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            var userGroupSet = new HashSet<string>(userGroups.Where(g => !string.IsNullOrWhiteSpace(g)), StringComparer.OrdinalIgnoreCase);
+
+            return allowedGroups.Any(allowed => userGroupSet.Contains(allowed));
         }
 
         /// <summary>

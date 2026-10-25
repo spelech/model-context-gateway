@@ -197,6 +197,9 @@ namespace ModelContextGateway.Extensions
             builder.Services.AddSingleton<BackendHealthCheckService>();
             builder.Services.AddHostedService(sp => sp.GetRequiredService<BackendHealthCheckService>());
 
+            // Register Code Mode Execution Engine
+            builder.Services.AddSingleton<ModelContextGateway.Core.CodeMode.ICodeModeExecutionEngine, ModelContextGateway.Core.CodeMode.CodeModeExecutionEngine>();
+
             // Register Vector Search & In-Memory SIMD Tool Vector Store
             builder.Services.AddSingleton<ModelContextGateway.Core.VectorSearch.IToolVectorStore, ModelContextGateway.Core.VectorSearch.InMemorySimdToolVectorStore>();
 
