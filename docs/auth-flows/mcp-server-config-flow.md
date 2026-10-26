@@ -2,10 +2,12 @@
 
 This document explains how an administrator configures a backend MCP server in the gateway. It focuses on authentication options and secret management.
 
-### Core Concepts for Beginners
+## Core Concepts for Beginners
 - **Secret Provider**: The storage location where the gateway fetches credentials (environment variables, Windows registry, or HashiCorp Vault).
 - **AuthShape**: The format used to send credentials to the backend server (Bearer token, Basic auth, custom header, or query string).
 - **Bearer Token**: A secret key string sent in the `Authorization: Bearer <token>` header.
+
+## Configuration Decision Flowchart
 
 ```mermaid
 flowchart TD
@@ -62,7 +64,7 @@ flowchart TD
     G --> Z[(Database: Servers Table)]
 ```
 
-### Configuration Options Reference
+## Configuration Options Reference
 
 1. **Connection Type**: The transport used to reach the backend server (`sse`, `http`, or `stdio`).
 2. **Secret Provider**: The source where the gateway retrieves credentials:
@@ -79,7 +81,7 @@ flowchart TD
    - `query`: Appends credentials to the query string.
    - `impersonation`: Runs request inside `WindowsIdentity.RunImpersonated()` using caller's Windows token (Windows Server / IIS only).
 
-### Dynamic vs. Static Credentials
+## Dynamic vs. Static Credentials
 
 The gateway supports both **static credentials** (Vault, Environment, DPAPI, database keys) and **dynamic credentials** (RFC 8693 Token Exchange, Pass-Through JWTs, and interactive OAuth consent):
 

@@ -6,8 +6,7 @@ const gettingStartedSidebar = [
     text: 'Getting Started',
     items: [
       { text: 'Overview & Quickstart', link: '/getting-started/' },
-      { text: 'Features Overview', link: '/features-guide' },
-      { text: 'Support Matrix', link: '/support-matrix' }
+      { text: 'Features Overview', link: '/features-guide' }
     ]
   },
   {
@@ -33,7 +32,8 @@ const userGuideSidebar = [
       { text: 'Server Management & Secrets', link: '/user-guide/servers' },
       { text: 'RBAC, Security & Policies', link: '/user-guide/rbac-and-policies' },
       { text: 'AppKey Management & Scopes', link: '/user-guide/app-keys' },
-      { text: 'System Settings & Embeddings', link: '/user-guide/settings' }
+      { text: 'System Settings & Embeddings', link: '/user-guide/settings' },
+      { text: 'MCP Code Mode (execute_script)', link: '/user-guide/code-mode' }
     ]
   },
   {
@@ -67,6 +67,7 @@ const architectureSidebar = [
       { text: 'Architecture Overview', link: '/architecture/' },
       { text: 'Components & Boundary Model', link: '/architecture/components' },
       { text: 'Routing & Meta-Mode', link: '/architecture/routing-and-meta-mode' },
+      { text: 'Code Mode Sandbox Engine', link: '/architecture/code-mode' },
       { text: 'Authorization Pipeline', link: '/architecture/authorization-pipeline' },
       { text: 'Transports & Subprocesses', link: '/architecture/transports-and-subprocesses' },
       { text: 'Transports (Detailed Guide)', link: '/transports' },
@@ -86,9 +87,22 @@ const architectureSidebar = [
       { text: 'OIDC & SSO Reverse Proxy', link: '/oidc-and-sso-guide' },
       { text: 'Downstream Auth & Delegation', link: '/downstream-auth-and-delegation-guide' },
       { text: 'MCP Server Auth Cookbook', link: '/mcp-server-auth-cookbook' },
+      { text: 'Enterprise AD & Vault Analysis', link: '/enterprise-ad-vault-scenarios-and-gap-analysis' }
+    ]
+  },
+  {
+    text: 'OAuth & Protocol Flows',
+    collapsed: false,
+    items: [
       { text: 'Auth Support Matrix', link: '/auth-flows/auth-support-matrix' },
       { text: 'Per-User OAuth Flow', link: '/auth-flows/per-user-oauth-flow' },
-      { text: 'Slack Direct MCP Integration', link: '/auth-flows/slack-direct-mcp-integration' }
+      { text: 'Dynamic Client Registration (DCR)', link: '/auth-flows/dynamic-client-registration' },
+      { text: 'Multi-Tenant OAuth Consent', link: '/auth-flows/multi-tenant-oauth-consent' },
+      { text: 'Dynamic Auth & Caching Limits', link: '/auth-flows/dynamic-auth-limitations' },
+      { text: 'Slack Direct MCP Integration', link: '/auth-flows/slack-direct-mcp-integration' },
+      { text: 'MCP Request Auth Flow', link: '/auth-flows/mcp-request-auth-flow' },
+      { text: 'MCP Server Config Flow', link: '/auth-flows/mcp-server-config-flow' },
+      { text: 'Platform Config Flow', link: '/auth-flows/platform-config-flow' }
     ]
   }
 ];
@@ -168,6 +182,11 @@ export default withMermaid(
       siteTitle: 'Model Context Gateway',
       logo: '/logo.svg',
 
+      outline: {
+        level: [2, 3],
+        label: 'On this page'
+      },
+
       nav: [
         { text: 'Home', link: '/' },
         { text: 'Getting Started', link: '/getting-started/' },
@@ -190,6 +209,7 @@ export default withMermaid(
         '/oidc-and-sso-guide': architectureSidebar,
         '/downstream-auth-and-delegation-guide': architectureSidebar,
         '/mcp-server-auth-cookbook': architectureSidebar,
+        '/enterprise-ad-vault-scenarios-and-gap-analysis': architectureSidebar,
         '/transports': architectureSidebar,
         '/data-model': architectureSidebar,
         '/auth-flows/': architectureSidebar,

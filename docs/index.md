@@ -4,50 +4,50 @@ layout: home
 hero:
   name: Model Context Gateway
   text: Enterprise MCP Router & Control Plane
-  tagline: High-performance C# gateway connecting AI assistants and IDEs to your tools with zero-trust security, per-user OAuth delegation, and sub-millisecond semantic search.
+  tagline: High-performance C# gateway connecting AI assistants and IDEs to your tools with zero-trust security, sandboxed Code Mode orchestration, and sub-millisecond semantic search.
   image:
     src: /logo.svg
     alt: Model Context Gateway Logo
   actions:
     - theme: brand
       text: Get Started
-      link: /features-guide
+      link: /getting-started/
+    - theme: alt
+      text: MCP Code Mode
+      link: /user-guide/code-mode
     - theme: alt
       text: User Guide
       link: /user-guide/
-    - theme: alt
-      text: Deploy with Docker
-      link: /deployment/docker
     - theme: alt
       text: GitHub
       link: https://github.com/spelech/model-context-gateway
 
 features:
+  - icon: 💻
+    title: MCP Code Mode (execute_script)
+    details: Orchestrate multi-step tool workflows in a single LLM turn inside an isolated Jint JavaScript sandbox with automatic JSON unboxing and strict resource quotas.
   - icon: 🎯
     title: Meta-Mode Context Optimization
-    details: Exposes only search_tools and execute_tool by default. Conserves LLM context tokens and prevents prompt latency across hundreds of tools.
+    details: Exposes only search_tools, execute_tool, and execute_script by default. Eliminates context window bloat across hundreds of downstream tools.
+  - icon: ⚡
+    title: Calibrated Hybrid Semantic Search
+    details: .NET 10 hardware SIMD TensorPrimitives and normalized lexical scoring with configurable relevance floors and relative score drop-off filtering.
   - icon: 🛡️
     title: Enterprise Identity & Zero Trust
-    details: Active Directory Kerberos, OIDC header SSO, scoped AppKeys, and per-user 3LO OAuth delegation for Google Home and SaaS tools.
-  - icon: ⚡
-    title: Hardware SIMD Semantic Routing
-    details: .NET 10 hardware SIMD TensorPrimitives and Reciprocal Rank Fusion deliver sub-millisecond hybrid tool search.
+    details: Active Directory Kerberos, OIDC header SSO, scoped AppKeys with atomic rotation, and per-user 3LO OAuth delegation for SaaS tools.
   - icon: 🔐
     title: Envelope Encryption & Vault
     details: Hardware AES-256-GCM database envelope encryption and HashiCorp Vault KV v2 secret engine with automated background token refresh.
-  - icon: 🐳
-    title: Docker Auto-Discovery
-    details: Automatically detects and registers containerized MCP servers from Docker socket labels without manual configuration.
   - icon: 🤖
     title: Autonomous Admin Control Plane
-    details: AI agents manage servers, RBAC policies, and live diagnostics programmatically through 10 standard MCP admin tools.
+    details: Docker container auto-discovery and 10 standard Admin MCP tools enabling AI agents to manage servers, RBAC policies, and live diagnostics.
 ---
 
 <p align="center" class="badge-row" style="margin-top: 2rem;">
-  <img src="https://img.shields.io/badge/version-v5.17.0-orange?style=for-the-badge" alt="Version" />
+  <img src="https://img.shields.io/badge/version-v5.23.0-orange?style=for-the-badge" alt="Version" />
   <img src="https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&amp;logo=dotnet&amp;logoColor=white" alt=".NET 10.0" />
   <img src="https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge" alt="MCP Spec" />
-  <img src="https://img.shields.io/badge/tests-1%2C131%20passing-2ea44f?style=for-the-badge" alt="Tests" />
+  <img src="https://img.shields.io/badge/tests-1%2C209%20passing-2ea44f?style=for-the-badge" alt="Tests" />
   <img src="https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&amp;logo=docker&amp;logoColor=white" alt="Docker Ready" />
   <img src="https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&amp;logo=react&amp;logoColor=black" alt="React 19" />
   <img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge" alt="License" />
@@ -57,19 +57,19 @@ features:
 
 ## What is Model Context Gateway?
 
-The **Model Context Protocol (MCP)** allows AI assistants to run external tools and read data sources.
+The **Model Context Protocol (MCP)** connects AI assistants to external tools and data sources.
 
-When you connect an AI assistant directly to many individual tools, you face common operational problems:
-* **Context Bloat**: Loading hundreds of tool schemas consumes AI context memory before your session begins.
-* **Higher Latency and Token Costs**: Massive prompts increase inference costs and response times.
-* **Security Hazards**: API keys and passwords sit in plain text across local client configuration files.
-* **Multi-User Isolation**: Direct connections cannot safely handle per-user authentication (such as Google Home or personal SaaS tokens).
+Connecting an AI client directly to dozens of individual MCP servers creates operational bottlenecks:
+* **Context Bloat**: Loading hundreds of tool schemas consumes 40,000–80,000 tokens before your conversation begins.
+* **Multi-Step Round-Trip Tax**: Chaining five tool calls requires five sequential LLM turns and floods the prompt with raw intermediate JSON.
+* **Security Exposure**: Plaintext API keys and tokens sit scattered across local IDE configuration files.
+* **Multi-User Isolation Gaps**: Direct connections lack per-user RBAC policies and individual 3LO OAuth token isolation.
 
-**Model Context Gateway (MCG) solves these problems:**
-* **Single Connection Endpoint (`/sse`)**: Connect your AI assistant to a single gateway URL. MCG routes requests to the correct backend tool.
-* **Context Optimization (Meta-Mode)**: The gateway hides backend tool schemas and exposes only `search_tools` and `execute_tool`. The AI finds tools dynamically and invokes them on demand.
-* **Central Security & Per-User OAuth**: Credentials remain secure with AES-256-GCM envelope encryption or HashiCorp Vault. Individual users authenticate safely via 3LO OAuth with automated token refresh.
-* **Universal Tool Support**: Route across Docker containers, remote HTTP/SSE services, and local script subprocesses (Node.js, Python, uv, bun) without client reloads.
+**Model Context Gateway (MCG) solves these challenges:**
+* **Single Gateway Endpoint (`/sse`)**: Connect your IDE or AI agent to one URL. MCG routes requests across all registered backend servers.
+* **Meta-Mode & Code Mode (`search_tools`, `execute_tool`, `execute_script`)**: Discover relevant tools on demand with calibrated hybrid search, or execute multi-tool JavaScript workflows in a single turn inside an isolated sandbox.
+* **Zero-Trust Security & Per-User OAuth**: Protect credentials with AES-256-GCM envelope encryption or HashiCorp Vault, enforce 4-stage RBAC policies, and delegate per-user 3LO OAuth tokens automatically.
+* **Universal Transport Support**: Route across Docker containers, remote HTTP/SSE services, and local STDIO subprocesses (Node.js, Python, uv, bun) with configurable background health probing.
 
 ![Model Context Gateway Dashboard](assets/dashboard.jpg)
 
@@ -81,14 +81,15 @@ When you connect an AI assistant directly to many individual tools, you face com
 flowchart LR
     subgraph Clients["AI Clients & IDEs"]
         Claude["Claude Desktop"]
-        Cursor["Cursor / Windsurf"]
+        Cursor["Cursor / VS Code"]
         Agents["Autonomous Agents"]
     end
 
     subgraph Gateway["Model Context Gateway (MCG)"]
         Auth["OAuth / OIDC SSO / AppKey"]
         MetaMode["Meta-Mode Router\n(search_tools / execute_tool)"]
-        Vector["Semantic Vector Search\n(SIMD Hardware / OpenAI)"]
+        CodeMode["Code Mode Sandbox\n(execute_script / Jint)"]
+        Vector["Calibrated Hybrid Search\n(SIMD Vector + Lexical)"]
         AdminMCP["Admin MCP Server\n(/admin, /mcg-admin)"]
         Secrets["Secret Providers\n(Vault / DPAPI / AES)"]
     end
@@ -101,8 +102,10 @@ flowchart LR
 
     Clients -->|Bearer / SSE| Auth
     Auth --> MetaMode
+    Auth --> CodeMode
     Auth --> AdminMCP
     MetaMode <--> Vector
+    CodeMode --> MetaMode
     MetaMode --> Secrets
     Secrets --> DockerSrv
     Secrets --> SSESrv
@@ -113,7 +116,7 @@ flowchart LR
 
 ## Quickstart: Zero-Config Startup
 
-Run the gateway container with zero required initial configuration. On first boot, the gateway automatically generates a 256-bit AES Master Key in `./data/.master.key` and initializes a secure SQLite database:
+Run the gateway container with zero initial configuration. On first boot, the gateway automatically generates a 256-bit AES Master Key in `./data/.master.key` and initializes a SQLite database:
 
 ::: code-group
 
@@ -148,8 +151,8 @@ services:
 ### Live Gateway Endpoints
 
 * **Web UI Dashboard**: `http://localhost:8080/`
-* **Health Check**: `http://localhost:8080/health` &rarr; `{"status":"healthy","service":"ModelContextGateway","version":"5.17.0"}`
-* **Meta-Mode Gateway**: `http://localhost:8080/sse`
+* **Health Check**: `http://localhost:8080/health` → `{"status":"healthy","service":"ModelContextGateway","version":"5.23.0"}`
+* **Meta-Mode & Code Mode Gateway**: `http://localhost:8080/sse`
 * **Admin MCP Server**: `http://localhost:8080/admin/sse` (or `POST /admin` / `GET /mcg-admin/sse`)
 * **Direct Backend Proxy**: `http://localhost:8080/{targetServerId}`
 
@@ -157,16 +160,27 @@ services:
 
 ## Documentation Directory
 
+### Getting Started & Deployment
+
 <div class="grid cards">
 
 <ul>
 <li>
 
-🚀 **[Container Deployment Guide](deployment/docker.md)**
+🚀 **[Getting Started & Quickstart](getting-started/index.md)**
 
 ---
 
-Production Docker, Docker Compose, environment settings, and multi-database configurations.
+5-minute setup paths for homelab users, enterprise platform engineers, and Windows IIS administrators.
+
+</li>
+<li>
+
+🐳 **[Container Deployment Guide](deployment/docker.md)**
+
+---
+
+Production Docker, Docker Compose, `latest` vs `latest-full` images, and multi-database configurations.
 
 </li>
 <li>
@@ -175,16 +189,88 @@ Production Docker, Docker Compose, environment settings, and multi-database conf
 
 ---
 
-Fast setup for personal use, home labs, SQLite database, and local AI clients.
+Fast setup for personal automation, home labs, SQLite database, and local AI clients.
 
 </li>
+<li>
+
+🪟 **[Windows & IIS Deployment](deployment/windows-iis.md)**
+
+---
+
+Native Windows Server IIS in-process hosting (ANCM v2), Windows Service (SCM), and DPAPI encryption.
+
+</li>
+</ul>
+
+</div>
+
+### User Guide & MCP Code Mode
+
+<div class="grid cards">
+
+<ul>
+<li>
+
+📖 **[Official User Guide](user-guide/index.md)**
+
+---
+
+Interactive dashboard walkthrough, server registration, health check modes, RBAC management, and client setup.
+
+</li>
+<li>
+
+💻 **[MCP Code Mode (`execute_script`)](user-guide/code-mode.md)**
+
+---
+
+Write sandboxed JavaScript workflows that chain `mcg.callTool` and `tools.<server>.<tool>` in a single turn.
+
+</li>
+<li>
+
+🧪 **[Interactive Test Bench](user-guide/test-bench/index.md)**
+
+---
+
+Execute tools with schema forms, simulate calibrated hybrid search, and inspect live JSON-RPC streams.
+
+</li>
+<li>
+
+⚙️ **[System Settings & Embeddings](user-guide/settings.md)**
+
+---
+
+Configure local ONNX or OpenAI embeddings, search drop-off thresholds, identity providers, and Code Mode limits.
+
+</li>
+</ul>
+
+</div>
+
+### Enterprise Security & Authentication
+
+<div class="grid cards">
+
+<ul>
 <li>
 
 🛡️ **[Authentication Architecture](authentication-architecture.md)**
 
 ---
 
-Active Directory SIDs, OIDC reverse proxy SSO, standalone trust, and AppKey scopes.
+Active Directory SIDs, OIDC reverse proxy SSO, standalone trust, and 4-stage RBAC evaluation.
+
+</li>
+<li>
+
+🔑 **[AppKey Scopes & Authorization](appkey-scopes.md)**
+
+---
+
+Scope grammar (`*`, `server:*`, `category:*`, `tool:*`), atomic key rotation, usage tracking, and SHA-256 hashing.
 
 </li>
 <li>
@@ -198,29 +284,20 @@ Individual user authentication (Google Home, GitHub, Slack), 3LO protocol, encry
 </li>
 <li>
 
-⚙️ **[Administrator Guide](admin-guide.md)**
+🔒 **[Secret Providers & Key Management](secret-providers.md)**
 
 ---
 
-Server management, the 10 Admin MCP tools, RBAC policies, and secret provider configuration.
+HashiCorp Vault KV v2 JIT renewal, Windows DPAPI, Master Key lifecycle, and zero-downtime hot reloading.
 
 </li>
 <li>
 
-🤖 **[Admin MCP Automation Guide](admin-mcp-automation-guide.md)**
+🏢 **[Active Directory & RBAC Guide](active-directory-and-rbac-guide.md)**
 
 ---
 
-Autonomous agent administration via the `mcg-admin` skill, control plane tools, and programmatic provisioning.
-
-</li>
-<li>
-
-📖 **[Official User Guide](user-guide/index.md)**
-
----
-
-Interactive dashboard walkthrough, server registration, RBAC management, client setup, and test bench.
+Inbound Windows Kerberos, LDAPS `tokenGroups` recursive resolution, and multi-level group policies.
 
 </li>
 <li>
@@ -232,13 +309,31 @@ Interactive dashboard walkthrough, server registration, RBAC management, client 
 Scenario-driven integration recipes for Bearer auth, Custom Headers, Vault, BYOK, and Pass-Through.
 
 </li>
+</ul>
+
+</div>
+
+### Architecture, Operations & Reference
+
+<div class="grid cards">
+
+<ul>
 <li>
 
 🗺️ **[Comprehensive Architecture](architecture/index.md)**
 
 ---
 
-Complete enterprise architecture specification, sequence diagrams, component models, and AES encryption pipelines.
+System topology, component boundaries, routing & Meta-Mode engine, and Code Mode sandbox internals.
+
+</li>
+<li>
+
+🤖 **[Admin MCP Automation Guide](admin-mcp-automation-guide.md)**
+
+---
+
+Autonomous agent administration via the `mcg-admin` skill and the 10 built-in administrative MCP tools.
 
 </li>
 <li>
@@ -252,29 +347,11 @@ Canonical 12-table ERD, dialect specifications for SQLite, MSSQL, and MySQL, and
 </li>
 <li>
 
-🔑 **[AppKey Scopes & Authorization](appkey-scopes.md)**
-
----
-
-Scope grammar (`*`, `server:*`, `category:*`, `tool:*`), evaluation pipeline, least-privilege personas, and token hashing.
-
-</li>
-<li>
-
-🔒 **[Secret Providers & Key Management](secret-providers.md)**
-
----
-
-HashiCorp Vault KV v2 JIT renewal, Windows DPAPI, Master Key lifecycle, and secure credential storage.
-
-</li>
-<li>
-
 🔄 **[Downstream Transports Guide](transports.md)**
 
 ---
 
-SSE, HTTP/streamable, subprocess STDIO security policies, environment secret injection, and process isolation.
+SSE, HTTP/streamable, subprocess STDIO security policies, and configurable `RootOrigin` / `JsonRpcPing` health checks.
 
 </li>
 <li>
@@ -283,43 +360,16 @@ SSE, HTTP/streamable, subprocess STDIO security policies, environment secret inj
 
 ---
 
-Living Software Requirements Specification, requirement taxonomy (`AUTH`, `MCP`, `SEC`, `GUARD`), and test matrix.
+Living Software Requirements Specification, requirement taxonomy (`AUTH`, `MCP`, `SEC`, `GUARD`), and test proofs.
 
 </li>
 <li>
 
-⚠️ **[Troubleshooting & RCA Guide](mcp-routing-and-admin-issues.md)**
+⚠️ **[Troubleshooting & Runbooks](operations/index.md)**
 
 ---
 
-In-depth root cause analysis and resolution guide covering session lifecycles, cache synchronization, and downstreams.
-
-</li>
-<li>
-
-🏢 **[Active Directory & RBAC Guide](active-directory-and-rbac-guide.md)**
-
----
-
-Inbound Windows Kerberos and LDAPS tokenGroups recursive resolution, multi-level group policies, and impersonation.
-
-</li>
-<li>
-
-🌐 **[OIDC & SSO Reverse Proxy Guide](oidc-and-sso-guide.md)**
-
----
-
-External JWT validation, trusted proxy header SSO, multi-level claims authorization, and RFC 8693 token exchange.
-
-</li>
-<li>
-
-🎯 **[Downstream Auth & Delegation Guide](downstream-auth-and-delegation-guide.md)**
-
----
-
-Seven credential delegation patterns, RLS identity forwarding, token exchange, and mixing guardrails.
+Operational runbooks, health diagnostics, and root cause analysis for STDIO, OAuth tokens, and database locks.
 
 </li>
 </ul>
@@ -379,7 +429,7 @@ Seven credential delegation patterns, RLS identity forwarding, token exchange, a
 
 All features, security guardrails, and authentication flows are validated across automated test suites:
 
-* **xUnit Backend Suite**: 878 integration & unit tests ([`ModelContextGateway.Tests`](developer-guide.md#backend-test-suite))
-* **Vitest Frontend Suite**: 253 component and state store tests ([`frontend/src/test`](developer-guide.md#frontend-vitest-suite))
-* **Playwright E2E Suite**: End-to-end browser automation ([`frontend/e2e`](developer-guide.md#end-to-end-testing-playwright))
+* **xUnit Backend Suite**: 917+ integration & unit tests ([`ModelContextGateway.Tests`](developer-guide.md#backend-test-suite))
+* **Vitest Frontend Suite**: 269+ component and state store tests ([`frontend/src/test`](developer-guide.md#frontend-vitest-suite))
+* **Playwright E2E Suite**: 23+ end-to-end browser automation specs ([`frontend/e2e`](developer-guide.md#end-to-end-testing-playwright))
 * **Living Requirements Matrix**: Zero-drift catalog generation via `dotnet run --project scripts/CatalogGenerator -- --verify-only` ([SRS Catalog](software-requirements-and-test-catalog.md))

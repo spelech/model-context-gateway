@@ -2,48 +2,38 @@
 
 [Home](index.md) > Features Overview
 
-Welcome to the **Model Context Gateway (MCG)** feature directory and documentation hub. Model Context Gateway routes, transforms, and secures communication for the Model Context Protocol (MCP).
-
-This overview organizes MCG's capabilities and technical documentation following the **Diátaxis framework** into four distinct quadrants: **Tutorials**, **How-To Guides**, **Reference**, and **Explanation**.
+Welcome to the **Model Context Gateway (MCG)** feature directory and documentation hub. Model Context Gateway routes, orchestrates, and secures communication between AI assistants and backend Model Context Protocol (MCP) servers.
 
 ---
 
-```
-                       LEARNING-ORIENTED
-                             │
-            Tutorials        │       Explanation
-      (Getting Started)      │      (Architecture)
-                             │
-  PROBLEM- ──────────────────┼────────────────── INFORMATION-
-  ORIENTED                   │                     ORIENTED
-           How-To Guides     │        Reference
-            (Task-based)     │      (Specifications)
-                             │
-                       ACTION-ORIENTED
-```
+## Quickstart & Onboarding Guides
 
----
+Step-by-step guides to deploy and evaluate Model Context Gateway in your environment:
 
-## 1. Tutorials (Learning-Oriented)
-
-Step-by-step guides designed to get you up and running with Model Context Gateway quickly.
-
+* [**Getting Started Overview**](getting-started/index.md)
+  Choose your deployment path across Docker containers, Windows Server IIS, or single-user home labs.
 * [**Single-User & Home-Lab Quickstart**](deployment/homelab.md)
   Deploy MCG for personal automation or homelab environments with zero external dependencies.
-* [**Universal Setup Skill (`mcg-setup`)**](admin-guide.md#7-automated-administration)
-  Use AI coding assistants (Claude Code, Antigravity, Cursor) to guide you through installing and configuring MCG in any workspace.
+* [**Automated Setup & Admin Provisioning (`mcg-admin`)**](admin-mcp-automation-guide.md)
+  Use AI coding assistants (Claude Code, Antigravity, Cursor) to install, configure, and manage MCG programmatically.
 * [**Evaluation Guide**](evaluation-guide.md)
   Evaluate MCG features, performance benchmarks, and security boundaries.
 
 ---
 
-## 2. How-To Guides (Task & Goal-Oriented)
+## User & Task Guides
 
-Practical recipes to help you accomplish specific goals and operational tasks.
+Practical guides for configuring servers, connecting AI clients, and testing capabilities in the Web UI.
 
 ### Server & Connection Management
-* [**Dynamic Server Management**](user-guide/servers.md)
-  Add and configure backend MCP servers via Web UI, JSON seeding (`custom_servers.json`), environment variables, or Docker container labels (`mcp.*`).
+* [**Dynamic Server Management & Health Checks**](user-guide/servers.md)
+  Register backend MCP servers via the Web UI, JSON seeding (`custom_servers.json`), or Docker container labels (`mcp.*`), and configure `RootOrigin` or `JsonRpcPing` health probes.
+* [**MCP Code Mode (`execute_script`)**](user-guide/code-mode.md)
+  Orchestrate multi-step tool workflows in a single LLM turn using sandboxed JavaScript (`mcg.callTool` and `tools.<server>.<tool>`), automatic JSON unboxing, and configurable resource guardrails.
+* [**AppKey Management & Atomic Rotation**](user-guide/app-keys.md)
+  Generate scoped AppKeys, monitor live `LastUsedAt` activity, rotate credentials in place without recreating keys, and generate ready-to-paste client configs.
+* [**System Settings, Search Thresholds & Code Mode**](user-guide/settings.md)
+  Configure local ONNX or external embeddings, tune `search_tools` minimum score and drop-off ratios, and manage Code Mode sandbox limits.
 * [**Client Setup & IDE Integration**](user-guide/clients/index.md)
   Connect AI clients and IDEs to MCG:
   * [Cursor IDE Integration](user-guide/clients/cursor.md)
@@ -51,16 +41,12 @@ Practical recipes to help you accomplish specific goals and operational tasks.
   * [Cline & VS Code Integration](user-guide/clients/cline-and-vscode.md)
   * [Antigravity CLI Integration](user-guide/clients/antigravity.md)
 
-### Administration & Automation
-* [**Admin MCP Server & Agent Automation**](admin-mcp-automation-guide.md)
-  Automate gateway configuration using AI agents via the built-in Admin MCP Server (`/admin`, `/mcg-admin`).
-* [**Universal Admin MCP Automation Skill (`mcg-admin`)**](admin-mcp-automation-guide.md)
-  7-phase automation skill for zero-dashboard programmatic provisioning.
-* [**Interactive Developer Test Bench**](user-guide/test-bench/index.md)
-  Inspect JSON-RPC traffic, test tools with dynamic form builders, simulate semantic search, and view live logs:
+### Interactive Developer Test Bench
+* [**Test Bench Overview**](user-guide/test-bench/index.md)
+  Inspect JSON-RPC traffic, test tools with dynamic form builders, simulate calibrated hybrid search, and view live logs:
   * [Tool Execution Tester](user-guide/test-bench/tool-tester.md)
   * [Virtual Resources & Prompts](user-guide/test-bench/resources-and-prompts.md)
-  * [Semantic Search Simulator](user-guide/test-bench/semantic-search.md)
+  * [Semantic Router Simulator](user-guide/test-bench/semantic-search.md)
   * [Raw Console & Live Logs](user-guide/test-bench/console-and-logs.md)
 
 ### Deployment & Hosting
@@ -71,7 +57,7 @@ Practical recipes to help you accomplish specific goals and operational tasks.
 
 ---
 
-## 3. Reference (Information & Specification-Oriented)
+## Technical Reference & Specifications
 
 Detailed technical specifications, parameter matrices, and API references.
 
@@ -79,56 +65,7 @@ Detailed technical specifications, parameter matrices, and API references.
 * [**Admin MCP Tools Reference**](admin-mcp-features.md)
   Complete reference for the 10 consolidated administrative tools (`manage_servers`, `manage_appkeys`, `manage_policies`, `manage_group_mappings`, `manage_providers`, `manage_settings`, `manage_custom_files`, `manage_system`, `test_tool_call`, `manage_clients`).
 * [**AppKey Taxonomy & Scopes**](appkey-scopes.md)
-  Base62 AppKey character formats, entropy, fast lookup design, and scope granularity (`all`, `server:<id>`, `category:<name>`, `tool:<name>`).
-
-### MCP Code Mode (JavaScript Sandbox Engine)
-
-Model Context Gateway provides **MCP Code Mode**, an in-gateway orchestration engine powered by an isolated [Jint](https://github.com/sebastienros/jint) JavaScript runtime. Rather than requiring connected AI models to perform multiple serial tool-call round-trips over the network with large JSON-RPC overhead, agents can write and execute JavaScript workflows directly on the gateway via the `execute_script` meta-tool.
-
-#### 1. Invoking `execute_script` in Meta-Mode
-When Code Mode is enabled in settings (`CodeMode:Enabled = true`), the gateway exposes `execute_script` alongside `search_tools` and `execute_tool` on Meta-Mode endpoints (`/sse` and `/mcp`).
-
-**Tool Definition:**
-- **Name**: `execute_script`
-- **Description**: Executes JavaScript within an isolated sandbox with direct access to backend MCP tools.
-- **Parameters**:
-  - `script` (or `code`) (string, required): JavaScript snippet to execute. Top-level statements and return values are captured as tool output.
-  - `arguments` (object, optional): Optional JSON object with caller parameters accessible in the script as global `args` (and `mcg.args`).
-
-#### 2. Dual Dispatcher Syntax
-Scripts running inside the sandbox have two ergonomic ways to invoke downstream backend MCP tools:
-
-1. **Direct Gateway Dispatcher (`mcg.callTool`)**:
-   ```javascript
-   const status = await mcg.callTool("docker/inspect_container", { id: "web" });
-   return status;
-   ```
-   Supports modern slash (`server/tool`) and canonical underscore (`server__tool`) namespacing.
-
-2. **Hierarchical Proxy Object (`tools.<server>.<tool>`)**:
-   ```javascript
-   const containers = await tools.docker.list_containers({ all: true });
-   const running = containers.filter(c => c.state === 'running');
-   return { count: running.length, names: running.map(c => c.name) };
-   ```
-   Both dot-notation (`tools.docker.list_containers(...)`) and bracket-notation (`tools["docker"]["list_containers"](...)`) are dynamically resolved through hierarchical JavaScript proxies.
-
-#### 3. Auto-Unboxing & JSON Parsing
-Tools executed within the sandbox automatically unbox MCP JSON-RPC content envelopes:
-- If a downstream tool returns a single JSON text object in its content array (`[{ type: "text", text: "{\"key\": \"val\"}" }]`), MCG transparently parses the payload into a native JavaScript object or array.
-- This allows immediate property access, array manipulation, and filtering without manual `JSON.parse()` boilerplate. Plain text or non-JSON payloads remain strings.
-
-#### 4. Sandbox Security & Resource Guardrails
-The Code Mode engine executes scripts in a fully isolated Jint engine with strict fail-closed resource limits:
-- **Strict Isolation**: No access to CLR types, file system, network sockets, reflection, threading, or Node.js/browser globals (`process`, `require`, `window`, `document`).
-- **Execution Timeout**: Configurable wall-clock cancellation timeout (default: `30 seconds`, range: 1–120s).
-- **Statement Limit**: Maximum AST statement count to prevent infinite loops (default: `100,000` statements, range: 10,000–1,000,000).
-- **Memory Ceiling**: Strict heap memory limit allocated to the engine (default: `64 MB`, range: 16–512 MB).
-- **Max Tool Calls Quota**: Limits the number of downstream tool invocations allowed per script execution to prevent amplification attacks (default: `50` calls, range: 1–500).
-
-#### 5. Group-Based RBAC & Settings UI
-- **Authorization**: Access to `execute_script` can be restricted to specific user groups via `CodeMode:AllowedGroups`. If configured, only users possessing at least one matching group claim (via Windows AD SIDs, OIDC tokens, or reverse proxy SSO headers) are permitted to discover and execute scripts. Unauthorized users receive access-denied errors and do not see `execute_script` in `tools/list`.
-- **Settings Management**: Administrators can toggle Code Mode, adjust timeout, statement, memory, and tool-call limits, and select allowed groups via the **Code Mode** tab in the Settings dashboard or via Admin MCP (`manage_settings`).
+  AppKey token structure, SHA-256 hashing, atomic rotation, and scope granularity (`*`, `server:<id>`, `category:<name>`, `tool:<name>`).
 
 ### Protocols & Standards Alignment
 * [**MCP 2026-07-28 Specification Alignment**](architecture/transports-and-subprocesses.md)
@@ -136,7 +73,7 @@ The Code Mode engine executes scripts in a fully isolated Jint engine with stric
 * [**RFC 9728 Protected Resource Metadata & Discovery**](auth-flows/mcp-request-auth-flow.md)
   Zeroconf client discovery via `/.well-known/oauth-protected-resource` and standard 401 `WWW-Authenticate` handshakes.
 * [**RFC 7591 Dynamic Client Registration**](auth-flows/dynamic-client-registration.md)
-  OAuth 2.1 client registration with mandatory `application_type` validation.
+  OAuth 2.1 client registration with mandatory `application_type` validation and redirect URI management.
 
 ### Platform Infrastructure
 * [**Database Providers & ERD**](database-providers.md)
@@ -150,17 +87,17 @@ The Code Mode engine executes scripts in a fully isolated Jint engine with stric
 
 ---
 
-## 4. Explanation & Architecture (Understanding-Oriented)
+## Architecture & Deep-Dive Explanations
 
-Deep-dive explanations of core architectural concepts, security pipelines, and subsystem mechanics.
+In-depth explanations of core architectural concepts, security pipelines, and subsystem mechanics.
 
 ### Core Routing & Processing
 * [**Architecture Overview**](architecture/index.md)
   High-level system topology, module boundaries, and request lifecycle.
-* [**Routing & Meta-Mode Engine**](architecture/routing-and-meta-mode.md)
-  Slash formatting (`{serverId}/{toolName}`), dual-key routing, context window token reduction in Meta-Mode, and Reciprocal Rank Fusion (RRF) hybrid search combining SIMD vector embeddings with lexical search.
-* **MCP Code Mode Execution Engine**
-  Client-side JavaScript multi-tool workflow orchestration directly within MCG, featuring an isolated Jint sandbox, dual dispatchers (`mcg.callTool`, `tools.<server>.<tool>`), automatic JSON unboxing, statement/memory ceilings, and group-based RBAC.
+* [**Routing, Meta-Mode & Calibrated Hybrid Search**](architecture/routing-and-meta-mode.md)
+  Multi-delimiter tool resolution (`__`, `.`, `/`), cold-start on-demand discovery, calibrated hybrid vector + lexical scoring, and two-stage relevance thresholding.
+* [**Code Mode Sandbox Engine Architecture**](architecture/code-mode.md)
+  In-process Jint JavaScript isolation, `mcg.callTool` and `tools.<server>.<tool>` proxy mechanics, automatic JSON unboxing, statement/memory ceilings, and dual-layer RBAC enforcement.
 * [**Transports & Subprocess Execution**](architecture/transports-and-subprocesses.md)
   Stateful SSE, stateless HTTP, and STDIO subprocess execution models (including the batteries-included `latest-full` container image).
 
@@ -168,7 +105,7 @@ Deep-dive explanations of core architectural concepts, security pipelines, and s
 * [**Authentication Architecture**](authentication-architecture.md)
   Unified identity resolution across Windows Integrated Auth, JWT, and reverse proxies.
 * [**Unified Authorization Pipeline**](architecture/authorization-pipeline.md)
-  5-level security pipeline enforcing AppKey scopes, administrator SIDs, database access policies, and discovery filtering across tools, prompts, resources, and completions.
+  4-stage fail-closed security pipeline enforcing AppKey scopes, administrator SIDs, database access policies, and discovery filtering across tools, prompts, resources, and completions.
 * [**Active Directory & LDAPS Domain Setup**](architecture/security/active-directory-ldap.md)
   Domain integration, LDAPS TLS port 636, service credentials, and `tokenGroups` transitive group resolution.
 * [**Multi-Level RBAC & Access Control Policies**](architecture/security/rbac-and-policies.md)
