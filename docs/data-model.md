@@ -41,6 +41,8 @@ erDiagram
         string ApiKey "Static API key (redacted in API)"
         string HeadersJson "JSON dictionary of custom HTTP headers"
         boolean AutoDiscovered "Flag indicating dynamic auto-discovery"
+        string Alias "Optional secondary server alias"
+        string HealthCheckMode "Health probe mode: RootOrigin or JsonRpcPing"
     }
 
     Settings {
@@ -53,6 +55,15 @@ erDiagram
         string UserSecretStorage "Storage mode for user personal secrets"
         int GlobalMaxKeys "Maximum total active AppKeys allowed"
         int UserMaxKeys "Maximum active AppKeys allowed per user"
+        int ToolSearchDefaultLimit "Default result limit for search_tools (default 5)"
+        float ToolSearchMinScore "Minimum relevance score floor (default 0.35)"
+        float ToolSearchScoreDropoffRatio "Relative score drop-off ratio (default 0.60)"
+        boolean EnableCodeMode "Master toggle for execute_script sandbox"
+        int CodeModeExecutionTimeoutSeconds "Sandbox execution timeout in seconds (default 30)"
+        int CodeModeMaxToolCalls "Maximum tool calls per script execution (default 50)"
+        int CodeModeMaxMemoryMb "Maximum JS heap memory in MB (default 64)"
+        int CodeModeMaxStatements "Maximum JS AST statements per script (default 100000)"
+        string CodeModeAllowedGroups "Optional RBAC group allowlist for Code Mode"
     }
 
     SecretProviders {
@@ -129,6 +140,7 @@ erDiagram
         string ScopesJson "JSON array of allowed scopes (*, category:*, server:*)"
         datetime ExpiresAt "Optional key expiration UTC timestamp"
         datetime CreatedAt "Timestamp of key creation"
+        datetime LastUsedAt "Debounced UTC timestamp of most recent key usage"
         string OwnerSid "Target user SID (decoupled from admin creator)"
     }
 
@@ -187,6 +199,8 @@ Stores backend downstream server registrations, transport parameters, credential
 | `ApiKey` | `VARCHAR(1000)` | Yes | | Static token (encrypted at rest; redacted in API responses) |
 | `HeadersJson` | `TEXT / JSON` | Yes | | JSON dictionary of static downstream HTTP headers |
 | `AutoDiscovered` | `BOOLEAN / INT` | No | Default `0` | Flag set when registered dynamically via Docker socket discovery |
+| `Alias` | `VARCHAR(100)` | Yes | | Optional secondary short identifier for tool routing |
+| `HealthCheckMode` | `VARCHAR(50)` | No | Default `'RootOrigin'` | Background probe strategy: `'RootOrigin'` or `'JsonRpcPing'` |
 
 ---
 
@@ -220,6 +234,7 @@ Stores client API credentials used by IDEs, CLI tools, and background agents.
 | `ScopesJson` | `TEXT / JSON` | No | | Scopes JSON array: `["*"]`, `["server:docker"]`, `["category:media"]` |
 | `ExpiresAt` | `DATETIME` | Yes | | Expiration timestamp in UTC (`NULL` = Never) |
 | `CreatedAt` | `DATETIME` | No | Default `CURRENT_TIMESTAMP` | Creation timestamp |
+| `LastUsedAt` | `DATETIME` | Yes | `NULL` | Debounced UTC timestamp of most recent authentication |
 | `OwnerSid` | `VARCHAR(255)` | Yes | | Target user SID decoupled from admin creator principal |
 
 ---
@@ -312,6 +327,15 @@ Stores global singleton settings controlling vector embeddings, user quotas, and
 | `UserSecretStorage` | `VARCHAR(50)` | No | Default `'Database'` | Storage strategy for user-supplied secrets (`Database`, `Vault`) |
 | `GlobalMaxKeys` | `INT` | No | Default `0` | Gateway-wide limit on active AppKeys (`0` = Unlimited) |
 | `UserMaxKeys` | `INT` | No | Default `0` | Per-user limit on active AppKeys (`0` = Unlimited) |
+| `ToolSearchDefaultLimit` | `INT` | No | Default `5` | Default maximum results returned by `search_tools` (`1`–`100`) |
+| `ToolSearchMinScore` | `DOUBLE / FLOAT` | No | Default `0.35` | Minimum relevance floor for `search_tools` (`0.0`–`1.0`) |
+| `ToolSearchScoreDropoffRatio` | `DOUBLE / FLOAT` | No | Default `0.60` | Relative cutoff ratio compared against the top `search_tools` hit (`0.0`–`1.0`) |
+| `EnableCodeMode` | `BOOLEAN / INT` | No | Default `1` | Master toggle enabling `execute_script` in Meta-Mode |
+| `CodeModeExecutionTimeoutSeconds` | `INT` | No | Default `30` | Maximum wall-clock execution timeout in seconds (`1`–`300`) |
+| `CodeModeMaxToolCalls` | `INT` | No | Default `50` | Maximum downstream tool calls per script execution (`1`–`500`) |
+| `CodeModeMaxMemoryMb` | `INT` | No | Default `64` | Maximum Jint JavaScript heap allocation in megabytes (`8`–`512`) |
+| `CodeModeMaxStatements` | `INT` | No | Default `100000` | Maximum JavaScript AST statements evaluated per script (`100`–`10000000`) |
+| `CodeModeAllowedGroups` | `VARCHAR(1000)` | No | Default `''` | Comma-separated RBAC group allowlist for `execute_script` (`''` = all users) |
 
 ---
 

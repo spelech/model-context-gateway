@@ -6,35 +6,7 @@ This guide details supported transports, security policies, concurrency architec
 
 ---
 
-## Table of Contents
-
-1. [Transport Comparison and Capability Matrix](#1-transport-comparison-and-capability-matrix)
-2. [Subprocess STDIO Deep-Dive](#2-subprocess-stdio-deep-dive)
-   - [Executable Path and Argument Configuration](#executable-path-and-argument-configuration)
-   - [Strict Process Security Policy](#strict-process-security-policy)
-   - [Secure Credential Injection via Environment Variables](#secure-credential-injection-via-environment-variables)
-   - [Process Tree Management and Lifecycle](#process-tree-management-and-lifecycle)
-   - [Stderr Log Capture and Secret Masking](#stderr-log-capture-and-secret-masking)
-   - [Stream EOF Draining and Buffer Loss Prevention](#stream-eof-draining-and-buffer-loss-prevention)
-   - [Health Checking: Non-HTTP Process Liveness](#health-checking-non-http-process-liveness)
-3. [SSE Concurrency and Session Isolation](#3-sse-concurrency-and-session-isolation)
-   - [JSON-RPC ID Type Preservation and Rewriting](#json-rpc-id-type-preservation-and-rewriting)
-   - [Concurrent Response Isolation Under High Load](#concurrent-response-isolation-under-high-load)
-   - [Stateless vs Stateful Request Routing](#stateless-vs-stateful-request-routing)
-   - [Target Proxy Routing (`/{targetServerId}`)](#target-proxy-routing-targetserverid)
-   - [Cancellation Token Handling and Disconnect Race Prevention](#cancellation-token-handling-and-disconnect-race-prevention)
-4. [Configuration Examples](#4-configuration-examples)
-   - [Auth Token Pass-Through](#auth-token-pass-through)
-   - [Backend Server Configuration (JSON and UI)](#backend-server-configuration-json-and-ui)
-   - [Client IDE and Agent Configurations](#client-ide-and-agent-configurations)
-5. [Troubleshooting and Recovery Procedures](#5-troubleshooting-and-recovery-procedures)
-   - [JSON-RPC Error Codes](#json-rpc-error-codes)
-   - [HTTP Status Codes](#http-status-codes)
-   - [Common Operational Issues and Solutions](#common-operational-issues-and-solutions)
-
----
-
-## 1. Transport Comparison and Capability Matrix
+## Transport Comparison and Capability Matrix
 
 The gateway abstracts transport differences using the unified [`ITransport`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/ITransport.cs) interface and the [`BackendConnection`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/BackendConnection.cs) wrapper. Backend servers specify their transport type in the `Type` column (`sse`, `http`, `streamable`, `stdio`, or `custom`).
 
@@ -71,13 +43,13 @@ graph TD
 | **Duplex Streaming** | Full duplex (server events over SSE, client tool calls over POST) | Half duplex (request and response body stream) | Full duplex (asynchronous line-by-line read and write locks) | Full duplex passthrough directly to target server |
 | **Session Identification** | `Mcp-Session-Id` header and `event: endpoint` payload | `Mcp-Session-Id` header (passed across requests) | Subprocess Process ID (PID) + dedicated transport instance | Target session ID + client connection token |
 | **Secret Injection** | Authorization headers (`Bearer`, `Basic`, `Raw`, `X-API-Key`, `Custom-Header`) or Query Parameter | Authorization headers (`Bearer`, `Basic`, `Raw`, `X-API-Key`, `Custom-Header`) or Query Parameter | Environment variables (`startInfo.Environment`) — **never command-line arguments** | Inherits target server authentication + AppKey scope validation |
-| **Health Probing** | HTTP GET probe every 15s + background 30s JSON-RPC `ping` loop | HTTP GET probe every 15s | Process liveness check (`!_process.HasExited`) and syntax checks | Evaluates health of downstream backend connection |
+| **Health Probing** | Configurable `HealthCheckMode` every 30s (`RootOrigin` base authority GET or `JsonRpcPing` POST) | Configurable `HealthCheckMode` every 30s (`RootOrigin` or `JsonRpcPing`) | Process liveness check (`!_process.HasExited`) and syntax checks | Evaluates health of downstream backend connection |
 | **Auto-Reconnection** | Automatic reconnect with 5-second backoff and clean state reset | Stateless per-request retries with 15-second default timeout | Exit detection, state cleanup, and lazy process restart | Rebinds client session upon reconnect |
 | **Best For** | Long-running MCP services, Docker containers, remote network microservices | Serverless functions, stateless API gateways, lightweight webhooks | Local CLI tools, Python/Node packages (`uvx`, `npx`), sandboxed binary tools | Client sessions requiring direct target access without Meta-Mode filtering |
 
 ---
 
-## 2. Subprocess STDIO Deep-Dive
+## Subprocess STDIO Deep-Dive
 
 The [`StdioTransport`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs) executes local MCP tools, script interpreters, and binary programs without network overhead. It communicates through Standard Input and Output (STDIO).
 
@@ -182,16 +154,24 @@ while (!_cts.Token.IsCancellationRequested && _process != null)
 
 This ensures fast one-shot tools send their complete response to the caller before the process terminates.
 
-### Health Checking: Non-HTTP Process Liveness
+### Health Checking: HTTP/SSE Probe Modes & Non-HTTP Process Liveness
 
-`stdio` backends do not expose network ports or HTTP URLs. [`BackendHealthCheckService.ProbeServerAsync`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/BackendHealthCheckService.cs#L112-L122) validates `stdio` servers with these steps:
+[`BackendHealthCheckService`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/BackendHealthCheckService.cs) polls enabled backend servers every **30 seconds**.
+
+#### HTTP and SSE Health Check Modes (`HealthCheckMode`)
+Each network server supports two configurable health check strategies (`ServerConfig.HealthCheckMode`):
+1. **`RootOrigin` (Default)**: Sends a lightweight `HTTP GET` request to the server's base authority (`scheme://host:port/`) rather than its `/sse` or `/mcp` streaming endpoint. This verifies network reachability without opening and abandoning stateful SSE sessions on frameworks such as FastMCP.
+2. **`JsonRpcPing`**: Sends a stateless `HTTP POST` containing `{"jsonrpc":"2.0","id":"health-ping","method":"ping"}` with `Accept: application/json, text/event-stream` to the server's configured endpoint URL.
+
+#### STDIO Process Liveness
+`stdio` backends do not expose network ports or HTTP URLs. `BackendHealthCheckService.ProbeServerAsync` validates `stdio` servers with these steps:
 1. **Command Syntax and Security Verification**: Runs `ServerValidationHelper.IsValidStdioCommand` to confirm the executable exists and meets security policy.
 2. **Process Liveness**: Confirms the process is running or ready to start on demand.
 3. **Zero Socket Usage**: Bypasses network sockets entirely.
 
 ---
 
-## 3. SSE Concurrency and Session Isolation
+## SSE Concurrency and Session Isolation
 
 The Model Context Protocol supports full-duplex communication. Multiple concurrent tool calls, notifications, and prompts can run at the same time.
 
@@ -282,7 +262,7 @@ Network interruptions and client cancellations are handled cleanly without memor
 
 ---
 
-## 4. Configuration Examples
+## Configuration Examples
 
 ### Auth Token Pass-Through
 
@@ -434,7 +414,7 @@ To connect directly to one backend without Meta-Mode discovery, point the client
 
 ---
 
-## 5. Troubleshooting and Recovery Procedures
+## Troubleshooting and Recovery Procedures
 
 ### JSON-RPC Error Codes
 

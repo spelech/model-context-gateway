@@ -16,7 +16,7 @@ When you connect an AI assistant directly to many separate tools, common problem
 Model Context Gateway provides a central, secure gateway between AI clients and backend tools:
 
 * **Unified Ingress**: AI clients (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) connect once to `/sse`.
-* **Meta-Mode Tool Discovery**: Instead of loading hundreds of tool schemas at startup, Meta-Mode provides on-demand tool discovery via `search_tools` and `execute_tool`. This saves context memory and token costs.
+* **Meta-Mode & MCP Code Mode**: Instead of loading hundreds of tool schemas at startup, Meta-Mode provides on-demand tool discovery via `search_tools`, single-tool execution via `execute_tool`, and multi-step sandboxed JavaScript orchestration via `execute_script` ([Code Mode Architecture](docs/architecture/code-mode.md)). This saves context memory and eliminates multi-turn round-trip latency.
 * **Security & Access Control**: The gateway authenticates users (Active Directory Windows SIDs, OIDC headers, or AppKeys), checks permissions with database-backed RBAC, and redacts sensitive credentials from logs.
 * **Universal Routing**: The gateway routes requests to Docker containers (auto-discovered via socket), remote HTTP/SSE servers, and local STDIO scripts.
 
@@ -86,9 +86,10 @@ The backend is organized into clear bounded modules across domain components, in
 │   ├── Secrets/         # Vault, Windows Registry, Environment secret retrievers & encryption
 │   └── Logging/         # Audit logger, PII sanitization & in-memory log providers
 └── Core/
+    ├── CodeMode/        # Sandboxed Jint JavaScript execution engine (CodeModeExecutionEngine)
     ├── Protocol/        # JSON-RPC protocol models & Polymorphic converter
     ├── Routing/         # ClientSession, SessionManager, BackendConnection & Tool Routing
-    └── VectorSearch/    # IEmbeddingProvider, IToolVectorStore, InMemorySimdToolVectorStore & RRF
+    └── VectorSearch/    # IEmbeddingProvider, IToolVectorStore, InMemorySimdToolVectorStore & Calibrated Hybrid Search
 ```
 
 ---

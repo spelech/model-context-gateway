@@ -34,6 +34,13 @@ AppKeys are high-entropy bearer tokens hashed with SHA-256 prior to database sto
 4. Click **Generate Key**.
 5. **Copy the Plaintext Secret Key**: The plaintext key (`mcp-usr-...` or `mcp-adm-...`) is displayed **only once**. Save it into your client configuration or secrets manager immediately. The gateway persists only the one-way cryptographic SHA-256 hash.
 
+### 2. Usage Tracking (`LastUsedAt`) & Atomic Key Rotation
+* **Live Activity Tracking**: Each row in the **App Keys** table displays a **Last Used** timestamp (`LastUsedAt`). Whenever a client authenticates with an AppKey, `ActivityTracker` records the activity asynchronously (debounced to one write per 60 seconds) without slowing down request routing.
+* **Atomic Secret Rotation (`Rotate` Button)**: Click **`Rotate`** on any active AppKey to open the confirmation modal (`AppKeyRotateModal`) and call `POST /api/appkeys/{id}/rotate`:
+  - Generates a fresh cryptographic secret and `KeyPrefix` in place while preserving the key's `Id`, `Name`, `OwnerSid`, and `Scopes`.
+  - Immediately invalidates the old token.
+  - Displays the new plaintext secret **once** alongside an interactive **Client Configuration Generator** with ready-to-copy snippets for **Claude Desktop**, **Cursor**, **VS Code / Cline**, **Antigravity**, **HTTP Headers**, and **OAuth2 Client**.
+
 ---
 
 ## 📜 AppKey Scope Grammar & Patterns
@@ -77,6 +84,8 @@ The **Registered Clients** card in the **App Keys & Security** view provides rea
 * **Client IP Address**: Source IP address of the incoming connection.
 * **Active Sessions**: Count of active concurrent SSE or HTTP streaming sessions.
 * **Last Seen**: Live UTC timestamp of the most recent JSON-RPC activity.
+* **Redirect URIs Inspector (`RedirectUrisModal`)**: For Dynamic Client Registration (DCR) and OAuth 2.0 clients with multiple callback URLs, click the redirect URI badge to inspect and copy individual callback URIs in a dedicated modal.
+* **OAuth Client Secret Rotation**: Confidential OAuth clients support one-click atomic secret rotation (`POST /api/clients/{id}/rotate-secret`), returning the newly generated client secret once while preserving the `client_id` and registered redirect URIs.
 
 ---
 

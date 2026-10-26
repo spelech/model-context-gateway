@@ -4,23 +4,7 @@ This document details the software architecture, component boundaries, dependenc
 
 ---
 
-## 📑 Table of Contents
-
-1. [Backend Component & Boundary Model](#1-backend-component-boundary-model)
-   - [Domain Components (`Components/`)](#domain-components-components)
-   - [Infrastructure Services (`Infrastructure/`)](#infrastructure-services-infrastructure)
-   - [Core Protocol & Routing Engine (`Core/`)](#core-protocol-routing-engine-core)
-   - [Architectural Boundary Constraints](#architectural-boundary-constraints)
-   - [Component Subsystem Diagram](#component-subsystem-diagram)
-2. [Frontend Component & Typed Architecture](#2-frontend-component-typed-architecture)
-   - [React 19 & Vite SPA Architecture](#react-19-vite-spa-architecture)
-   - [Domain Component Decomposition](#domain-component-decomposition)
-   - [Typed API Layer & Zustand State Stores](#typed-api-layer-zustand-state-stores)
-   - [Frontend Architecture & State Flow Diagram](#frontend-architecture-state-flow-diagram)
-
----
-
-## 1. Backend Component & Boundary Model
+## Backend Component & Boundary Model
 
 The C# ASP.NET Core backend codebase is partitioned into three strictly bounded contexts following Clean Architecture and Domain-Driven Design principles: [`Components/`](https://github.com/spelech/model-context-gateway/tree/main/Components), [`Infrastructure/`](https://github.com/spelech/model-context-gateway/tree/main/Infrastructure), and [`Core/`](https://github.com/spelech/model-context-gateway/tree/main/Core).
 
@@ -39,6 +23,7 @@ The C# ASP.NET Core backend codebase is partitioned into three strictly bounded 
 │   ├── Secrets/         # Vault, Windows Registry, Environment secret retrievers & encryption
 │   └── Logging/         # Audit logger, PII sanitization & in-memory log providers
 └── Core/
+    ├── CodeMode/        # Sandboxed Jint JavaScript execution engine (CodeModeExecutionEngine)
     ├── Protocol/        # JSON-RPC 2.0 protocol models & polymorphic converter
     └── Routing/         # ClientSession, SessionManager, BackendConnection & Semantic Search
 ```
@@ -54,15 +39,15 @@ Domain components encapsulate vertical business features, HTTP/JSON-RPC controll
    - [`ServerEndpoints.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/ServerEndpoints.cs): Minimal API mapping for CRUD operations, inspections, and health states (`GET /api/servers`, `POST /api/servers`, `DELETE /api/servers/{id}`).
    - [`ServerValidationHelper.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/ServerValidationHelper.cs): URL syntax checking, Server-Side Request Forgery (SSRF) prevention, and parameter sanitization.
    - [`DockerAutoDiscoveryService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/DockerAutoDiscoveryService.cs): Dynamic label-based container discovery (`mcp.enable=true`, `mcp.name`, `mcp.port`).
-   - [`BackendHealthCheckService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/BackendHealthCheckService.cs): Background periodic health prober (15s HTTP GET + 30s JSON-RPC ping).
+   - [`BackendHealthCheckService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Servers/BackendHealthCheckService.cs): Background periodic health prober (30s cycle supporting `RootOrigin` base authority HTTP probing and `JsonRpcPing` POST probing).
 
 2. **`Clients`**:
-   - [`ClientEndpoints.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Clients/ClientEndpoints.cs) & [`ClientsController.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Clients/ClientsController.cs): Client registration and OAuth client management.
+   - [`ClientEndpoints.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Clients/ClientEndpoints.cs) & [`ClientsController.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Clients/ClientsController.cs): Client registration, OAuth client management, and atomic secret rotation (`POST /api/clients/{id}/rotate-secret`).
    - [`CredentialService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Clients/CredentialService.cs): Automated client configuration generation (`claude_desktop_config.json`, Cursor config, environment templates).
 
 3. **`AppKeys`**:
-   - [`AppKey.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/AppKeys/AppKey.cs) & [`AppKeyModels.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/AppKeys/AppKeyModels.cs): High-entropy machine keys (`mcp-*-*-*`), key prefixes (`KeyPrefix`), AES-256-GCM encrypted keys, scopes (`ScopesJson`), and attribution (`OwnerSid`).
-   - [`AppKeyEndpoints.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/AppKeys/AppKeyEndpoints.cs) & [`AppKeysController.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/AppKeys/AppKeysController.cs): Endpoints for key minting, revocation, prefix lookups, and validation.
+   - [`AppKey.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/AppKeys/AppKey.cs) & [`AppKeyModels.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/AppKeys/AppKeyModels.cs): High-entropy machine keys (`mcp-*-*-*`), key prefixes (`KeyPrefix`), SHA-256 hashed keys, scopes (`ScopesJson`), usage tracking (`LastUsedAt`), and attribution (`OwnerSid`).
+   - [`AppKeyEndpoints.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/AppKeys/AppKeyEndpoints.cs) & [`AppKeysController.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/AppKeys/AppKeysController.cs): Endpoints for key minting, atomic rotation (`POST /api/appkeys/{id}/rotate`), revocation, prefix lookups, and validation.
 
 4. **`Providers`**:
    - [`ProviderEndpoints.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Providers/ProviderEndpoints.cs) & [`ProvidersController.cs`](https://github.com/spelech/model-context-gateway/blob/main/Components/Providers/ProvidersController.cs): Management of Identity and Secret Provider configurations.
@@ -132,6 +117,9 @@ The Core assembly contains high-performance routing coordinators and protocol en
    - [`SemanticSearchService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/SemanticSearchService.cs): Hybrid BM25 keyword matching combined with cosine similarity vector scoring.
    - [`DynamicEmbeddingService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/DynamicEmbeddingService.cs), [`OnnxEmbeddingService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/OnnxEmbeddingService.cs), and [`ApiEmbeddingService.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ApiEmbeddingService.cs): Vector embedding calculation via local CPU ONNX runtime (`all-MiniLM-L6-v2`) or remote OpenAI-compatible APIs.
    - [`ToolRoutingManager.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ToolRoutingManager.cs), [`ResourceRoutingManager.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ResourceRoutingManager.cs), [`PromptRoutingManager.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/PromptRoutingManager.cs): Namespacing, un-namespacing, and routing of individual MCP capabilities.
+
+3. **`Code Mode Sandbox Engine (`Core/CodeMode/`)`**:
+   - [`CodeModeExecutionEngine.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/CodeMode/CodeModeExecutionEngine.cs) & [`ICodeModeExecutionEngine.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/CodeMode/ICodeModeExecutionEngine.cs): Isolated Jint JavaScript execution engine powering `execute_script` with `mcg.callTool` and `tools.<server>.<tool>` proxy interop, automatic JSON unboxing, and memory/statement/timeout/tool-call guardrails (see [Code Mode Sandbox Architecture](code-mode.md)).
 
 ---
 
@@ -256,7 +244,7 @@ classDiagram
 
 ---
 
-## 2. Frontend Component & Typed Architecture
+## Frontend Component & Typed Architecture
 
 ### React 19 & Vite SPA Architecture
 
@@ -274,19 +262,20 @@ frontend/src/
 │   ├── api.ts              # Base API instance, headers & error handling
 │   ├── serverApi.ts        # Server CRUD & discovery endpoints
 │   ├── clientApi.ts        # Registered OAuth clients
-│   ├── appKeyApi.ts        # AppKey minting, revocation & verification
+│   ├── appKeyApi.ts        # AppKey minting, rotation, revocation & verification
 │   ├── securityApi.ts      # Policies & group mappings
 │   ├── settingsApi.ts      # Provider configs & system settings
 │   ├── userApi.ts          # Authenticated user identity & version info
 │   └── testbenchApi.ts     # Tool execution, search simulation & log streaming
 ├── components/             # Domain UI Component Trees
 │   ├── servers/            # DashboardView, ServerModal, ServerInspectModal, ServerCard
-│   ├── clients/            # RegisteredClientsCard, ClientSetupGuide, AppKeysCard, ClientModal
+│   ├── clients/            # RegisteredClientsCard, ClientSetupGuide, AppKeysCard, ClientModal,
+│   │                       # AppKeyRotateModal, RedirectUrisModal
 │   ├── security/           # SecurityView, PolicyModal, MappingModal
 │   ├── settings/           # SettingsView, GeneralTab, IdentityAuthTab, SecretProvidersTab,
-│   │                       # AccessControlTab, CustomFilesTab, BackupsTab
+│   │                       # AccessControlTab, CustomFilesTab, CodeModeTab, BackupsTab
 │   ├── testbench/          # TestBenchView (Interactive JSON Schema Form Builder, Console, & Log Stream)
-│   └── shared/             # Header, Footer, Toasts, Modal, StatusBadge, PaginationToolbar
+│   └── shared/             # Header, Footer, Toasts, Modal, StatusBadge, PaginationToolbar, FormattedDescription
 ├── stores/                 # Centralized Zustand Reactive Stores
 │   ├── useServerStore.ts   # Servers list, health states, filter queries
 │   ├── useClientStore.ts   # Registered clients & setup guides

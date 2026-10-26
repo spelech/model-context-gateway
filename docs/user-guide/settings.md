@@ -8,15 +8,16 @@ The **Settings View** (`Settings` tab) provides administrative controls for conf
 
 ![System Settings Overview](../assets/settings_view.jpg)
 
-The Settings interface is structured into five operational tabs:
+The Settings interface is structured into six operational tabs:
 
 | Settings Tab | Primary Configuration Domain |
 | :--- | :--- |
-| **🧠 Vector & Search** | Local ONNX runtime parameters, external OpenAI/Ollama embedding APIs, and SIMD RRF search tuning |
+| **🧠 Vector & Search** | Local ONNX runtime parameters, external OpenAI/Ollama embedding APIs, hybrid search calibration, and score drop-off thresholds |
 | **🪪 Identity & Auth** | Active Directory LDAP bindings, OIDC proxy headers, and OpenIddict OAuth 2.0 provider |
 | **🔐 Secret Providers** | HashiCorp Vault KV v2 AppRole/Token, Windows DPAPI Registry, and RFC 8693 token exchange |
 | **📂 Prompts & Resources** | Custom JSON specification file manager, prompt templates, and virtual resource definitions |
 | **👥 Access Control** | Role-based access policies (`ALLOW`/`DENY`) and external Windows SID / AD group mappings |
+| **💻 Code Mode** | Jint JavaScript sandbox toggle (`execute_script`), execution timeout, tool call caps, memory/statement limits, and RBAC group allowlist |
 
 ---
 
@@ -25,8 +26,6 @@ The Settings interface is structured into five operational tabs:
 ![Settings Vector and Semantic Search Options](../assets/settings_vector_search.jpg)
 
 The vector embedding engine powers the **Meta-Mode** tool discovery function (`search_tools`). It generates mathematical representations of natural language intents and compares them against tool catalog metadata:
-
-![Vector Embedding & Semantic Search Configuration](../assets/settings_vector_search.jpg)
 
 ### 1. Local ONNX Engine (Recommended / Default)
 * **Model Architecture**: Uses the embedded `All-MiniLM-L6-v2` transformer model (384-dimensional dense vectors).
@@ -40,10 +39,14 @@ The vector embedding engine powers the **Meta-Mode** tool discovery function (`s
 * **SSRF Guardrails**: MCG validates custom provider URLs (`SecurityValidationHelper.IsPrivateOrLoopback`) to prevent Server-Side Request Forgery.
 * **Key Encryption**: API keys are encrypted at rest in the database using AES-256-GCM envelope encryption.
 
-### 3. In-Memory SIMD Vector Store & Reciprocal Rank Fusion (RRF)
+### 3. In-Memory SIMD Vector Store & Calibrated Hybrid Search
 * **In-Memory SIMD Acceleration (`IToolVectorStore`)**: Tool vectors are indexed in memory. Cosine similarities are calculated using **.NET 10 hardware SIMD intrinsics** (`System.Numerics.Tensors.TensorPrimitives.CosineSimilarity`), providing sub-millisecond query evaluation without requiring external vector databases for catalogs up to 5,000+ tools.
-* **Reciprocal Rank Fusion (RRF, $k=60$)**: The search engine blends dense vector semantic similarity with multi-signal lexical matching across tool names, descriptions, tags, and JSON schemas.
-* **Graceful Degradation**: If embedding providers are disabled or offline, MCG seamlessly falls back to pure keyword ranking with zero downtime.
+* **Calibrated Linear Combination**: The search engine blends dense vector semantic similarity with normalized lexical matching (`Score = α × DenseScore + (1 - α) × SparseScore`) across tool names, descriptions, tags, and JSON schemas.
+* **Tool Search Thresholding & Drop-Off Controls**:
+  - **Default Result Limit (`ToolSearchDefaultLimit`)**: Maximum tools returned by `search_tools` when `limit` is omitted (default `5`, range `1`–`100`).
+  - **Minimum Relevance Score (`ToolSearchMinScore`)**: Absolute relevance floor below which candidate tools are filtered out (default `0.35`, range `0.0`–`1.0`).
+  - **Score Drop-Off Ratio (`ToolSearchScoreDropoffRatio`)**: Relative cutoff ratio compared against the top-scoring match (`Score >= topScore × ratio`, default `0.60`, range `0.0`–`1.0`).
+* **Graceful Degradation**: If embedding providers are disabled or offline, MCG seamlessly falls back to normalized keyword ranking with zero downtime.
 
 ---
 
@@ -100,3 +103,20 @@ Configure fine-grained access rules and map external directory groups:
 
 * **Group Mappings Table**: Maps external directory groups (e.g. `CN=IT-Admins,OU=Groups,DC=corp` or `S-1-5-21-1001`) to internal MCG roles (`full_admin`, `user`).
 * **Server Policies Table**: Central policy management matrix defining target identifiers (`server:docker`, `tool:docker__ps`), required security groups, and evaluation modes (`ALLOW` or `DENY`).
+
+---
+
+## 💻 Tab 6: Code Mode Sandbox (`CodeModeTab`)
+
+![Code Mode Settings Tab](../assets/codemode_settings_tab.png)
+
+Configure the sandboxed JavaScript execution engine (`execute_script`) that allows AI agents to chain multiple MCP tool calls in a single turn:
+
+* **Enable Code Mode (`EnableCodeMode`)**: Master toggle (`true` by default) that controls whether `execute_script` is advertised in Meta-Mode `tools/list` responses and available for execution.
+* **Execution Timeout (`CodeModeExecutionTimeoutSeconds`)**: Maximum wall-clock duration in seconds (`1`–`300`, default `30`) before a running script and its pending downstream tool calls are cancelled.
+* **Max Tool Calls (`CodeModeMaxToolCalls`)**: Maximum number of `mcg.callTool` / `tools.<server>.<tool>` invocations allowed during a single script execution (`1`–`500`, default `50`).
+* **Max Memory Limit (`CodeModeMaxMemoryMb`)**: Per-execution JavaScript heap memory cap enforced by the Jint sandbox (`8`–`512` MB, default `64` MB).
+* **Max Statements (`CodeModeMaxStatements`)**: Maximum AST statements evaluated per script (`100`–`10,000,000`, default `100,000`) to halt infinite loops immediately.
+* **Allowed Security Groups (`CodeModeAllowedGroups`)**: Optional comma-separated list of RBAC groups permitted to see and invoke `execute_script`. Leave empty to permit all authenticated users (individual downstream tool calls inside the sandbox still enforce caller RBAC policies and AppKey scopes).
+
+See the **[MCP Code Mode Guide](./code-mode.md)** for scripting examples and sandbox API details.

@@ -13,10 +13,11 @@ The architecture documentation is decomposed into dedicated, modular specificati
 | Module | Document | Description |
 | :--- | :--- | :--- |
 | **01. Components** | [**Backend & Frontend Components**](components.md) | Clean Architecture component boundaries (`Components/`, `Infrastructure/`, `Core/`), dependency inversion rules, subsystem class diagrams, and React 19 / Zustand state architecture. |
-| **02. Routing & Meta-Mode** | [**Protocol & Routing Engine**](routing-and-meta-mode.md) | Meta-Mode capability abstraction (`search_tools`, `execute_tool`), target-specific virtual proxying (`/{targetServerId}`), JSON-RPC 2.0 multiplexing, and SSE/HTTP sequence diagrams. |
-| **03. Authorization** | [**Authorization Pipeline & RBAC**](authorization-pipeline.md) | 4-stage hierarchical authorization pipeline, AppKey scope resolution grammar, Admin SID bypass (`S-1-5-32-544`), database RBAC evaluation, and decision flowcharts. |
-| **04. Transports** | [**Transports & Subprocesses**](transports-and-subprocesses.md) | `ITransport` strategy pattern, STDIO subprocess isolation, child process tree lifecycle and signal handling, stderr log capture, and execution sequence diagrams. |
-| **05. Persistence & Secrets** | [**Database & Envelope Encryption**](database-and-encryption.md) | Multi-engine persistence dialect strategies (SQLite, MS SQL, MySQL), unified ERD (12 entities), AES-256-GCM envelope encryption, and secret resolution pipeline. |
+| **02. Routing & Meta-Mode** | [**Protocol & Routing Engine**](routing-and-meta-mode.md) | Meta-Mode capability abstraction (`search_tools`, `execute_tool`, `execute_script`), calibrated hybrid search, target-specific virtual proxying (`/{targetServerId}`), and JSON-RPC 2.0 multiplexing. |
+| **03. Code Mode Engine** | [**Code Mode Sandbox Architecture**](code-mode.md) | Isolated Jint JavaScript execution engine (`CodeModeExecutionEngine`), `mcg.callTool` & `tools.<server>.<tool>` proxy bindings, automatic JSON unboxing, resource guardrails, and dual-layer RBAC. |
+| **04. Authorization** | [**Authorization Pipeline & RBAC**](authorization-pipeline.md) | 4-stage hierarchical authorization pipeline, AppKey scope resolution grammar, Admin SID bypass (`S-1-5-32-544`), database RBAC evaluation, and decision flowcharts. |
+| **05. Transports** | [**Transports & Subprocesses**](transports-and-subprocesses.md) | `ITransport` strategy pattern, STDIO subprocess isolation, child process tree lifecycle and signal handling, stderr log capture, and execution sequence diagrams. |
+| **06. Persistence & Secrets** | [**Database & Envelope Encryption**](database-and-encryption.md) | Multi-engine persistence dialect strategies (SQLite, MS SQL, MySQL), unified ERD (12 entities), AES-256-GCM envelope encryption, and secret resolution pipeline. |
 
 ---
 
@@ -34,7 +35,7 @@ To address these challenges, Model Context Gateway enforces seven **core archite
 | Core Architectural Tenet | Description & Mechanism |
 | :--- | :--- |
 | **1. Sub-Millisecond Routing Decisions** | Header inspection (`Mcp-Method`, `Mcp-Name`) and lightweight path resolution allow fast triage without buffering large request bodies. |
-| **2. Zero Token Waste via Meta-Mode** | Default client connections expose only two bootstrap tools: `search_tools` and `execute_tool`. Target tools are ranked on-demand using local in-process ONNX embeddings or API embeddings. |
+| **2. Zero Token Waste via Meta-Mode & Code Mode** | Default client connections expose only `search_tools`, `execute_tool`, and `execute_script`. Target tools are ranked on-demand using calibrated hybrid search, and multi-step workflows run inside the in-gateway Jint sandbox. |
 | **3. Fail-Closed, Multi-Stage RBAC** | All capability invocations pass through AppKey scope boundaries, identity group mappings, and stored procedure RBAC evaluations. Any missing policy or exception results in DENY. |
 | **4. Strict Isolation & Concurrency Fidelity** | Clients maintain separate session contexts. JSON-RPC request IDs (integer, string, GUID) are faithfully preserved while being mapped upstream to prevent collisions in multiplexed streams. |
 | **5. Zero Credential Exposure (Environment-Only Injection)** | Downstream secrets are fetched from Vault, Registry DPAPI, or Env, and injected into headers or process environments. Credentials are NEVER passed via CLI arguments or logged to disk. |
@@ -67,7 +68,7 @@ flowchart TD
     L1["<b>LAYER 1: INGRESS & EDGE SECURITY</b><br>Reverse Proxy (Caddy/Nginx) ➔ McpSpecMiddleware ➔ McpAuthorizationSpecMiddleware"]
     L2["<b>LAYER 2: AUTHENTICATION & IDENTITY MAPPING</b><br>CompositeIdentityProvider ➔ ActiveDirectory (LDAP SIDs) ➔ OIDC Headers ➔ AppKey Auth"]
     L3["<b>LAYER 3: PROTOCOL, SESSION & MULTIPLEXING ENGINE</b><br>ProxyEndpoints ➔ SessionManager ➔ ClientSession ➔ JsonRpcStateManager & ID Rewriter"]
-    L4["<b>LAYER 4: SEMANTIC INTELLIGENCE & META-MODE</b><br>DynamicEmbeddingService ➔ OnnxEmbeddingService (all-MiniLM-L6-v2) ➔ SemanticSearchService"]
+    L4["<b>LAYER 4: SEMANTIC INTELLIGENCE, META-MODE & CODE MODE</b><br>DynamicEmbeddingService ➔ SemanticSearchService (Calibrated Hybrid) ➔ CodeModeExecutionEngine (Jint Sandbox)"]
     L5["<b>LAYER 5: AUTHORIZATION & RBAC DECISION ENGINE</b><br>AppKey Scope Filter ➔ Admin SID Bypass ➔ Database RBAC (sp_EvaluateUserAccess)"]
     L6["<b>LAYER 6: PERSISTENCE & SECRET RESOLUTION</b><br>DbConnectionFactory (SQLite/MSSQL/MySQL) ➔ CompositeSecretRetriever ➔ AES-256-GCM Crypto"]
     L7["<b>LAYER 7: DOWNSTREAM MCP SERVER FLEET & TRANSPORTS</b><br>SseTransport (Duplex) ➔ HttpTransport (Stateless) ➔ StdioTransport (Subprocess NDJSON)"]
@@ -204,4 +205,4 @@ CI=true dotnet test ModelContextGateway.slnx
 
 ---
 
-*Document Version: `v5.0.0` | Maintained by the Model Context Gateway Architecture Group.*
+*Document Version: `v5.23.0` | Maintained by the Model Context Gateway Architecture Group.*

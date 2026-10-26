@@ -26,13 +26,13 @@ Connecting AI assistants directly to individual MCP servers introduces significa
 ### 1. MCP Server
 An MCP server is an application or service providing tools, resources, or prompt templates. MCG supports backend servers running in Docker containers, as local subprocesses (`STDIO`), or across remote networks via `SSE` and `HTTP`.
 
-### 2. Meta-Mode (`/sse`)
+### 2. Meta-Mode & MCP Code Mode (`/sse`)
 Meta-Mode is MCG's signature context-optimization architecture. Instead of exposing all backend tools at startup:
-* The gateway exposes only two bootstrap tools: `search_tools` and `execute_tool`.
+* The gateway exposes only three bootstrap meta-tools: `search_tools`, `execute_tool`, and `execute_script`.
 * When an AI client needs a capability, it calls `search_tools` with natural language intent (e.g. *"restart broken proxy container"*).
-* MCG's semantic vector router ranks and returns only relevant tool schemas.
-* The AI then calls `execute_tool` with the targeted tool name and arguments.
-* This cuts prompt tokens by up to 95%, prevents model hallucinations, and accelerates response times.
+* MCG's calibrated hybrid search router ranks and filters matching tool schemas using minimum relevance and score drop-off thresholds.
+* The AI then calls `execute_tool` for a single tool invocation, or calls `execute_script` ([MCP Code Mode](code-mode.md)) to orchestrate multiple tool calls inside a sandboxed JavaScript workflow in a single turn.
+* This cuts prompt tokens by up to 95%, eliminates multi-turn round-trip latency, and prevents model hallucinations.
 
 ### 3. AppKey
 An AppKey is a cryptographically hashed (SHA-256) bearer token used by AI clients to authenticate to the gateway. Keys carry explicit semantic prefixes:
@@ -89,6 +89,7 @@ graph TD
     Settings --> SecProvTab[Secret Providers Configuration]
     Settings --> FilesTab[Custom Prompts & Resources]
     Settings --> AccessTab[RBAC Policies & Group Mappings]
+    Settings --> CodeModeTab[Code Mode Sandbox Settings]
 
     MyServers --> PersonalCreds[Personal User Credentials / PATs]
     MyServers --> UserEndpoints[Custom Connection Endpoints]
@@ -154,7 +155,8 @@ graph TD
 | ↳ *Resources & Prompts* | Reading virtual resources (`mcp://...`) and evaluating prompt templates. | [Resources & Prompts](test-bench/resources-and-prompts.md) |
 | ↳ *Semantic Router* | Vector cosine similarity, keyword weighting, and relevance scoring simulation. | [Semantic Search Simulator](test-bench/semantic-search.md) |
 | ↳ *Console & Live Logs* | Direct JSON-RPC console, SSE streaming, and real-time log terminal. | [Console & Live Logs](test-bench/console-and-logs.md) |
-| **07. Settings & Configuration** | Vector search engines (Local ONNX vs OpenAI), secret providers, identity providers, and custom files. | [System Settings](settings.md) |
+| **07. Settings & Configuration** | Vector search engines (Local ONNX vs OpenAI), search thresholds, secret providers, identity providers, and Code Mode settings. | [System Settings](settings.md) |
+| **08. MCP Code Mode (`execute_script`)** | Sandboxed JavaScript multi-tool orchestration, `mcg.callTool` & `tools` proxy APIs, automatic JSON unboxing, and resource limits. | [MCP Code Mode](code-mode.md) |
 
 ---
 

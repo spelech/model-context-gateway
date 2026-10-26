@@ -4,19 +4,7 @@ This document details the protocol translation, routing engine, Meta-Mode capabi
 
 ---
 
-## 📑 Table of Contents
-
-1. [Meta-Mode Dynamic Capability Hiding (`/sse` & `/message`)](#1-meta-mode-dynamic-capability-hiding-sse-message)
-   - [Architectural Motivation](#architectural-motivation)
-   - [Meta-Mode Four-Stage Execution Lifecycle](#meta-mode-four-stage-execution-lifecycle)
-2. [Target-Specific Virtual Proxying (`/{targetServerId}`)](#2-target-specific-virtual-proxying-targetserverid)
-3. [JSON-RPC 2.0 In-Flight Multiplexing & ID Preservation](#3-json-rpc-20-in-flight-multiplexing-id-preservation)
-4. [Sequence Diagram: Stateful SSE Session Lifecycle](#4-sequence-diagram-stateful-sse-session-lifecycle)
-5. [Sequence Diagram: Stateless HTTP Stream Execution](#5-sequence-diagram-stateless-http-stream-execution)
-
----
-
-## 1. Meta-Mode Dynamic Capability Hiding (`/sse` & `/message`)
+## Meta-Mode Dynamic Capability Hiding (`/sse` & `/message`)
 
 ### Architectural Motivation
 
@@ -29,44 +17,54 @@ Model Context Gateway eliminates this overhead via **Meta-Mode**.
 
 ---
 
-### Meta-Mode Four-Stage Execution Lifecycle
+### Meta-Mode Execution Lifecycle
 
 ```mermaid
 flowchart LR
-    Init["1. Handshake<br>Expose bootstrap tools<br>(search_tools, execute_tool)"] --> Warm["2. Background Warming<br>Pre-fetch schemas & build<br>vector/keyword index"]
-    Warm --> Search["3. Semantic Discovery<br>Query search_tools<br>(Hybrid BM25 + ONNX)"]
-    Search --> Exec["4. Dynamic Execution<br>Call execute_tool<br>(Un-namespace & forward)"]
+    Init["1. Handshake<br>Expose bootstrap tools<br>(search_tools, execute_tool, execute_script)"] --> Warm["2. Background Warming<br>Pre-fetch schemas & build<br>vector/keyword index"]
+    Warm --> Search["3. Semantic Discovery<br>Query search_tools<br>(Calibrated Hybrid Search)"]
+    Search --> Exec["4. Dynamic Execution<br>Call execute_tool or execute_script<br>(Authorize, un-namespace & route)"]
 ```
 
 1. **Bootstrap Initialization**:
-   When an MCP client connects to `/sse` (the default gateway endpoint), the router intercepts `tools/list` and returns only two gateway bootstrap tools:
-   - `search_tools`: Accepts a natural language query string (e.g., `"restart plex media server"`) and returns ranked, matching tools.
-   - `execute_tool`: Executes a namespaced tool (`{serverId}__{toolName}`) with dynamic parameter forwarding.
+   When an MCP client connects to `/sse` (the default gateway endpoint), the router intercepts `tools/list` and returns only the gateway bootstrap meta-tools:
+   - `search_tools`: Accepts a natural language query string (e.g., `"restart plex media server"`) and returns ranked, threshold-filtered tool schemas.
+   - `execute_tool`: Executes a single namespaced tool (`{serverId}__{toolName}`) with dynamic parameter forwarding.
+   - `execute_script`: Executes an asynchronous JavaScript workflow inside an isolated Jint sandbox when [MCP Code Mode](code-mode.md) is enabled (`EnableCodeMode = true`) and the caller satisfies `CodeModeAllowedGroups`.
 
-2. **Background Cache Pre-Warming**:
-   Simultaneously in the background, [`ClientSession.BackendInitializer.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession/ClientSession.BackendInitializer.cs) concurrently initializes all enabled downstream transports and caches their tool, prompt, and resource schemas. This ensures zero latency during subsequent user requests.
+2. **Background Cache Pre-Warming & Cold-Start On-Demand Discovery**:
+   Simultaneously in the background, [`ClientSession.BackendInitializer.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession/ClientSession.BackendInitializer.cs) concurrently initializes enabled downstream transports and caches their tool, prompt, and resource schemas. If a stateless or freshly connected client calls a tool before background warming finishes, `ToolRoutingManager` triggers an on-demand `InitializeAndFetchToolsAsync` discovery pass against the target server automatically.
 
-3. **Semantic Scoring & Ranking (Hybrid RRF & SIMD)**:
+3. **Calibrated Hybrid Semantic Scoring & Thresholding**:
    When the client invokes `search_tools`:
    - The query string is vectorized using `IEmbeddingProvider` (supporting local CPU ONNX runtime with `all-MiniLM-L6-v2` or remote OpenAI/Ollama/LiteLLM embedding APIs via `OpenAiEmbeddingProvider`).
-   - The tool candidate list is retrieved through two independent ranking passes:
-     1. **Lexical Keyword Matcher**: Tokenizes query phrases and evaluates exact matches across tool names, descriptions, categories, and JSON input schemas.
-     2. **SIMD Vector Store (`IToolVectorStore`)**: Computes dense vector cosine similarities using **.NET 10 hardware SIMD intrinsics** (`TensorPrimitives.CosineSimilarity`) directly in memory.
-   - Rankings are fused using **Reciprocal Rank Fusion (RRF, $k=60$)**:
-     $$\text{RRF\_Score}(tool) = \frac{1.0}{60 + \text{Rank}_{\text{keyword}}(tool)} + \frac{1.0}{60 + \text{Rank}_{\text{vector}}(tool)}$$
-   - Tools are formatted as `{serverId}__{toolName}` along with their input schemas and returned to the client.
-   - If vector search is unconfigured or unavailable, the engine gracefully falls back to pure keyword rankings.
+   - The tool candidate list is evaluated through two parallel scoring engines:
+     1. **Sparse Lexical Engine**: Tokenizes query phrases and evaluates exact and partial matches across tool names, descriptions, categories, and JSON input schemas, normalizing candidate scores to `[0.0, 1.0]`.
+     2. **Dense SIMD Vector Engine (`IToolVectorStore`)**: Computes dense vector cosine similarities using **.NET 10 hardware SIMD intrinsics** (`TensorPrimitives.CosineSimilarity`) directly in memory, clamped to `[0.0, 1.0]`.
+   - Scores are combined using a **Calibrated Linear Combination**:
+     ```text
+     Score = (α × DenseScore) + ((1.0 - α) × SparseScore)
+     ```
+     where `α` (`dense_weight`, default `0.5`) controls the balance between semantic vector similarity (`mode: "dense"`, `α = 1.0`) and lexical keyword matching (`mode: "lexical"`, `α = 0.0`).
+   - **Two-Stage Relevance Filtering**:
+     - **Minimum Floor (`min_score`)**: Candidates scoring below `ToolSearchMinScore` (default `0.35`) are discarded.
+     - **Relative Drop-Off (`score_dropoff_ratio`)**: Candidates scoring below `topScore × ToolSearchScoreDropoffRatio` (default `0.60`) are pruned, and the remaining list is capped at `limit` (`ToolSearchDefaultLimit`, default `5`).
+   - If vector search is unconfigured or unavailable, the engine gracefully falls back to normalized lexical scoring (`α = 0.0`).
 
-4. **Execution Dispatch**:
-   When the client invokes `execute_tool`:
-   - The router un-namespaces the `{serverId}__{toolName}` identifier to identify the destination server.
+4. **Execution Dispatch & Multi-Delimiter Resolution**:
+   When the client invokes `execute_tool` (or dispatches a tool directly):
+   - The router resolves the target server and tool name across all three common LLM namespace conventions:
+     - Double-underscore (`{serverId}__{toolName}`, canonical MCP format)
+     - Dot notation (`{serverId}.{toolName}`)
+     - Slash notation (`{serverId}/{toolName}`)
+   - Server names and configured server aliases (`ServerConfig.Alias`) are matched case-insensitively with normalized hyphen/underscore handling.
    - Caller identity, AppKey scopes, and database RBAC policies are evaluated.
    - Associated secrets (from HashiCorp Vault, DPAPI, or Environment) are resolved and injected into the transport headers or process environment.
    - The payload is dispatched to the upstream transport, and the result is returned to the client.
 
 ---
 
-## 2. Target-Specific Virtual Proxying (`/{targetServerId}`)
+## Target-Specific Virtual Proxying (`/{targetServerId}`)
 
 For specialized IDEs, scripts, or agents requiring dedicated, direct access to a specific backend server without Meta-Mode abstraction:
 
@@ -80,7 +78,7 @@ For specialized IDEs, scripts, or agents requiring dedicated, direct access to a
 
 ---
 
-## 3. JSON-RPC 2.0 In-Flight Multiplexing & ID Preservation
+## JSON-RPC 2.0 In-Flight Multiplexing & ID Preservation
 
 The router multiplexes concurrent requests across shared backend connections while guaranteeing strict response isolation:
 
@@ -115,7 +113,7 @@ flowchart LR
 
 ---
 
-## 4. Sequence Diagram: Stateful SSE Session Lifecycle
+## Sequence Diagram: Stateful SSE Session Lifecycle
 
 The following sequence diagram details the full lifecycle of a stateful Server-Sent Events session, from edge authentication and background cache warming through semantic discovery and multiplexed execution:
 
@@ -181,7 +179,7 @@ sequenceDiagram
 
 ---
 
-## 5. Sequence Diagram: Stateless HTTP Stream Execution
+## Sequence Diagram: Stateless HTTP Stream Execution
 
 For single-shot tool calls, serverless functions, or webhooks that execute over standard HTTP POST without an ongoing SSE stream:
 
