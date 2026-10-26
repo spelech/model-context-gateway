@@ -13,7 +13,7 @@ The Raw Console allows you to bypass the UI form builders and send exact JSON-RP
 ### Useful Raw JSON-RPC Payloads for Testing
 
 #### 1. Discover Meta-Mode Bootstrap Tools
-Lists the initial tools advertised by the gateway (`search_tools` and `execute_tool`):
+Lists the initial bootstrap tools advertised by the gateway (`search_tools`, `execute_tool`, and `execute_script`):
 ```json
 {
   "jsonrpc": "2.0",
@@ -24,7 +24,7 @@ Lists the initial tools advertised by the gateway (`search_tools` and `execute_t
 ```
 
 #### 2. Perform Dynamic Semantic Tool Search
-Simulates an AI assistant searching for tools matching an intent:
+Simulates an AI assistant searching for tools matching an intent with relevance thresholding:
 ```json
 {
   "jsonrpc": "2.0",
@@ -33,7 +33,10 @@ Simulates an AI assistant searching for tools matching an intent:
   "params": {
     "name": "search_tools",
     "arguments": {
-      "query": "find active database connections"
+      "query": "find active database connections",
+      "limit": 5,
+      "min_score": 0.35,
+      "score_dropoff_ratio": 0.60
     }
   }
 }
@@ -50,6 +53,23 @@ Executes a target tool through Meta-Mode's wrapper:
     "name": "execute_tool",
     "arguments": {
       "name": "postgres__list_connections",
+      "arguments": {}
+    }
+  }
+}
+```
+
+#### 4. Execute a Multi-Tool JavaScript Workflow via Code Mode (`execute_script`)
+Runs an asynchronous JavaScript snippet inside the gateway's isolated Jint sandbox (see [MCP Code Mode](../code-mode.md)):
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "tools/call",
+  "params": {
+    "name": "execute_script",
+    "arguments": {
+      "script": "const containers = await tools.docker.list_containers({ all: true }); console.log(`Total: ${containers.length}`); return containers.filter(c => c.state === 'running');",
       "arguments": {}
     }
   }

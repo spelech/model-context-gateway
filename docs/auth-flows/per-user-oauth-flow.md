@@ -24,7 +24,7 @@ Model Context Gateway solves these problems with its **Personal Egress 3-Legged 
 
 ---
 
-## 2. Core Definitions (ASD-STE100)
+## 2. Core Definitions
 
 | Term | Definition |
 | :--- | :--- |

@@ -13,17 +13,17 @@ For full administration procedures, see the [**Administrator Guide**](admin-guid
 ### 1. `manage_servers`
 Manage backend MCP server configurations and connections.
 - **Actions**: `list`, `get`, `create`, `update`, `delete`, `toggle`, `reconnect`, `reconnect_all`
-- **Key Parameters**: `id`, `name`, `url`, `type` (`sse`, `http`, `stdio`), `alias`, `category`, `enabled`, `secret_provider`, `secret_key`
-- **Description**: Add new backend servers, update URLs or headers, toggle active status, and refresh connections.
+- **Key Parameters**: `id`, `name`, `url`, `type` (`sse`, `http`, `stdio`), `alias`, `health_check_mode` (`RootOrigin`, `JsonRpcPing`), `category`, `enabled`, `secret_provider`, `secret_key`
+- **Description**: Add new backend servers, update URLs, health check modes, or headers, toggle active status, and refresh connections.
 
 ### 2. `manage_appkeys`
-Manage user and application API keys, quotas, and expiration.
-- **Actions**: `list`, `get_limits`, `create`, `revoke`
-- **Use Cases**: Enforcing limits on API keys, provisioning temporary or permanent AppKeys for scripts or developers, and revoking compromised keys.
+Manage user and application API keys, atomic rotation, quotas, and expiration.
+- **Actions**: `list`, `get_limits`, `create`, `rotate`, `revoke`
+- **Use Cases**: Enforcing limits on API keys, provisioning temporary or permanent AppKeys for scripts or developers, rotating existing keys in place without changing their ID/scopes, and revoking compromised keys.
 
 ### 3. `manage_clients`
 Manage OAuth2 / dynamic client credentials.
-- **Actions**: `list`, `register`, `delete`
+- **Actions**: `list`, `register`, `rotate_secret`, `delete`
 - **Use Cases**: Registering new machine-to-machine OAuth2 clients, assigning display names and scopes, and rotating or deleting client credentials.
 
 ### 4. `manage_policies`
@@ -42,9 +42,9 @@ Manage secret providers (Vault, etc.) and authentication providers (LDAP/AD, OID
 - **Use Cases**: Configuring HashiCorp Vault integrations, saving LDAP/AD configuration details, and securely testing connections (e.g., LDAP bind or Vault AppRole auth) before enabling them.
 
 ### 7. `manage_settings`
-Manage global router settings, embedding models, and UI configuration.
+Manage global router settings, embedding models, tool search thresholds, Code Mode sandbox guardrails, and UI configuration.
 - **Actions**: `get`, `update`
-- **Use Cases**: Modifying the dashboard title/icon, configuring semantic routing embedding providers (like ONNX or API-based embeddings), and enforcing global AppKey limits.
+- **Use Cases**: Modifying the dashboard title/icon, configuring semantic routing embedding providers (ONNX or OpenAI/Ollama APIs), tuning `search_tools` thresholds (`toolSearchDefaultLimit`, `toolSearchMinScore`, `toolSearchScoreDropoffRatio`), configuring MCP Code Mode (`enableCodeMode`, `codeModeExecutionTimeoutSeconds`, `codeModeMaxToolCalls`, `codeModeMaxMemoryMb`, `codeModeMaxStatements`, `codeModeAllowedGroups`), and enforcing global AppKey limits.
 
 ### 8. `manage_custom_files`
 Manage custom prompt templates and local resource files in the router data directory.

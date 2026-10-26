@@ -2,10 +2,12 @@
 
 This document explains how to configure user authentication in Model Context Gateway (MCG). It covers identity providers, reverse proxies, and AppKeys.
 
-### Core Concepts for Beginners
+## Core Concepts for Beginners
 - **AppKey (Bearer Token)**: A persistent secret string that IDEs and scripts send to authenticate with the gateway.
 - **Reverse Proxy**: A server that verifies user identity and forwards requests with identity headers.
 - **Scope**: A permission tag that controls which tools and endpoints a key can access.
+
+## Identity & AppKey Provisioning Flowchart
 
 ```mermaid
 flowchart TD
@@ -31,7 +33,7 @@ flowchart TD
     O --> P[(Database: AppKeys)]
 ```
 
-### Explanation of AppKeys
+## Explanation of AppKeys
 
 AppKeys are bearer tokens that external clients (such as IDEs or scripts) use to authenticate with the gateway.
 

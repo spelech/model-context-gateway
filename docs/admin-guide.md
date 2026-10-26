@@ -21,13 +21,13 @@ The Admin MCP Server provides 10 tools that cover all administrative operations:
 
 | Tool Name | Supported Actions | Description | Key Parameters |
 | :--- | :--- | :--- | :--- |
-| **`manage_servers`** | `list`, `get`, `create`, `update`, `delete`, `toggle`, `reconnect`, `reconnect_all` | Manage backend MCP servers and connections. | `id`, `name`, `url`, `type`, `alias`, `category`, `enabled`, `secret_provider`, `secret_key` |
-| **`manage_appkeys`** | `list`, `get_limits`, `create`, `revoke` | Manage user and application API keys and quotas. | `name`, `username`, `scopes`, `expiresInDays`, `id` |
-| **`manage_clients`** | `list`, `register`, `delete` | Manage OAuth 2.0 dynamic client applications. | `client_name`, `redirect_uris`, `scope`, `client_id` |
+| **`manage_servers`** | `list`, `get`, `create`, `update`, `delete`, `toggle`, `reconnect`, `reconnect_all` | Manage backend MCP servers and connections. | `id`, `name`, `url`, `type`, `alias`, `health_check_mode`, `category`, `enabled`, `secret_provider`, `secret_key` |
+| **`manage_appkeys`** | `list`, `get_limits`, `create`, `rotate`, `revoke` | Manage user and application API keys, atomic rotation, and quotas. | `name`, `username`, `scopes`, `expiresInDays`, `id` |
+| **`manage_clients`** | `list`, `register`, `rotate_secret`, `delete` | Manage OAuth 2.0 dynamic client applications and secrets. | `client_name`, `redirect_uris`, `scope`, `client_id` |
 | **`manage_policies`** | `list`, `save`, `delete` | Manage role-based access control (RBAC) rules. | `target_id`, `required_group`, `is_allowed`, `id` |
 | **`manage_group_mappings`** | `list`, `save`, `delete` | Map external identity groups to internal gateway roles. | `external_group`, `internal_role`, `id` |
 | **`manage_providers`** | `list`, `save_secret`, `test_vault`, `save_auth`, `test_ldap` | Configure secret stores (Vault) and identity providers (Active Directory). | `providerName`, `displayName`, `configJson`, `isEnabled`, `address` |
-| **`manage_settings`** | `get`, `update` | Manage global settings, vector models, and AppKey limits. | `settings` JSON object |
+| **`manage_settings`** | `get`, `update` | Manage global settings, vector models, search thresholds, Code Mode sandbox limits, and AppKey quotas. | `settings` JSON object |
 | **`manage_custom_files`** | `list`, `get`, `save`, `delete` | Manage prompt templates and resource files in `./data`. | `file_name`, `content`, `category` |
 | **`manage_system`** | `diagnostics`, `get_logs`, `clear_logs`, `query_audit` | View memory, handle counts, recent logs, and audit trails. | `limit`, `user_filter`, `server_filter` |
 | **`test_tool_call`** | *(execution)* | Execute a backend tool directly through the gateway test harness. | `server_id`, `tool_name`, `arguments` |
@@ -69,7 +69,7 @@ The authorization engine evaluates permissions in four strict stages:
 4. **Default Policy**: If no rule matches, the gateway fails closed and denies access (`403 Forbidden`).
 
 ### Creating an Access Policy
-1. In the Web Dashboard, click **Settings** &rarr; **Access Control**.
+1. In the Web Dashboard, click **Settings** → **Access Control**.
 2. Click **+ Add Policy**.
 3. Specify:
    * **Target Type**: Choose `server`, `tool`, or wildcard `*`.
@@ -80,7 +80,7 @@ The authorization engine evaluates permissions in four strict stages:
 
 ### External Group Mappings
 If you use Active Directory or an OIDC identity provider (such as Authentik or Keycloak):
-1. Go to **Settings** &rarr; **Access Control** &rarr; **Group Mappings**.
+1. Go to **Settings** → **Access Control** → **Group Mappings**.
 2. Click **+ Add Mapping**.
 3. Map the external group (for example: `CN=DevOps,OU=Groups,DC=company,DC=com` or `devops-team`) to an internal role (such as `Administrator` or `Operator`).
 4. Users presenting that external group claim receive the mapped permissions automatically.
@@ -101,12 +101,12 @@ The gateway protects backend credentials so clients never handle plaintext secre
 | **TokenExchange** | Dynamic RFC 8693 token exchange via IdP. | Microservices requiring audience-scoped downstream JWTs. |
 
 ### User Secret Storage (BYOK)
-Configure user secret storage in **Settings &rarr; Secret Providers &rarr; User Secret Storage (BYOK)**:
+Configure user secret storage in **Settings → Secret Providers → User Secret Storage (BYOK)**:
 - **Database (Encrypted Storage)**: Saves secrets in the local database encrypted with AES-256-GCM.
 - **HashiCorp Vault (KV v2)**: Saves secrets in Vault KV v2 using a customizable path template (such as `{Company}/mcgateway/{User}/{Server}`). Supported tokens: `{Company}`, `{User}`, `{Server}`.
 
 ### In-House Identity Provider / External JWT Bearer
-Configure inbound Bearer JWT validation in **Settings &rarr; Identity & Authentication &rarr; In-House IdP / External JWT Bearer**:
+Configure inbound Bearer JWT validation in **Settings → Identity & Authentication → In-House IdP / External JWT Bearer**:
 - **Authority / Discovery URL**: Provider discovery URL (such as `https://idp.corp.internal/auth/realms/corp/.well-known/openid-configuration`).
 - **Audience**: Expected JWT audience (such as `model-context-gateway`).
 - **Issuer**: Expected JWT issuer URL.

@@ -48,7 +48,7 @@ Administrator status is granted if the caller matches any of the following:
 ### Level 2: External Group Role Mappings (`GroupMappings` Table)
 External identity groups (Active Directory SIDs, LDAP groups, OIDC claims) are mapped to internal gateway roles.
 
-Configure mappings in **Settings &rarr; Access Control &rarr; Group Mappings**:
+Configure mappings in **Settings → Access Control → Group Mappings**:
 
 | External Identifier | Internal Role | Granted Capabilities |
 | :--- | :--- | :--- |
@@ -62,7 +62,7 @@ Configure mappings in **Settings &rarr; Access Control &rarr; Group Mappings**:
 ### Level 3: Server-Level Access Control (`Policies` Table)
 Controls whether an authenticated group or user can access a specific downstream backend MCP server.
 
-Configure server policies in **Servers &rarr; Edit Server &rarr; Access Control**:
+Configure server policies in **Servers → Edit Server → Access Control**:
 - **`AllowedGroups`**: Delimited list of permitted groups/SIDs (e.g. `CORP\Engineering,CORP\DevOps`).
 - **`DeniedGroups`**: Delimited list of blocked groups/SIDs (e.g. `CORP\Contractors,CORP\Guests`).
 
@@ -76,7 +76,7 @@ Configure server policies in **Servers &rarr; Edit Server &rarr; Access Control*
 ### Level 4: Tool-Level Granular Access Control (`Policies` Table)
 Restricts individual tools within a server to specific security groups.
 
-Configure tool policies in **Settings &rarr; Access Control &rarr; Access Policies**:
+Configure tool policies in **Settings → Access Control → Access Policies**:
 - **Target Type**: Select `tool`.
 - **Target ID**: Enter `{serverId}/{toolName}` or `{serverId}__{toolName}`.
 - **Required Group**: Enter the Active Directory group name, OIDC claim, or SID.

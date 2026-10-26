@@ -143,17 +143,17 @@ Regardless of whether SQLite, SQL Server, or MySQL is used, backend server crede
 ```mermaid
 flowchart LR
     subgraph Ingress["Admin Input"]
-        RawKey["Plaintext Backend Key\n(e.g. sk-ant-api03-...)"]
+        RawKey["Plaintext Backend Key<br/>(e.g. sk-ant-api03-...)"]
     end
 
     subgraph EncryptEngine["MCG Envelope Encryption"]
-        MasterKey["256-Bit Master Key\n(AES-256-GCM)"]
+        MasterKey["256-Bit Master Key<br/>(AES-256-GCM)"]
         IV["Random 96-Bit Nonce"]
         Tag["128-Bit Auth Tag"]
     end
 
     subgraph DBStorage["Target Database (SQLite / MSSQL / MySQL)"]
-        Ciphertext["Encrypted Ciphertext (Base64)\n+ Nonce + Tag"]
+        Ciphertext["Encrypted Ciphertext (Base64)<br/>+ Nonce + Tag"]
     end
 
     RawKey --> EncryptEngine

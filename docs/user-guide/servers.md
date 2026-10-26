@@ -11,18 +11,18 @@ The **Model Context Gateway (MCG)** manages connections to downstream Model Cont
 
 ![Add Server Registration Modal](../assets/add_server_modal.jpg)
 
-Click the **`+ Add Server`** button in the dashboard toolbar to open the registration modal:
-
-![Add New MCP Server Modal](../assets/add_server_modal.jpg)
+Click the **`+ Add Server`** button in the dashboard toolbar to open the registration modal.
 
 ### Core Configuration Parameters
 
 | Field | Description | Example |
 | :--- | :--- | :--- |
 | **Server Identifier (`id`)** | Unique identifier string. Used to namespace tools (`{id}__{tool}` or `{id}/{tool}`) and route requests (`/{id}`). | `docker`, `homeassistant`, `plex` |
+| **Alias (`alias`)** | Optional secondary short identifier accepted during tool routing and target proxying. | `ha`, `k8s` |
 | **Display Name** | Human-readable label displayed across status cards and test bench selectors. | `Docker Infrastructure Daemon` |
 | **Transport Type** | Communication protocol: `SSE`, `HTTP`, or `STDIO`. | `SSE` |
 | **Endpoint / Command** | Downstream URL (for `SSE` / `HTTP`) or local CLI executable path (for `STDIO`). | `http://docker-mcp:8080/sse` or `npx` |
+| **Health Check Mode** | Background liveness probe mode (`RootOrigin` default or `JsonRpcPing`). | `RootOrigin` |
 | **Categories** | Comma-separated tags used for catalog grouping and category-scoped AppKey evaluation. | `Infrastructure, Smart Home` |
 | **Secret Provider** | Secret resolution strategy: `None`, `Environment`, `Vault`, or `WindowsRegistry`. | `Vault` |
 | **Custom Headers** | Optional JSON key-value map of HTTP headers injected into downstream requests. | `{"Authorization": "Bearer token"}` |
@@ -48,6 +48,11 @@ Click the **`+ Add Server`** button in the dashboard toolbar to open the registr
 * **Usage**: Spawns local CLI tools, Node.js scripts, Python binaries, or container wrappers communicating over standard input/output (`stdin`/`stdout`).
 * **Command Syntax**: Executable name with command-line arguments (for example, `npx -y @modelcontextprotocol/server-filesystem /shared/data`).
 * **Secret Protection**: MCG injects resolved credentials directly into the child process environment variables. Secrets never appear in command-line arguments or system process listings (`ps aux`).
+
+### 4. Background Health Checking (`RootOrigin` vs `JsonRpcPing`)
+`BackendHealthCheckService` probes enabled downstream servers every **30 seconds**. For `SSE` and `HTTP` servers, you can select between two probe modes in the Server Modal:
+* **`RootOrigin` (Default)**: Sends a lightweight `HTTP GET` to the server's base authority (`scheme://host:port/`). This confirms server reachability without opening and abandoning stateful SSE streaming sessions on frameworks such as FastMCP.
+* **`JsonRpcPing`**: Sends a stateless `HTTP POST` containing `{"jsonrpc":"2.0","id":"health-ping","method":"ping"}` with `Accept: application/json, text/event-stream` to the configured endpoint URL.
 
 ---
 

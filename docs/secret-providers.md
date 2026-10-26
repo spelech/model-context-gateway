@@ -5,33 +5,11 @@ The **Model Context Gateway (MCG)** provides a pluggable secrets management syst
 This guide explains supported secret providers, AES-256-GCM (Advanced Encryption Standard in Galois/Counter Mode) encryption at rest, runtime configuration reloading, audit sanitization, Docker settings, and troubleshooting.
 
 > [!TIP]
-> **Need server setup recipes?** Read the [**MCP Server Authentication & Integration Cookbook**](mcp-server-auth-cookbook.md) for lookup tables and configuration examples (*"If your server requires Bearer / Custom Header / Basic Auth / Vault / STDIO ➔ Setup is Y"*).
+> **Need server setup recipes?** Read the [**MCP Server Authentication & Integration Cookbook**](mcp-server-auth-cookbook.md) for lookup tables and configuration examples (*"If your server requires Bearer / Custom Header / Basic Auth / Vault / STDIO → Setup is Y"*).
 
 ---
 
-## 📑 Table of Contents
-- [Architecture Overview](#architecture-overview)
-- [Supported Secret Providers](#supported-secret-providers)
-  - [1. HashiCorp Vault (KV v2)](#1-hashicorp-vault-kv-v2)
-  - [2. Windows Registry (DPAPI)](#2-windows-registry-dpapi)
-  - [3. Environment Variables](#3-environment-variables)
-- [Encryption at Rest and Key Derivation](#encryption-at-rest-and-key-derivation)
-  - [AES-256-GCM Envelope Encryption](#aes-256-gcm-envelope-encryption)
-  - [Master Key Derivation (PBKDF2)](#master-key-derivation-pbkdf2)
-- [Dynamic Runtime Reloading](#dynamic-runtime-reloading)
-- [Secret Redaction and Audit Safety](#secret-redaction-and-audit-safety)
-  - [Masking and Mask-Preserving Updates](#masking-and-mask-preserving-updates)
-  - [Audit Trail Sanitization](#audit-trail-sanitization)
-  - [Fail-Closed Security Validation](#fail-closed-security-validation)
-- [Configuration Examples](#configuration-examples)
-  - [Docker Compose with HashiCorp Vault](#docker-compose-with-hashicorp-vault)
-  - [Vault KV v2 and AppRole Setup Commands](#vault-kv-v2-and-approle-setup-commands)
-  - [Registering Backend MCP Servers with Secrets](#registering-backend-mcp-servers-with-secrets)
-- [Troubleshooting and Operational Guide](#troubleshooting-and-operational-guide)
-
----
-
-## 🏛️ Architecture Overview
+## Architecture Overview
 
 When an incoming client request (over HTTP, Server-Sent Events [SSE], or Standard Input/Output [STDIO]) targets a downstream MCP server, the router resolves credentials on demand using `CompositeSecretRetriever`.
 
@@ -105,6 +83,8 @@ The Vault retriever connects to HashiCorp Vault Key-Value Version 2 (`kv-v2`) se
   "mountPath": "secret",
   "token": "hvs.CAESIJ7...sampleVaultToken"
 }
+```
+
 #### User Secrets in HashiCorp Vault (`VaultUserSecretStore`)
 
 The gateway stores per-user credentials directly in HashiCorp Vault. This includes personal tokens for Slack, GitHub, or Jira.
@@ -122,7 +102,7 @@ The gateway stores per-user credentials directly in HashiCorp Vault. This includ
 * **Credential Data Formats**:
   `VaultUserSecretStore` reads individual secret keys (`secret`, `access_token`, `token`, `key`, `password`) or structured JSON credential objects.
 * **Web Dashboard Configuration**:
-  Configure user secret storage in **Settings &rarr; Secret Providers &rarr; User Secret Storage (BYOK)**:
+  Configure user secret storage in **Settings → Secret Providers → User Secret Storage (BYOK)**:
   - **Storage Provider**: Select `Database (Encrypted Storage)` or `HashiCorp Vault (KV v2)`.
   - **Vault Path Template**: Enter the template path. The dashboard shows an immediate preview of the resolved path.
   - **Guardrail Alert**: If you select `HashiCorp Vault` while Vault is disabled, an alert displays before save.

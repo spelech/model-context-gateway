@@ -40,14 +40,25 @@ flowchart TD
 ```
 
 ### Scoring Formula
-$$\text{Score} = \alpha \cdot \text{DenseScore} + (1.0 - \alpha) \cdot \text{SparseScore}$$
 
-* **$\alpha$ (`dense_weight`)**: Configurable weight in $[0.0, 1.0]$ (default $0.5$).
-  - When Mode is `semantic`: $\alpha = 1.0$.
-  - When Mode is `lexical`: $\alpha = 0.0$.
-  - When Mode is `hybrid`: $\alpha$ matches the slider setting.
-* **$\text{DenseScore}$**: SIMD cosine similarity clamped between $0.0$ and $1.0$.
-* **$\text{SparseScore}$**: Min-max normalized lexical match score across candidate tools.
+```text
+Score = (α × DenseScore) + ((1.0 - α) × SparseScore)
+```
+
+* **`α` (`dense_weight`)**: Configurable weight between `0.0` and `1.0` (default `0.5`).
+  - When Mode is `semantic` (or `dense`): `α = 1.0`.
+  - When Mode is `lexical`: `α = 0.0`.
+  - When Mode is `hybrid`: `α` matches the configured slider setting.
+* **`DenseScore`**: SIMD cosine similarity clamped to the `[0.0, 1.0]` range.
+* **`SparseScore`**: Min-max normalized lexical match score across candidate tools in the `[0.0, 1.0]` range.
+
+### Two-Stage Score Thresholding & Relative Drop-Off
+
+When AI agents call `search_tools` in Meta-Mode, the gateway applies a two-stage relevance filter after computing each tool's `Score` so low-relevance noise does not bloat the LLM context window:
+
+1. **Minimum Relevance Floor (`min_score`)**: Discards any candidate tool whose calibrated `Score` falls below the configured minimum threshold (default `0.35`).
+2. **Relative Score Drop-Off (`score_dropoff_ratio`)**: Compares each candidate against the highest-scoring tool (`topScore`) in the result set and retains only tools where `Score >= topScore × score_dropoff_ratio` (default `0.60`, meaning candidates must score at least 60% of the top match).
+3. **Result Cap (`limit`)**: Returns at most `limit` tools after filtering (default `5`, configurable up to `100`).
 
 ---
 
@@ -99,14 +110,28 @@ Response includes decomposed score diagnostics:
 ```
 
 ### Meta-Mode MCP Tool (`search_tools`)
-AI agents calling `search_tools` can optionally pass `mode` and `dense_weight`:
+
+AI agents calling `search_tools` can override the global search defaults per query using the following optional parameters:
+
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `query` | `string` | *(Required)* | Natural language intent or keywords describing the required tool capability. |
+| `mode` | `string` | `"hybrid"` | Scoring strategy: `"hybrid"`, `"dense"` (or `"semantic"`), or `"lexical"`. |
+| `dense_weight` | `number` | `0.5` | Weight `α` in `[0.0, 1.0]` applied to dense vector similarity when `mode` is `"hybrid"`. |
+| `limit` | `integer` | `5` | Maximum number of matching tools to return (`ToolSearchDefaultLimit`, range `1`–`100`). |
+| `min_score` | `number` | `0.35` | Absolute minimum relevance score floor (`ToolSearchMinScore`, range `0.0`–`1.0`). |
+| `score_dropoff_ratio` | `number` | `0.60` | Relative cutoff ratio against the top-scoring hit (`ToolSearchScoreDropoffRatio`, range `0.0`–`1.0`). |
+
 ```json
 {
   "name": "search_tools",
   "arguments": {
     "query": "find proxy tools",
     "mode": "hybrid",
-    "dense_weight": 0.5
+    "dense_weight": 0.5,
+    "limit": 5,
+    "min_score": 0.35,
+    "score_dropoff_ratio": 0.60
   }
 }
 ```

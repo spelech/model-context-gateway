@@ -2,10 +2,12 @@
 
 This diagram shows the end-to-end authentication lifecycle of an MCP request. It traces the request from a client, through the gateway, to a downstream MCP server.
 
-### Core Concepts for Beginners
+## Core Concepts for Beginners
 - **Reverse Proxy**: A server that authenticates users and passes identity headers to the gateway.
 - **Bearer Token**: A secret key sent in the `Authorization: Bearer <token>` header.
 - **AuthShape**: The credential format required by a downstream server (Bearer token, Basic auth, custom header, or query parameter).
+
+## End-to-End Sequence Diagram
 
 ```mermaid
 sequenceDiagram
@@ -75,7 +77,7 @@ sequenceDiagram
     R-->>C: Forward Response back to Client
 ```
 
-### Auth & Setup Matrix Reference
+## Auth & Setup Matrix Reference
 
 This flow combines three security layers:
 1. **Client Identity**: The gateway resolves caller identity from SSO headers or AppKey records.

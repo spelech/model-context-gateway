@@ -4,19 +4,7 @@ This document details the multi-stage authorization pipeline, scope resolution g
 
 ---
 
-## 📑 Table of Contents
-
-1. [4-Stage Hierarchical Decision Flow](#1-4-stage-hierarchical-decision-flow)
-2. [Scope Grammar & Resolution](#2-scope-grammar-resolution)
-3. [Admin SID Bypass & Database-Backed RBAC Evaluation](#3-admin-sid-bypass-database-backed-rbac-evaluation)
-   - [Administrator SID Verification](#administrator-sid-verification)
-   - [Database Stored Procedure Evaluation (`sp_EvaluateUserAccess`)](#database-stored-procedure-evaluation-sp_evaluateuseraccess)
-   - [Evaluation Precedence Rules](#evaluation-precedence-rules)
-4. [Mermaid Authorization Decision Flowchart](#4-mermaid-authorization-decision-flowchart)
-
----
-
-## 1. 4-Stage Hierarchical Decision Flow
+## 4-Stage Hierarchical Decision Flow
 
 Every incoming capability invocation (`tools/call`, `prompts/get`, `resources/read`, or target-specific proxying) is evaluated through a strict, fail-closed 4-stage pipeline:
 
@@ -53,16 +41,16 @@ flowchart TD
 
 ---
 
-## 2. Scope Grammar & Resolution
+## Scope Grammar & Resolution
 
-AppKeys support granular least-privilege scoping. The gateway validates that the targeted server, category, tool, prompt, or resource matches the scopes encoded in the AppKey's `ScopesJson` array:
+AppKeys support granular least-privilege scoping using either colon (`:`) or slash (`/`) delimiters. The gateway validates that the targeted server, category, tool, prompt, or resource matches the scopes encoded in the AppKey's `ScopesJson` array:
 
 | Scope Pattern | Matches / Grants Access To | Evaluation Logic |
 | :--- | :--- | :--- |
 | `*` or `all` or `mcp_client` | Global Wildcard | Permits invocation of all servers, tools, prompts, and resources. |
-| `server:{serverId}` | Target Server Wildcard | Permits access to all capabilities exposed by the specified server (e.g. `server:docker`). |
-| `category:{categoryName}` | Target Category Wildcard | Permits access to any server tagged with the specified category (e.g. `category:Media`, `category:Smarthome`). |
-| `tool:{toolName}` | Specific Tool | Permits execution of a specific un-namespaced or namespaced tool (e.g. `tool:list_containers`, `tool:docker__list_containers`). |
+| `server:{serverId}` or `server/{serverId}` | Target Server Wildcard | Permits access to all capabilities exposed by the specified server (e.g. `server:docker`). |
+| `category:{categoryName}` or `category/{categoryName}` | Target Category Wildcard | Permits access to any server tagged with the specified category (e.g. `category:Media`, `category/Smarthome`). |
+| `tool:{toolName}` or `tool/{toolName}` | Specific Tool | Permits execution of a specific un-namespaced or namespaced tool (e.g. `tool:list_containers`, `tool:docker__list_containers`). |
 | `prompt:{promptName}` | Specific Prompt | Permits retrieval of a specific prompt template. |
 | `resource:{uri}` | Specific Resource URI | Permits reading a specific resource URI or wildcard pattern (e.g. `resource:mcp://docker/*`). |
 
@@ -70,14 +58,14 @@ AppKeys support granular least-privilege scoping. The gateway validates that the
 
 1. If the key contains `*`, `all`, or `mcp_client`, Stage 1 immediately succeeds.
 2. If the invocation targets a tool `{serverId}__{toolName}`:
-   - Check if `tool:{toolName}` or `tool:{serverId}__{toolName}` is present.
-   - Check if `server:{serverId}` is present.
-   - Check if `category:{category}` matches any of the server's categories.
+   - Check if `tool:{toolName}` or `tool:{serverId}__{toolName}` (or slash equivalent) is present.
+   - Check if `server:{serverId}` or `server/{serverId}` is present.
+   - Check if `category:{category}` or `category/{category}` matches any of the server's categories.
 3. If no scope matches the target capability, the request is immediately rejected with `403 Forbidden` and audited as a scope violation.
 
 ---
 
-## 3. Admin SID Bypass & Database-Backed RBAC Evaluation
+## Admin SID Bypass & Database-Backed RBAC Evaluation
 
 ### Administrator SID Verification
 
@@ -106,13 +94,15 @@ For standard users, agents, and client connections, the gateway invokes the data
    Access is granted if at least one matching policy for the user's groups has `IsAllowed = 1`.
 3. **Hierarchical Inheritance**:
    Permissions cascade down the hierarchy:
-   $$\text{Category Policy} \longrightarrow \text{Server Policy} \longrightarrow \text{Tool-Specific Policy}$$
+   ```text
+   Category Policy ──► Server Policy ──► Tool-Specific Policy
+   ```
 4. **Fail-Closed Default (Lowest Priority)**:
    If no matching policy is found in the database, or if an unexpected database connection error occurs, the pipeline defaults to **FAIL-CLOSED** (`403 Forbidden`).
 
 ---
 
-## 4. Mermaid Authorization Decision Flowchart
+## Mermaid Authorization Decision Flowchart
 
 The following diagram illustrates the complete end-to-end authorization decision logic executed for every incoming MCP request:
 
