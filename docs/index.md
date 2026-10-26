@@ -87,17 +87,17 @@ flowchart LR
 
     subgraph Gateway["Model Context Gateway (MCG)"]
         Auth["OAuth / OIDC SSO / AppKey"]
-        MetaMode["Meta-Mode Router\n(search_tools / execute_tool)"]
-        CodeMode["Code Mode Sandbox\n(execute_script / Jint)"]
-        Vector["Calibrated Hybrid Search\n(SIMD Vector + Lexical)"]
-        AdminMCP["Admin MCP Server\n(/admin, /mcg-admin)"]
-        Secrets["Secret Providers\n(Vault / DPAPI / AES)"]
+        MetaMode["Meta-Mode Router<br/>(search_tools / execute_tool)"]
+        CodeMode["Code Mode Sandbox<br/>(execute_script / Jint)"]
+        Vector["Calibrated Hybrid Search<br/>(SIMD Vector + Lexical)"]
+        AdminMCP["Admin MCP Server<br/>(/admin, /mcg-admin)"]
+        Secrets["Secret Providers<br/>(Vault / DPAPI / AES)"]
     end
 
     subgraph Backends["Downstream MCP Servers"]
-        DockerSrv["Docker Containers\n(Auto-Discovery)"]
+        DockerSrv["Docker Containers<br/>(Auto-Discovery)"]
         SSESrv["Remote SSE / HTTP Servers"]
-        StdioSrv["Subprocess STDIO\n(Node / Python / uv / bun)"]
+        StdioSrv["Subprocess STDIO<br/>(Node / Python / uv / bun)"]
     end
 
     Clients -->|Bearer / SSE| Auth

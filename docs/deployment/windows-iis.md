@@ -21,9 +21,9 @@ flowchart LR
 
     subgraph IISProcess["IIS Worker Process (w3wp.exe)"]
         HttpSys["HTTP.sys Kernel Driver"]
-        ANCM["AspNetCoreModuleV2\n(In-Process Handler)"]
-        KestrelCore["Model Context Gateway\nASP.NET Core Engine (.NET 10)"]
-        WinAuth["Native WindowsIdentity\n(Kerberos / NTLM Accessor)"]
+        ANCM["AspNetCoreModuleV2<br/>(In-Process Handler)"]
+        KestrelCore["Model Context Gateway<br/>ASP.NET Core Engine (.NET 10)"]
+        WinAuth["Native WindowsIdentity<br/>(Kerberos / NTLM Accessor)"]
     end
 
     subgraph Downstream["Downstream MCP Fleet"]

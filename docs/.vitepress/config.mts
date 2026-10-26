@@ -266,8 +266,18 @@ export default withMermaid(
 
     mermaid: {
       theme: 'dark',
-      mermaid: {
-        fontFamily: 'JetBrains Mono, monospace'
+      fontFamily: 'Outfit, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      flowchart: {
+        htmlLabels: true,
+        padding: 16,
+        wrappingWidth: 260
+      },
+      sequence: {
+        boxMargin: 10,
+        boxTextMargin: 8,
+        noteMargin: 10,
+        messageMargin: 35,
+        width: 180
       }
     }
   })

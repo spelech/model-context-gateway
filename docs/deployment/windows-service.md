@@ -20,15 +20,15 @@ flowchart TD
     end
 
     subgraph ServiceDaemon["Model Context Gateway Service (mcg.exe)"]
-        Kestrel["High-Performance Kestrel Web Server\n(:8080)"]
+        Kestrel["High-Performance Kestrel Web Server<br/>(:8080)"]
         Engine["Core Routing & Auth Pipeline"]
-        DPAPIEngine["WindowsRegistrySecretRetriever\n(IDpapiProtector)"]
+        DPAPIEngine["WindowsRegistrySecretRetriever<br/>(IDpapiProtector)"]
     end
 
     subgraph SecurityRegistry["Host Operating System Security"]
-        RegistryHive["HKLM:\\SOFTWARE\\McpRouter\\Secrets\n(REG_BINARY Encrypted Values)"]
-        DPAPI["DPAPI ProtectedData\n(DataProtectionScope.LocalMachine)"]
-        PortACL["HTTP.sys URL ACL\n(netsh urlacl)"]
+        RegistryHive["HKLM:\\SOFTWARE\\McpRouter\\Secrets<br/>(REG_BINARY Encrypted Values)"]
+        DPAPI["DPAPI ProtectedData<br/>(DataProtectionScope.LocalMachine)"]
+        PortACL["HTTP.sys URL ACL<br/>(netsh urlacl)"]
     end
 
     SCM -->|Start / Stop / Pause| ServiceDaemon

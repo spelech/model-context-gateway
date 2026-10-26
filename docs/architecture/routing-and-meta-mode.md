@@ -136,7 +136,7 @@ sequenceDiagram
     Proxy->>SessionMgr: CreateSessionAsync(sessionId, responseStream)
     SessionMgr->>Session: Instantiate ClientSession
     Session-->>Proxy: Session Created (Guid: "sess-abc")
-    Proxy-->>Client: HTTP 200 OK (text/event-stream)<br>event: endpoint\ndata: /message?sessionId=sess-abc
+    Proxy-->>Client: HTTP 200 OK (text/event-stream)<br/>event: endpoint<br/>data: /message?sessionId=sess-abc
     
     par Async Background Warming
         Session->>Upstream: InitializeAsync() & tools/list
