@@ -1,16 +1,16 @@
 # Test Coverage & Reliability Evaluation Report
 
-**Date:** 2026-09-06 (Release v5.11.0)  
+**Date:** 2026-10-25 (Release v5.23.0)  
 **Scope:** Backend .NET Unit & Integration Suite (`ModelContextGateway.Tests`), Frontend Vitest Suite (`frontend/src/test`), Playwright E2E Suite (`frontend/e2e`), and Windows Native Diagnostics (`scripts/windows/Test-WindowsEnvironment.ps1`).
 
 ---
 
-## 1. Executive Summary
+## Executive Summary
 
-The automated test suite contains **1,063 passing tests** with high code coverage across core modules. Tests validate functionality across Linux container and Windows IIS hosting environments.
+The automated test suite contains **1,209+ passing tests** with high code coverage across core modules. Tests validate functionality across Linux container and Windows IIS hosting environments.
 
 ### Key Milestones Completed:
-1. **Frontend Coverage $\ge 90\%$ Across All Components (Overall 92.7%)**:
+1. **Frontend Coverage >= 90% Across All Components (Overall 92.7%)**:
    - `AppKeysCard.tsx`: **100.0%**
    - `SecretProvidersTab.tsx`: **96.8%**
    - `CustomFileModal.tsx`: **90.8%**
@@ -95,7 +95,7 @@ The automated test suite contains **1,063 passing tests** with high code coverag
 | **Identity & AD/LDAP Settings** | `frontend/src/components/settings/IdentityAuthTab.tsx` | **96.9%** | `frontend/e2e/ldap-identity-and-auth-flow.spec.ts` | **Fully Covered**: Form inputs for Server, Port, LDAPS switch, Domain, Base DN, Bind DN, Password, "Test Connection" button, and saving. |
 | **Secret Providers Settings** | `frontend/src/components/settings/SecretProvidersTab.tsx` | **79.9%** | `frontend/e2e/vault-approle-config-flow.spec.ts` | **Fully Covered**: Vault Address, Token vs AppRole radio, Role ID/Secret ID inputs, "Test Vault" button, and provider toggle switches. |
 | **General Settings** | `frontend/src/components/settings/GeneralTab.tsx` | **97.6%** | `frontend/e2e/settings.spec.ts` | **Fully Covered**: Base URL, Log Level, CORS origins, Embedding provider selection (Local ONNX vs External API). |
-| **Custom Dynamic Files** | `frontend/src/components/settings/CustomFilesTab.tsx` / `CustomFileModal.tsx` | **84.6% (Modal)**<br>90.5% (Tab) | 0% in E2E | **High Coverage**: Visual Prompt Builder $\leftrightarrow$ Raw JSON Editor 2-way sync, arguments/messages builders, schema validation tested in Vitest (`CustomFileModal.test.tsx`). |
+| **Custom Dynamic Files** | `frontend/src/components/settings/CustomFilesTab.tsx` / `CustomFileModal.tsx` | **84.6% (Modal)**<br>90.5% (Tab) | 0% in E2E | **High Coverage**: Visual Prompt Builder ↔ Raw JSON Editor 2-way sync, arguments/messages builders, schema validation tested in Vitest (`CustomFileModal.test.tsx`). |
 | **Backups & Restoration** | `frontend/src/components/settings/BackupsTab.tsx` | **100.0%** | 0% in E2E | **Fully Covered**: JSON database backup export and restoration flow tested in Vitest. |
 
 ---

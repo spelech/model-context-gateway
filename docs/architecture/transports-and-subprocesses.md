@@ -4,17 +4,7 @@ This document details the transport abstraction layer, STDIO subprocess isolatio
 
 ---
 
-## 📑 Table of Contents
-
-1. [Strategy Pattern (`ITransport`)](#1-strategy-pattern-itransport)
-2. [Subprocess STDIO Architecture & Security Hardening](#2-subprocess-stdio-architecture-security-hardening)
-3. [Child Process Tree Lifecycle & Signal Handling](#3-child-process-tree-lifecycle-signal-handling)
-4. [Stderr Log Capture & PII Token Masking](#4-stderr-log-capture-pii-token-masking)
-5. [Sequence Diagram: STDIO Subprocess Execution](#5-sequence-diagram-stdio-subprocess-execution)
-
----
-
-## 1. Strategy Pattern (`ITransport`)
+## Strategy Pattern (`ITransport`)
 
 The gateway shields core routing coordinators from network and IPC transport protocols through the [`ITransport`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/ITransport.cs) strategy interface:
 
@@ -41,7 +31,7 @@ The gateway provides three production transport implementations:
 
 ---
 
-## 2. Subprocess STDIO Architecture & Security Hardening
+## Subprocess STDIO Architecture & Security Hardening
 
 The [`StdioTransport`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Transports/StdioTransport.cs) manages local CLI processes, Python virtual environments, and Node runtimes with strict security sandboxing:
 
@@ -62,7 +52,7 @@ The [`StdioTransport`](https://github.com/spelech/model-context-gateway/blob/mai
 
 ---
 
-## 3. Child Process Tree Lifecycle & Signal Handling
+## Child Process Tree Lifecycle & Signal Handling
 
 Subprocesses follow a deterministic lifecycle that ensures processes and their spawned worker threads exit cleanly without leaving zombie or orphaned processes:
 
@@ -91,7 +81,7 @@ stateDiagram-v2
 
 ---
 
-## 4. Stderr Log Capture & PII Token Masking
+## Stderr Log Capture & PII Token Masking
 
 Local CLI processes often emit diagnostic, debugging, or error information to `StandardError`. The gateway continuously monitors this stream while safeguarding sensitive data:
 
@@ -102,7 +92,7 @@ Local CLI processes often emit diagnostic, debugging, or error information to `S
 
 ---
 
-## 5. Sequence Diagram: STDIO Subprocess Execution
+## Sequence Diagram: STDIO Subprocess Execution
 
 The following sequence diagram illustrates the lifecycle of a tool request dispatched over the STDIO transport, including background stderr log capture, secret injection, and asynchronous response completion:
 

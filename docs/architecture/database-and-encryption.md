@@ -4,20 +4,7 @@ This document details the multi-engine persistence architecture, relational data
 
 ---
 
-## 📑 Table of Contents
-
-1. [Database & Persistence Architecture](#1-database-persistence-architecture)
-   - [Unified Entity-Relationship Diagram (Mermaid ERD)](#unified-entity-relationship-diagram-mermaid-erd)
-   - [Engine Dialect Strategies (SQLite, MS SQL Server, MySQL)](#engine-dialect-strategies-sqlite-ms-sql-server-mysql)
-2. [Secret Provider & Envelope Encryption Pipeline](#2-secret-provider-envelope-encryption-pipeline)
-   - [AES-256-GCM Envelope Encryption Specification](#aes-256-gcm-envelope-encryption-specification)
-   - [Master Key Derivation (PBKDF2)](#master-key-derivation-pbkdf2)
-   - [Pluggable Retrievers & Dynamic Reload Without Restart](#pluggable-retrievers-dynamic-reload-without-restart)
-   - [Secret Resolution & Encryption Pipeline Flowchart](#secret-resolution-encryption-pipeline-flowchart)
-
----
-
-## 1. Database & Persistence Architecture
+## Database & Persistence Architecture
 
 The gateway abstracts persistent storage behind [`IDbConnectionFactory`](https://github.com/spelech/model-context-gateway/blob/main/Infrastructure/Persistence/DbConnectionFactory.cs) and high-performance Dapper repositories. It natively supports SQLite, Microsoft SQL Server, and MySQL / MariaDB.
 
@@ -195,7 +182,7 @@ erDiagram
 
 ---
 
-## 2. Secret Provider & Envelope Encryption Pipeline
+## Secret Provider & Envelope Encryption Pipeline
 
 ### AES-256-GCM Envelope Encryption Specification
 

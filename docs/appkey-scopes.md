@@ -4,18 +4,7 @@ This document explains the **AppKey Scoping and Authorization Engine** in the **
 
 ---
 
-## 📑 Table of Contents
-1. [Overview & Security Architecture](#1-overview-security-architecture)
-2. [Canonical Scope Syntax & Normalization](#2-canonical-scope-syntax-normalization)
-3. [Multi-Stage Authorization Pipeline](#3-multi-stage-authorization-pipeline)
-4. [Capability Authorization Matrix](#4-capability-authorization-matrix)
-5. [Key Lifecycle & Cryptographic Architecture](#5-key-lifecycle-cryptographic-architecture)
-6. [Least-Privilege Personas & Configuration Recipes](#6-least-privilege-personas-configuration-recipes)
-7. [Diagnostics, Auditing & Troubleshooting](#7-diagnostics-auditing-troubleshooting)
-
----
-
-## 1. Overview & Security Architecture
+## Overview & Security Architecture
 
 The Model Context Gateway (MCG) aggregates Model Context Protocol (MCP) servers (Docker, Home Assistant, Plex, databases) into a single secure endpoint.
 
@@ -60,18 +49,18 @@ flowchart TD
 
 ---
 
-## 2. Canonical Scope Syntax & Normalization
+## Canonical Scope Syntax & Normalization
 
-AppKeys store assigned scopes in a JSON array (`ScopesJson`). Scopes define the outer permission perimeter for the token.
+AppKeys store assigned scopes in a JSON array (`ScopesJson`). Scopes define the outer permission perimeter for the token. Both colon (`:`) and slash (`/`) delimiters are supported natively.
 
 ### Scope Grammar & Taxonomy
 
 | Scope Pattern | Type | Description | Example |
 | :--- | :--- | :--- | :--- |
 | `*`<br>`all`<br>`mcp_client` | **Global Wildcard** | Grants access to all capabilities across all registered backend servers. | `"*"` |
-| `server:<serverId>`<br>`<serverId>` | **Server-Level** | Grants access to all tools, prompts, resources, and templates on the specified server. | `"server:ha"`<br>`"docker"` |
-| `category:<name>`<br>`group:<name>` | **Category-Level** | Dynamically authorizes all servers classified under the given category name. | `"category:smarthome"`<br>`"group:infrastructure"` |
-| `tool:<toolName>` | **Tool Capability** | Grants access to a specific namespaced tool or native router tool. | `"tool:ha__turn_on"`<br>`"tool:docker__ps"` |
+| `server:<serverId>`<br>`server/<serverId>`<br>`<serverId>` | **Server-Level** | Grants access to all tools, prompts, resources, and templates on the specified server. | `"server:ha"`<br>`"server/docker"`<br>`"docker"` |
+| `category:<name>`<br>`category/<name>`<br>`group:<name>`<br>`group/<name>` | **Category-Level** | Dynamically authorizes all servers classified under the given category name. | `"category:smarthome"`<br>`"category/media"`<br>`"group:infrastructure"` |
+| `tool:<toolName>`<br>`tool/<toolName>` | **Tool Capability** | Grants access to a specific namespaced tool or native router tool. | `"tool:ha__turn_on"`<br>`"tool/docker__ps"` |
 | `prompt:<promptName>` | **Prompt Capability** | Grants access to a specific namespaced prompt template. | `"prompt:ha__diagnose_device"` |
 | `resource:<uri>` | **Resource Capability** | Grants access to a specific virtualized resource URI. | `"resource:mcp://ha/states"`<br>`"resource:router://status"` |
 | `resource_template:<uri>`<br>`template:<uri>` | **Template Capability** | Grants access to a specific resource URI template. | `"resource_template:mcp://ha/sensor/{id}"` |
@@ -82,16 +71,16 @@ AppKeys store assigned scopes in a JSON array (`ScopesJson`). Scopes define the 
 The scope engine in `ClientSession.Authorization.cs` runs these normalization steps:
 
 1. **Trimming & Lowercase Conversion**: The engine trims whitespace from all scope strings and converts characters to lowercase (`s.Trim().ToLowerInvariant()`).
-2. **Server ID Extraction**: The engine extracts the root `serverId` across multiple URI formats:
-   - `mcp://{serverId}/{path}` $\rightarrow$ `{serverId}` (e.g. `mcp://ha/states` $\rightarrow$ `ha`)
-   - `logs://{serverId}/{path}` $\rightarrow$ `{serverId}`
-   - `router://{path}` $\rightarrow$ `router`
-   - `server:{serverId}` $\rightarrow$ `{serverId}`
-   - `{serverId}__{toolName}` $\rightarrow$ `{serverId}` (e.g. `docker__list_containers` $\rightarrow$ `docker`)
-   - Native prefixes: `plex_*` $\rightarrow$ `plex`, `seerr_*` $\rightarrow$ `seerr`
-3. **Meta-Mode Built-In Passthrough**: Discovery and execution tools (`search_tools` and `execute_tool`) can always run. When `execute_tool` runs, the engine checks the target tool against caller scopes and RBAC rules.
+2. **Server ID Extraction**: The engine extracts the root `serverId` across multiple URI and tool formats:
+   - `mcp://{serverId}/{path}` → `{serverId}` (e.g. `mcp://ha/states` → `ha`)
+   - `logs://{serverId}/{path}` → `{serverId}`
+   - `router://{path}` → `router`
+   - `server:{serverId}` or `server/{serverId}` → `{serverId}`
+   - `{serverId}__{toolName}`, `{serverId}.{toolName}`, or `{serverId}/{toolName}` → `{serverId}` (e.g. `docker__list_containers` → `docker`)
+   - Native prefixes: `plex_*` → `plex`, `seerr_*` → `seerr`
+3. **Meta-Mode Built-In Passthrough**: Discovery and execution meta-tools (`search_tools`, `execute_tool`, and `execute_script`) can run on any valid AppKey, while enforcing caller scopes and RBAC rules on every candidate or invoked inner tool.
 4. **Dynamic Category Resolution**:
-   - For `category:<name>` and `group:<name>` scopes, the gateway reads server categories from the database (`SELECT Categories FROM Servers WHERE Id = @Id`).
+   - For `category:<name>` / `category/<name>` and `group:<name>` / `group/<name>` scopes, the gateway reads server categories from the database (`SELECT Categories FROM Servers WHERE Id = @Id`).
    - Categories can be formatted as JSON arrays or comma-separated lists.
    - When an administrator updates a category tag on a server, all category-scoped AppKeys update their access immediately.
 5. **Scope Creation Validation**:
@@ -101,7 +90,7 @@ The scope engine in `ClientSession.Authorization.cs` runs these normalization st
 
 ---
 
-## 3. Multi-Stage Authorization Pipeline
+## Multi-Stage Authorization Pipeline
 
 Every incoming MCP request undergoes deterministic evaluation through `IsUserAuthorizedAsync(requestMethod, targetId, httpContext)`:
 
@@ -109,10 +98,10 @@ Every incoming MCP request undergoes deterministic evaluation through `IsUserAut
 If the request authenticates with an AppKey (`context.Items["AppKeyUsed"] == true`):
 1. Parse the JSON scope list from `context.Items["AppKeyScopes"]`. If the JSON is missing or malformed, the pipeline fails closed and denies access.
 2. Compare the requested target with the scope rules:
-   - Wildcard (`*`, `all`, `mcp_client`) $\rightarrow$ Proceed to Stage 2.
-   - `server:{serverId}` or `{serverId}` $\rightarrow$ Proceed to Stage 2.
-   - `category:{category}` or `group:{category}` where the server belongs to that category $\rightarrow$ Proceed to Stage 2.
-   - Specific `tool:{targetId}`, `prompt:{targetId}`, `resource:{targetId}`, `template:{targetId}`, `completion:{targetId}` $\rightarrow$ Proceed to Stage 2.
+   - Wildcard (`*`, `all`, `mcp_client`) → Proceed to Stage 2.
+   - `server:{serverId}`, `server/{serverId}`, or `{serverId}` → Proceed to Stage 2.
+   - `category:{category}`, `category/{category}`, `group:{category}`, or `group/{category}` where the server belongs to that category → Proceed to Stage 2.
+   - Specific `tool:{targetId}`, `tool/{targetId}`, `prompt:{targetId}`, `resource:{targetId}`, `template:{targetId}`, `completion:{targetId}` → Proceed to Stage 2.
 3. If no scope matches the target, the gateway logs a warning and returns `403 Forbidden`.
 
 ### Stage 2: Identity Resolution & Group Mapping
@@ -152,7 +141,7 @@ When an administrator creates an AppKey or Machine Client for another user:
 
 ---
 
-## 4. Capability Authorization Matrix
+## Capability Authorization Matrix
 
 This table shows how each MCP method and router capability maps to scopes, RBAC evaluation keys, and filtering behavior:
 
@@ -168,10 +157,11 @@ This table shows how each MCP method and router capability maps to scopes, RBAC 
 | `completion/complete` | Reference object: `ref/prompt` (`{name}`) or `ref/resource` (`{uri}`) | `*`, `server:{id}`, `category:{cat}`, `prompt:*`, `resource:*`, `completion:*` | `completion:{target}`, `prompt:{name}`, `resource:{uri}`, `server:{serverId}`, `category:{cat}` | **Invocation Guard & Value Filter**: Checks template permission and filters completion values by authorized server IDs. | Returns empty completion values array or throws error. |
 | `search_tools` *(Meta-Mode)* | `"search_tools"` | Any active AppKey (wrapper); filters candidates | Evaluates candidate tool permissions before scoring | **Semantic Search Filter**: Candidate tools outside caller permissions are excluded from search results. | Excluded from returned search results. |
 | `execute_tool` *(Meta-Mode)* | `"execute_tool"` (params specify inner target) | Any active AppKey (wrapper); inspects inner target | Evaluates inner tool: `{name}`, `tool:{name}`, `server:{serverId}`, `category:{cat}` | **Invocation Guard**: Enforces scope and RBAC on the inner target tool. | Returns JSON-RPC error: `User does not have permission to execute tool '{innerName}'`. |
+| `execute_script` *(Code Mode)* | `"execute_script"` (sandboxed JS orchestration) | Any active AppKey (subject to `CodeModeAllowedGroups`); inspects each inner tool call | Evaluates `CodeModeAllowedGroups` on entry and evaluates full scope + RBAC on every `mcg.callTool` / `tools.<server>.<tool>` call | **Dual Gate**: Checks group allowlist before starting Jint sandbox and enforces per-tool authorization on every sub-call. | Throws JS Error inside sandbox (`isError: true`) or rejects `execute_script` if group is unauthorized. |
 
 ---
 
-## 5. Key Lifecycle & Cryptographic Architecture
+## Key Lifecycle & Cryptographic Architecture
 
 Model Context Gateway (MCG) uses token hashing, high-entropy selectors, and constant-time authentication to protect machine credentials:
 
@@ -179,10 +169,14 @@ Model Context Gateway (MCG) uses token hashing, high-entropy selectors, and cons
 
 Generated AppKeys follow a structured, multi-segment format:
 
-$$\text{Token Format} = \underbrace{\texttt{mcp}}_{\text{Scheme}}-\underbrace{\texttt{\{scopeSlug\}}}_{\text{Scope Hint}}-\underbrace{\texttt{\{selector\}}_{32\text{ hex}}}_{\text{128-bit Selector}}-\underbrace{\texttt{\{secret\}}_{64\text{ hex}}}_{\text{256-bit CSPRNG Secret}}$$
+```text
+mcp - {scopeSlug} - {selector (32 hex / 128-bit)} - {secret (64 hex / 256-bit CSPRNG)}
+ │         │                     │                                 │
+ └─ Scheme └─ Scope Hint         └─ Indexed O(1) DB Lookup Prefix  └─ SHA-256 Hashed Secret
+```
 
 - **Scope Slug**: Derived from the primary assigned scope (`global`, `server`, `group`, or `tool`).
-- **Selector (128-bit entropy / 16 bytes)**: Generated using cryptographically secure random number generation (`RandomNumberGenerator.GetBytes`). The database indexes this prefix for fast lookup ($O(1)$).
+- **Selector (128-bit entropy / 16 bytes)**: Generated using cryptographically secure random number generation (`RandomNumberGenerator.GetBytes`). The database indexes this prefix for fast `O(1)` lookup.
 - **Secret (256-bit entropy / 32 bytes)**: High-entropy cryptographic secret.
 - **Prefix Key**: Stored as `KeyPrefix` in the database: `mcp-{scopeSlug}-{selector}`.
 
@@ -208,7 +202,7 @@ flowchart LR
 
 - **One-Way SHA-256 Hash**: The database stores only the SHA-256 hash digest of the key in the `EncryptedKey` column.
 - **One-Time Secret Presentation**: The API returns the plaintext key **exactly once** upon creation. The gateway never saves plaintext keys. You cannot recover a lost key.
-- **Sanitized Management APIs**: `GET /api/appkeys` sanitizes the response. It returns only `Id`, `Name`, `Username`, `KeyPrefix`, `Scopes`, `ExpiresAt`, and `CreatedAt`. It never exposes cipher hashes.
+- **Sanitized Management APIs**: `GET /api/appkeys` sanitizes the response. It returns only `Id`, `Name`, `Username`, `KeyPrefix`, `Scopes`, `ExpiresAt`, `CreatedAt`, and `LastUsedAt`. It never exposes cipher hashes.
 
 ### 3. Constant-Time Authentication Flow
 
@@ -232,17 +226,19 @@ Incoming requests supply the token in HTTP headers or query parameters:
    This prevents timing attacks.
 5. Verifies the `ExpiresAt` timestamp against UTC time.
 6. Attaches `ClaimsPrincipal` with `ClaimTypes.Name` and role `McpClient`. Sets `HttpContext.Items["AppKeyUsed"] = true` and `HttpContext.Items["AppKeyScopes"] = appKey.ScopesJson`.
+7. Records an asynchronous usage timestamp via `ActivityTracker` (debounced to at most one database write per key every 60 seconds) to keep `LastUsedAt` current without adding hot-path latency.
 
-### 4. Quotas, Expiration & Revocation
+### 4. Quotas, Atomic Rotation, Expiration & Revocation
 
 - **Key Quotas**: Configured in the `Settings` table (`GlobalMaxKeys`, default 0; `UserMaxKeys`, default 0; `0` = Unlimited). Non-admin users who exceed an administrator-configured limit receive `400 Bad Request`.
+- **Atomic Secret Rotation**: Rotate an existing AppKey in place via `POST /api/appkeys/{id}/rotate` (or rotate an OAuth client secret via `POST /api/clients/{id}/rotate-secret`). Rotation generates a new cryptographic secret and `KeyPrefix`, preserves the key's `Id`, `Name`, `OwnerSid`, and `Scopes`, and invalidates the previous token immediately.
 - **Expiration**: Keys support optional expiration (`ExpiresInDays`). Expired keys fail authentication with an audited `App Key has expired` error.
 - **Revocation**: You can revoke keys via `DELETE /api/appkeys/{id}` or `DELETE /api/clients/{id}` (`sp_DeleteAppKey`). Revocations take effect immediately.
-- **Audit Logging**: The gateway records key creations, revocations, and authentication failures in the audit log database table.
+- **Audit Logging**: The gateway records key creations, rotations, revocations, and authentication failures in the audit log database table.
 
 ---
 
-## 6. Least-Privilege Personas & Configuration Recipes
+## Least-Privilege Personas & Configuration Recipes
 
 Use these configurations to apply least-privilege access:
 
@@ -354,7 +350,7 @@ Use this setup for scheduled cluster maintenance jobs in CI/CD. The key grants a
 
 ---
 
-## 7. Diagnostics, Auditing & Troubleshooting
+## Diagnostics, Auditing & Troubleshooting
 
 ### Common Error Responses & Resolution
 

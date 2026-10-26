@@ -104,9 +104,9 @@ flowchart TD
 ### Level 2: Group Role Mappings (`GroupMappings` Table)
 - Maps external OIDC group claims to internal gateway roles.
 - Examples:
-  - `oidc:engineering-leads` &rarr; `Operator` (can toggle and reconnect servers).
-  - `oidc:compliance-auditors` &rarr; `Auditor` (can view diagnostics and audit logs).
-  - `oidc:platform-admins` &rarr; `Administrator` (full administrative rights).
+  - `oidc:engineering-leads` → `Operator` (can toggle and reconnect servers).
+  - `oidc:compliance-auditors` → `Auditor` (can view diagnostics and audit logs).
+  - `oidc:platform-admins` → `Administrator` (full administrative rights).
 
 ### Level 3: Server-Level Access Control (`Policies` Table)
 - Restricts backend MCP servers using server `AllowedGroups` and `DeniedGroups`.

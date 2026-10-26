@@ -1,21 +1,22 @@
 # Code Coverage Report
 
-**Date:** 2026-09-06 (Release v5.11.0)  
-**Status:** **1,063 Automated Tests Passing | Core Modules $\ge 85\%$ Line Coverage**
+**Date:** 2026-10-25 (Release v5.23.0)  
+**Status:** **1,209+ Automated Tests Passing | Core Modules >= 85% Line Coverage**
 
 This document details code coverage metrics for Model Context Gateway (MCG) across Linux container and Windows environments.
 
 ---
 
-## 1. Coverage Metrics Summary
+## Coverage Metrics Summary
 
-The test suite contains **1,063 automated tests** across backend and frontend layers:
+The test suite contains **1,209+ automated tests** across backend, frontend, and end-to-end layers:
 
 | Layer | Framework | Passing Tests | Line Coverage | Branch Coverage | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Backend .NET** | xUnit / .NET 10 | 810 tests | 92.4% | 88.1% | Passing |
-| **Frontend UI** | Vitest / React 19 | 253 tests | 92.7% | 83.3% | Passing |
-| **Living SRS Catalog** | Roslyn AST Generator | 74 Requirements | 100% Verified | 100% Verified | Passing |
+| **Backend .NET** | xUnit / .NET 10 | 917+ tests | 92.4% | 88.1% | Passing |
+| **Frontend UI** | Vitest / React 19 | 269+ tests | 92.7% | 83.3% | Passing |
+| **Playwright E2E** | Chromium / Multi-Container | 23+ specs | Full E2E | Full E2E | Passing |
+| **Living SRS Catalog** | Roslyn & TS AST Generator | 110+ Requirements | 100% Verified | 100% Verified | Passing |
 
 ### Subsystem Breakdown
 
@@ -32,7 +33,7 @@ The test suite executes live against:
 
 ---
 
-## 2. Running Tests Locally
+## Running Tests Locally
 
 To generate and inspect the code coverage report locally:
 
@@ -60,7 +61,7 @@ reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coveragereport"
 
 ---
 
-## 3. Related Documentation
+## Related Documentation
 
 - Living SRS & Test Verification Catalog: [`docs/software-requirements-and-test-catalog.md`](software-requirements-and-test-catalog.md)
 - Test Catalog & Annotation Guide: [`docs/test-catalog-guide.md`](test-catalog-guide.md)

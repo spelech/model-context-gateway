@@ -4,27 +4,6 @@ This document provides instructions for developers. It explains setup steps, arc
 
 ---
 
-## 📑 Table of Contents
-
-- [Prerequisites & Development Environment](#prerequisites-development-environment)
-- [Repository Structure & Architecture Conventions](#repository-structure-architecture-conventions)
-- [Local Development Workflow](#local-development-workflow)
-  - [Backend (.NET 10 C#)](#backend-net-10-c)
-  - [Frontend (React 19 / Vite / TypeScript)](#frontend-react-19-vite-typescript)
-- [Automated Testing & Code Coverage](#automated-testing-code-coverage)
-  - [Backend Test Suite](#backend-test-suite)
-  - [Frontend Vitest Suite](#frontend-vitest-suite)
-  - [End-to-End Testing (Playwright)](#end-to-end-testing-playwright)
-- [Formatting, Linting & Static Analysis](#formatting-linting-static-analysis)
-- [Version Synchronization & Release Verification](#version-synchronization-release-verification)
-  - [Mandatory Version Synchronization Contract](#mandatory-version-synchronization-contract)
-  - [Release Verification Script (`verify-release.sh`)](#release-verification-script-verify-releasesh)
-  - [CLI Flags & Options Reference](#cli-flags-options-reference)
-  - [Automated Version Bumping & Atomic Commits](#automated-version-bumping-atomic-commits)
-- [Continuous Integration & Quality Gates](#continuous-integration-quality-gates)
-
----
-
 ## 🛠️ Prerequisites & Development Environment
 
 Install these tools before you start development:

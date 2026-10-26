@@ -20,7 +20,7 @@ Cursor reads MCP configurations from either a project-specific directory or glob
 
 ### Option A: Unified Meta-Mode (Recommended)
 
-Connecting to `/sse` activates **Meta-Mode**. Cursor receives only `search_tools` and `execute_tool`, allowing your AI model to search hundreds of tools without context window saturation:
+Connecting to `/sse` activates **Meta-Mode**. Cursor receives only `search_tools`, `execute_tool`, and `execute_script` (when [Code Mode](../code-mode.md) is enabled), allowing your AI model to search and orchestrate hundreds of tools without context window saturation:
 
 ```json
 {
@@ -56,6 +56,8 @@ If you want Cursor to access a specific backend server directly (exposing all it
     }
   }
 }
+```
+
 ### Option C: Automatic OAuth Discovery (RFC 9728)
 
 If your organization secures MCG using an Identity Provider (Authentik, Keycloak, Microsoft Entra ID), modern Cursor versions support automatic OAuth Protected Resource Metadata (RFC 9728) discovery:

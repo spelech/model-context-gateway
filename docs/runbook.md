@@ -271,7 +271,7 @@ mysql -u mcp_user -p mcpmaster < /backups/mcpmaster_2026-08-25.sql
 
 ---
 
-## 📊 Observability, Health Checks, and Logs
+## Observability, Health Checks, and Logs
 
 ### 1. Health Probe (`GET /health`)
 The `/health` endpoint returns JSON health status for container orchestrators and monitoring tools (such as Uptime Kuma):
@@ -285,7 +285,7 @@ Example JSON Response:
 {
   "status": "healthy",
   "service": "ModelContextGateway",
-  "version": "5.0.0",
+  "version": "5.23.0",
   "database": {
     "provider": "SQLite",
     "connected": true
