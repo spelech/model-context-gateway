@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using ModelContextGateway.Core.CodeMode;
 
 namespace ModelContextGateway.Core.Routing
 {
@@ -22,7 +23,14 @@ namespace ModelContextGateway.Core.Routing
             return await _catalogManager.SearchResourcesAsync(query, resources);
         }
 
-        public async Task<List<object>> ListResourcesAsync(string body, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync, SessionManager? sessionManager = null)
+        public async Task<List<object>> ListResourcesAsync(
+            string body,
+            IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections,
+            ILogger logger,
+            Func<Task> ensureBackendsInitializedAsync,
+            SessionManager? sessionManager = null,
+            bool isMetaMode = false,
+            IEnumerable<McpServer>? servers = null)
         {
             var allResources = new List<object>();
             var tasks = new List<Task<(string ServerId, JsonElement Resources)>>();
@@ -53,6 +61,8 @@ namespace ModelContextGateway.Core.Routing
             }
 
             var completed = await Task.WhenAll(tasks);
+            var serverResourceCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
             foreach (var item in completed)
             {
                 var serverResources = new List<object>();
@@ -77,14 +87,67 @@ namespace ModelContextGateway.Core.Routing
                                 }
 
                                 serverResources.Add(resourceDict);
-                                allResources.Add(resourceDict);
+                                if (!isMetaMode)
+                                {
+                                    allResources.Add(resourceDict);
+                                }
                             }
                         }
                     }
                 }
+                serverResourceCounts[item.ServerId] = serverResources.Count;
                 if (sessionManager != null)
                 {
                     sessionManager.SetServerResourcesCache(item.ServerId, serverResources);
+                }
+            }
+
+            if (isMetaMode)
+            {
+                allResources.Add(new Dictionary<string, object> {
+                    { "uri", "router://code-mode/guide" },
+                    { "name", "Code Mode Guide & Sandbox Reference" },
+                    { "mimeType", "text/markdown" },
+                    { "description", "Complete guide to the MCG JavaScript/TypeScript sandbox (`execute_script`), `tools.<server>.<tool>()` proxies, and `mcg.*` discovery APIs." }
+                });
+                allResources.Add(new Dictionary<string, object> {
+                    { "uri", "router://code-mode/sdk.d.ts" },
+                    { "name", "Code Mode TypeScript SDK & Tool Declarations (.d.ts)" },
+                    { "mimeType", "application/typescript" },
+                    { "description", "Ambient TypeScript (.d.ts) declarations for the Code Mode sandbox globals (`tools`, `mcg`, `args`) and all authorized backend server tools." }
+                });
+                allResources.Add(new Dictionary<string, object> {
+                    { "uri", "router://resources/catalog" },
+                    { "name", "Downstream Resource Catalog (All Authorized Servers)" },
+                    { "mimeType", "application/json" },
+                    { "description", "Compacted JSON index of all authorized downstream `mcp://{serverId}/{escapedUri}` resources grouped by server." }
+                });
+                allResources.Add(new Dictionary<string, object> {
+                    { "uri", "router://prompts/catalog" },
+                    { "name", "Downstream Prompt Catalog (All Authorized Servers)" },
+                    { "mimeType", "application/json" },
+                    { "description", "JSON catalog of all authorized downstream and built-in MCP prompts and their arguments." }
+                });
+
+                var activeServerIds = (servers != null && servers.Any())
+                    ? servers.Where(s => s.Enabled).Select(s => s.Id).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+                    : backendConnections.Select(b => b.Key).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+                foreach (var sid in activeServerIds)
+                {
+                    serverResourceCounts.TryGetValue(sid, out var count);
+                    allResources.Add(new Dictionary<string, object> {
+                        { "uri", $"router://resources/server/{sid}" },
+                        { "name", $"[{sid}] Downstream Resource Index ({count} resources)" },
+                        { "mimeType", "application/json" },
+                        { "description", $"List of all exposed `mcp://{sid}/...` resources and metadata for server '{sid}'." }
+                    });
+                    allResources.Add(new Dictionary<string, object> {
+                        { "uri", $"router://code-mode/types/{sid}" },
+                        { "name", $"[{sid}] TypeScript Tool Declarations (.d.ts)" },
+                        { "mimeType", "application/typescript" },
+                        { "description", $"TypeScript (.d.ts) tool interfaces and JSDoc comments for server '{sid}'." }
+                    });
                 }
             }
 
@@ -170,6 +233,28 @@ namespace ModelContextGateway.Core.Routing
                     } }
                 } }
             });
+            allTemplates.Add(new Dictionary<string, object> {
+                { "uriTemplate", "router://code-mode/types/{server_name}" },
+                { "name", "Server TypeScript Tool Declarations (.d.ts)" },
+                { "mimeType", "application/typescript" },
+                { "description", "Generate TypeScript (.d.ts) interface declarations for all authorized tools on a specific backend server." },
+                { "parameters", new Dictionary<string, object> {
+                    { "server_name", new Dictionary<string, object> {
+                        { "description", "The unique identifier or alias of the backend server (e.g., ha, docker, homebox_db)" }
+                    } }
+                } }
+            });
+            allTemplates.Add(new Dictionary<string, object> {
+                { "uriTemplate", "router://resources/server/{server_name}" },
+                { "name", "Server Downstream Resource Index" },
+                { "mimeType", "application/json" },
+                { "description", "List all exposed mcp:// resource URIs and metadata for a specific backend server." },
+                { "parameters", new Dictionary<string, object> {
+                    { "server_name", new Dictionary<string, object> {
+                        { "description", "The unique identifier or alias of the backend server (e.g., ha, docker, homebox_db)" }
+                    } }
+                } }
+            });
 
             await ensureBackendsInitializedAsync();
 
@@ -233,13 +318,30 @@ namespace ModelContextGateway.Core.Routing
             return allTemplates;
         }
 
-        public async Task<object?> ReadResourceAsync(string resourceUri, string body, ConcurrentDictionary<string, BackendConnection> backendConnections, Func<Task> ensureBackendsInitializedAsync, Func<string, string, string, string> rewriteRequestJson, SessionManager? sessionManager = null)
+        public async Task<object?> ReadResourceAsync(
+            string resourceUri,
+            string body,
+            ConcurrentDictionary<string, BackendConnection> backendConnections,
+            Func<Task> ensureBackendsInitializedAsync,
+            Func<string, string, string, string> rewriteRequestJson,
+            SessionManager? sessionManager = null,
+            Func<Task<List<object>>>? getAuthorizedToolsAsync = null,
+            Func<Task<List<object>>>? getAuthorizedResourcesAsync = null,
+            Func<Task<List<object>>>? getAuthorizedPromptsAsync = null,
+            IEnumerable<McpServer>? servers = null)
         {
-            if (resourceUri.StartsWith("router://"))
+            if (resourceUri.StartsWith("router://", StringComparison.OrdinalIgnoreCase))
             {
-                return ResolveLocalResource(resourceUri, backendConnections, sessionManager);
+                return await ResolveLocalResourceAsync(
+                    resourceUri,
+                    backendConnections,
+                    sessionManager,
+                    getAuthorizedToolsAsync,
+                    getAuthorizedResourcesAsync,
+                    getAuthorizedPromptsAsync,
+                    servers);
             }
-            if (resourceUri.StartsWith("logs://"))
+            if (resourceUri.StartsWith("logs://", StringComparison.OrdinalIgnoreCase))
             {
                 return ResolveLocalLogResource(resourceUri);
             }
@@ -257,7 +359,7 @@ namespace ModelContextGateway.Core.Routing
                 return resp.Result;
             }
 
-            // Fallback for cold-start mcp://{serverId}/{rawUri}
+            // Fallback for cold-start or alias mcp://{serverId}/{rawUri}
             if (resourceUri.StartsWith("mcp://", StringComparison.OrdinalIgnoreCase))
             {
                 var withoutScheme = resourceUri.Substring("mcp://".Length);
@@ -266,7 +368,11 @@ namespace ModelContextGateway.Core.Routing
                 {
                     var targetServer = withoutScheme.Substring(0, slashIdx);
                     var rawUri = Uri.UnescapeDataString(withoutScheme.Substring(slashIdx + 1));
-                    var matchedConn = backendConnections.FirstOrDefault(c => string.Equals(c.Key, targetServer, StringComparison.OrdinalIgnoreCase));
+
+                    var resolvedServerId = ResolveCanonicalServerId(targetServer, servers);
+                    var matchedConn = backendConnections.FirstOrDefault(c =>
+                        string.Equals(c.Key, resolvedServerId, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(c.Key, targetServer, StringComparison.OrdinalIgnoreCase));
                     if (matchedConn.Value != null)
                     {
                         _resourceRoutingTable[resourceUri] = matchedConn.Key;
@@ -280,9 +386,161 @@ namespace ModelContextGateway.Core.Routing
             throw new KeyNotFoundException($"Resource {resourceUri} not found in routing table.");
         }
 
-        private object ResolveLocalResource(string uri, ConcurrentDictionary<string, BackendConnection> backendConnections, SessionManager? sessionManager)
+        private static string ResolveCanonicalServerId(string serverIdOrAlias, IEnumerable<McpServer>? servers)
         {
-            if (uri.StartsWith("router://resources/"))
+            if (servers != null)
+            {
+                var match = servers.FirstOrDefault(s =>
+                    string.Equals(s.Id, serverIdOrAlias, StringComparison.OrdinalIgnoreCase) ||
+                    (!string.IsNullOrWhiteSpace(s.Alias) && string.Equals(s.Alias, serverIdOrAlias, StringComparison.OrdinalIgnoreCase)));
+                if (match != null)
+                {
+                    return match.Id;
+                }
+            }
+            return serverIdOrAlias;
+        }
+
+        private async Task<object> ResolveLocalResourceAsync(
+            string uri,
+            ConcurrentDictionary<string, BackendConnection> backendConnections,
+            SessionManager? sessionManager,
+            Func<Task<List<object>>>? getAuthorizedToolsAsync,
+            Func<Task<List<object>>>? getAuthorizedResourcesAsync,
+            Func<Task<List<object>>>? getAuthorizedPromptsAsync,
+            IEnumerable<McpServer>? servers)
+        {
+            if (string.Equals(uri, "router://code-mode/guide", StringComparison.OrdinalIgnoreCase))
+            {
+                var serverIds = (servers != null && servers.Any())
+                    ? servers.Where(s => s.Enabled).Select(s => !string.IsNullOrWhiteSpace(s.Alias) ? $"{s.Id} (alias: {s.Alias})" : s.Id).ToList()
+                    : backendConnections.Keys.ToList();
+                var guideText = CodeModeTypeGenerator.GenerateCodeModeGuideMarkdown(serverIds);
+                return new
+                {
+                    contents = new[] {
+                        new {
+                            uri = uri,
+                            mimeType = "text/markdown",
+                            text = guideText
+                        }
+                    }
+                };
+            }
+
+            if (string.Equals(uri, "router://code-mode/sdk.d.ts", StringComparison.OrdinalIgnoreCase))
+            {
+                var tools = getAuthorizedToolsAsync != null ? await getAuthorizedToolsAsync() : new List<object>();
+                var dts = CodeModeTypeGenerator.GenerateFullSdkDeclarations(tools, servers);
+                return new
+                {
+                    contents = new[] {
+                        new {
+                            uri = uri,
+                            mimeType = "application/typescript",
+                            text = dts
+                        }
+                    }
+                };
+            }
+
+            if (_catalogManager.TryMatchCodeModeTypesTemplate(uri, out var targetTypesServer))
+            {
+                var tools = getAuthorizedToolsAsync != null ? await getAuthorizedToolsAsync() : new List<object>();
+                var dts = CodeModeTypeGenerator.GenerateServerDeclarations(targetTypesServer, tools, servers);
+                return new
+                {
+                    contents = new[] {
+                        new {
+                            uri = uri,
+                            mimeType = "application/typescript",
+                            text = dts
+                        }
+                    }
+                };
+            }
+
+            if (string.Equals(uri, "router://resources/catalog", StringComparison.OrdinalIgnoreCase))
+            {
+                var resources = getAuthorizedResourcesAsync != null ? await getAuthorizedResourcesAsync() : new List<object>();
+                var downstreamOnly = resources
+                    .Where(r =>
+                    {
+                        var u = ExtractResourceProperty(r, "uri");
+                        return !string.IsNullOrEmpty(u) && u.StartsWith("mcp://", StringComparison.OrdinalIgnoreCase);
+                    })
+                    .ToList();
+                var catalogPayload = new
+                {
+                    totalCount = downstreamOnly.Count,
+                    resources = downstreamOnly
+                };
+                return new
+                {
+                    contents = new[] {
+                        new {
+                            uri = uri,
+                            mimeType = "application/json",
+                            text = JsonSerializer.Serialize(catalogPayload)
+                        }
+                    }
+                };
+            }
+
+            if (_catalogManager.TryMatchServerResourcesTemplate(uri, out var targetResServer))
+            {
+                var canonicalId = ResolveCanonicalServerId(targetResServer, servers);
+                var resources = getAuthorizedResourcesAsync != null ? await getAuthorizedResourcesAsync() : new List<object>();
+                var prefixCanonical = $"mcp://{canonicalId}/";
+                var prefixRaw = $"mcp://{targetResServer}/";
+                var serverResources = resources
+                    .Where(r =>
+                    {
+                        var u = ExtractResourceProperty(r, "uri");
+                        return !string.IsNullOrEmpty(u) &&
+                               (u.StartsWith(prefixCanonical, StringComparison.OrdinalIgnoreCase) ||
+                                u.StartsWith(prefixRaw, StringComparison.OrdinalIgnoreCase));
+                    })
+                    .ToList();
+                var payload = new
+                {
+                    serverId = canonicalId,
+                    count = serverResources.Count,
+                    resources = serverResources
+                };
+                return new
+                {
+                    contents = new[] {
+                        new {
+                            uri = uri,
+                            mimeType = "application/json",
+                            text = JsonSerializer.Serialize(payload)
+                        }
+                    }
+                };
+            }
+
+            if (string.Equals(uri, "router://prompts/catalog", StringComparison.OrdinalIgnoreCase))
+            {
+                var prompts = getAuthorizedPromptsAsync != null ? await getAuthorizedPromptsAsync() : new List<object>();
+                var payload = new
+                {
+                    totalCount = prompts.Count,
+                    prompts = prompts
+                };
+                return new
+                {
+                    contents = new[] {
+                        new {
+                            uri = uri,
+                            mimeType = "application/json",
+                            text = JsonSerializer.Serialize(payload)
+                        }
+                    }
+                };
+            }
+
+            if (uri.StartsWith("router://resources/", StringComparison.OrdinalIgnoreCase))
             {
                 var filename = uri.Substring("router://resources/".Length);
                 filename = Path.GetFileName(filename);
@@ -438,6 +696,27 @@ namespace ModelContextGateway.Core.Routing
                     }
                 }
             };
+        }
+
+        private static string? ExtractResourceProperty(object? resourceItem, string propName)
+        {
+            if (resourceItem == null)
+            {
+                return null;
+            }
+            if (resourceItem is IDictionary<string, object> dict && dict.TryGetValue(propName, out var val))
+            {
+                if (val is JsonElement je)
+                {
+                    return je.ValueKind == JsonValueKind.String ? je.GetString() : je.ToString();
+                }
+                return val?.ToString();
+            }
+            if (resourceItem is JsonElement elem && elem.ValueKind == JsonValueKind.Object && elem.TryGetProperty(propName, out var p))
+            {
+                return p.ValueKind == JsonValueKind.String ? p.GetString() : p.ToString();
+            }
+            return null;
         }
     }
 }

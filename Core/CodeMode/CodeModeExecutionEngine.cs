@@ -13,7 +13,8 @@ namespace ModelContextGateway.Core.CodeMode
             JsonElement? args,
             RouterSettings settings,
             Func<string, JsonElement, string?, Task<object>> toolDispatcher,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            CodeModeSandboxCallbacks? sandboxCallbacks = null)
         {
             var sw = Stopwatch.StartNew();
             var logs = new List<string>();
@@ -65,9 +66,9 @@ namespace ModelContextGateway.Core.CodeMode
                 }));
                 engine.Evaluate("const console = { log: (...args) => __console_log(args), warn: (...args) => __console_warn(args), error: (...args) => __console_error(args) };");
 
-                // Tool calling dispatcher & quota enforcement
+                // Tool & sandbox operation dispatcher & quota enforcement
                 int toolCallsCount = 0;
-                engine.SetValue("__callTool", new Func<string, object?, object?, Task<object>>(async (toolName, toolArgs, options) =>
+                void IncrementAndEnforceQuota()
                 {
                     toolCallsCount++;
                     result.ToolCallsCount = toolCallsCount;
@@ -76,6 +77,104 @@ namespace ModelContextGateway.Core.CodeMode
                     {
                         throw new InvalidOperationException($"Tool invocation quota exceeded: maximum tool invocation limit of {settings.CodeModeMaxToolCalls} calls reached.");
                     }
+                }
+
+                object UnboxToJsValue(object? rawResponse)
+                {
+                    if (rawResponse is null)
+                    {
+                        return null!;
+                    }
+
+                    if (rawResponse is string str)
+                    {
+                        return str;
+                    }
+
+                    if (rawResponse is int || rawResponse is long || rawResponse is double || rawResponse is float || rawResponse is bool)
+                    {
+                        return rawResponse;
+                    }
+
+                    JsonElement responseElement;
+                    if (rawResponse is JsonElement je)
+                    {
+                        responseElement = je;
+                    }
+                    else if (rawResponse is JsonDocument jd)
+                    {
+                        responseElement = jd.RootElement;
+                    }
+                    else
+                    {
+                        responseElement = JsonSerializer.SerializeToElement(rawResponse);
+                    }
+
+                    // Auto-unboxing 1: Standard MCP tool content blocks (content: [{ type: "text", text: "..." }])
+                    if (responseElement.ValueKind == JsonValueKind.Object &&
+                        responseElement.TryGetProperty("content", out var contentArray) &&
+                        contentArray.ValueKind == JsonValueKind.Array &&
+                        contentArray.GetArrayLength() > 0)
+                    {
+                        var firstItem = contentArray[0];
+                        if (firstItem.ValueKind == JsonValueKind.Object &&
+                            firstItem.TryGetProperty("type", out var typeProp) &&
+                            typeProp.GetString() == "text" &&
+                            firstItem.TryGetProperty("text", out var textProp) &&
+                            textProp.ValueKind == JsonValueKind.String)
+                        {
+                            var text = textProp.GetString();
+                            if (!string.IsNullOrWhiteSpace(text))
+                            {
+                                try
+                                {
+                                    using var jsonDoc = JsonDocument.Parse(text);
+                                    return engine.Evaluate($"JSON.parse({JsonSerializer.Serialize(text)})");
+                                }
+                                catch (JsonException)
+                                {
+                                    if (contentArray.GetArrayLength() == 1)
+                                    {
+                                        return text;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Auto-unboxing 2: Standard MCP resources/read contents array (contents: [{ uri, mimeType, text }])
+                    if (responseElement.ValueKind == JsonValueKind.Object &&
+                        responseElement.TryGetProperty("contents", out var contentsArray) &&
+                        contentsArray.ValueKind == JsonValueKind.Array &&
+                        contentsArray.GetArrayLength() == 1)
+                    {
+                        var firstContent = contentsArray[0];
+                        if (firstContent.ValueKind == JsonValueKind.Object &&
+                            firstContent.TryGetProperty("text", out var resTextProp) &&
+                            resTextProp.ValueKind == JsonValueKind.String)
+                        {
+                            var text = resTextProp.GetString();
+                            if (!string.IsNullOrWhiteSpace(text))
+                            {
+                                try
+                                {
+                                    using var jsonDoc = JsonDocument.Parse(text);
+                                    return engine.Evaluate($"JSON.parse({JsonSerializer.Serialize(text)})");
+                                }
+                                catch (JsonException)
+                                {
+                                    return text;
+                                }
+                            }
+                        }
+                    }
+
+                    return engine.Evaluate($"JSON.parse({JsonSerializer.Serialize(responseElement.GetRawText())})");
+                }
+
+                engine.SetValue("__callTool", new Func<string, object?, object?, Task<object>>(async (toolName, toolArgs, options) =>
+                {
+                    IncrementAndEnforceQuota();
 
                     if (string.IsNullOrWhiteSpace(toolName))
                     {
@@ -111,77 +210,93 @@ namespace ModelContextGateway.Core.CodeMode
                     }
 
                     var rawResponse = await toolDispatcher(toolName, argsElement, authToken);
-                    if (rawResponse is null)
-                    {
-                        return null!;
-                    }
+                    return UnboxToJsValue(rawResponse);
+                }));
 
-                    if (rawResponse is string str)
+                engine.SetValue("__listServers", new Func<Task<object>>(async () =>
+                {
+                    IncrementAndEnforceQuota();
+                    if (sandboxCallbacks?.ListServersAsync == null)
                     {
-                        return str;
+                        return UnboxToJsValue(Array.Empty<object>());
                     }
+                    var res = await sandboxCallbacks.ListServersAsync();
+                    return UnboxToJsValue(res);
+                }));
 
-                    if (rawResponse is int || rawResponse is long || rawResponse is double || rawResponse is float || rawResponse is bool)
+                engine.SetValue("__listResources", new Func<string?, Task<object>>(async (serverId) =>
+                {
+                    IncrementAndEnforceQuota();
+                    if (sandboxCallbacks?.ListResourcesAsync == null)
                     {
-                        return rawResponse;
+                        return UnboxToJsValue(Array.Empty<object>());
                     }
+                    var res = await sandboxCallbacks.ListResourcesAsync(string.IsNullOrWhiteSpace(serverId) ? null : serverId);
+                    return UnboxToJsValue(res);
+                }));
 
-                    JsonElement responseElement;
-                    if (rawResponse is JsonElement je)
+                engine.SetValue("__searchResources", new Func<string?, Task<object>>(async (query) =>
+                {
+                    IncrementAndEnforceQuota();
+                    if (sandboxCallbacks?.SearchResourcesAsync == null)
                     {
-                        responseElement = je;
+                        return UnboxToJsValue(Array.Empty<object>());
                     }
-                    else if (rawResponse is JsonDocument jd)
-                    {
-                        responseElement = jd.RootElement;
-                    }
-                    else
-                    {
-                        responseElement = JsonSerializer.SerializeToElement(rawResponse);
-                    }
+                    var res = await sandboxCallbacks.SearchResourcesAsync(query ?? string.Empty);
+                    return UnboxToJsValue(res);
+                }));
 
-                    // Auto-unboxing: If the tool result contains standard MCP content blocks
-                    // (content: [{ type: "text", text: "..." }]), check if text is valid JSON
-                    // and parse it back to a native JS object/array before resolving.
-                    if (responseElement.ValueKind == JsonValueKind.Object &&
-                        responseElement.TryGetProperty("content", out var contentArray) &&
-                        contentArray.ValueKind == JsonValueKind.Array &&
-                        contentArray.GetArrayLength() > 0)
+                engine.SetValue("__readResource", new Func<string, Task<object>>(async (uri) =>
+                {
+                    IncrementAndEnforceQuota();
+                    if (string.IsNullOrWhiteSpace(uri))
                     {
-                        var firstItem = contentArray[0];
-                        if (firstItem.ValueKind == JsonValueKind.Object &&
-                            firstItem.TryGetProperty("type", out var typeProp) &&
-                            typeProp.GetString() == "text" &&
-                            firstItem.TryGetProperty("text", out var textProp) &&
-                            textProp.ValueKind == JsonValueKind.String)
-                        {
-                            var text = textProp.GetString();
-                            if (!string.IsNullOrWhiteSpace(text))
-                            {
-                                try
-                                {
-                                    using var jsonDoc = JsonDocument.Parse(text);
-                                    // Valid JSON text block: unbox into native JavaScript object/array
-                                    return engine.Evaluate($"JSON.parse({JsonSerializer.Serialize(text)})");
-                                }
-                                catch (JsonException)
-                                {
-                                    if (contentArray.GetArrayLength() == 1)
-                                    {
-                                        return text;
-                                    }
-                                }
-                            }
-                        }
+                        throw new ArgumentException("Resource URI must be specified.", nameof(uri));
                     }
+                    if (sandboxCallbacks?.ReadResourceAsync == null)
+                    {
+                        throw new InvalidOperationException("Resource reading is not available in this sandbox context.");
+                    }
+                    var res = await sandboxCallbacks.ReadResourceAsync(uri);
+                    return UnboxToJsValue(res);
+                }));
 
-                    // Default object unboxing to native JS object
-                    return engine.Evaluate($"JSON.parse({JsonSerializer.Serialize(responseElement.GetRawText())})");
+                engine.SetValue("__listPrompts", new Func<string?, Task<object>>(async (serverId) =>
+                {
+                    IncrementAndEnforceQuota();
+                    if (sandboxCallbacks?.ListPromptsAsync == null)
+                    {
+                        return UnboxToJsValue(Array.Empty<object>());
+                    }
+                    var res = await sandboxCallbacks.ListPromptsAsync(string.IsNullOrWhiteSpace(serverId) ? null : serverId);
+                    return UnboxToJsValue(res);
+                }));
+
+                engine.SetValue("__getPrompt", new Func<string, object?, Task<object>>(async (promptName, promptArgs) =>
+                {
+                    IncrementAndEnforceQuota();
+                    if (string.IsNullOrWhiteSpace(promptName))
+                    {
+                        throw new ArgumentException("Prompt name must be specified.", nameof(promptName));
+                    }
+                    if (sandboxCallbacks?.GetPromptAsync == null)
+                    {
+                        throw new InvalidOperationException("Prompt retrieval is not available in this sandbox context.");
+                    }
+                    JsonElement? argsElem = promptArgs != null ? JsonSerializer.SerializeToElement(promptArgs) : null;
+                    var res = await sandboxCallbacks.GetPromptAsync(promptName, argsElem);
+                    return UnboxToJsValue(res);
                 }));
 
                 // Setup dynamic proxy `tools`, top-level `callTool`, and `mcg`
                 engine.Evaluate(@"
                     const callTool = (toolName, toolArgs, options) => __callTool(toolName, toolArgs, options);
+                    const listServers = () => __listServers();
+                    const listResources = (serverId) => __listResources(serverId ?? null);
+                    const searchResources = (query) => __searchResources(query ?? '');
+                    const readResource = (uri) => __readResource(uri);
+                    const listPrompts = (serverId) => __listPrompts(serverId ?? null);
+                    const getPrompt = (name, promptArgs) => __getPrompt(name, promptArgs ?? null);
 
                     const tools = new Proxy({}, {
                         get: (target, serverName) => {
@@ -205,11 +320,11 @@ namespace ModelContextGateway.Core.CodeMode
                 {
                     var parsedArgs = engine.Evaluate($"JSON.parse({JsonSerializer.Serialize(args.Value.GetRawText())})");
                     engine.SetValue("args", parsedArgs);
-                    engine.Evaluate("const mcg = { callTool, tools, args };");
+                    engine.Evaluate("const mcg = { callTool, listServers, listResources, searchResources, readResource, listPrompts, getPrompt, tools, args };");
                 }
                 else
                 {
-                    engine.Evaluate("const args = undefined; const mcg = { callTool, tools, args: undefined };");
+                    engine.Evaluate("const args = undefined; const mcg = { callTool, listServers, listResources, searchResources, readResource, listPrompts, getPrompt, tools, args: undefined };");
                 }
 
                 // Execute script

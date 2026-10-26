@@ -9,6 +9,7 @@ namespace ModelContextGateway.Core.CodeMode
             JsonElement? args,
             RouterSettings settings,
             Func<string, JsonElement, string?, Task<object>> toolDispatcher,
-            CancellationToken cancellationToken);
+            CancellationToken cancellationToken,
+            CodeModeSandboxCallbacks? sandboxCallbacks = null);
     }
 }

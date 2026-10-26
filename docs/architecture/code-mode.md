@@ -93,24 +93,27 @@ After evaluating the wrapper, the engine unwraps `__mcg_result__`:
 * If the result is a JavaScript `Promise` (`JsPromise`), the engine calls ` engine.UnwrapIfPromiseAsync(rawResult, cancellationToken)` and pumps the Jint event loop (`engine.Advanced.ProcessTasks()`) until the promise settles.
 * If the promise rejects, Jint raises `PromiseRejectedException`, which the engine translates into a structured error diagnostic containing the rejection message and captured console logs.
 
-### 2. Dual Tool Dispatchers (`mcg.callTool` and `tools` Proxy)
+### 2. Dual Tool Dispatchers (`mcg.callTool` and `tools` Proxy) & Discovery APIs (`mcg.*`)
 
-During sandbox initialization, the engine injects a hidden host callback `__mcg_call_tool__(toolName, argsJson)` backed by `Func<string, string, Task<JsValue>>`, and wires two user-facing JavaScript APIs on top of it:
+During sandbox initialization, the engine injects host callbacks backed by `CodeModeExecutionEngine` and `CodeModeSandboxCallbacks`, wiring two user-facing tool dispatchers plus six resource/prompt/server discovery helpers:
 
 ```javascript
 const mcg = {
-  callTool: async function(toolName, toolArgs) {
-    const serialized = toolArgs !== undefined ? JSON.stringify(toolArgs) : "{}";
-    return await __mcg_call_tool__(String(toolName), serialized);
-  }
+  callTool: async function(toolName, toolArgs, callOptions) { ... },
+  listServers: async function() { ... },
+  listResources: async function(serverId) { ... },
+  searchResources: async function(query) { ... },
+  readResource: async function(uri) { ... },
+  listPrompts: async function(serverId) { ... },
+  getPrompt: async function(promptName, promptArgs) { ... }
 };
 
 const tools = new Proxy({}, {
   get: function(_target, serverProp) {
     return new Proxy({}, {
       get: function(_serverTarget, toolProp) {
-        return async function(toolArgs) {
-          return await mcg.callTool(String(serverProp) + "__" + String(toolProp), toolArgs);
+        return async function(toolArgs, callOptions) {
+          return await mcg.callTool(String(serverProp) + "__" + String(toolProp), toolArgs, callOptions);
         };
       }
     });
@@ -118,7 +121,25 @@ const tools = new Proxy({}, {
 });
 ```
 
-This two-level ES6 `Proxy` allows arbitrary `await tools.<serverId>.<toolName>(args)` expressions to resolve dynamically at runtime without pre-generating stubs for thousands of backend tools.
+This two-level ES6 `Proxy` allows arbitrary `await tools.<serverId>.<toolName>(args)` expressions to resolve dynamically at runtime without pre-generating stubs for thousands of backend tools, while `mcg.listResources`, `mcg.searchResources`, `mcg.readResource`, `mcg.listPrompts`, `mcg.getPrompt`, and `mcg.listServers` share the same `CodeModeMaxToolCalls` quota and session RBAC enforcement.
+
+---
+
+## Dynamic TypeScript SDK Synthesis (`CodeModeTypeGenerator`) & Resource Compaction
+
+To enable zero-guesswork code generation without bloating `tools/list` or `resources/list`:
+
+1. **Dynamic `.d.ts` Generation (`Core/CodeMode/CodeModeTypeGenerator.cs`)**:
+   * Converts JSON Schema tool definitions into ambient TypeScript declarations (`router://code-mode/sdk.d.ts` for all authorized servers, and `router://code-mode/types/{server_name}` for a single server).
+   * Preserves JSDoc tool/property descriptions, required vs. optional properties (`prop?: type`), nested objects, arrays, and string/literal union enums.
+   * Exposes compact TypeScript call signatures directly from `search_tools` when called with `format: "typescript"` or `include_typescript: true`.
+2. **Meta-Mode Resource Compaction (`ResourceRoutingManager.ListResourcesAsync`)**:
+   * In Meta-Mode (`IsMetaMode == true`), `resources/list` replaces hundreds of raw downstream `mcp://` entries with a compact discovery directory (`router://code-mode/guide`, `router://code-mode/sdk.d.ts`, `router://resources/catalog`, `router://prompts/catalog`, and per-server `router://resources/server/{serverId}` and `router://code-mode/types/{serverId}`).
+   * Full downstream `mcp://{serverId}/{escapedUri}` URIs remain directly readable via `resources/read` or `await mcg.readResource(uri)`.
+3. **MCP `2026-07-28` Specification Enhancements**:
+   * **Top-Level `instructions`**: Returned in `InitializeResult` (`GatewayMetadata.BuildGatewayInstructions`) so MCP clients automatically populate server instructions for Meta-Mode, Code Mode, and resource catalog discovery.
+   * **Tool `annotations`, `outputSchema`, and `structuredContent`**: Attached to `search_tools`, `execute_tool`, and `execute_script`.
+   * **Completions (`completion/complete`)**: Advertises `completions: {}` in `InitializeResult.capabilities`, resolves `router__*` prompt and `router://` template completions locally, and unescapes `mcp://` resource templates (with server alias resolution) when forwarding to downstream backends.
 
 ### 3. Automatic MCP Envelope Unboxing (`UnboxMcpResult`)
 

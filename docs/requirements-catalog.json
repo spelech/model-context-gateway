@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-25T23:28:20.3800935Z",
-    "totalRequirements": 481,
-    "positiveCount": 379,
+    "generatedAt": "2026-10-26T23:47:01.9667903Z",
+    "totalRequirements": 484,
+    "positiveCount": 382,
     "guardrailCount": 102,
-    "totalProofs": 1116
+    "totalProofs": 1127
   },
   "requirements": [
     {
@@ -1919,9 +1919,16 @@
       "id": "AUTH-RBAC-RESOURCE-FILTER",
       "category": "AUTH",
       "type": "Positive",
-      "description": "resources/list filters exposed resources according to caller permissions.",
-      "proofCount": 1,
+      "description": "Code Mode SDK declarations and resource catalogs enforce RBAC per server and block unauthorized server type/resource reads.",
+      "proofCount": 2,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs",
+          "lineNumber": 343,
+          "testName": "ReadResourceAsync_CodeModeDeclarationsAndCatalogs_RespectRbacPolicies",
+          "details": null
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
@@ -5184,9 +5191,16 @@
       "id": "MCP-01",
       "category": "MCP",
       "type": "Positive",
-      "description": "initializes with default state",
-      "proofCount": 29,
+      "description": "GatewayMetadata.BuildGatewayInstructions generates MCP 2026-07-28 initialize instructions documenting Code Mode and resource catalogs.",
+      "proofCount": 30,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs",
+          "lineNumber": 513,
+          "testName": "BuildGatewayInstructions_IncludesCodeModeAndResourceCatalogGuidance",
+          "details": null
+        },
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/stores/useServerStore.test.ts",
@@ -5582,9 +5596,23 @@
       "id": "MCP-06",
       "category": "MCP",
       "type": "Positive",
-      "description": "prompts/list aggregates, namespaces, and routes prompts to target backends.",
-      "proofCount": 3,
+      "description": "Meta-Mode compacts downstream mcp:// resources into router:// catalog and per-server resources while non-Meta-Mode preserves flat mcp:// listings.",
+      "proofCount": 5,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs",
+          "lineNumber": 311,
+          "testName": "ListResourcesAsync_CompactsDownstreamResourcesInMetaMode_AndPreservesFlatListInDirectMode",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs",
+          "lineNumber": 425,
+          "testName": "GetPromptAsync_CodeModePrompts_EmbedTypeScriptDeclarations",
+          "details": null
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/McpIntegrationTests.cs",
@@ -5612,9 +5640,16 @@
       "id": "MCP-08",
       "category": "MCP",
       "type": "Positive",
-      "description": "completion/complete forwards prompt completions to backend when caller is authorized.",
-      "proofCount": 3,
+      "description": "CompleteAsync resolves local router__* prompts, router:// templates, and unescapes mcp:// templates with alias support.",
+      "proofCount": 4,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs",
+          "lineNumber": 457,
+          "testName": "CompleteAsync_SupportsLocalRouterPromptsTemplatesAndUnescapesMcpUris",
+          "details": null
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs",
@@ -6249,9 +6284,16 @@
       "id": "MCP-31",
       "category": "MCP",
       "type": "Negative",
-      "description": "DockerAutoDiscoveryService parses mcp.alias from Docker container labels",
-      "proofCount": 4,
+      "description": "Sandbox mcg.* APIs allow scripts to list servers, search/read resources with auto-unboxing, and list/get prompts under session RBAC.",
+      "proofCount": 5,
       "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs",
+          "lineNumber": 378,
+          "testName": "ExecuteScript_ViaClientSession_SupportsMcgResourcePromptAndServerApis",
+          "details": null
+        },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
@@ -6625,14 +6667,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 43,
+          "lineNumber": 58,
           "testName": "SemanticSearchEndpoint_ReturnsCalibratedHybridResultsWithDiagnostics",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 126,
+          "lineNumber": 143,
           "testName": "SemanticSearchEndpoint_RespectsSearchModeAndDenseWeightParameters",
           "details": null
         }
@@ -6648,14 +6690,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 185,
+          "lineNumber": 204,
           "testName": "MetaModeTools_SearchToolsSchema_ExposesModeAndDenseWeight",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 229,
+          "lineNumber": 248,
           "testName": "SearchTools_CustomToolCall_ExecutesWithModeAndDenseWeight",
           "details": null
         }
@@ -6701,7 +6743,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 298,
+          "lineNumber": 317,
           "testName": "SearchTools_CustomToolCall_ExecutesWithCallerLimitAndThresholds",
           "details": null
         }
@@ -7431,6 +7473,68 @@
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
           "lineNumber": 215,
           "testName": "ExecuteScript_WithCodeParameter_ExecutesSuccessfully",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-CODE-03",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "CodeModeTypeGenerator synthesizes full SDK TypeScript declarations with sandbox globals and JSDoc comments.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs",
+          "lineNumber": 52,
+          "testName": "GenerateFullSdkDeclarations_IncludesSandboxGlobalsAndServerInterfaces",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs",
+          "lineNumber": 84,
+          "testName": "GenerateServerDeclarations_FiltersToTargetServerAndSupportsAlias",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs",
+          "lineNumber": 100,
+          "testName": "SearchTools_SupportsTypeScriptFormatAndStructuredContent",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-CODE-04",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "GetMetaTools includes MCP 2026-07-28 annotations and outputSchema on meta-tools.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs",
+          "lineNumber": 153,
+          "testName": "GetMetaTools_IncludesAnnotationsAndOutputSchema",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-CODE-05",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Sandbox exposes mcg.listServers, mcg.listResources, mcg.searchResources, mcg.readResource, mcg.listPrompts, and mcg.getPrompt with automatic unboxing.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
+          "lineNumber": 166,
+          "testName": "ExecuteAsync_SandboxResourcePromptAndServerApis_WorkAndUnboxContents",
           "details": null
         }
       ]

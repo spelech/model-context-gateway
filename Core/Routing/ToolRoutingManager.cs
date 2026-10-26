@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text.Json.Serialization;
 using ModelContextGateway.Core.CodeMode;
 using ModelContextGateway.Core.VectorSearch;
 
@@ -9,6 +10,12 @@ namespace ModelContextGateway.Core.Routing
         public string name { get; set; } = string.Empty;
         public string description { get; set; } = string.Empty;
         public object inputSchema { get; set; } = new();
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public object? outputSchema { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public object? annotations { get; set; }
     }
 
     /// <summary>
@@ -73,7 +80,7 @@ namespace ModelContextGateway.Core.Routing
                 new()
                 {
                     name = "search_tools",
-                    description = "Semantically search across all registered internal MCP tools (Excel, Docker, Plex, Home Assistant, etc.) using keywords. Returns the matching tool names, descriptions, and input schemas. Use this first to discover what tools are available.",
+                    description = "Semantically search across all registered internal MCP tools (Excel, Docker, Plex, Home Assistant, etc.) using keywords. Returns the matching tool names, descriptions, and input schemas (or compact TypeScript call signatures when format='typescript'). Use this first to discover what tools are available.",
                     inputSchema = new
                     {
                         type = "object",
@@ -84,9 +91,30 @@ namespace ModelContextGateway.Core.Routing
                             min_score = new { type = "number", description = "Optional minimum score threshold between 0.0 and 1.0 to filter low-confidence noise." },
                             score_dropoff_ratio = new { type = "number", description = "Optional relative score dropoff ratio between 0.0 and 1.0. Filters tools scoring below top_score * ratio." },
                             mode = new { type = "string", @enum = new[] { "hybrid", "semantic", "lexical" }, description = "Search mode: 'hybrid' (default), 'semantic' (pure vector), or 'lexical' (pure keyword)." },
-                            dense_weight = new { type = "number", description = "Weight between 0.0 (pure lexical) and 1.0 (pure semantic). Default is 0.5 (balanced)." }
+                            dense_weight = new { type = "number", description = "Weight between 0.0 (pure lexical) and 1.0 (pure semantic). Default is 0.5 (balanced)." },
+                            format = new { type = "string", @enum = new[] { "json", "typescript" }, description = "Output format: 'json' (default, returns full JSON Schemas) or 'typescript' (returns compact TypeScript function declarations with JSDoc for Code Mode)." },
+                            include_typescript = new { type = "boolean", description = "Optional flag to attach a 'typescriptSignature' field to each returned JSON tool schema." }
                         },
                         required = new[] { "query" }
+                    },
+                    outputSchema = new
+                    {
+                        type = "object",
+                        properties = new
+                        {
+                            tools = new { type = "array", items = new { type = "object" } },
+                            format = new { type = "string" },
+                            count = new { type = "integer" }
+                        },
+                        required = new[] { "tools", "format", "count" }
+                    },
+                    annotations = new
+                    {
+                        title = "Search MCP Tools",
+                        readOnlyHint = true,
+                        destructiveHint = false,
+                        idempotentHint = true,
+                        openWorldHint = false
                     }
                 },
                 new()
@@ -103,6 +131,14 @@ namespace ModelContextGateway.Core.Routing
                             target_auth_token = new { type = "string", description = "Optional authentication token if the backend tool requires dynamic pass-through authorization." }
                         },
                         required = new[] { "name", "arguments" }
+                    },
+                    annotations = new
+                    {
+                        title = "Execute MCP Tool",
+                        readOnlyHint = false,
+                        destructiveHint = true,
+                        idempotentHint = false,
+                        openWorldHint = true
                     }
                 }
             };
@@ -112,7 +148,7 @@ namespace ModelContextGateway.Core.Routing
                 tools.Add(new MetaToolDefinition
                 {
                     name = "execute_script",
-                    description = "Execute a JavaScript script to programmatically chain and orchestrate internal MCP tools using an in-memory sandbox. Tools can be called via await tools.<server>.<tool>(arguments) or await mcg.callTool(name, arguments). Returns a structured execution envelope with results, logs, and execution telemetry.",
+                    description = "Execute a JavaScript script to programmatically chain and orchestrate internal MCP tools, resources, and prompts using an in-memory sandbox. Tools can be called via await tools.<server>.<tool>(arguments) or await mcg.callTool(name, arguments). Also supports await mcg.listServers(), await mcg.listResources(serverId?), await mcg.searchResources(query), await mcg.readResource(uri), await mcg.listPrompts(serverId?), and await mcg.getPrompt(name, args). Read resource 'router://code-mode/sdk.d.ts' or 'router://code-mode/types/{server_name}' for TypeScript signatures.",
                     inputSchema = new
                     {
                         type = "object",
@@ -122,6 +158,26 @@ namespace ModelContextGateway.Core.Routing
                             arguments = new { type = "object", description = "Optional JSON object with caller parameters accessible in the script as global args." }
                         },
                         required = new[] { "script" }
+                    },
+                    outputSchema = new
+                    {
+                        type = "object",
+                        properties = new
+                        {
+                            result = new { description = "Value returned by the JavaScript script." },
+                            logs = new { type = "array", items = new { type = "string" }, description = "Captured console.log/warn/error entries." },
+                            executionTimeMs = new { type = "integer", description = "Total wall-clock execution duration in milliseconds." },
+                            toolCallsCount = new { type = "integer", description = "Total number of sandboxed MCP calls executed." }
+                        },
+                        required = new[] { "result", "logs", "executionTimeMs", "toolCallsCount" }
+                    },
+                    annotations = new
+                    {
+                        title = "Execute Code Mode Script",
+                        readOnlyHint = false,
+                        destructiveHint = true,
+                        idempotentHint = false,
+                        openWorldHint = true
                     }
                 });
             }

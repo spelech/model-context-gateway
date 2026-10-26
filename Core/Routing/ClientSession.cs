@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using ModelContextGateway.Core.CodeMode;
 
 namespace ModelContextGateway.Core.Routing
 {
@@ -267,10 +268,13 @@ namespace ModelContextGateway.Core.Routing
                         var config = contextToUse?.RequestServices?.GetService<IConfiguration>();
                         bool isCallerAdmin = SecurityValidationHelper.IsAdmin(identity, config, contextToUse);
 
+                        var sandboxCallbacks = BuildSandboxCallbacks(httpContext);
+
                         var res = await _toolRoutingManager.CallToolAsync(toolName, body, dbFactory, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson, cts.Token, _sessionManager, _sessionId,
                             filterAuthorizedToolsAsync: async (tools) => await FilterAuthorizedAsync(tools, "tools/list", "name", httpContext),
                             callerGroups: identity.GroupNames,
-                            isCallerAdmin: isCallerAdmin);
+                            isCallerAdmin: isCallerAdmin,
+                            sandboxCallbacks: sandboxCallbacks);
                         responsePayload = res != null ? JsonSerializer.Serialize(res) : null;
                         return res;
                     }
@@ -305,7 +309,136 @@ namespace ModelContextGateway.Core.Routing
             }
         }
 
+        private CodeModeSandboxCallbacks BuildSandboxCallbacks(HttpContext? httpContext)
+        {
+            return new CodeModeSandboxCallbacks
+            {
+                ListServersAsync = async () =>
+                {
+                    var result = new List<object>();
+                    foreach (var s in _servers.Where(s => s.Enabled))
+                    {
+                        if (await IsUserAuthorizedAsync("tools/list", $"server:{s.Id}", httpContext))
+                        {
+                            result.Add(new
+                            {
+                                id = s.Id,
+                                alias = s.Alias,
+                                name = s.DisplayName,
+                                enabled = s.Enabled
+                            });
+                        }
+                    }
+                    return result;
+                },
+                ListResourcesAsync = async (serverIdFilter) =>
+                {
+                    var allResources = await ListAllAuthorizedResourcesAsync("{}", httpContext);
+                    if (string.IsNullOrWhiteSpace(serverIdFilter))
+                    {
+                        return allResources;
+                    }
+                    var matchedServer = _servers.FirstOrDefault(s =>
+                        string.Equals(s.Id, serverIdFilter, StringComparison.OrdinalIgnoreCase) ||
+                        (!string.IsNullOrWhiteSpace(s.Alias) && string.Equals(s.Alias, serverIdFilter, StringComparison.OrdinalIgnoreCase)));
+                    var canonicalId = matchedServer?.Id ?? serverIdFilter;
+                    var prefix1 = $"mcp://{canonicalId}/";
+                    var prefix2 = $"mcp://{serverIdFilter}/";
+                    return allResources.Where(r =>
+                    {
+                        if (r is IDictionary<string, object> dict && dict.TryGetValue("uri", out var uObj) && uObj is string uStr)
+                        {
+                            return uStr.StartsWith(prefix1, StringComparison.OrdinalIgnoreCase) ||
+                                   uStr.StartsWith(prefix2, StringComparison.OrdinalIgnoreCase);
+                        }
+                        return false;
+                    }).ToList();
+                },
+                SearchResourcesAsync = async (query) =>
+                {
+                    var allResources = await ListAllAuthorizedResourcesAsync("{}", httpContext);
+                    return await _resourceRoutingManager.SearchResourcesAsync(query, allResources);
+                },
+                ReadResourceAsync = async (uri) =>
+                {
+                    var reqBody = JsonSerializer.Serialize(new
+                    {
+                        jsonrpc = "2.0",
+                        id = Guid.NewGuid().ToString("N"),
+                        method = "resources/read",
+                        @params = new { uri = uri }
+                    });
+                    var res = await ReadResourceAsync(uri, reqBody, httpContext);
+                    return res ?? new { };
+                },
+                ListPromptsAsync = async (serverIdFilter) =>
+                {
+                    var allPrompts = await ListPromptsAsync("{}", httpContext);
+                    if (string.IsNullOrWhiteSpace(serverIdFilter))
+                    {
+                        return allPrompts;
+                    }
+                    var matchedServer = _servers.FirstOrDefault(s =>
+                        string.Equals(s.Id, serverIdFilter, StringComparison.OrdinalIgnoreCase) ||
+                        (!string.IsNullOrWhiteSpace(s.Alias) && string.Equals(s.Alias, serverIdFilter, StringComparison.OrdinalIgnoreCase)));
+                    var canonicalId = matchedServer?.Id ?? serverIdFilter;
+                    var prefix1 = $"{canonicalId}__";
+                    var prefix2 = $"{serverIdFilter}__";
+                    return allPrompts.Where(p =>
+                    {
+                        if (p is IDictionary<string, object> dict && dict.TryGetValue("name", out var nObj) && nObj is string nStr)
+                        {
+                            return nStr.StartsWith(prefix1, StringComparison.OrdinalIgnoreCase) ||
+                                   nStr.StartsWith(prefix2, StringComparison.OrdinalIgnoreCase);
+                        }
+                        return false;
+                    }).ToList();
+                },
+                GetPromptAsync = async (promptName, promptArgs) =>
+                {
+                    var reqBody = JsonSerializer.Serialize(new
+                    {
+                        jsonrpc = "2.0",
+                        id = Guid.NewGuid().ToString("N"),
+                        method = "prompts/get",
+                        @params = new
+                        {
+                            name = promptName,
+                            arguments = promptArgs.HasValue && promptArgs.Value.ValueKind == JsonValueKind.Object ? (object)promptArgs.Value : new Dictionary<string, string>()
+                        }
+                    });
+                    var res = await GetPromptAsync(promptName, reqBody, httpContext);
+                    return res ?? new { };
+                }
+            };
+        }
 
+        public async Task<List<object>> ListAllAuthorizedDownstreamToolsAsync(HttpContext? httpContext = null)
+        {
+            var rawTools = await _toolRoutingManager.ListToolsAsync(
+                "{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"dts-list\"}",
+                false,
+                _backendConnections,
+                _logger,
+                EnsureBackendsInitializedAsync,
+                _servers,
+                _sessionManager,
+                false);
+            return await FilterAuthorizedAsync(rawTools, "tools/list", "name", httpContext);
+        }
+
+        public async Task<List<object>> ListAllAuthorizedResourcesAsync(string body = "{}", HttpContext? httpContext = null)
+        {
+            var resources = await _resourceRoutingManager.ListResourcesAsync(
+                body,
+                _backendConnections,
+                _logger,
+                EnsureBackendsInitializedAsync,
+                _sessionManager,
+                isMetaMode: false,
+                servers: _servers);
+            return await FilterAuthorizedAsync(resources, "resources/list", "uri", httpContext);
+        }
 
 
         public void Close()
@@ -325,7 +458,14 @@ namespace ModelContextGateway.Core.Routing
 
         public async Task<List<object>> ListResourcesAsync(string body, HttpContext? httpContext = null)
         {
-            var resources = await _resourceRoutingManager.ListResourcesAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync, _sessionManager);
+            var resources = await _resourceRoutingManager.ListResourcesAsync(
+                body,
+                _backendConnections,
+                _logger,
+                EnsureBackendsInitializedAsync,
+                _sessionManager,
+                isMetaMode: IsMetaMode,
+                servers: _servers);
             return await FilterAuthorizedAsync(resources, "resources/list", "uri", httpContext);
         }
 
@@ -339,7 +479,10 @@ namespace ModelContextGateway.Core.Routing
             try
             {
                 // Namespace validation
-                var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+                var activeServerIds = _servers.Where(s => s.Enabled)
+                    .SelectMany(s => string.IsNullOrWhiteSpace(s.Alias) ? new[] { s.Id } : new[] { s.Id, s.Alias })
+                    .Distinct()
+                    .ToList();
                 if (!SecurityValidationHelper.ValidateResourceUri(resourceUri, activeServerIds))
                 {
                     statusCode = 403;
@@ -357,7 +500,17 @@ namespace ModelContextGateway.Core.Routing
                     throw new UnauthorizedAccessException(errorMessage);
                 }
 
-                var res = await _resourceRoutingManager.ReadResourceAsync(resourceUri, body, _backendConnections, EnsureBackendsInitializedAsync, RewriteRequestJson, _sessionManager);
+                var res = await _resourceRoutingManager.ReadResourceAsync(
+                    resourceUri,
+                    body,
+                    _backendConnections,
+                    EnsureBackendsInitializedAsync,
+                    RewriteRequestJson,
+                    _sessionManager,
+                    getAuthorizedToolsAsync: () => ListAllAuthorizedDownstreamToolsAsync(httpContext),
+                    getAuthorizedResourcesAsync: () => ListAllAuthorizedResourcesAsync("{}", httpContext),
+                    getAuthorizedPromptsAsync: () => ListPromptsAsync("{}", httpContext),
+                    servers: _servers);
                 responsePayload = res != null ? JsonSerializer.Serialize(res) : null;
                 return res;
             }
@@ -395,7 +548,7 @@ namespace ModelContextGateway.Core.Routing
             {
                 using var doc = JsonDocument.Parse(body);
                 var root = doc.RootElement;
-                if (root.ValueKind != JsonValueKind.Object || !root.TryGetProperty("params", out var paramsProp) || !paramsProp.TryGetProperty("ref", out var refProp))
+                if (root.ValueKind != JsonValueKind.Object || !root.TryGetProperty("params", out var paramsProp) || !root.GetProperty("params").TryGetProperty("ref", out var refProp))
                 {
                     statusCode = 403;
                     errorMessage = "Security Error: Missing required completion parameters or reference.";
@@ -422,7 +575,10 @@ namespace ModelContextGateway.Core.Routing
                     var promptName = nameProp.GetString() ?? string.Empty;
                     targetItem = promptName;
 
-                    var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+                    var activeServerIds = _servers.Where(s => s.Enabled)
+                        .SelectMany(s => string.IsNullOrWhiteSpace(s.Alias) ? new[] { s.Id } : new[] { s.Id, s.Alias })
+                        .Distinct()
+                        .ToList();
                     if (!SecurityValidationHelper.ValidateToolOrPromptName(promptName, activeServerIds))
                     {
                         statusCode = 403;
@@ -450,9 +606,66 @@ namespace ModelContextGateway.Core.Routing
                     var serverId = parts[0];
                     var rawName = parts[1];
 
+                    if (string.Equals(serverId, "router", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var argName = string.Empty;
+                        var argVal = string.Empty;
+                        if (paramsProp.TryGetProperty("argument", out var argObj))
+                        {
+                            if (argObj.TryGetProperty("name", out var nProp))
+                            {
+                                argName = nProp.GetString() ?? string.Empty;
+                            }
+                            if (argObj.TryGetProperty("value", out var vProp))
+                            {
+                                argVal = vProp.GetString() ?? string.Empty;
+                            }
+                        }
+
+                        var values = new List<string>();
+                        if (string.Equals(argName, "server_name", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(argName, "servers", StringComparison.OrdinalIgnoreCase))
+                        {
+                            foreach (var s in _servers.Where(s => s.Enabled))
+                            {
+                                if (s.Id.StartsWith(argVal, StringComparison.OrdinalIgnoreCase) &&
+                                    await IsUserAuthorizedAsync("completion/complete", $"server:{s.Id}", httpContext))
+                                {
+                                    values.Add(s.Id);
+                                }
+                                if (!string.IsNullOrWhiteSpace(s.Alias) &&
+                                    s.Alias.StartsWith(argVal, StringComparison.OrdinalIgnoreCase) &&
+                                    await IsUserAuthorizedAsync("completion/complete", $"server:{s.Id}", httpContext))
+                                {
+                                    values.Add(s.Alias);
+                                }
+                            }
+                        }
+                        else if (string.Equals(argName, "tool_name", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var tools = await ListAllAuthorizedDownstreamToolsAsync(httpContext);
+                            foreach (var t in tools)
+                            {
+                                if (t is IDictionary<string, object> dict && dict.TryGetValue("name", out var tnObj) && tnObj is string tn &&
+                                    tn.StartsWith(argVal, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    values.Add(tn);
+                                }
+                            }
+                        }
+
+                        var localPromptRes = new { completion = new { values = values.Distinct().Take(10).ToList(), hasMore = false } };
+                        responsePayload = JsonSerializer.Serialize(localPromptRes);
+                        return localPromptRes;
+                    }
+
+                    var resolvedServerId = _servers.FirstOrDefault(s =>
+                        string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase) ||
+                        (!string.IsNullOrWhiteSpace(s.Alias) && string.Equals(s.Alias, serverId, StringComparison.OrdinalIgnoreCase)))?.Id ?? serverId;
+
                     await EnsureBackendsInitializedAsync();
 
-                    if (!_backendConnections.TryGetValue(serverId, out var conn))
+                    if (!_backendConnections.TryGetValue(resolvedServerId, out var conn))
                     {
                         statusCode = 403;
                         errorMessage = $"Security Error: Target backend server '{serverId}' is not available for prompt '{promptName}'.";
@@ -489,7 +702,9 @@ namespace ModelContextGateway.Core.Routing
 
                     targetItem = uriString;
 
-                    if (uriString == "logs://{server_name}/today")
+                    if (uriString == "logs://{server_name}/today" ||
+                        string.Equals(uriString, "router://code-mode/types/{server_name}", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(uriString, "router://resources/server/{server_name}", StringComparison.OrdinalIgnoreCase))
                     {
                         var argVal = string.Empty;
                         if (paramsProp.TryGetProperty("argument", out var argObj) && argObj.TryGetProperty("value", out var vProp))
@@ -505,7 +720,8 @@ namespace ModelContextGateway.Core.Routing
                         var matching = new List<string>();
                         foreach (var s in serverIds.Where(id => id.StartsWith(argVal, StringComparison.OrdinalIgnoreCase)))
                         {
-                            if (await IsUserAuthorizedAsync("resources/read", $"logs://{s}/today", httpContext) ||
+                            var checkUri = uriString.Replace("{server_name}", s, StringComparison.OrdinalIgnoreCase);
+                            if (await IsUserAuthorizedAsync("resources/read", checkUri, httpContext) ||
                                 await IsUserAuthorizedAsync("completion/complete", s, httpContext))
                             {
                                 matching.Add(s);
@@ -516,7 +732,10 @@ namespace ModelContextGateway.Core.Routing
                         return res;
                     }
 
-                    var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+                    var activeServerIds = _servers.Where(s => s.Enabled)
+                        .SelectMany(s => string.IsNullOrWhiteSpace(s.Alias) ? new[] { s.Id } : new[] { s.Id, s.Alias })
+                        .Distinct()
+                        .ToList();
                     if (!SecurityValidationHelper.ValidateResourceUri(uriString, activeServerIds))
                     {
                         statusCode = 403;
@@ -542,11 +761,15 @@ namespace ModelContextGateway.Core.Routing
                     }
 
                     var serverId = parts[0];
-                    var backendTemplate = parts[1];
+                    var backendTemplate = Uri.UnescapeDataString(parts[1]);
+
+                    var resolvedServerId = _servers.FirstOrDefault(s =>
+                        string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase) ||
+                        (!string.IsNullOrWhiteSpace(s.Alias) && string.Equals(s.Alias, serverId, StringComparison.OrdinalIgnoreCase)))?.Id ?? serverId;
 
                     await EnsureBackendsInitializedAsync();
 
-                    if (!_backendConnections.TryGetValue(serverId, out var conn))
+                    if (!_backendConnections.TryGetValue(resolvedServerId, out var conn))
                     {
                         statusCode = 403;
                         errorMessage = $"Security Error: Target backend server '{serverId}' is not available for resource '{uriString}'.";
@@ -584,7 +807,9 @@ namespace ModelContextGateway.Core.Routing
 
         public async Task<List<object>> ListPromptsAsync(string body, HttpContext? httpContext = null)
         {
-            var prompts = await _promptRoutingManager.ListPromptsAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync, _sessionManager);
+            var settings = (_embeddingService as DynamicEmbeddingService)?.GetSettings();
+            bool enableCodeMode = settings?.EnableCodeMode ?? IsMetaMode;
+            var prompts = await _promptRoutingManager.ListPromptsAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync, _sessionManager, enableCodeMode);
             return await FilterAuthorizedAsync(prompts, "prompts/list", "name", httpContext);
         }
 
@@ -598,7 +823,10 @@ namespace ModelContextGateway.Core.Routing
             try
             {
                 // Namespace validation
-                var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+                var activeServerIds = _servers.Where(s => s.Enabled)
+                    .SelectMany(s => string.IsNullOrWhiteSpace(s.Alias) ? new[] { s.Id } : new[] { s.Id, s.Alias })
+                    .Distinct()
+                    .ToList();
                 if (!SecurityValidationHelper.ValidateToolOrPromptName(promptName, activeServerIds))
                 {
                     statusCode = 403;
@@ -616,7 +844,14 @@ namespace ModelContextGateway.Core.Routing
                     throw new UnauthorizedAccessException(errorMessage);
                 }
 
-                var res = await _promptRoutingManager.GetPromptAsync(promptName, body, _backendConnections, EnsureBackendsInitializedAsync, RewriteRequestJson);
+                var res = await _promptRoutingManager.GetPromptAsync(
+                    promptName,
+                    body,
+                    _backendConnections,
+                    EnsureBackendsInitializedAsync,
+                    RewriteRequestJson,
+                    getAuthorizedToolsAsync: () => ListAllAuthorizedDownstreamToolsAsync(httpContext),
+                    servers: _servers);
                 responsePayload = res != null ? JsonSerializer.Serialize(res) : null;
                 return res;
             }

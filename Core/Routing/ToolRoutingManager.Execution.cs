@@ -23,11 +23,12 @@ namespace ModelContextGateway.Core.Routing
             string? clientSessionId = null,
             Func<List<object>, Task<List<object>>>? filterAuthorizedToolsAsync = null,
             IEnumerable<string>? callerGroups = null,
-            bool? isCallerAdmin = null)
+            bool? isCallerAdmin = null,
+            CodeModeSandboxCallbacks? sandboxCallbacks = null)
         {
             try
             {
-                var task = CallToolInternalAsync(toolName, body, dbFactory, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId, filterAuthorizedToolsAsync, callerGroups, isCallerAdmin);
+                var task = CallToolInternalAsync(toolName, body, dbFactory, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId, filterAuthorizedToolsAsync, callerGroups, isCallerAdmin, sandboxCallbacks);
                 return await task.WaitAsync(cancellationToken);
             }
             catch (OperationCanceledException)
@@ -63,7 +64,8 @@ namespace ModelContextGateway.Core.Routing
             string? clientSessionId,
             Func<List<object>, Task<List<object>>>? filterAuthorizedToolsAsync = null,
             IEnumerable<string>? callerGroups = null,
-            bool? isCallerAdmin = null)
+            bool? isCallerAdmin = null,
+            CodeModeSandboxCallbacks? sandboxCallbacks = null)
         {
             await ensureBackendsInitializedAsync();
 
@@ -78,6 +80,8 @@ namespace ModelContextGateway.Core.Routing
                 int? callerLimit = null;
                 double? callerMinScore = null;
                 double? callerScoreDropoffRatio = null;
+                string format = "json";
+                bool includeTypeScript = false;
 
                 if (root.TryGetProperty("params", out var paramsProp) &&
                     paramsProp.TryGetProperty("arguments", out var argsProp))
@@ -116,6 +120,17 @@ namespace ModelContextGateway.Core.Routing
                         if (sdrProp.ValueKind == JsonValueKind.Number && sdrProp.TryGetDouble(out var sdrVal))
                         {
                             callerScoreDropoffRatio = sdrVal;
+                        }
+                    }
+                    if (argsProp.TryGetProperty("format", out var formatProp) && formatProp.ValueKind == JsonValueKind.String)
+                    {
+                        format = (formatProp.GetString() ?? "json").Trim().ToLowerInvariant();
+                    }
+                    if (argsProp.TryGetProperty("include_typescript", out var incTsProp) || argsProp.TryGetProperty("includeTypescript", out incTsProp))
+                    {
+                        if (incTsProp.ValueKind == JsonValueKind.True || incTsProp.ValueKind == JsonValueKind.False)
+                        {
+                            includeTypeScript = incTsProp.GetBoolean();
                         }
                     }
                 }
@@ -261,14 +276,66 @@ namespace ModelContextGateway.Core.Routing
                     scoreDropoffRatio: effectiveDropoff,
                     cancellationToken: cancellationToken);
                 var toolSchemas = detailedResults.Select(r => r.Tool).ToList();
-                var serialized = JsonSerializer.Serialize(toolSchemas, new JsonSerializerOptions { WriteIndented = true });
+
+                if (includeTypeScript)
+                {
+                    var enrichedSchemas = new List<object>(toolSchemas.Count);
+                    foreach (var toolItem in toolSchemas)
+                    {
+                        try
+                        {
+                            var elem = toolItem is JsonElement je ? je : JsonSerializer.SerializeToElement(toolItem);
+                            if (elem.ValueKind == JsonValueKind.Object)
+                            {
+                                var dict = JsonSerializer.Deserialize<Dictionary<string, object?>>(elem.GetRawText()) ?? new();
+                                dict["typescriptSignature"] = CodeModeTypeGenerator.GenerateSingleToolSignature(elem);
+                                enrichedSchemas.Add(dict);
+                            }
+                            else
+                            {
+                                enrichedSchemas.Add(toolItem);
+                            }
+                        }
+                        catch
+                        {
+                            enrichedSchemas.Add(toolItem);
+                        }
+                    }
+                    toolSchemas = enrichedSchemas;
+                }
+
+                string outputText;
+                object structuredPayload;
+                if (format == "typescript" || format == "ts")
+                {
+                    outputText = CodeModeTypeGenerator.GenerateCompactToolSignatures(toolSchemas);
+                    structuredPayload = new
+                    {
+                        tools = toolSchemas,
+                        format = "typescript",
+                        count = toolSchemas.Count,
+                        typescript = outputText
+                    };
+                }
+                else
+                {
+                    outputText = JsonSerializer.Serialize(toolSchemas, new JsonSerializerOptions { WriteIndented = true });
+                    structuredPayload = new
+                    {
+                        tools = toolSchemas,
+                        format = "json",
+                        count = toolSchemas.Count
+                    };
+                }
+
                 return new
                 {
                     resultType = "complete",
+                    structuredContent = structuredPayload,
                     content = new[] {
                         new {
                             type = "text",
-                            text = serialized
+                            text = outputText
                         }
                     }
                 };
@@ -564,8 +631,26 @@ namespace ModelContextGateway.Core.Routing
                     return await ExecuteTargetToolAsync(targetName, targetBody, targetAuthToken, dbFactory!, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);
                 };
 
+                var effectiveCallbacks = sandboxCallbacks ?? new CodeModeSandboxCallbacks
+                {
+                    ListServersAsync = () =>
+                    {
+                        var serverList = (servers ?? Enumerable.Empty<McpServer>())
+                            .Where(s => s.Enabled)
+                            .Select(s => (object)new
+                            {
+                                id = s.Id,
+                                alias = s.Alias,
+                                name = s.DisplayName,
+                                enabled = s.Enabled
+                            })
+                            .ToList();
+                        return Task.FromResult<object>(serverList);
+                    }
+                };
+
                 var engine = _codeModeEngine ?? new CodeModeExecutionEngine();
-                var execResult = await engine.ExecuteAsync(script, scriptArgs, settings, toolDispatcher, cancellationToken);
+                var execResult = await engine.ExecuteAsync(script, scriptArgs, settings, toolDispatcher, cancellationToken, effectiveCallbacks);
 
                 object? resultPayload = null;
                 if (execResult.IsError)
@@ -597,6 +682,7 @@ namespace ModelContextGateway.Core.Routing
                 {
                     resultType = "complete",
                     isError = execResult.IsError,
+                    structuredContent = envelope,
                     content = new[] {
                         new {
                             type = "text",

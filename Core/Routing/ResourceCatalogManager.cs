@@ -26,11 +26,17 @@ namespace ModelContextGateway.Core.Routing
 
             foreach (var res in resources)
             {
+                string uri = "";
                 string name = "";
                 string description = "";
 
                 if (res is Dictionary<string, object> dict)
                 {
+                    if (dict.TryGetValue("uri", out var u))
+                    {
+                        uri = u?.ToString() ?? "";
+                    }
+
                     if (dict.TryGetValue("name", out var n))
                     {
                         name = n?.ToString() ?? "";
@@ -43,6 +49,11 @@ namespace ModelContextGateway.Core.Routing
                 }
                 else if (res is JsonElement je)
                 {
+                    if (je.TryGetProperty("uri", out var u) && u.ValueKind == JsonValueKind.String)
+                    {
+                        uri = u.GetString() ?? "";
+                    }
+
                     if (je.TryGetProperty("name", out var n) && n.ValueKind == JsonValueKind.String)
                     {
                         name = n.GetString() ?? "";
@@ -54,7 +65,8 @@ namespace ModelContextGateway.Core.Routing
                     }
                 }
 
-                if (name.Contains(queryLower, StringComparison.OrdinalIgnoreCase) ||
+                if (uri.Contains(queryLower, StringComparison.OrdinalIgnoreCase) ||
+                    name.Contains(queryLower, StringComparison.OrdinalIgnoreCase) ||
                     description.Contains(queryLower, StringComparison.OrdinalIgnoreCase))
                 {
                     results.Add(res);
@@ -74,6 +86,36 @@ namespace ModelContextGateway.Core.Routing
         {
             var match = Regex.Match(uri, @"^logs://([^/]+)/today$");
             if (match.Success)
+            {
+                serverId = match.Groups[1].Value;
+                return true;
+            }
+            serverId = string.Empty;
+            return false;
+        }
+
+        /// <summary>
+        /// Attempts to match router://code-mode/types/{serverId}.
+        /// </summary>
+        public bool TryMatchCodeModeTypesTemplate(string uri, out string serverId)
+        {
+            var match = Regex.Match(uri, @"^router://code-mode/types/([^/]+)$", RegexOptions.IgnoreCase);
+            if (match.Success && !match.Groups[1].Value.Contains('{'))
+            {
+                serverId = match.Groups[1].Value;
+                return true;
+            }
+            serverId = string.Empty;
+            return false;
+        }
+
+        /// <summary>
+        /// Attempts to match router://resources/server/{serverId}.
+        /// </summary>
+        public bool TryMatchServerResourcesTemplate(string uri, out string serverId)
+        {
+            var match = Regex.Match(uri, @"^router://resources/server/([^/]+)$", RegexOptions.IgnoreCase);
+            if (match.Success && !match.Groups[1].Value.Contains('{'))
             {
                 serverId = match.Groups[1].Value;
                 return true;

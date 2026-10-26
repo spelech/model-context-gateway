@@ -48,6 +48,12 @@ namespace ModelContextGateway.Core.Routing
             if (obj.TryGetPropertyValue("params", out var paramsNode) && paramsNode is System.Text.Json.Nodes.JsonObject foundParams)
             {
                 foundParams[paramKey] = newValue;
+                if (foundParams.TryGetPropertyValue("ref", out var refNode) &&
+                    refNode is System.Text.Json.Nodes.JsonObject refObj &&
+                    refObj.ContainsKey(paramKey))
+                {
+                    refObj[paramKey] = newValue;
+                }
                 paramsObj = foundParams;
             }
 

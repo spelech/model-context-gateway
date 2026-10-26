@@ -40,10 +40,26 @@ namespace ModelContextGateway.Tests
             return client;
         }
 
+        private async Task SeedIsolatedToolsCacheAsync(SessionManager sessionManager, Dictionary<string, List<object>> serverTools)
+        {
+            using var scope = _factory.Services.CreateScope();
+            var serverRepo = scope.ServiceProvider.GetRequiredService<IServerRepository>();
+            var enabledServers = await serverRepo.GetEnabledServersAsync();
+            foreach (var srv in enabledServers)
+            {
+                sessionManager.SetServerToolsCache(srv.Id, new List<object>());
+            }
+            foreach (var kvp in serverTools)
+            {
+                sessionManager.SetServerToolsCache(kvp.Key, kvp.Value);
+            }
+        }
+
         [Fact]
         [Requirement("MCP-41", "MCP", RequirementType.Positive, "Explicit search modes (hybrid, semantic, lexical) and decomposed score diagnostics in ToolRoutingManager.")]
         public async Task SemanticSearchEndpoint_ReturnsCalibratedHybridResultsWithDiagnostics()
         {
+            var client = CreateAuthenticatedClient();
             var sessionManager = _factory.Services.GetRequiredService<SessionManager>();
             var tool1 = new Dictionary<string, object>
             {
@@ -70,10 +86,11 @@ namespace ModelContextGateway.Tests
                 ["description"] = "Get status of active media transcoder",
                 ["inputSchema"] = new Dictionary<string, object> { ["type"] = "object" }
             };
-            sessionManager.SetServerToolsCache("docker", new List<object> { tool1, tool2 });
-            sessionManager.SetServerToolsCache("media", new List<object> { tool3 });
-
-            var client = CreateAuthenticatedClient();
+            await SeedIsolatedToolsCacheAsync(sessionManager, new Dictionary<string, List<object>>
+            {
+                ["docker"] = new List<object> { tool1, tool2 },
+                ["media"] = new List<object> { tool3 }
+            });
             var payload = new
             {
                 query = "restart container",
@@ -127,6 +144,7 @@ namespace ModelContextGateway.Tests
         [Requirement("MCP-41", "MCP", RequirementType.Positive, "Explicit search modes (hybrid, semantic, lexical) and decomposed score diagnostics in ToolRoutingManager.")]
         public async Task SemanticSearchEndpoint_RespectsSearchModeAndDenseWeightParameters()
         {
+            var client = CreateAuthenticatedClient();
             var sessionManager = _factory.Services.GetRequiredService<SessionManager>();
             var tool1 = new Dictionary<string, object>
             {
@@ -146,10 +164,11 @@ namespace ModelContextGateway.Tests
                 ["description"] = "Bounce physical server host",
                 ["inputSchema"] = new Dictionary<string, object> { ["type"] = "object" }
             };
-            sessionManager.SetServerToolsCache("media", new List<object> { tool1, tool3 });
-            sessionManager.SetServerToolsCache("docker", new List<object> { tool2 });
-
-            var client = CreateAuthenticatedClient();
+            await SeedIsolatedToolsCacheAsync(sessionManager, new Dictionary<string, List<object>>
+            {
+                ["media"] = new List<object> { tool1, tool3 },
+                ["docker"] = new List<object> { tool2 }
+            });
             var payload = new
             {
                 query = "scan library",

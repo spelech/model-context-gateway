@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
+using ModelContextGateway.Core.CodeMode;
 
 namespace ModelContextGateway.Core.Routing
 {
@@ -8,7 +9,13 @@ namespace ModelContextGateway.Core.Routing
     {
         private readonly Dictionary<string, string> _promptRoutingTable = new();
 
-        public async Task<List<object>> ListPromptsAsync(string body, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync, SessionManager? sessionManager = null)
+        public async Task<List<object>> ListPromptsAsync(
+            string body,
+            IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections,
+            ILogger logger,
+            Func<Task> ensureBackendsInitializedAsync,
+            SessionManager? sessionManager = null,
+            bool enableCodeMode = false)
         {
             var allPrompts = new List<object>();
             var tasks = new List<Task<(string ServerId, JsonElement Prompts)>>();
@@ -97,6 +104,25 @@ namespace ModelContextGateway.Core.Routing
                 } }
             });
 
+            if (enableCodeMode)
+            {
+                allPrompts.Add(new Dictionary<string, object> {
+                    { "name", "router__code_mode_guide" },
+                    { "description", "[router] Load the Code Mode JavaScript/TypeScript sandbox guide and optional TypeScript (.d.ts) declarations for a target server." },
+                    { "arguments", new[] {
+                        new { name = "server_name", description = "Optional server ID or alias to embed TypeScript (.d.ts) tool declarations for", required = false }
+                    } }
+                });
+                allPrompts.Add(new Dictionary<string, object> {
+                    { "name", "router__write_code_mode_script" },
+                    { "description", "[router] Generate a multi-step Code Mode (`execute_script`) workflow with embedded TypeScript tool signatures for the specified goal and servers." },
+                    { "arguments", new[] {
+                        new { name = "goal", description = "Natural language description of the multi-tool workflow to script", required = true },
+                        new { name = "servers", description = "Comma-separated list of target server IDs or aliases (optional)", required = false }
+                    } }
+                });
+            }
+
             // Load custom file-based prompts from data/prompts/
             var promptsDir = Path.Combine(AppContext.BaseDirectory, "data", "prompts");
             if (!Directory.Exists(promptsDir))
@@ -144,7 +170,14 @@ namespace ModelContextGateway.Core.Routing
             return allPrompts;
         }
 
-        public async Task<object?> GetPromptAsync(string promptName, string body, ConcurrentDictionary<string, BackendConnection> backendConnections, Func<Task> ensureBackendsInitializedAsync, Func<string, string, string, string> rewriteRequestJson)
+        public async Task<object?> GetPromptAsync(
+            string promptName,
+            string body,
+            ConcurrentDictionary<string, BackendConnection> backendConnections,
+            Func<Task> ensureBackendsInitializedAsync,
+            Func<string, string, string, string> rewriteRequestJson,
+            Func<Task<List<object>>>? getAuthorizedToolsAsync = null,
+            IEnumerable<McpServer>? servers = null)
         {
             if (promptName.StartsWith("router__", StringComparison.OrdinalIgnoreCase) ||
                 promptName.StartsWith("router/", StringComparison.OrdinalIgnoreCase) ||
@@ -159,7 +192,7 @@ namespace ModelContextGateway.Core.Routing
                 {
                     normalizedPromptName = "router__" + promptName.Substring("router:".Length);
                 }
-                return ResolveLocalPrompt(normalizedPromptName, body);
+                return await ResolveLocalPromptAsync(normalizedPromptName, body, getAuthorizedToolsAsync, servers);
             }
 
             await ensureBackendsInitializedAsync();
@@ -198,7 +231,13 @@ namespace ModelContextGateway.Core.Routing
 
             if (!string.IsNullOrEmpty(parsedServer) && !string.IsNullOrEmpty(parsedRawName))
             {
-                var matchedConn = backendConnections.FirstOrDefault(c => string.Equals(c.Key, parsedServer, StringComparison.OrdinalIgnoreCase));
+                var resolvedServer = servers?.FirstOrDefault(s =>
+                    string.Equals(s.Id, parsedServer, StringComparison.OrdinalIgnoreCase) ||
+                    (!string.IsNullOrWhiteSpace(s.Alias) && string.Equals(s.Alias, parsedServer, StringComparison.OrdinalIgnoreCase)))?.Id ?? parsedServer;
+
+                var matchedConn = backendConnections.FirstOrDefault(c =>
+                    string.Equals(c.Key, resolvedServer, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(c.Key, parsedServer, StringComparison.OrdinalIgnoreCase));
                 if (matchedConn.Value != null)
                 {
                     _promptRoutingTable[promptName] = matchedConn.Key;
@@ -211,11 +250,15 @@ namespace ModelContextGateway.Core.Routing
             throw new KeyNotFoundException($"Prompt {promptName} not found in routing table.");
         }
 
-        private object? ResolveLocalPrompt(string promptName, string body)
+        private async Task<object?> ResolveLocalPromptAsync(
+            string promptName,
+            string body,
+            Func<Task<List<object>>>? getAuthorizedToolsAsync,
+            IEnumerable<McpServer>? servers)
         {
             using var doc = JsonDocument.Parse(body);
             var root = doc.RootElement;
-            var args = new Dictionary<string, string>();
+            var args = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("arguments", out var argsProp))
             {
                 foreach (var prop in argsProp.EnumerateObject())
@@ -225,22 +268,74 @@ namespace ModelContextGateway.Core.Routing
             }
 
             string text = string.Empty;
-            if (promptName == "router__diagnose_failure")
+            if (string.Equals(promptName, "router__diagnose_failure", StringComparison.OrdinalIgnoreCase))
             {
                 args.TryGetValue("tool_name", out var toolName);
                 args.TryGetValue("error_message", out var errMsg);
                 text = $"You are an expert systems administrator diagnosing a failure in the MCP tool '{toolName}'. The error received was:\n\n{errMsg}\n\nAnalyze this failure. Consider configuration issues, API key availability, schema mismatches, and connection timeouts. Output a detailed diagnostic report with 3 actionable remediation steps.";
             }
-            else if (promptName == "router__route_multi_task")
+            else if (string.Equals(promptName, "router__route_multi_task", StringComparison.OrdinalIgnoreCase))
             {
                 args.TryGetValue("task_description", out var taskDesc);
                 text = $"You are an orchestrator routing tasks. We have a complex request:\n\n{taskDesc}\n\nWe have multiple MCP backends (e.g., Home Assistant, Docker, Excel, UniFi). Break this request down into sequential tool invocations. For each step, specify which backend tool to call and what arguments to supply.";
             }
-            else if (promptName == "router__audit_permissions")
+            else if (string.Equals(promptName, "router__audit_permissions", StringComparison.OrdinalIgnoreCase))
             {
                 args.TryGetValue("server_name", out var serverName);
                 var target = string.IsNullOrEmpty(serverName) ? "all MCP servers" : $"MCP server '{serverName}'";
                 text = $"You are a security auditor auditing tool access permissions for {target}. List all available tools, classify them as read-only or read-write, identify sensitive tools (like file system writes or container actions), and suggest security constraints.";
+            }
+            else if (string.Equals(promptName, "router__code_mode_guide", StringComparison.OrdinalIgnoreCase))
+            {
+                args.TryGetValue("server_name", out var serverName);
+                var serverIds = servers?.Where(s => s.Enabled).Select(s => s.Id).ToList();
+                var sb = new StringBuilder();
+                sb.AppendLine(CodeModeTypeGenerator.GenerateCodeModeGuideMarkdown(serverIds));
+                var tools = getAuthorizedToolsAsync != null ? await getAuthorizedToolsAsync() : new List<object>();
+                if (!string.IsNullOrWhiteSpace(serverName))
+                {
+                    sb.AppendLine();
+                    sb.AppendLine($"## TypeScript Declarations for `{serverName}`");
+                    sb.AppendLine("```typescript");
+                    sb.AppendLine(CodeModeTypeGenerator.GenerateServerDeclarations(serverName, tools, servers).TrimEnd());
+                    sb.AppendLine("```");
+                }
+                else if (tools.Count > 0)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine("## Full Sandbox TypeScript SDK (`router://code-mode/sdk.d.ts`)");
+                    sb.AppendLine("```typescript");
+                    sb.AppendLine(CodeModeTypeGenerator.GenerateFullSdkDeclarations(tools, servers).TrimEnd());
+                    sb.AppendLine("```");
+                }
+                text = sb.ToString();
+            }
+            else if (string.Equals(promptName, "router__write_code_mode_script", StringComparison.OrdinalIgnoreCase))
+            {
+                args.TryGetValue("goal", out var goal);
+                args.TryGetValue("servers", out var serversCsv);
+                var tools = getAuthorizedToolsAsync != null ? await getAuthorizedToolsAsync() : new List<object>();
+                var sb = new StringBuilder();
+                sb.AppendLine($"Write an `execute_script` JavaScript/TypeScript workflow for the following goal:\n\n**Goal**: {goal}");
+                sb.AppendLine();
+                sb.AppendLine("Use top-level `await`, `tools.<server>.<tool>(args)` (or `mcg.callTool(\"<server>__<tool>\", args)`), and `mcg.*` resource/prompt helpers, then `return` a concise structured object.");
+                sb.AppendLine();
+                sb.AppendLine("### Available TypeScript Tool Declarations");
+                sb.AppendLine("```typescript");
+                if (!string.IsNullOrWhiteSpace(serversCsv))
+                {
+                    var requestedServers = serversCsv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    foreach (var reqSrv in requestedServers)
+                    {
+                        sb.AppendLine(CodeModeTypeGenerator.GenerateServerDeclarations(reqSrv, tools, servers).TrimEnd());
+                    }
+                }
+                else
+                {
+                    sb.AppendLine(CodeModeTypeGenerator.GenerateFullSdkDeclarations(tools, servers).TrimEnd());
+                }
+                sb.AppendLine("```");
+                text = sb.ToString();
             }
             else
             {
