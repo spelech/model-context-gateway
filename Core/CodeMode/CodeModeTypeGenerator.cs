@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace ModelContextGateway.Core.CodeMode
@@ -8,7 +7,7 @@ namespace ModelContextGateway.Core.CodeMode
     /// Synthesizes TypeScript (.d.ts) declarations, JSDoc comments, and compact tool call signatures
     /// from MCP JSON Schema tool definitions for Code Mode discovery and IDE/agent consumption.
     /// </summary>
-    public static class CodeModeTypeGenerator
+    public static partial class CodeModeTypeGenerator
     {
         private static readonly Regex SafeIdentifierRegex = new("^[a-zA-Z_$][a-zA-Z0-9_$]*$", RegexOptions.Compiled);
 
@@ -50,29 +49,29 @@ namespace ModelContextGateway.Core.CodeMode
                 var canonicalId = matchedServer?.Id ?? prefix;
                 var safeTypeSuffix = ToSafeTypeIdentifier(canonicalId);
                 var interfaceName = $"Server_{safeTypeSuffix}_Tools";
-                var displayComment = matchedServer != null && !string.IsNullOrWhiteSpace(matchedServer.DisplayName)
-                    ? $"{matchedServer.DisplayName} ({canonicalId})"
+                var displayName = !string.IsNullOrWhiteSpace(matchedServer?.DisplayName)
+                    ? $"{matchedServer!.DisplayName} ({canonicalId})"
                     : canonicalId;
 
-                string? instructions = null;
+                string? srvInstructions = null;
                 if (serverInstructions != null)
                 {
-                    if (!serverInstructions.TryGetValue(canonicalId, out instructions))
+                    if (!serverInstructions.TryGetValue(canonicalId, out srvInstructions))
                     {
-                        serverInstructions.TryGetValue(prefix, out instructions);
+                        serverInstructions.TryGetValue(prefix, out srvInstructions);
                     }
                 }
 
-                if (!string.IsNullOrWhiteSpace(instructions))
+                if (!string.IsNullOrWhiteSpace(srvInstructions))
                 {
                     sb.AppendLine("/**");
-                    sb.AppendLine($" * Tools exposed by backend server: {SanitizeComment(displayComment)}");
-                    sb.AppendLine($" * Server Instructions: {SanitizeComment(instructions!)}");
+                    sb.AppendLine($" * Tools exposed by backend server: {SanitizeComment(displayName)}");
+                    sb.AppendLine($" * Server Instructions: {SanitizeComment(srvInstructions!)}");
                     sb.AppendLine(" */");
                 }
                 else
                 {
-                    sb.AppendLine($"/** Tools exposed by backend server: {SanitizeComment(displayComment)} */");
+                    sb.AppendLine($"/** Tools exposed by backend server: {SanitizeComment(displayName)} */");
                 }
                 sb.AppendLine($"interface {interfaceName} {{");
 
@@ -84,17 +83,26 @@ namespace ModelContextGateway.Core.CodeMode
                 sb.AppendLine("}");
                 sb.AppendLine();
 
-                namespaceEntries.Add((canonicalId, interfaceName, $"Tools for {displayComment}"));
-                if (matchedServer != null && !string.IsNullOrWhiteSpace(matchedServer.Alias) &&
+                var namespaceComment = !string.IsNullOrWhiteSpace(srvInstructions)
+                    ? $"{displayName} — {srvInstructions}"
+                    : displayName;
+                namespaceEntries.Add((canonicalId, interfaceName, namespaceComment));
+                if (matchedServer != null &&
+                    !string.IsNullOrWhiteSpace(matchedServer.Alias) &&
                     !string.Equals(matchedServer.Alias, canonicalId, StringComparison.OrdinalIgnoreCase))
                 {
-                    namespaceEntries.Add((matchedServer.Alias, interfaceName, $"Alias for {canonicalId} ({displayComment})"));
+                    namespaceEntries.Add((matchedServer.Alias, interfaceName, $"Alias for {canonicalId} ({displayName})"));
+                }
+                else if (!string.Equals(prefix, canonicalId, StringComparison.OrdinalIgnoreCase))
+                {
+                    namespaceEntries.Add((prefix, interfaceName, $"Alias for {canonicalId}"));
                 }
             }
 
-            sb.AppendLine("/** Dynamic proxy mapping server IDs (and aliases) to their downstream MCP tools. */");
             sb.AppendLine("interface ToolsNamespace {");
-            foreach (var entry in namespaceEntries.DistinctBy(e => e.PropertyName, StringComparer.OrdinalIgnoreCase))
+            foreach (var entry in namespaceEntries
+                .GroupBy(e => e.PropertyName, StringComparer.OrdinalIgnoreCase)
+                .Select(g => g.First()))
             {
                 if (!string.IsNullOrWhiteSpace(entry.Comment))
                 {
@@ -306,359 +314,50 @@ return {
             sb.AppendLine("declare const args: Record<string, any> | undefined;");
         }
 
-        private static void AppendToolMethodDeclaration(StringBuilder sb, ParsedToolInfo tool, string indent)
+        public static List<string> ExtractAuthorizedServerIds(IEnumerable<object> tools, IEnumerable<McpServer>? servers)
         {
-            var hasDesc = !string.IsNullOrWhiteSpace(tool.Description);
-            var paramDocs = ExtractParameterDocs(tool.InputSchema);
-
-            if (hasDesc || paramDocs.Count > 0)
+            var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var parsed in ParseToolList(tools))
             {
-                sb.AppendLine($"{indent}/**");
-                if (hasDesc)
-                {
-                    sb.AppendLine($"{indent} * {SanitizeComment(tool.Description!)}");
-                }
-                foreach (var p in paramDocs)
-                {
-                    sb.AppendLine($"{indent} * @param args.{p.Name} {SanitizeComment(p.Description)}");
-                }
-                sb.AppendLine($"{indent} */");
+                var matched = servers?.FirstOrDefault(s =>
+                    string.Equals(s.Id, parsed.ServerPrefix, StringComparison.OrdinalIgnoreCase) ||
+                    (!string.IsNullOrWhiteSpace(s.Alias) && string.Equals(s.Alias, parsed.ServerPrefix, StringComparison.OrdinalIgnoreCase)));
+                result.Add(matched?.Id ?? parsed.ServerPrefix);
             }
-
-            var methodKey = FormatPropertyKey(tool.RawToolName);
-            var argsType = FormatInputSchemaAsTypeScriptType(tool.InputSchema, indent, out bool hasRequiredProps);
-            var optionalMod = hasRequiredProps ? "" : "?";
-            sb.AppendLine($"{indent}{methodKey}(args{optionalMod}: {argsType}, options?: McgCallOptions): Promise<any>;");
+            return result.OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ToList();
         }
 
-        private static string FormatSingleToolSignature(ParsedToolInfo tool)
+        public static bool IsServerInAuthorizedSet(string serverIdOrAlias, IEnumerable<string> authorizedServerIds, IEnumerable<McpServer>? servers)
         {
-            var sb = new StringBuilder();
-            if (!string.IsNullOrWhiteSpace(tool.Description))
+            var set = new HashSet<string>(authorizedServerIds, StringComparer.OrdinalIgnoreCase);
+            if (set.Contains(serverIdOrAlias))
             {
-                sb.AppendLine($"/** {SanitizeComment(tool.Description!)} */");
+                return true;
             }
-            var argsType = FormatInlineObjectSchema(tool.InputSchema, out bool hasRequired);
-            var optionalMod = hasRequired ? "" : "?";
-            var serverProp = SafeIdentifierRegex.IsMatch(tool.ServerPrefix) ? $".{tool.ServerPrefix}" : $"[\"{tool.ServerPrefix}\"]";
-            var toolProp = SafeIdentifierRegex.IsMatch(tool.RawToolName) ? $".{tool.RawToolName}" : $"[\"{tool.RawToolName}\"]";
-            sb.Append($"await tools{serverProp}{toolProp}(args{optionalMod}: {argsType}): Promise<any>;");
-            return sb.ToString();
+            var matched = servers?.FirstOrDefault(s =>
+                string.Equals(s.Id, serverIdOrAlias, StringComparison.OrdinalIgnoreCase) ||
+                (!string.IsNullOrWhiteSpace(s.Alias) && string.Equals(s.Alias, serverIdOrAlias, StringComparison.OrdinalIgnoreCase)));
+            return matched != null && set.Contains(matched.Id);
         }
 
-        private static string FormatInputSchemaAsTypeScriptType(JsonElement? schema, string indent, out bool hasRequiredProps)
+        public static IReadOnlyDictionary<string, string>? FilterInstructionsByAuthorizedServers(
+            IReadOnlyDictionary<string, string>? instructions,
+            IEnumerable<string> authorizedServerIds,
+            IEnumerable<McpServer>? servers)
         {
-            hasRequiredProps = false;
-            if (!schema.HasValue || schema.Value.ValueKind != JsonValueKind.Object)
-            {
-                return "Record<string, any>";
-            }
-
-            var root = schema.Value;
-            if (!root.TryGetProperty("properties", out var props) || props.ValueKind != JsonValueKind.Object)
-            {
-                return "Record<string, any>";
-            }
-
-            var propList = props.EnumerateObject().ToList();
-            if (propList.Count == 0)
-            {
-                return "Record<string, any>";
-            }
-
-            var requiredSet = new HashSet<string>(StringComparer.Ordinal);
-            if (root.TryGetProperty("required", out var reqArr) && reqArr.ValueKind == JsonValueKind.Array)
-            {
-                foreach (var item in reqArr.EnumerateArray())
-                {
-                    if (item.ValueKind == JsonValueKind.String && item.GetString() is string s)
-                    {
-                        requiredSet.Add(s);
-                    }
-                }
-            }
-
-            hasRequiredProps = requiredSet.Count > 0;
-            var sb = new StringBuilder();
-            sb.AppendLine("{");
-            foreach (var prop in propList)
-            {
-                var isReq = requiredSet.Contains(prop.Name);
-                var opt = isReq ? "" : "?";
-                var tsType = MapJsonSchemaPropertyToTsType(prop.Value);
-                if (prop.Value.ValueKind == JsonValueKind.Object &&
-                    prop.Value.TryGetProperty("description", out var dProp) &&
-                    dProp.ValueKind == JsonValueKind.String &&
-                    !string.IsNullOrWhiteSpace(dProp.GetString()))
-                {
-                    sb.AppendLine($"{indent}  /** {SanitizeComment(dProp.GetString()!)} */");
-                }
-                sb.AppendLine($"{indent}  {FormatPropertyKey(prop.Name)}{opt}: {tsType};");
-            }
-            sb.Append($"{indent}}}");
-            return sb.ToString();
-        }
-
-        private static string FormatInlineObjectSchema(JsonElement? schema, out bool hasRequiredProps)
-        {
-            hasRequiredProps = false;
-            if (!schema.HasValue || schema.Value.ValueKind != JsonValueKind.Object)
-            {
-                return "Record<string, any>";
-            }
-
-            var root = schema.Value;
-            if (!root.TryGetProperty("properties", out var props) || props.ValueKind != JsonValueKind.Object)
-            {
-                return "Record<string, any>";
-            }
-
-            var propList = props.EnumerateObject().ToList();
-            if (propList.Count == 0)
-            {
-                return "Record<string, any>";
-            }
-
-            var requiredSet = new HashSet<string>(StringComparer.Ordinal);
-            if (root.TryGetProperty("required", out var reqArr) && reqArr.ValueKind == JsonValueKind.Array)
-            {
-                foreach (var item in reqArr.EnumerateArray())
-                {
-                    if (item.ValueKind == JsonValueKind.String && item.GetString() is string s)
-                    {
-                        requiredSet.Add(s);
-                    }
-                }
-            }
-
-            hasRequiredProps = requiredSet.Count > 0;
-            var parts = new List<string>(propList.Count);
-            foreach (var prop in propList)
-            {
-                var isReq = requiredSet.Contains(prop.Name);
-                var opt = isReq ? "" : "?";
-                var tsType = MapJsonSchemaPropertyToTsType(prop.Value);
-                parts.Add($"{FormatPropertyKey(prop.Name)}{opt}: {tsType}");
-            }
-            return "{ " + string.Join("; ", parts) + " }";
-        }
-
-        private static string MapJsonSchemaPropertyToTsType(JsonElement propSchema)
-        {
-            if (propSchema.ValueKind != JsonValueKind.Object)
-            {
-                return "any";
-            }
-
-            if (propSchema.TryGetProperty("enum", out var enumArr) && enumArr.ValueKind == JsonValueKind.Array)
-            {
-                var literals = new List<string>();
-                foreach (var item in enumArr.EnumerateArray())
-                {
-                    literals.Add(item.ValueKind == JsonValueKind.String
-                        ? JsonSerializer.Serialize(item.GetString())
-                        : item.GetRawText());
-                }
-                if (literals.Count > 0)
-                {
-                    return string.Join(" | ", literals);
-                }
-            }
-
-            string? typeStr = null;
-            if (propSchema.TryGetProperty("type", out var typeProp))
-            {
-                if (typeProp.ValueKind == JsonValueKind.String)
-                {
-                    typeStr = typeProp.GetString();
-                }
-                else if (typeProp.ValueKind == JsonValueKind.Array)
-                {
-                    var unionTypes = new List<string>();
-                    foreach (var t in typeProp.EnumerateArray())
-                    {
-                        if (t.ValueKind == JsonValueKind.String)
-                        {
-                            unionTypes.Add(MapPrimitiveType(t.GetString()));
-                        }
-                    }
-                    if (unionTypes.Count > 0)
-                    {
-                        return string.Join(" | ", unionTypes.Distinct());
-                    }
-                }
-            }
-
-            if (typeStr == "array")
-            {
-                if (propSchema.TryGetProperty("items", out var itemsProp) && itemsProp.ValueKind == JsonValueKind.Object)
-                {
-                    var itemType = MapJsonSchemaPropertyToTsType(itemsProp);
-                    return itemType.Contains(" | ") ? $"({itemType})[]" : $"{itemType}[]";
-                }
-                return "any[]";
-            }
-
-            if (typeStr == "object")
-            {
-                if (propSchema.TryGetProperty("properties", out _))
-                {
-                    return FormatInlineObjectSchema(propSchema, out _);
-                }
-                return "Record<string, any>";
-            }
-
-            return MapPrimitiveType(typeStr);
-        }
-
-        private static string MapPrimitiveType(string? jsonType) => jsonType switch
-        {
-            "string" => "string",
-            "integer" or "number" => "number",
-            "boolean" => "boolean",
-            "null" => "null",
-            _ => "any"
-        };
-
-        private static List<(string Name, string Description)> ExtractParameterDocs(JsonElement? schema)
-        {
-            var result = new List<(string Name, string Description)>();
-            if (!schema.HasValue || schema.Value.ValueKind != JsonValueKind.Object)
-            {
-                return result;
-            }
-            if (schema.Value.TryGetProperty("properties", out var props) && props.ValueKind == JsonValueKind.Object)
-            {
-                foreach (var prop in props.EnumerateObject())
-                {
-                    if (prop.Value.ValueKind == JsonValueKind.Object &&
-                        prop.Value.TryGetProperty("description", out var descProp) &&
-                        descProp.ValueKind == JsonValueKind.String &&
-                        !string.IsNullOrWhiteSpace(descProp.GetString()))
-                    {
-                        result.Add((prop.Name, descProp.GetString()!));
-                    }
-                }
-            }
-            return result;
-        }
-
-        private static List<ParsedToolInfo> ParseToolList(IEnumerable<object> tools)
-        {
-            var list = new List<ParsedToolInfo>();
-            foreach (var item in tools)
-            {
-                var parsed = ParseSingleTool(item);
-                if (parsed != null)
-                {
-                    list.Add(parsed);
-                }
-            }
-            return list;
-        }
-
-        private static ParsedToolInfo? ParseSingleTool(object? item)
-        {
-            if (item == null)
+            if (instructions == null)
             {
                 return null;
             }
-
-            JsonElement element;
-            if (item is JsonElement je)
+            var filtered = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var kvp in instructions)
             {
-                element = je;
-            }
-            else
-            {
-                try
+                if (IsServerInAuthorizedSet(kvp.Key, authorizedServerIds, servers))
                 {
-                    element = JsonSerializer.SerializeToElement(item);
-                }
-                catch
-                {
-                    return null;
+                    filtered[kvp.Key] = kvp.Value;
                 }
             }
-
-            if (element.ValueKind != JsonValueKind.Object || !element.TryGetProperty("name", out var nameProp))
-            {
-                return null;
-            }
-
-            var fullName = nameProp.GetString();
-            if (string.IsNullOrWhiteSpace(fullName))
-            {
-                return null;
-            }
-
-            string serverPrefix = "router";
-            string rawToolName = fullName;
-
-            if (fullName.Contains("__", StringComparison.Ordinal))
-            {
-                var idx = fullName.IndexOf("__", StringComparison.Ordinal);
-                serverPrefix = fullName.Substring(0, idx);
-                rawToolName = fullName.Substring(idx + 2);
-            }
-            else if (fullName.Contains('/'))
-            {
-                var idx = fullName.IndexOf('/');
-                serverPrefix = fullName.Substring(0, idx);
-                rawToolName = fullName.Substring(idx + 1);
-            }
-            else if (fullName.Contains(':'))
-            {
-                var idx = fullName.IndexOf(':');
-                serverPrefix = fullName.Substring(0, idx);
-                rawToolName = fullName.Substring(idx + 1);
-            }
-
-            string? description = null;
-            if (element.TryGetProperty("description", out var descProp) && descProp.ValueKind == JsonValueKind.String)
-            {
-                description = descProp.GetString();
-            }
-
-            JsonElement? inputSchema = null;
-            if (element.TryGetProperty("inputSchema", out var schemaProp) && schemaProp.ValueKind == JsonValueKind.Object)
-            {
-                inputSchema = schemaProp.Clone();
-            }
-
-            return new ParsedToolInfo
-            {
-                FullName = fullName,
-                ServerPrefix = serverPrefix,
-                RawToolName = rawToolName,
-                Description = description,
-                InputSchema = inputSchema
-            };
-        }
-
-        private static string ToSafeTypeIdentifier(string raw)
-        {
-            var chars = raw.Select(c => char.IsLetterOrDigit(c) ? c : '_').ToArray();
-            return new string(chars);
-        }
-
-        private static string FormatPropertyKey(string key)
-        {
-            return SafeIdentifierRegex.IsMatch(key) ? key : JsonSerializer.Serialize(key);
-        }
-
-        private static string SanitizeComment(string comment)
-        {
-            return comment.Replace("*/", "* /").Replace("\r", " ").Replace("\n", " ").Trim();
-        }
-
-        private sealed class ParsedToolInfo
-        {
-            public string FullName { get; set; } = string.Empty;
-            public string ServerPrefix { get; set; } = string.Empty;
-            public string RawToolName { get; set; } = string.Empty;
-            public string? Description { get; set; }
-            public JsonElement? InputSchema { get; set; }
+            return filtered;
         }
     }
 }

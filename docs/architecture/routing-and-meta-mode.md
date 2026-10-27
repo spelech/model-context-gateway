@@ -27,10 +27,12 @@ flowchart LR
 ```
 
 1. **Bootstrap Initialization**:
-   When an MCP client connects to `/sse` (the default gateway endpoint), the router intercepts `tools/list` and returns only the gateway bootstrap meta-tools:
-   - `search_tools`: Accepts a natural language query string (e.g., `"restart plex media server"`) and returns ranked, threshold-filtered tool schemas.
+   When an MCP client connects to `/sse` (the default gateway endpoint), the router intercepts `tools/list` and returns only the gateway bootstrap meta-tools (each annotated with MCP `2026-07-28` `annotations` and `outputSchema`):
+   - `search_tools`: Accepts a natural language query string (e.g., `"restart plex media server"`) and returns ranked, threshold-filtered tool schemas (`format: "json"` or `format: "typescript"` / `include_typescript: true` for compact TypeScript call signatures) plus `structuredContent`.
    - `execute_tool`: Executes a single namespaced tool (`{serverId}__{toolName}`) with dynamic parameter forwarding.
    - `execute_script`: Executes an asynchronous JavaScript workflow inside an isolated Jint sandbox when [MCP Code Mode](code-mode.md) is enabled (`EnableCodeMode = true`) and the caller satisfies `CodeModeAllowedGroups`.
+   - **Meta-Mode Resource Compaction (`resources/list`) & Built-In Prompts (`prompts/list`)**: To prevent downstream `mcp://` resource lists from overflowing client `resources/list` limits, Meta-Mode returns a compact catalog directory (`router://code-mode/guide`, `router://code-mode/sdk.d.ts`, `router://resources/catalog`, `router://prompts/catalog`, and per-server `router://resources/server/{serverId}` and `router://code-mode/types/{serverId}`) and exposes built-in Code Mode prompts (`router__code_mode_guide`, `router__write_code_mode_script`).
+   - **Downstream `instructions` Propagation (`MCP-56`)**: During backend `initialize`, `ClientSession` caches each server's `instructions` in `SessionManager` and surfaces them across direct proxy `initialize` responses, `router://resources/server/{serverId}`, `router://active-servers`, `await mcg.listServers()`, `.d.ts` `Server Instructions:` JSDoc headers, and RBAC-filtered Meta-Mode `initialize` rollups.
 
 2. **Background Cache Pre-Warming & Cold-Start On-Demand Discovery**:
    Simultaneously in the background, [`ClientSession.BackendInitializer.cs`](https://github.com/spelech/model-context-gateway/blob/main/Core/Routing/ClientSession/ClientSession.BackendInitializer.cs) concurrently initializes enabled downstream transports and caches their tool, prompt, and resource schemas. If a stateless or freshly connected client calls a tool before background warming finishes, `ToolRoutingManager` triggers an on-demand `InitializeAndFetchToolsAsync` discovery pass against the target server automatically.

@@ -753,6 +753,13 @@ namespace ModelContextGateway.Core.Routing
                         throw new UnauthorizedAccessException(errorMessage);
                     }
 
+                    if (!uriString.StartsWith("mcp://", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var emptyLocalRes = new { completion = new { values = Array.Empty<string>(), hasMore = false } };
+                        responsePayload = JsonSerializer.Serialize(emptyLocalRes);
+                        return emptyLocalRes;
+                    }
+
                     var parts = uriString.Substring("mcp://".Length).Split('/', 2);
                     if (parts.Length != 2)
                     {

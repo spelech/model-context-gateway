@@ -50,7 +50,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-CODE-03", "MCP", RequirementType.Positive, "CodeModeTypeGenerator synthesizes full SDK TypeScript declarations with sandbox globals and JSDoc comments.")]
+        [Requirement("MCP-52", "MCP", RequirementType.Positive, "CodeModeTypeGenerator synthesizes full SDK TypeScript declarations with sandbox globals and JSDoc comments.")]
         public void GenerateFullSdkDeclarations_IncludesSandboxGlobalsAndServerInterfaces()
         {
             var tools = CreateSampleTools();
@@ -82,7 +82,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-CODE-03", "MCP", RequirementType.Positive, "CodeModeTypeGenerator generates per-server TypeScript declarations matching server ID or alias.")]
+        [Requirement("MCP-52", "MCP", RequirementType.Positive, "CodeModeTypeGenerator generates per-server TypeScript declarations matching server ID or alias.")]
         public void GenerateServerDeclarations_FiltersToTargetServerAndSupportsAlias()
         {
             var tools = CreateSampleTools();
@@ -98,7 +98,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-CODE-03", "MCP", RequirementType.Positive, "search_tools supports typescript format and include_typescript flag with structuredContent.")]
+        [Requirement("MCP-52", "MCP", RequirementType.Positive, "search_tools supports typescript format and include_typescript flag with structuredContent.")]
         public async Task SearchTools_SupportsTypeScriptFormatAndStructuredContent()
         {
             var router = new ToolRoutingManager();
@@ -151,7 +151,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-CODE-04", "MCP", RequirementType.Positive, "GetMetaTools includes MCP 2026-07-28 annotations and outputSchema on meta-tools.")]
+        [Requirement("MCP-55", "MCP", RequirementType.Positive, "GetMetaTools includes MCP 2026-07-28 annotations and outputSchema on meta-tools.")]
         public void GetMetaTools_IncludesAnnotationsAndOutputSchema()
         {
             var router = new ToolRoutingManager();

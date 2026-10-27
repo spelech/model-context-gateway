@@ -164,7 +164,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-CODE-05", "MCP", RequirementType.Positive, "Sandbox exposes mcg.listServers, mcg.listResources, mcg.searchResources, mcg.readResource, mcg.listPrompts, and mcg.getPrompt with automatic unboxing.")]
+        [Requirement("MCP-53", "MCP", RequirementType.Positive, "Sandbox exposes mcg.listServers, mcg.listResources, mcg.searchResources, mcg.readResource, mcg.listPrompts, and mcg.getPrompt with automatic unboxing.")]
         public async Task ExecuteAsync_SandboxResourcePromptAndServerApis_WorkAndUnboxContents()
         {
             var settings = new RouterSettings();

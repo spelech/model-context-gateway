@@ -416,9 +416,23 @@ namespace ModelContextGateway.Core.Routing
         {
             if (string.Equals(uri, "router://code-mode/guide", StringComparison.OrdinalIgnoreCase))
             {
-                var serverIds = (servers != null && servers.Any())
-                    ? servers.Where(s => s.Enabled).Select(s => !string.IsNullOrWhiteSpace(s.Alias) ? $"{s.Id} (alias: {s.Alias})" : s.Id).ToList()
-                    : backendConnections.Keys.ToList();
+                List<string> serverIds;
+                if (getAuthorizedToolsAsync != null)
+                {
+                    var tools = await getAuthorizedToolsAsync();
+                    var authorizedSet = CodeModeTypeGenerator.ExtractAuthorizedServerIds(tools, servers);
+                    serverIds = (servers != null && servers.Any())
+                        ? servers.Where(s => s.Enabled && CodeModeTypeGenerator.IsServerInAuthorizedSet(s.Id, authorizedSet, servers))
+                            .Select(s => !string.IsNullOrWhiteSpace(s.Alias) ? $"{s.Id} (alias: {s.Alias})" : s.Id)
+                            .ToList()
+                        : authorizedSet;
+                }
+                else
+                {
+                    serverIds = (servers != null && servers.Any())
+                        ? servers.Where(s => s.Enabled).Select(s => !string.IsNullOrWhiteSpace(s.Alias) ? $"{s.Id} (alias: {s.Alias})" : s.Id).ToList()
+                        : backendConnections.Keys.ToList();
+                }
                 var guideText = CodeModeTypeGenerator.GenerateCodeModeGuideMarkdown(serverIds);
                 return new
                 {
@@ -631,8 +645,19 @@ namespace ModelContextGateway.Core.Routing
                 var statuses = sessionManager?.BackendStatuses;
                 if (statuses != null)
                 {
+                    List<string>? authorizedIds = null;
+                    if (getAuthorizedToolsAsync != null)
+                    {
+                        var tools = await getAuthorizedToolsAsync();
+                        authorizedIds = CodeModeTypeGenerator.ExtractAuthorizedServerIds(tools, servers);
+                    }
+
                     foreach (var entry in statuses)
                     {
+                        if (authorizedIds != null && !CodeModeTypeGenerator.IsServerInAuthorizedSet(entry.Key, authorizedIds, servers))
+                        {
+                            continue;
+                        }
                         serversList.Add(new
                         {
                             id = entry.Key,

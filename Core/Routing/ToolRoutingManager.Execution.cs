@@ -633,10 +633,23 @@ namespace ModelContextGateway.Core.Routing
 
                 var effectiveCallbacks = sandboxCallbacks ?? new CodeModeSandboxCallbacks
                 {
-                    ListServersAsync = () =>
+                    ListServersAsync = async () =>
                     {
-                        var serverList = (servers ?? Enumerable.Empty<McpServer>())
-                            .Where(s => s.Enabled)
+                        var candidateServers = (servers ?? Enumerable.Empty<McpServer>()).Where(s => s.Enabled).ToList();
+                        if (filterAuthorizedToolsAsync != null)
+                        {
+                            var rawTools = candidateServers
+                                .Select(s => (object)new Dictionary<string, object> { ["name"] = $"server:{s.Id}" })
+                                .ToList();
+                            var allowed = await filterAuthorizedToolsAsync(rawTools);
+                            var allowedIds = allowed
+                                .OfType<IDictionary<string, object>>()
+                                .Select(d => d.TryGetValue("name", out var n) ? n?.ToString()?.Substring("server:".Length) : null)
+                                .Where(id => !string.IsNullOrEmpty(id))
+                                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                            candidateServers = candidateServers.Where(s => allowedIds.Contains(s.Id)).ToList();
+                        }
+                        var serverList = candidateServers
                             .Select(s => (object)new
                             {
                                 id = s.Id,
@@ -646,7 +659,7 @@ namespace ModelContextGateway.Core.Routing
                                 instructions = sessionManager?.GetServerInstructionsCache(s.Id)
                             })
                             .ToList();
-                        return Task.FromResult<object>(serverList);
+                        return serverList;
                     }
                 };
 
