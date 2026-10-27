@@ -159,5 +159,44 @@ namespace ModelContextGateway.Core
         {
             return BuildInitializeRequest(id, "McpTestBench", protocolVersion);
         }
+
+        /// <summary>
+        /// Builds the MCP 2026-07-28 top-level instructions string returned in InitializeResult
+        /// so MCP clients and coding agents automatically discover Meta-Mode, Code Mode, resource/prompt catalogs,
+        /// and any cached downstream server instructions.
+        /// </summary>
+        public static string BuildGatewayInstructions(bool enableCodeMode = true, IReadOnlyDictionary<string, string>? downstreamInstructions = null)
+        {
+            string baseInstructions;
+            if (enableCodeMode)
+            {
+                baseInstructions = "Model Context Gateway (MCG) unified MCP router. " +
+                                   "Use `search_tools` (supports `format: \"typescript\"` and `include_typescript: true`) to discover tools across connected servers. " +
+                                   "Use `execute_tool` for single tool calls or `execute_script` (Code Mode) to run multi-step JavaScript/TypeScript workflows in a sandboxed Jint engine using `await tools.<server>.<tool>(args)` and `await mcg.readResource(uri)` / `await mcg.searchResources(query)`. " +
+                                   "Read `router://code-mode/guide` and `router://code-mode/sdk.d.ts` (or `router://code-mode/types/{server_name}`) for TypeScript declarations, and `router://resources/catalog` or `router://resources/server/{server_name}` for compacted downstream resource discovery and per-server instructions.";
+            }
+            else
+            {
+                baseInstructions = "Model Context Gateway (MCG) unified MCP router. " +
+                                   "Use `search_tools` to discover tools across connected servers and `execute_tool` to invoke them. " +
+                                   "Read `router://resources/catalog` or `router://resources/server/{server_name}` for compacted downstream resource discovery and per-server instructions, and `router://prompts/catalog` for available prompts.";
+            }
+
+            if (downstreamInstructions != null && downstreamInstructions.Count > 0)
+            {
+                var nonEmpty = downstreamInstructions
+                    .Where(kvp => !string.IsNullOrWhiteSpace(kvp.Key) && !string.IsNullOrWhiteSpace(kvp.Value))
+                    .OrderBy(kvp => kvp.Key, StringComparer.OrdinalIgnoreCase)
+                    .Select(kvp => $"- [{kvp.Key}]: {kvp.Value.Trim()}")
+                    .ToList();
+
+                if (nonEmpty.Count > 0)
+                {
+                    baseInstructions += "\n\nDownstream Server Instructions:\n" + string.Join("\n", nonEmpty);
+                }
+            }
+
+            return baseInstructions;
+        }
     }
 }

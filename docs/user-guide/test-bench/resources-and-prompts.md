@@ -21,9 +21,15 @@ Use the Virtual Resource Tester to read and verify virtual file paths, database 
   mcp://{serverId}/{path}
   ```
   *Example*: `mcp://docker/containers/status`, `mcp://filesystem/shared/config.json`.
-* **Gateway System Resources**: Built-in system introspection endpoints:
+* **Gateway System & Code Mode Resources**: Built-in system introspection, catalog, and TypeScript SDK endpoints:
   * `router://status`: Returns active client session counts, connection pools, and runtime uptime.
+  * `router://active-servers`: Returns RBAC-filtered active backend server statuses and downstream `instructions`.
   * `router://database`: Returns database connection status, registered table counts, and provider types.
+  * `router://code-mode/guide`: Returns the Markdown reference guide for MCP Code Mode (`execute_script`) and `mcg.*` sandbox globals.
+  * `router://code-mode/sdk.d.ts`: Synthesizes full ambient TypeScript declarations (`.d.ts`) for all authorized server tools and `Server Instructions:` JSDoc headers.
+  * `router://code-mode/types/{server_name}`: Synthesizes focused TypeScript declarations for a specific backend server ID or alias.
+  * `router://resources/catalog` & `router://resources/server/{server_name}`: Returns the compacted JSON directory of authorized downstream `mcp://` resources (and per-server `instructions`).
+  * `router://prompts/catalog`: Returns the JSON directory of all authorized downstream and built-in prompts.
   * `logs://recent`: Retrieves the most recent in-memory log buffer.
 
 ### API & cURL Invocation

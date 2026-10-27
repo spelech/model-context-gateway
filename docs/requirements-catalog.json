@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-25T23:28:20.3800935Z",
-    "totalRequirements": 481,
-    "positiveCount": 379,
-    "guardrailCount": 102,
-    "totalProofs": 1116
+    "generatedAt": "2026-10-27T00:46:56.0354548Z",
+    "totalRequirements": 486,
+    "positiveCount": 381,
+    "guardrailCount": 105,
+    "totalProofs": 1131
   },
   "requirements": [
     {
@@ -6625,14 +6625,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 43,
+          "lineNumber": 58,
           "testName": "SemanticSearchEndpoint_ReturnsCalibratedHybridResultsWithDiagnostics",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 126,
+          "lineNumber": 143,
           "testName": "SemanticSearchEndpoint_RespectsSearchModeAndDenseWeightParameters",
           "details": null
         }
@@ -6648,14 +6648,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 185,
+          "lineNumber": 204,
           "testName": "MetaModeTools_SearchToolsSchema_ExposesModeAndDenseWeight",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 229,
+          "lineNumber": 248,
           "testName": "SearchTools_CustomToolCall_ExecutesWithModeAndDenseWeight",
           "details": null
         }
@@ -6701,8 +6701,158 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/SemanticSearchEndpointTests.cs",
-          "lineNumber": 298,
+          "lineNumber": 317,
           "testName": "SearchTools_CustomToolCall_ExecutesWithCallerLimitAndThresholds",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-52",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "CodeModeTypeGenerator synthesizes full SDK TypeScript declarations with sandbox globals and JSDoc comments.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs",
+          "lineNumber": 52,
+          "testName": "GenerateFullSdkDeclarations_IncludesSandboxGlobalsAndServerInterfaces",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs",
+          "lineNumber": 84,
+          "testName": "GenerateServerDeclarations_FiltersToTargetServerAndSupportsAlias",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs",
+          "lineNumber": 100,
+          "testName": "SearchTools_SupportsTypeScriptFormatAndStructuredContent",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-53",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "Sandbox mcg.* APIs allow scripts to list servers, search/read resources with auto-unboxing, and list/get prompts under session RBAC.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs",
+          "lineNumber": 270,
+          "testName": "ExecuteScript_ViaClientSession_SupportsMcgResourcePromptAndServerApis",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs",
+          "lineNumber": 313,
+          "testName": "ExecuteScript_ViaClientSession_BlocksUnauthorizedResourceAndPromptAccess",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
+          "lineNumber": 166,
+          "testName": "ExecuteAsync_SandboxResourcePromptAndServerApis_WorkAndUnboxContents",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-54",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "Meta-Mode compacts downstream mcp:// resources into router:// catalog and per-server resources while non-Meta-Mode preserves flat mcp:// listings.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs",
+          "lineNumber": 208,
+          "testName": "ListResourcesAsync_CompactsDownstreamResourcesInMetaMode_AndPreservesFlatListInDirectMode",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs",
+          "lineNumber": 240,
+          "testName": "ReadResourceAsync_CodeModeDeclarationsAndCatalogs_RespectRbacPolicies",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs",
+          "lineNumber": 351,
+          "testName": "GetPromptAsync_CodeModePrompts_EmbedTypeScriptDeclarations",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-55",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "GatewayMetadata.BuildGatewayInstructions generates MCP 2026-07-28 initialize instructions documenting Code Mode and resource catalogs.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/DownstreamInstructionsTests.cs",
+          "lineNumber": 227,
+          "testName": "BuildGatewayInstructions_IncludesCodeModeAndResourceCatalogGuidance",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs",
+          "lineNumber": 382,
+          "testName": "CompleteAsync_SupportsLocalRouterPromptsTemplatesAndUnescapesMcpUris",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs",
+          "lineNumber": 153,
+          "testName": "GetMetaTools_IncludesAnnotationsAndOutputSchema",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-56",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "Downstream server initialize instructions are captured, cached in SessionManager, and returned directly in direct proxy mode (Surface 1) and rolled up in Meta-Mode initialize instructions (Surface 4).",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/DownstreamInstructionsTests.cs",
+          "lineNumber": 238,
+          "testName": "ResolveSessionInstructionsAsync_SurfacesDownstreamInstructions_InDirectProxyAndMetaMode",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/DownstreamInstructionsTests.cs",
+          "lineNumber": 289,
+          "testName": "DownstreamServerInstructions_AreExposedAcrossServerResourcesSandboxAndTypeScriptDeclarations",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/DownstreamInstructionsTests.cs",
+          "lineNumber": 335,
+          "testName": "DownstreamServerInstructions_EnforceRbacFiltering_AcrossInitializeActiveServersAndPrompts",
           "details": null
         }
       ]

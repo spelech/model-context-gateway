@@ -381,6 +381,8 @@ namespace ModelContextGateway.Components.Capabilities
                     if (method == "initialize")
                     {
                         string clientProtocolVersion = GatewayMetadata.ExtractRequestedProtocolVersion(requestBody);
+                        var enableCodeMode = httpContext.RequestServices.GetService<DynamicEmbeddingService>()?.GetSettings()?.EnableCodeMode ?? true;
+                        var resolvedInstructions = await session.ResolveSessionInstructionsAsync(enableCodeMode, requestBody, httpContext: httpContext);
 
                         var response = new
                         {
@@ -394,9 +396,11 @@ namespace ModelContextGateway.Components.Capabilities
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
                                     resources = new { listChanged = true },
+                                    completions = new { },
                                     subscriptions = new { }
                                 },
-                                serverInfo = new { name = "ModelContextGateway", version = AppVersion }
+                                serverInfo = new { name = "ModelContextGateway", version = AppVersion },
+                                instructions = resolvedInstructions
                             })
                         };
                         var json = JsonSerializer.Serialize(response);
@@ -406,6 +410,8 @@ namespace ModelContextGateway.Components.Capabilities
                     }
                     else if (method == "server/discover")
                     {
+                        var enableCodeMode = httpContext.RequestServices.GetService<DynamicEmbeddingService>()?.GetSettings()?.EnableCodeMode ?? true;
+                        var resolvedInstructions = await session.ResolveSessionInstructionsAsync(enableCodeMode, requestBody, httpContext: httpContext);
                         var response = new
                         {
                             jsonrpc = "2.0",
@@ -418,9 +424,11 @@ namespace ModelContextGateway.Components.Capabilities
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
                                     resources = new { listChanged = true },
+                                    completions = new { },
                                     subscriptions = new { }
                                 },
-                                serverInfo = new { name = "ModelContextGateway", version = AppVersion }
+                                serverInfo = new { name = "ModelContextGateway", version = AppVersion },
+                                instructions = resolvedInstructions
                             })
                         };
                         var json = JsonSerializer.Serialize(response);
@@ -766,6 +774,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 serverName = char.ToUpper(targetServerId[0]) + targetServerId.Substring(1) + " Services";
                             }
                         }
+                        var enableCodeMode = httpContext.RequestServices.GetService<DynamicEmbeddingService>()?.GetSettings()?.EnableCodeMode ?? true;
+                        var resolvedInstructions = await session.ResolveSessionInstructionsAsync(enableCodeMode, requestBody, httpContext: httpContext);
                         var response = method == "server/discover" ? (object)new
                         {
                             jsonrpc = "2.0",
@@ -778,9 +788,11 @@ namespace ModelContextGateway.Components.Capabilities
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
                                     resources = new { listChanged = true },
+                                    completions = new { },
                                     subscriptions = new { }
                                 },
-                                serverInfo = new { name = serverName, version = AppVersion }
+                                serverInfo = new { name = serverName, version = AppVersion },
+                                instructions = resolvedInstructions
                             })
                         } : new
                         {
@@ -794,9 +806,11 @@ namespace ModelContextGateway.Components.Capabilities
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
                                     resources = new { listChanged = true },
+                                    completions = new { },
                                     subscriptions = new { }
                                 },
-                                serverInfo = new { name = serverName, version = AppVersion }
+                                serverInfo = new { name = serverName, version = AppVersion },
+                                instructions = resolvedInstructions
                             })
                         };
                         await session.WriteMessageAsync(response);
@@ -879,6 +893,8 @@ namespace ModelContextGateway.Components.Capabilities
 
                     if (method == "initialize")
                     {
+                        var enableCodeMode = httpContext.RequestServices.GetService<DynamicEmbeddingService>()?.GetSettings()?.EnableCodeMode ?? true;
+                        var resolvedInstructions = await session.ResolveSessionInstructionsAsync(enableCodeMode, body, httpContext: httpContext);
                         var response = new
                         {
                             jsonrpc = "2.0",
@@ -891,13 +907,15 @@ namespace ModelContextGateway.Components.Capabilities
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
                                     resources = new { listChanged = true },
+                                    completions = new { },
                                     subscriptions = new { }
                                 },
                                 serverInfo = new
                                 {
                                     name = "ModelContextGateway",
                                     version = AppVersion
-                                }
+                                },
+                                instructions = resolvedInstructions
                             })
                         };
 
@@ -907,6 +925,8 @@ namespace ModelContextGateway.Components.Capabilities
                     }
                     else if (method == "server/discover")
                     {
+                        var enableCodeMode = httpContext.RequestServices.GetService<DynamicEmbeddingService>()?.GetSettings()?.EnableCodeMode ?? true;
+                        var resolvedInstructions = await session.ResolveSessionInstructionsAsync(enableCodeMode, body, httpContext: httpContext);
                         var response = new
                         {
                             jsonrpc = "2.0",
@@ -919,13 +939,15 @@ namespace ModelContextGateway.Components.Capabilities
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
                                     resources = new { listChanged = true },
+                                    completions = new { },
                                     subscriptions = new { }
                                 },
                                 serverInfo = new
                                 {
                                     name = "ModelContextGateway",
                                     version = AppVersion
-                                }
+                                },
+                                instructions = resolvedInstructions
                             })
                         };
 

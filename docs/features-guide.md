@@ -29,7 +29,7 @@ Practical guides for configuring servers, connecting AI clients, and testing cap
 * [**Dynamic Server Management & Health Checks**](user-guide/servers.md)
   Register backend MCP servers via the Web UI, JSON seeding (`custom_servers.json`), or Docker container labels (`mcp.*`), and configure `RootOrigin` or `JsonRpcPing` health probes.
 * [**MCP Code Mode (`execute_script`)**](user-guide/code-mode.md)
-  Orchestrate multi-step tool workflows in a single LLM turn using sandboxed JavaScript (`mcg.callTool` and `tools.<server>.<tool>`), automatic JSON unboxing, and configurable resource guardrails.
+  Orchestrate multi-step tool workflows in a single LLM turn using sandboxed JavaScript (`mcg.callTool`, `tools.<server>.<tool>`, and `mcg.*` resource/prompt/server discovery APIs), dynamic TypeScript SDK declarations (`router://code-mode/sdk.d.ts`, `router://code-mode/types/{server_name}`), Meta-Mode resource compaction (`router://resources/catalog`), automatic JSON unboxing, and configurable resource guardrails.
 * [**AppKey Management & Atomic Rotation**](user-guide/app-keys.md)
   Generate scoped AppKeys, monitor live `LastUsedAt` activity, rotate credentials in place without recreating keys, and generate ready-to-paste client configs.
 * [**System Settings, Search Thresholds & Code Mode**](user-guide/settings.md)

@@ -260,6 +260,11 @@ namespace ModelContextGateway.Core.Routing
                         {
                             throw new Exception($"Initialize failed: {resp.Error.Message}");
                         }
+
+                        if (resp.Error == null && resp.Result.HasValue)
+                        {
+                            TryCacheBackendInitializeResult(server.Id, resp.Result.Value);
+                        }
                     }
 
                     // Send initialized notification to this backend
@@ -410,6 +415,24 @@ namespace ModelContextGateway.Core.Routing
             catch
             {
                 return GatewayMetadata.BuildInitializeRequest(protocolVersion: targetVersion);
+            }
+        }
+
+        private void TryCacheBackendInitializeResult(string serverId, JsonElement resultElement)
+        {
+            if (resultElement.ValueKind != JsonValueKind.Object)
+            {
+                return;
+            }
+
+            if (resultElement.TryGetProperty("instructions", out var instrProp) &&
+                instrProp.ValueKind == JsonValueKind.String)
+            {
+                var instructions = instrProp.GetString();
+                if (!string.IsNullOrWhiteSpace(instructions))
+                {
+                    _sessionManager?.SetServerInstructionsCache(serverId, instructions);
+                }
             }
         }
     }

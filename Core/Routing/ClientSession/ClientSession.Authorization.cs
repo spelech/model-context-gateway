@@ -160,8 +160,39 @@ namespace ModelContextGateway.Core.Routing
             }
             else if (targetId.StartsWith("router://", StringComparison.OrdinalIgnoreCase))
             {
-                serverId = "router";
-                extractedPrefix = "router";
+                if (targetId.StartsWith("router://resources/server/", StringComparison.OrdinalIgnoreCase))
+                {
+                    var rawServer = targetId.Substring("router://resources/server/".Length).Split('/')[0];
+                    if (!string.IsNullOrWhiteSpace(rawServer) && !rawServer.Contains('{'))
+                    {
+                        serverId = rawServer;
+                        extractedPrefix = rawServer;
+                    }
+                    else
+                    {
+                        serverId = "router";
+                        extractedPrefix = "router";
+                    }
+                }
+                else if (targetId.StartsWith("router://code-mode/types/", StringComparison.OrdinalIgnoreCase))
+                {
+                    var rawServer = targetId.Substring("router://code-mode/types/".Length).Split('/')[0];
+                    if (!string.IsNullOrWhiteSpace(rawServer) && !rawServer.Contains('{'))
+                    {
+                        serverId = rawServer;
+                        extractedPrefix = rawServer;
+                    }
+                    else
+                    {
+                        serverId = "router";
+                        extractedPrefix = "router";
+                    }
+                }
+                else
+                {
+                    serverId = "router";
+                    extractedPrefix = "router";
+                }
             }
             else if (targetId.StartsWith("server:", StringComparison.OrdinalIgnoreCase))
             {
@@ -260,7 +291,7 @@ namespace ModelContextGateway.Core.Routing
                                     scopeAllowed = true;
                                     break;
                                 }
-                                if ((targetId == "search_tools" || targetId == "execute_tool" || targetId == "execute_script") && (IsMetaMode || requestMethod.StartsWith("tools/")))
+                                if (IsMetaDiscoveryTarget(targetId) && (IsMetaMode || requestMethod.StartsWith("tools/")))
                                 {
                                     scopeAllowed = true;
                                     break;
@@ -437,6 +468,15 @@ namespace ModelContextGateway.Core.Routing
                         {
                             return true;
                         }
+                        if (IsMetaDiscoveryTarget(targetId) && (IsMetaMode || targetId == "search_tools" || targetId == "execute_tool" || targetId == "execute_script"))
+                        {
+                            const string anyAllowSql = "SELECT COUNT(*) FROM AccessPolicies WHERE RequiredGroup IN @GroupNames AND IsAllowed = 1;";
+                            int anyAllowCount = await conn.ExecuteScalarAsync<int>(anyAllowSql, new { GroupNames = allUserGroups.ToArray() });
+                            if (anyAllowCount > 0)
+                            {
+                                return true;
+                            }
+                        }
                         return false;
                     }
 
@@ -484,6 +524,21 @@ namespace ModelContextGateway.Core.Routing
                 _logger.LogError(ex, "Error checking user authorization for target '{TargetId}'", targetId);
                 return false; // Fail closed fallback
             }
+        }
+
+        private static bool IsMetaDiscoveryTarget(string targetId)
+        {
+            return targetId == "search_tools" ||
+                   targetId == "execute_tool" ||
+                   targetId == "execute_script" ||
+                   string.Equals(targetId, "router://code-mode/guide", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(targetId, "router://code-mode/sdk.d.ts", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(targetId, "router://resources/catalog", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(targetId, "router://prompts/catalog", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(targetId, "router://code-mode/types/{server_name}", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(targetId, "router://resources/server/{server_name}", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(targetId, "router__code_mode_guide", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(targetId, "router__write_code_mode_script", StringComparison.OrdinalIgnoreCase);
         }
 
         private async Task<List<string>> GetServerCategoriesAsync(string serverId, HttpContext? httpContext)

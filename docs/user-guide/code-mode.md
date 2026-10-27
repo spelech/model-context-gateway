@@ -89,7 +89,41 @@ const pods = await tools.kubernetes.list_pods({ namespace: targetNamespace });
 return pods.filter(p => p.status !== "Running");
 ```
 
-### 5. Diagnostic Logging: `console.log`, `console.warn`, `console.error`
+### 5. Resource, Prompt & Server Discovery APIs (`mcg.*`)
+
+In addition to calling tools, Code Mode scripts can discover and read MCP resources, prompts, and active servers directly inside the sandbox:
+
+```javascript
+// List all active authorized servers
+const servers = await mcg.listServers();
+
+// Search or list downstream resources
+const matches = await mcg.searchResources("nginx");
+const dockerResources = await mcg.listResources("docker");
+
+// Read a resource (automatically unboxes single-text JSON payloads)
+const containerState = await mcg.readResource(matches[0].uri);
+
+// List and retrieve MCP prompts
+const prompts = await mcg.listPrompts("docker");
+const compiledPrompt = await mcg.getPrompt("docker__inspect_container", { id: "nginx" });
+```
+
+### 6. TypeScript SDK Resources & `search_tools` Signatures
+
+Agents can inspect strongly-typed TypeScript declarations (`.d.ts`) before writing `execute_script` workflows:
+
+| Resource / Feature | URI / Parameter | Description |
+| :--- | :--- | :--- |
+| **Code Mode Guide** | `router://code-mode/guide` | Markdown reference covering sandbox globals, `tools.<server>.<tool>()` proxies, and `mcg.*` APIs. |
+| **Full TypeScript SDK** | `router://code-mode/sdk.d.ts` | Ambient `.d.ts` declarations for `McgSandbox` globals and all authorized server tool interfaces. |
+| **Per-Server `.d.ts`** | `router://code-mode/types/{server_name}` | Focused `.d.ts` interface declarations for a single backend server ID or alias. |
+| **Resource Catalog** | `router://resources/catalog` & `router://resources/server/{server_name}` | Compacted JSON directory of downstream `mcp://` resources (preventing `resources/list` context truncation). |
+| **Prompt Catalog** | `router://prompts/catalog` | JSON catalog of all authorized downstream and built-in prompts. |
+| **`search_tools` TypeScript Mode** | `format: "typescript"` or `include_typescript: true` | Returns compact TypeScript call signatures (`await tools.<server>.<tool>(args: { ... }): Promise<any>;`) directly from semantic search. |
+| **Code Mode Meta-Prompts** | `router__code_mode_guide`, `router__write_code_mode_script` | Built-in prompts that embed live `.d.ts` declarations for target servers. |
+
+### 7. Diagnostic Logging: `console.log`, `console.warn`, `console.error`
 
 Call `console.log()`, `console.warn()`, or `console.error()` to record diagnostic breadcrumbs during execution. The gateway captures up to 100 log entries per run and returns them in the `logs` array of the response envelope.
 

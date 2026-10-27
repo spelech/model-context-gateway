@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **481 Requirements Verified** across **1116 Test Proofs** (379 Functional Capabilities, 102 Safety Guardrails).
+> **Catalog Statistics:** **486 Requirements Verified** across **1131 Test Proofs** (381 Functional Capabilities, 105 Safety Guardrails).
 
 ---
 
@@ -15,7 +15,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **70** | 3 | 67 | 146 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **129** | 122 | 7 | 283 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **134** | 124 | 10 | 298 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **67** | 56 | 11 | 143 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **42** | 35 | 7 | 214 proofs |
@@ -1300,15 +1300,15 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L293`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L293) (`HybridSearch_ReturnsDecomposedScores`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L427`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L427) (`HybridSearch_WithEmptyQueryOrEmptyTools_ReturnsSafeGracefulList`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L451`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L451) (`HybridSearch_ResolveServerId_ResolvesVariousConventions`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L43`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L43) (`SemanticSearchEndpoint_ReturnsCalibratedHybridResultsWithDiagnostics`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L126`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L126) (`SemanticSearchEndpoint_RespectsSearchModeAndDenseWeightParameters`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L58`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L58) (`SemanticSearchEndpoint_ReturnsCalibratedHybridResultsWithDiagnostics`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L143`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L143) (`SemanticSearchEndpoint_RespectsSearchModeAndDenseWeightParameters`)
 
 ### `[MCP-42]` Meta-mode search_tools MCP tool accepts optional mode and dense_weight arguments and executes calibrated tool retrieval.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (2):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L185`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L185) (`MetaModeTools_SearchToolsSchema_ExposesModeAndDenseWeight`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L229`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L229) (`SearchTools_CustomToolCall_ExecutesWithModeAndDenseWeight`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L204`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L204) (`MetaModeTools_SearchToolsSchema_ExposesModeAndDenseWeight`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L248`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L248) (`SearchTools_CustomToolCall_ExecutesWithModeAndDenseWeight`)
 
 ### `[MCP-43]` SearchToolsDetailedAsync applies configurable result limit.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1322,7 +1322,23 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L298`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L298) (`SearchTools_CustomToolCall_ExecutesWithCallerLimitAndThresholds`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L317`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L317) (`SearchTools_CustomToolCall_ExecutesWithCallerLimitAndThresholds`)
+
+### `[MCP-52]` CodeModeTypeGenerator synthesizes full SDK TypeScript declarations with sandbox globals and JSDoc comments.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (3):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs#L52`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs#L52) (`GenerateFullSdkDeclarations_IncludesSandboxGlobalsAndServerInterfaces`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs#L84`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs#L84) (`GenerateServerDeclarations_FiltersToTargetServerAndSupportsAlias`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs#L100`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs#L100) (`SearchTools_SupportsTypeScriptFormatAndStructuredContent`)
+
+### `[MCP-55]` GatewayMetadata.BuildGatewayInstructions generates MCP 2026-07-28 initialize instructions documenting Code Mode and resource catalogs.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (3):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L227`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L227) (`BuildGatewayInstructions_IncludesCodeModeAndResourceCatalogGuidance`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L382`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L382) (`CompleteAsync_SupportsLocalRouterPromptsTemplatesAndUnescapesMcpUris`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs#L153`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs#L153) (`GetMetaTools_IncludesAnnotationsAndOutputSchema`)
 
 ### `[MCP-ADMIN-ENDPOINT-CALL-TOOL]` Admin endpoint /admin/message executes tools/call for manage_system diagnostics.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -3346,6 +3362,30 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L101`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L101) (`CallToolAsync_SearchTools_ExecutesHybridRrfSearch`)
   - [Backend xUnit] [`ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L108`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L108) (`GenerateEmbeddingAsync_ThrowsOnLoopbackIp_WhenPrivateIpsDisallowed`)
 
+### `[MCP-53]` Sandbox mcg.* APIs allow scripts to list servers, search/read resources with auto-unboxing, and list/get prompts under session RBAC.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (3):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L270`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L270) (`ExecuteScript_ViaClientSession_SupportsMcgResourcePromptAndServerApis`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L313`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L313) (`ExecuteScript_ViaClientSession_BlocksUnauthorizedResourceAndPromptAccess`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L166`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L166) (`ExecuteAsync_SandboxResourcePromptAndServerApis_WorkAndUnboxContents`)
+
+### `[MCP-54]` Meta-Mode compacts downstream mcp:// resources into router:// catalog and per-server resources while non-Meta-Mode preserves flat mcp:// listings.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (3):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L208`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L208) (`ListResourcesAsync_CompactsDownstreamResourcesInMetaMode_AndPreservesFlatListInDirectMode`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L240`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L240) (`ReadResourceAsync_CodeModeDeclarationsAndCatalogs_RespectRbacPolicies`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L351`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L351) (`GetPromptAsync_CodeModePrompts_EmbedTypeScriptDeclarations`)
+
+### `[MCP-56]` Downstream server initialize instructions are captured, cached in SessionManager, and returned directly in direct proxy mode (Surface 1) and rolled up in Meta-Mode initialize instructions (Surface 4).
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (3):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L238`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L238) (`ResolveSessionInstructionsAsync_SurfacesDownstreamInstructions_InDirectProxyAndMetaMode`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L289`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L289) (`DownstreamServerInstructions_AreExposedAcrossServerResourcesSandboxAndTypeScriptDeclarations`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L335`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L335) (`DownstreamServerInstructions_EnforceRbacFiltering_AcrossInitializeActiveServersAndPrompts`)
+
 ### `[AUTH-106]` Exchange throws InvalidOperationException when request is null.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
@@ -3811,9 +3851,14 @@
 | `MCP-39` | Positive | `MCP` | CapabilityEndpoints test bench APIs return 404 Not Found gracefully when target server is missing. | [`PromptAndResourceResilienceTests.cs:L165`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L165) | Backend xUnit |
 | `MCP-40` | Positive | `MCP` | Calibrated hybrid semantic search scoring with configurable dense weight and normalized linear combination. | [`ToolRoutingManagerHybridSearchTests.cs:L39`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L39) | Backend xUnit |
 | `MCP-41` | Positive | `MCP` | Explicit search modes (hybrid, semantic, lexical) and decomposed score diagnostics in ToolRoutingManager. | [`ToolRoutingManagerHybridSearchTests.cs:L203`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L203) | Backend xUnit |
-| `MCP-42` | Positive | `MCP` | Meta-mode search_tools MCP tool accepts optional mode and dense_weight arguments and executes calibrated tool retrieval. | [`SemanticSearchEndpointTests.cs:L185`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L185) | Backend xUnit |
+| `MCP-42` | Positive | `MCP` | Meta-mode search_tools MCP tool accepts optional mode and dense_weight arguments and executes calibrated tool retrieval. | [`SemanticSearchEndpointTests.cs:L204`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L204) | Backend xUnit |
 | `MCP-43` | Positive | `MCP` | SearchToolsDetailedAsync applies configurable result limit. | [`ToolRoutingManagerHybridSearchTests.cs:L473`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerHybridSearchTests.cs#L473) | Backend xUnit |
-| `MCP-44` | Positive | `MCP` | search_tools MCP tool call respects caller-supplied limit, min_score, and score_dropoff_ratio arguments. | [`SemanticSearchEndpointTests.cs:L298`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L298) | Backend xUnit |
+| `MCP-44` | Positive | `MCP` | search_tools MCP tool call respects caller-supplied limit, min_score, and score_dropoff_ratio arguments. | [`SemanticSearchEndpointTests.cs:L317`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SemanticSearchEndpointTests.cs#L317) | Backend xUnit |
+| `MCP-52` | Positive | `MCP` | CodeModeTypeGenerator synthesizes full SDK TypeScript declarations with sandbox globals and JSDoc comments. | [`CodeModeTypeGeneratorTests.cs:L52`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs#L52) | Backend xUnit |
+| `MCP-53` | **Guardrail** | `MCP` | Sandbox mcg.* APIs allow scripts to list servers, search/read resources with auto-unboxing, and list/get prompts under session RBAC. | [`CodeModeResourcesAndPromptsTests.cs:L270`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L270) | Backend xUnit |
+| `MCP-54` | **Guardrail** | `MCP` | Meta-Mode compacts downstream mcp:// resources into router:// catalog and per-server resources while non-Meta-Mode preserves flat mcp:// listings. | [`CodeModeResourcesAndPromptsTests.cs:L208`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L208) | Backend xUnit |
+| `MCP-55` | Positive | `MCP` | GatewayMetadata.BuildGatewayInstructions generates MCP 2026-07-28 initialize instructions documenting Code Mode and resource catalogs. | [`DownstreamInstructionsTests.cs:L227`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L227) | Backend xUnit |
+| `MCP-56` | **Guardrail** | `MCP` | Downstream server initialize instructions are captured, cached in SessionManager, and returned directly in direct proxy mode (Surface 1) and rolled up in Meta-Mode initialize instructions (Surface 4). | [`DownstreamInstructionsTests.cs:L238`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L238) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-CALL-TOOL` | Positive | `MCP` | Admin endpoint /admin/message executes tools/call for manage_system diagnostics. | [`AdminEndpointsTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L294) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-HEAD-REQUEST` | Positive | `MCP` | Admin endpoint /admin handles HEAD request returning text/event-stream headers. | [`AdminEndpointsTests.cs:L212`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L212) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-LIST-TOOLS` | Positive | `MCP` | Admin endpoint /admin/message executes tools/list over active SSE session and returns 10 admin tools. | [`AdminEndpointsTests.cs:L224`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L224) | Backend xUnit |

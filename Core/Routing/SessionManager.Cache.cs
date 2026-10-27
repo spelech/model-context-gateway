@@ -8,6 +8,44 @@ namespace ModelContextGateway.Core.Routing
         private readonly ConcurrentDictionary<string, List<object>> _serverPromptsCache = new();
         private readonly ConcurrentDictionary<string, List<object>> _serverResourcesCache = new();
         private readonly ConcurrentDictionary<string, List<object>> _serverResourceTemplatesCache = new();
+        private readonly ConcurrentDictionary<string, string> _serverInstructionsCache = new(StringComparer.OrdinalIgnoreCase);
+
+        public string? GetServerInstructionsCache(string serverId)
+        {
+            if (string.IsNullOrWhiteSpace(serverId))
+            {
+                return null;
+            }
+            _serverInstructionsCache.TryGetValue(serverId, out var instructions);
+            return instructions;
+        }
+
+        public void SetServerInstructionsCache(string serverId, string? instructions)
+        {
+            if (string.IsNullOrWhiteSpace(serverId))
+            {
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(instructions))
+            {
+                _serverInstructionsCache.TryRemove(serverId, out _);
+                return;
+            }
+            _serverInstructionsCache[serverId] = instructions.Trim();
+        }
+
+        public void RemoveServerInstructionsCache(string serverId)
+        {
+            if (!string.IsNullOrWhiteSpace(serverId))
+            {
+                _serverInstructionsCache.TryRemove(serverId, out _);
+            }
+        }
+
+        public IReadOnlyDictionary<string, string> GetAllCachedServerInstructions()
+        {
+            return new Dictionary<string, string>(_serverInstructionsCache, StringComparer.OrdinalIgnoreCase);
+        }
 
         public List<object>? GetServerToolsCache(string serverId)
         {
@@ -89,6 +127,7 @@ namespace ModelContextGateway.Core.Routing
             RemoveServerPromptsCache(serverId);
             RemoveServerResourcesCache(serverId);
             RemoveServerResourceTemplatesCache(serverId);
+            RemoveServerInstructionsCache(serverId);
         }
 
         public void ClearGlobalCache()
@@ -97,6 +136,7 @@ namespace ModelContextGateway.Core.Routing
             _serverPromptsCache.Clear();
             _serverResourcesCache.Clear();
             _serverResourceTemplatesCache.Clear();
+            _serverInstructionsCache.Clear();
         }
     }
 }

@@ -162,5 +162,87 @@ namespace ModelContextGateway.Tests
             using var doc = JsonDocument.Parse(result.ResultJson!);
             doc.RootElement.GetProperty("text").GetString().Should().Be("# Project Title\nThis is plain markdown not JSON.");
         }
+
+        [Fact]
+        [Requirement("MCP-53", "MCP", RequirementType.Positive, "Sandbox exposes mcg.listServers, mcg.listResources, mcg.searchResources, mcg.readResource, mcg.listPrompts, and mcg.getPrompt with automatic unboxing.")]
+        public async Task ExecuteAsync_SandboxResourcePromptAndServerApis_WorkAndUnboxContents()
+        {
+            var settings = new RouterSettings();
+            var callbacks = new CodeModeSandboxCallbacks
+            {
+                ListServersAsync = () => Task.FromResult<object>(new[]
+                {
+                    new { id = "docker", alias = (string?)null, displayName = "Docker Engine", categories = new[] { "infra" } }
+                }),
+                ListResourcesAsync = (serverId) => Task.FromResult<object>(new[]
+                {
+                    new { uri = $"mcp://{serverId ?? "docker"}/containers", name = "Containers" }
+                }),
+                SearchResourcesAsync = (query) => Task.FromResult<object>(new[]
+                {
+                    new { uri = "router://code-mode/sdk.d.ts", name = $"Match: {query}" }
+                }),
+                ReadResourceAsync = (uri) => Task.FromResult<object?>(new
+                {
+                    contents = new[]
+                    {
+                        new { uri, mimeType = "application/json", text = "{\"status\":\"healthy\",\"activeCount\":4}" }
+                    }
+                }),
+                ListPromptsAsync = (serverId) => Task.FromResult<object>(new[]
+                {
+                    new { name = "router__code_mode_guide", description = "Code Mode Guide" }
+                }),
+                GetPromptAsync = (name, promptArgs) => Task.FromResult<object?>(new
+                {
+                    description = $"Compiled {name}",
+                    messages = new[]
+                    {
+                        new { role = "user", content = new { type = "text", text = "Guide content" } }
+                    }
+                })
+            };
+
+            var script = @"
+                const servers = await mcg.listServers();
+                const resources = await mcg.listResources('docker');
+                const searched = await mcg.searchResources('sdk');
+                const statusObj = await mcg.readResource('router://status');
+                const prompts = await mcg.listPrompts();
+                const promptMsg = await mcg.getPrompt('router__code_mode_guide', { server_name: 'docker' });
+                return {
+                    serverCount: servers.length,
+                    firstServer: servers[0].id,
+                    resourceUri: resources[0].uri,
+                    searchedName: searched[0].name,
+                    unboxedStatus: statusObj.status,
+                    activeCount: statusObj.activeCount,
+                    promptName: prompts[0].name,
+                    compiledPrompt: promptMsg.description
+                };
+            ";
+
+            var result = await _engine.ExecuteAsync(
+                script,
+                null,
+                settings,
+                (toolName, args, token) => Task.FromResult<object>("ok"),
+                CancellationToken.None,
+                callbacks);
+
+            result.IsError.Should().BeFalse();
+            result.ToolCallsCount.Should().Be(6);
+
+            using var doc = JsonDocument.Parse(result.ResultJson!);
+            var root = doc.RootElement;
+            root.GetProperty("serverCount").GetInt32().Should().Be(1);
+            root.GetProperty("firstServer").GetString().Should().Be("docker");
+            root.GetProperty("resourceUri").GetString().Should().Be("mcp://docker/containers");
+            root.GetProperty("searchedName").GetString().Should().Be("Match: sdk");
+            root.GetProperty("unboxedStatus").GetString().Should().Be("healthy");
+            root.GetProperty("activeCount").GetInt32().Should().Be(4);
+            root.GetProperty("promptName").GetString().Should().Be("router__code_mode_guide");
+            root.GetProperty("compiledPrompt").GetString().Should().Be("Compiled router__code_mode_guide");
+        }
     }
 }
