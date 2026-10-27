@@ -6,7 +6,7 @@ namespace ModelContextGateway.Core.Routing
     {
         public async Task WriteMessageAsync(object message)
         {
-            if (_sessionId == "global-stateless-session" || _clientResponse == null)
+            if (_sessionId.StartsWith("global-stateless-session", StringComparison.Ordinal) || _clientResponse == null)
             {
                 return;
             }

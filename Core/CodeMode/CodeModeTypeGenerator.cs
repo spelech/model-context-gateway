@@ -293,6 +293,8 @@ return {
             sb.AppendLine("  callTool(name: string, args?: Record<string, any>, options?: McgCallOptions): Promise<any>;");
             sb.AppendLine("  /** List all active authorized MCP backend servers. */");
             sb.AppendLine("  listServers(): Promise<McgServerInfo[]>;");
+            sb.AppendLine("  /** Retrieve the cached MCP initialize instructions for a specific backend server ID or alias. */");
+            sb.AppendLine("  getServerInstructions(serverId: string): Promise<string | null>;");
             sb.AppendLine("  /** List authorized MCP resources, optionally filtered by backend server ID or alias. */");
             sb.AppendLine("  listResources(serverId?: string): Promise<McgResourceDescriptor[]>;");
             sb.AppendLine("  /** Search authorized MCP resources by keyword or natural language query. */");

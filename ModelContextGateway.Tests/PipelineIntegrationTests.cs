@@ -11,6 +11,8 @@ namespace ModelContextGateway.Tests
 {
     public class PipelineIntegrationFactory : WebApplicationFactory<Program>
     {
+        private readonly string _dbConnStr = $"Data Source=file:pipeline_test_{Guid.NewGuid():N}?mode=memory&cache=shared";
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Development");
@@ -18,12 +20,23 @@ namespace ModelContextGateway.Tests
             {
                 config.AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    { "ConnectionStrings:Sqlite", "Data Source=file:pipeline_test_db?mode=memory&cache=shared" },
+                    { "ConnectionStrings:DefaultConnection", _dbConnStr },
+                    { "ConnectionStrings:Sqlite", _dbConnStr },
                     { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" },
                     { "Oidc:TrustedProxies", "127.0.0.1,::1,127.0.0.1:0" },
                     { "Admin:GroupSid", "full_admin" },
                     { "Oidc:RequireTrustedProxy", "false" }
                 });
+            });
+            builder.ConfigureServices(services =>
+            {
+                var dockerHostedDescriptor = services.FirstOrDefault(d =>
+                    d.ServiceType == typeof(Microsoft.Extensions.Hosting.IHostedService) &&
+                    d.ImplementationType == typeof(DockerAutoDiscoveryService));
+                if (dockerHostedDescriptor != null)
+                {
+                    services.Remove(dockerHostedDescriptor);
+                }
             });
         }
     }
@@ -89,18 +102,52 @@ namespace ModelContextGateway.Tests
         {
             var client = CreateAuthenticatedClient();
 
-            // 1. Initialize global session via POST /sse
-            using (var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500)))
+            // 1. Initialize global session via POST /sse (synchronous Streamable HTTP response)
+            using (var req = new HttpRequestMessage(HttpMethod.Post, "/sse")
             {
-                try
-                {
-                    using var req = new HttpRequestMessage(HttpMethod.Post, "/sse")
-                    {
-                        Content = new StringContent("{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":1}", Encoding.UTF8, "application/json")
-                    };
-                    await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cts.Token);
-                }
-                catch (OperationCanceledException) { }
+                Content = new StringContent("{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":1,\"params\":{\"protocolVersion\":\"2026-07-28\",\"capabilities\":{},\"clientInfo\":{\"name\":\"gemini\",\"version\":\"1.0\"}}}", Encoding.UTF8, "application/json")
+            })
+            {
+                var initRes = await client.SendAsync(req);
+                Assert.Equal(HttpStatusCode.OK, initRes.StatusCode);
+                Assert.Equal("application/json", initRes.Content.Headers.ContentType?.MediaType);
+                var initJson = await initRes.Content.ReadFromJsonAsync<JsonElement>();
+                Assert.Equal("2026-07-28", initJson.GetProperty("result").GetProperty("protocolVersion").GetString());
+                Assert.True(initJson.GetProperty("result").TryGetProperty("instructions", out var instrProp));
+                Assert.Contains("search_tools", instrProp.GetString());
+            }
+
+            // 1a. Discover and ping via synchronous POST /sse and notifications/initialized (202 Accepted)
+            using (var discoverReq = new HttpRequestMessage(HttpMethod.Post, "/sse")
+            {
+                Content = new StringContent("{\"jsonrpc\":\"2.0\",\"method\":\"server/discover\",\"id\":\"disc-1\"}", Encoding.UTF8, "application/json")
+            })
+            {
+                var discRes = await client.SendAsync(discoverReq);
+                Assert.Equal(HttpStatusCode.OK, discRes.StatusCode);
+                Assert.Equal("application/json", discRes.Content.Headers.ContentType?.MediaType);
+                var discJson = await discRes.Content.ReadFromJsonAsync<JsonElement>();
+                Assert.True(discJson.GetProperty("result").TryGetProperty("supportedVersions", out _));
+                Assert.True(discJson.GetProperty("result").TryGetProperty("instructions", out _));
+            }
+
+            using (var pingReq = new HttpRequestMessage(HttpMethod.Post, "/sse")
+            {
+                Content = new StringContent("{\"jsonrpc\":\"2.0\",\"method\":\"ping\",\"id\":\"ping-1\"}", Encoding.UTF8, "application/json")
+            })
+            {
+                var pingRes = await client.SendAsync(pingReq);
+                Assert.Equal(HttpStatusCode.OK, pingRes.StatusCode);
+                Assert.Equal("application/json", pingRes.Content.Headers.ContentType?.MediaType);
+            }
+
+            using (var notifReq = new HttpRequestMessage(HttpMethod.Post, "/sse")
+            {
+                Content = new StringContent("{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}", Encoding.UTF8, "application/json")
+            })
+            {
+                var notifRes = await client.SendAsync(notifReq);
+                Assert.Equal(HttpStatusCode.Accepted, notifRes.StatusCode);
             }
 
             // 1b. GET /sse SSE stream test
@@ -607,6 +654,26 @@ namespace ModelContextGateway.Tests
                 uri = "mcp://db_alias/schema"
             });
             Assert.NotEqual(HttpStatusCode.BadRequest, resourceRes.StatusCode);
+
+            // 4. Synchronous Streamable HTTP POST /{targetServerId} for initialize, server/discover, ping, and tools/list
+            var targetInitRes = await client.PostAsync("/backend-db-1", new StringContent("{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"t-init-1\"}", Encoding.UTF8, "application/json"));
+            Assert.Equal(HttpStatusCode.OK, targetInitRes.StatusCode);
+            Assert.Equal("application/json", targetInitRes.Content.Headers.ContentType?.MediaType);
+            var targetInitJson = await targetInitRes.Content.ReadFromJsonAsync<JsonElement>();
+            Assert.Equal("Backend DB 1", targetInitJson.GetProperty("result").GetProperty("serverInfo").GetProperty("name").GetString());
+
+            var targetPingRes = await client.PostAsync("/backend-db-1", new StringContent("{\"jsonrpc\":\"2.0\",\"method\":\"ping\",\"id\":\"t-ping-1\"}", Encoding.UTF8, "application/json"));
+            Assert.Equal(HttpStatusCode.OK, targetPingRes.StatusCode);
+
+            // 5. Non-admin RBAC check on /{targetServerId} with SQLite IN @GroupNames and JsonListTypeHandler
+            await client.PostAsJsonAsync("/api/permissions/policies", new { targetId = "server:backend-db-1", requiredGroup = "house_member", isAllowed = true });
+            var memberClient = _factory.CreateClient();
+            memberClient.DefaultRequestHeaders.Add("X-Forwarded-For", "127.0.0.1");
+            memberClient.DefaultRequestHeaders.Add("Remote-User", "member_user");
+            memberClient.DefaultRequestHeaders.Add("Remote-Groups", "house_member");
+
+            var memberInitRes = await memberClient.PostAsync("/backend-db-1", new StringContent("{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"m-init-1\"}", Encoding.UTF8, "application/json"));
+            Assert.Equal(HttpStatusCode.OK, memberInitRes.StatusCode);
         }
     }
 }

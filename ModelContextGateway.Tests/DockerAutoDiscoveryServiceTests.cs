@@ -13,6 +13,7 @@ namespace ModelContextGateway.Tests
     {
         private (SqliteConnection masterConn, IDbConnectionFactory factory) CreateDbFactory()
         {
+            SqlMapper.AddTypeHandler(new JsonListTypeHandler());
             var dbName = $"Data Source=DiscoveryTestDb_{Guid.NewGuid():N};Mode=Memory;Cache=Shared";
             var masterConn = new SqliteConnection(dbName);
             masterConn.Open();
@@ -149,6 +150,10 @@ namespace ModelContextGateway.Tests
                 INSERT INTO Servers (Id, DisplayName, Url, AutoDiscovered, Enabled, Categories)
                 VALUES ('old-server', 'Old Server', 'http://old:8080/sse', 1, 1, '[""legacy""]')
             ");
+            conn.Execute(@"
+                INSERT INTO Servers (Id, DisplayName, Url, AutoDiscovered, Enabled, Categories)
+                VALUES ('stopped-server', 'Stopped Server', 'http://stopped:8080/sse', 1, 1, '[""legacy""]')
+            ");
 
             var discovered = new List<McpServer>
             {
@@ -183,6 +188,10 @@ namespace ModelContextGateway.Tests
 
             var newSrv = conn.QueryFirstOrDefault<McpServer>("SELECT * FROM Servers WHERE Id = 'new-server'");
             Assert.NotNull(newSrv);
+
+            var stoppedSrv = conn.QueryFirstOrDefault<McpServer>("SELECT * FROM Servers WHERE Id = 'stopped-server'");
+            Assert.NotNull(stoppedSrv);
+            Assert.False(stoppedSrv.Enabled);
         }
 
         [Fact]

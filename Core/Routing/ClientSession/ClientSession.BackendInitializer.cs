@@ -166,11 +166,16 @@ namespace ModelContextGateway.Core.Routing
                             if (_clientResponse?.HttpContext?.Request.Headers.TryGetValue("X-Target-Auth", out var tokenVals) == true)
                             {
                                 passThroughToken = tokenVals.ToString();
+                                _lastKnownPassThroughToken = passThroughToken;
+                            }
+                            else if (!string.IsNullOrEmpty(_lastKnownPassThroughToken))
+                            {
+                                passThroughToken = _lastKnownPassThroughToken;
                             }
                         }
                         catch (ObjectDisposedException)
                         {
-                            // Disposed HttpContext
+                            passThroughToken = _lastKnownPassThroughToken;
                         }
                     }
                     conn = new BackendConnection(server, _httpClient, _logger, retriever, passThroughToken, forwardedUser, userSecretStore);

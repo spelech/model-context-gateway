@@ -278,9 +278,10 @@ namespace ModelContextGateway.Tests
             sessionManager.GetServerInstructionsCache("docker").Should().Be("Always inspect container health before restarting.");
 
             var metaSession = CreateSession(context, isMetaMode: true);
-            await metaSession.EnsureBackendsInitializedAsync();
-
-            var metaInstructions = await metaSession.ResolveSessionInstructionsAsync(enableCodeMode: true, httpContext: context);
+            var metaInstructions = await metaSession.ResolveSessionInstructionsAsync(
+                enableCodeMode: true,
+                initialRequestBody: GatewayMetadata.BuildInitializeRequest(),
+                httpContext: context);
             metaInstructions.Should().Contain("Downstream Server Instructions:");
             metaInstructions.Should().Contain("- [docker]: Always inspect container health before restarting.");
             metaInstructions.Should().Contain("- [ha]: Verify entity_id domain before calling turn_on.");
@@ -372,6 +373,33 @@ namespace ModelContextGateway.Tests
             promptText.Should().Contain("Always inspect container health before restarting.");
             promptText.Should().NotContain("Verify entity_id domain before calling turn_on.");
             promptText.Should().NotContain("Server_ha_Tools");
+        }
+
+        [Fact]
+        [Requirement("MCP-56", "MCP", RequirementType.Positive, "Cold-start Code Mode sandbox mcg.listServers() and mcg.getServerInstructions() initialize backends on demand and return downstream server instructions.")]
+        public async Task ColdStart_CodeModeSandbox_ListServers_InitializesBackendsAndReturnsInstructions()
+        {
+            var context = CreateHttpContext("admin", sids: new List<string> { "S-1-5-32-544" });
+            var coldSession = CreateSession(context, isMetaMode: true);
+
+            var scriptBody = JsonSerializer.Serialize(new
+            {
+                jsonrpc = "2.0",
+                id = "cold-exec",
+                method = "tools/call",
+                @params = new
+                {
+                    name = "execute_script",
+                    arguments = new
+                    {
+                        script = "return await mcg.getServerInstructions('docker');"
+                    }
+                }
+            });
+
+            var res = await coldSession.CallToolAsync("execute_script", scriptBody, _dbFactory, context);
+            var instr = JsonSerializer.SerializeToElement(res).GetProperty("structuredContent").GetProperty("result").GetString();
+            instr.Should().Be("Always inspect container health before restarting.");
         }
     }
 }

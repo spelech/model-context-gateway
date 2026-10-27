@@ -235,7 +235,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 }
                                 using var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(3));
                                 var initReq = GatewayMetadata.BuildTestBenchInitializeRequest();
-                                await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
+                                var initResp = await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
+                                CacheTestBenchInstructions(sessionManager, server.Id, initResp);
                                 await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
                                 backendConnections[server.Id] = conn;
                             }
@@ -470,7 +471,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 }
                                 using var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(3));
                                 var initReq = GatewayMetadata.BuildTestBenchInitializeRequest();
-                                await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
+                                var initResp = await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
+                                CacheTestBenchInstructions(sessionManager, server.Id, initResp);
                                 await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
                                 backendConnections[server.Id] = conn;
                             }
@@ -581,7 +583,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 }
                                 using var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(3));
                                 var initReq = GatewayMetadata.BuildTestBenchInitializeRequest();
-                                await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
+                                var initResp = await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
+                                CacheTestBenchInstructions(sessionManager, server.Id, initResp);
                                 await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
                                 backendConnections[server.Id] = conn;
                             }
@@ -748,7 +751,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 }
                                 using var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(3));
                                 var initReq = GatewayMetadata.BuildTestBenchInitializeRequest();
-                                await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
+                                var initResp = await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
+                                CacheTestBenchInstructions(sessionManager, server.Id, initResp);
                                 await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
                                 backendConnections[server.Id] = conn;
                             }
@@ -1303,6 +1307,22 @@ namespace ModelContextGateway.Components.Capabilities
                 fullDirPath += Path.DirectorySeparatorChar;
             }
             return fullFilePath.StartsWith(fullDirPath, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static void CacheTestBenchInstructions(SessionManager sessionManager, string serverId, JsonRpcResponse initResp)
+        {
+            if (initResp.Error == null &&
+                initResp.Result.HasValue &&
+                initResp.Result.Value.ValueKind == JsonValueKind.Object &&
+                initResp.Result.Value.TryGetProperty("instructions", out var instrProp) &&
+                instrProp.ValueKind == JsonValueKind.String)
+            {
+                var instructions = instrProp.GetString();
+                if (!string.IsNullOrWhiteSpace(instructions))
+                {
+                    sessionManager.SetServerInstructionsCache(serverId, instructions);
+                }
+            }
         }
     }
 }

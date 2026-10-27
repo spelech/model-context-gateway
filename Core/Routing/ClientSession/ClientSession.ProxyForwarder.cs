@@ -13,7 +13,7 @@ namespace ModelContextGateway.Core.Routing
         public bool RegisterRequestCancellation(string requestId, CancellationTokenSource cts, string? traceIdentifier = null)
         {
             var scopeId = _sessionId;
-            if (_sessionId == "global-stateless-session" && !string.IsNullOrEmpty(traceIdentifier))
+            if (_sessionId.StartsWith("global-stateless-session", StringComparison.Ordinal) && !string.IsNullOrEmpty(traceIdentifier))
             {
                 scopeId = $"{_sessionId}:{traceIdentifier}";
             }

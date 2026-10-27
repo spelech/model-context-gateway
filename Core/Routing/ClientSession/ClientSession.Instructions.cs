@@ -48,6 +48,21 @@ namespace ModelContextGateway.Core.Routing
             TimeSpan? directWaitTimeout = null,
             HttpContext? httpContext = null)
         {
+            if (httpContext != null)
+            {
+                try
+                {
+                    _ = await ResolveUserIdentityAsync(httpContext);
+                    if (httpContext.Request.Headers.TryGetValue("X-Target-Auth", out var tokenVals))
+                    {
+                        _lastKnownPassThroughToken = tokenVals.ToString();
+                    }
+                }
+                catch
+                {
+                }
+            }
+
             if (!string.IsNullOrWhiteSpace(initialRequestBody))
             {
                 StartInitialization(initialRequestBody);
@@ -55,10 +70,10 @@ namespace ModelContextGateway.Core.Routing
 
             var enabledServers = _servers.Where(s => s.Enabled && s.Type != "custom").ToList();
 
-            if (!IsMetaMode && enabledServers.Count > 0)
+            if (enabledServers.Count > 0)
             {
                 bool anyMissing = enabledServers.Any(s => string.IsNullOrWhiteSpace(_sessionManager?.GetServerInstructionsCache(s.Id)));
-                if (anyMissing)
+                if (anyMissing && (!IsMetaMode || _backendConnections.IsEmpty))
                 {
                     try
                     {
@@ -69,7 +84,10 @@ namespace ModelContextGateway.Core.Routing
                     {
                     }
                 }
+            }
 
+            if (!IsMetaMode && enabledServers.Count > 0)
+            {
                 if (enabledServers.Count == 1)
                 {
                     var singleInstructions = _sessionManager?.GetServerInstructionsCache(enabledServers[0].Id);
