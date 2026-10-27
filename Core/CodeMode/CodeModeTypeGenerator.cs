@@ -12,7 +12,7 @@ namespace ModelContextGateway.Core.CodeMode
     {
         private static readonly Regex SafeIdentifierRegex = new("^[a-zA-Z_$][a-zA-Z0-9_$]*$", RegexOptions.Compiled);
 
-        public static string GenerateFullSdkDeclarations(IEnumerable<object> tools, IEnumerable<McpServer>? servers = null)
+        public static string GenerateFullSdkDeclarations(IEnumerable<object> tools, IEnumerable<McpServer>? servers = null, IReadOnlyDictionary<string, string>? serverInstructions = null)
         {
             var sb = new StringBuilder();
             sb.AppendLine("// ============================================================================");
@@ -54,7 +54,26 @@ namespace ModelContextGateway.Core.CodeMode
                     ? $"{matchedServer.DisplayName} ({canonicalId})"
                     : canonicalId;
 
-                sb.AppendLine($"/** Tools exposed by backend server: {SanitizeComment(displayComment)} */");
+                string? instructions = null;
+                if (serverInstructions != null)
+                {
+                    if (!serverInstructions.TryGetValue(canonicalId, out instructions))
+                    {
+                        serverInstructions.TryGetValue(prefix, out instructions);
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(instructions))
+                {
+                    sb.AppendLine("/**");
+                    sb.AppendLine($" * Tools exposed by backend server: {SanitizeComment(displayComment)}");
+                    sb.AppendLine($" * Server Instructions: {SanitizeComment(instructions!)}");
+                    sb.AppendLine(" */");
+                }
+                else
+                {
+                    sb.AppendLine($"/** Tools exposed by backend server: {SanitizeComment(displayComment)} */");
+                }
                 sb.AppendLine($"interface {interfaceName} {{");
 
                 foreach (var tool in group.OrderBy(t => t.RawToolName, StringComparer.OrdinalIgnoreCase))
@@ -93,15 +112,24 @@ namespace ModelContextGateway.Core.CodeMode
             return sb.ToString();
         }
 
-        public static string GenerateServerDeclarations(string serverIdOrAlias, IEnumerable<object> tools, IEnumerable<McpServer>? servers)
+        public static string GenerateServerDeclarations(string serverIdOrAlias, IEnumerable<object> tools, IEnumerable<McpServer>? servers, IReadOnlyDictionary<string, string>? serverInstructions = null)
         {
             var matched = servers?.FirstOrDefault(s =>
                 string.Equals(s.Id, serverIdOrAlias, StringComparison.OrdinalIgnoreCase) ||
                 (!string.IsNullOrWhiteSpace(s.Alias) && string.Equals(s.Alias, serverIdOrAlias, StringComparison.OrdinalIgnoreCase)));
-            return GenerateServerDeclarations(serverIdOrAlias, tools, matched);
+            var targetId = matched?.Id ?? serverIdOrAlias;
+            string? instructions = null;
+            if (serverInstructions != null)
+            {
+                if (!serverInstructions.TryGetValue(targetId, out instructions))
+                {
+                    serverInstructions.TryGetValue(serverIdOrAlias, out instructions);
+                }
+            }
+            return GenerateServerDeclarations(serverIdOrAlias, tools, matched, instructions);
         }
 
-        public static string GenerateServerDeclarations(string serverIdOrAlias, IEnumerable<object> tools, McpServer? server = null)
+        public static string GenerateServerDeclarations(string serverIdOrAlias, IEnumerable<object> tools, McpServer? server = null, string? instructions = null)
         {
             var sb = new StringBuilder();
             var targetId = server?.Id ?? serverIdOrAlias;
@@ -125,7 +153,17 @@ namespace ModelContextGateway.Core.CodeMode
             var safeTypeSuffix = ToSafeTypeIdentifier(targetId);
             var interfaceName = $"Server_{safeTypeSuffix}_Tools";
 
-            sb.AppendLine($"/** Tools exposed by backend server: {SanitizeComment(displayName)} */");
+            if (!string.IsNullOrWhiteSpace(instructions))
+            {
+                sb.AppendLine("/**");
+                sb.AppendLine($" * Tools exposed by backend server: {SanitizeComment(displayName)}");
+                sb.AppendLine($" * Server Instructions: {SanitizeComment(instructions!)}");
+                sb.AppendLine(" */");
+            }
+            else
+            {
+                sb.AppendLine($"/** Tools exposed by backend server: {SanitizeComment(displayName)} */");
+            }
             sb.AppendLine($"interface {interfaceName} {{");
             foreach (var tool in parsedTools)
             {
@@ -226,6 +264,7 @@ return {
             sb.AppendLine("  alias?: string | null;");
             sb.AppendLine("  displayName: string;");
             sb.AppendLine("  categories: string[];");
+            sb.AppendLine("  instructions?: string | null;");
             sb.AppendLine("}");
             sb.AppendLine();
             sb.AppendLine("interface McgResourceDescriptor {");

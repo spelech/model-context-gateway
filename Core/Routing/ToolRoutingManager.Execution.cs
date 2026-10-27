@@ -642,7 +642,8 @@ namespace ModelContextGateway.Core.Routing
                                 id = s.Id,
                                 alias = s.Alias,
                                 name = s.DisplayName,
-                                enabled = s.Enabled
+                                enabled = s.Enabled,
+                                instructions = sessionManager?.GetServerInstructionsCache(s.Id)
                             })
                             .ToList();
                         return Task.FromResult<object>(serverList);

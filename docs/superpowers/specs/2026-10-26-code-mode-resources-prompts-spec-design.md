@@ -97,6 +97,12 @@ When a client connects in **Meta-Mode** (`IsMetaMode == true`), `ResourceRouting
    - Handles local `ref/prompt` completions for `router__*` prompts (`server_filter`, `servers`, `category`, `server_name`) by matching authorized server IDs, aliases, and categories.
    - Handles local `ref/resource` completions for `router://code-mode/types/{server_name}` and `router://resources/server/{server_name}`.
    - Unescapes URL-encoded downstream `mcp://{prefix}/{encoded_uri}` resource references, resolves server aliases to canonical IDs, and rewrites `params.ref.uri` (`ClientSession.JsonRpcRewriter.cs`) before forwarding `completion/complete` to downstream MCP servers.
+4. **Downstream Server `instructions` Capture & 4-Surface Propagation (`MCP-56`):**
+   - `ClientSession.BackendInitializer.cs` captures `result.instructions` from each downstream server's `initialize` response and caches it in `SessionManager` (`_serverInstructionsCache`).
+   - **Surface 1 (Direct Proxy `initialize`):** When a client connects in direct proxy mode (`!IsMetaMode`), `ResolveSessionInstructionsAsync` returns the downstream server's `instructions` directly in `InitializeResult`.
+   - **Surface 2 (Per-Server Resources & Sandbox `mcg.listServers()`):** `router://resources/server/{serverId}`, `router://active-servers`, Meta-Mode `resources/list` descriptions, and `await mcg.listServers()` inside `execute_script` include the server's `instructions`.
+   - **Surface 3 (Code Mode TypeScript `.d.ts` Declarations & Prompts):** `CodeModeTypeGenerator` embeds `Server Instructions: ...` in the JSDoc block above `interface Server_<id>_Tools` in `router://code-mode/sdk.d.ts`, `router://code-mode/types/{serverId}`, and built-in Code Mode prompts.
+   - **Surface 4 (Meta-Mode `initialize` Rollup):** `GatewayMetadata.BuildGatewayInstructions(enableCodeMode, downstreamInstructions)` appends a `Downstream Server Instructions:` section rolling up cached instructions across active servers.
 
 ---
 
@@ -108,3 +114,4 @@ When a client connects in **Meta-Mode** (`IsMetaMode == true`), `ResourceRouting
 | `MCP-53` | `MCP` | Code Mode sandbox exposes `mcg.listServers`, `mcg.listResources`, `mcg.searchResources`, `mcg.readResource`, `mcg.listPrompts`, and `mcg.getPrompt` with RBAC and quota enforcement | `CodeModeRuntimeInteropTests`, `CodeModeResourcesAndPromptsTests` |
 | `MCP-54` | `MCP` | Meta-Mode compacts `resources/list` into gateway discovery/catalog resources while preserving full `resources/read` access and RBAC filtering | `CodeModeResourcesAndPromptsTests` |
 | `MCP-55` | `MCP` | Gateway advertises MCP `2026-07-28` `instructions`, `completions` capability, meta-tool `annotations`/`outputSchema`/`structuredContent`, and resolves `completion/complete` for `router__*` and `mcp://` refs | `CodeModeResourcesAndPromptsTests` |
+| `MCP-56` | `MCP` | Downstream server `initialize` instructions are cached and surfaced across direct proxy `initialize`, per-server resources/`mcg.listServers()`, TypeScript `.d.ts` JSDoc headers, and Meta-Mode `initialize` rollup | `CodeModeResourcesAndPromptsTests` |

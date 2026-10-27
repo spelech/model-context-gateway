@@ -136,11 +136,15 @@ namespace ModelContextGateway.Core.Routing
                 foreach (var sid in activeServerIds)
                 {
                     serverResourceCounts.TryGetValue(sid, out var count);
+                    var cachedInstructions = sessionManager?.GetServerInstructionsCache(sid);
+                    var resDescription = !string.IsNullOrWhiteSpace(cachedInstructions)
+                        ? $"List of all exposed `mcp://{sid}/...` resources and metadata for server '{sid}'. Instructions: {cachedInstructions}"
+                        : $"List of all exposed `mcp://{sid}/...` resources and metadata for server '{sid}'.";
                     allResources.Add(new Dictionary<string, object> {
                         { "uri", $"router://resources/server/{sid}" },
                         { "name", $"[{sid}] Downstream Resource Index ({count} resources)" },
                         { "mimeType", "application/json" },
-                        { "description", $"List of all exposed `mcp://{sid}/...` resources and metadata for server '{sid}'." }
+                        { "description", resDescription }
                     });
                     allResources.Add(new Dictionary<string, object> {
                         { "uri", $"router://code-mode/types/{sid}" },
@@ -431,7 +435,7 @@ namespace ModelContextGateway.Core.Routing
             if (string.Equals(uri, "router://code-mode/sdk.d.ts", StringComparison.OrdinalIgnoreCase))
             {
                 var tools = getAuthorizedToolsAsync != null ? await getAuthorizedToolsAsync() : new List<object>();
-                var dts = CodeModeTypeGenerator.GenerateFullSdkDeclarations(tools, servers);
+                var dts = CodeModeTypeGenerator.GenerateFullSdkDeclarations(tools, servers, sessionManager?.GetAllCachedServerInstructions());
                 return new
                 {
                     contents = new[] {
@@ -447,7 +451,7 @@ namespace ModelContextGateway.Core.Routing
             if (_catalogManager.TryMatchCodeModeTypesTemplate(uri, out var targetTypesServer))
             {
                 var tools = getAuthorizedToolsAsync != null ? await getAuthorizedToolsAsync() : new List<object>();
-                var dts = CodeModeTypeGenerator.GenerateServerDeclarations(targetTypesServer, tools, servers);
+                var dts = CodeModeTypeGenerator.GenerateServerDeclarations(targetTypesServer, tools, servers, sessionManager?.GetAllCachedServerInstructions());
                 return new
                 {
                     contents = new[] {
@@ -502,9 +506,12 @@ namespace ModelContextGateway.Core.Routing
                                 u.StartsWith(prefixRaw, StringComparison.OrdinalIgnoreCase));
                     })
                     .ToList();
+                var serverInstructions = sessionManager?.GetServerInstructionsCache(canonicalId)
+                                         ?? sessionManager?.GetServerInstructionsCache(targetResServer);
                 var payload = new
                 {
                     serverId = canonicalId,
+                    instructions = serverInstructions,
                     count = serverResources.Count,
                     resources = serverResources
                 };
@@ -631,7 +638,8 @@ namespace ModelContextGateway.Core.Routing
                             id = entry.Key,
                             status = entry.Value.Status,
                             attempts = entry.Value.Attempts,
-                            error = entry.Value.Error
+                            error = entry.Value.Error,
+                            instructions = sessionManager?.GetServerInstructionsCache(entry.Key)
                         });
                     }
                 }

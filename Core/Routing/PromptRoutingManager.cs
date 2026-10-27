@@ -177,7 +177,8 @@ namespace ModelContextGateway.Core.Routing
             Func<Task> ensureBackendsInitializedAsync,
             Func<string, string, string, string> rewriteRequestJson,
             Func<Task<List<object>>>? getAuthorizedToolsAsync = null,
-            IEnumerable<McpServer>? servers = null)
+            IEnumerable<McpServer>? servers = null,
+            SessionManager? sessionManager = null)
         {
             if (promptName.StartsWith("router__", StringComparison.OrdinalIgnoreCase) ||
                 promptName.StartsWith("router/", StringComparison.OrdinalIgnoreCase) ||
@@ -192,7 +193,7 @@ namespace ModelContextGateway.Core.Routing
                 {
                     normalizedPromptName = "router__" + promptName.Substring("router:".Length);
                 }
-                return await ResolveLocalPromptAsync(normalizedPromptName, body, getAuthorizedToolsAsync, servers);
+                return await ResolveLocalPromptAsync(normalizedPromptName, body, getAuthorizedToolsAsync, servers, sessionManager);
             }
 
             await ensureBackendsInitializedAsync();
@@ -254,7 +255,8 @@ namespace ModelContextGateway.Core.Routing
             string promptName,
             string body,
             Func<Task<List<object>>>? getAuthorizedToolsAsync,
-            IEnumerable<McpServer>? servers)
+            IEnumerable<McpServer>? servers,
+            SessionManager? sessionManager = null)
         {
             using var doc = JsonDocument.Parse(body);
             var root = doc.RootElement;
@@ -292,12 +294,13 @@ namespace ModelContextGateway.Core.Routing
                 var sb = new StringBuilder();
                 sb.AppendLine(CodeModeTypeGenerator.GenerateCodeModeGuideMarkdown(serverIds));
                 var tools = getAuthorizedToolsAsync != null ? await getAuthorizedToolsAsync() : new List<object>();
+                var cachedInstructions = sessionManager?.GetAllCachedServerInstructions();
                 if (!string.IsNullOrWhiteSpace(serverName))
                 {
                     sb.AppendLine();
                     sb.AppendLine($"## TypeScript Declarations for `{serverName}`");
                     sb.AppendLine("```typescript");
-                    sb.AppendLine(CodeModeTypeGenerator.GenerateServerDeclarations(serverName, tools, servers).TrimEnd());
+                    sb.AppendLine(CodeModeTypeGenerator.GenerateServerDeclarations(serverName, tools, servers, cachedInstructions).TrimEnd());
                     sb.AppendLine("```");
                 }
                 else if (tools.Count > 0)
@@ -305,7 +308,7 @@ namespace ModelContextGateway.Core.Routing
                     sb.AppendLine();
                     sb.AppendLine("## Full Sandbox TypeScript SDK (`router://code-mode/sdk.d.ts`)");
                     sb.AppendLine("```typescript");
-                    sb.AppendLine(CodeModeTypeGenerator.GenerateFullSdkDeclarations(tools, servers).TrimEnd());
+                    sb.AppendLine(CodeModeTypeGenerator.GenerateFullSdkDeclarations(tools, servers, cachedInstructions).TrimEnd());
                     sb.AppendLine("```");
                 }
                 text = sb.ToString();
@@ -315,6 +318,7 @@ namespace ModelContextGateway.Core.Routing
                 args.TryGetValue("goal", out var goal);
                 args.TryGetValue("servers", out var serversCsv);
                 var tools = getAuthorizedToolsAsync != null ? await getAuthorizedToolsAsync() : new List<object>();
+                var cachedInstructions = sessionManager?.GetAllCachedServerInstructions();
                 var sb = new StringBuilder();
                 sb.AppendLine($"Write an `execute_script` JavaScript/TypeScript workflow for the following goal:\n\n**Goal**: {goal}");
                 sb.AppendLine();
@@ -327,12 +331,12 @@ namespace ModelContextGateway.Core.Routing
                     var requestedServers = serversCsv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                     foreach (var reqSrv in requestedServers)
                     {
-                        sb.AppendLine(CodeModeTypeGenerator.GenerateServerDeclarations(reqSrv, tools, servers).TrimEnd());
+                        sb.AppendLine(CodeModeTypeGenerator.GenerateServerDeclarations(reqSrv, tools, servers, cachedInstructions).TrimEnd());
                     }
                 }
                 else
                 {
-                    sb.AppendLine(CodeModeTypeGenerator.GenerateFullSdkDeclarations(tools, servers).TrimEnd());
+                    sb.AppendLine(CodeModeTypeGenerator.GenerateFullSdkDeclarations(tools, servers, cachedInstructions).TrimEnd());
                 }
                 sb.AppendLine("```");
                 text = sb.ToString();

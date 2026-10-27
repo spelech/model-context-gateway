@@ -129,7 +129,10 @@ namespace ModelContextGateway.Tests
 
                     if (body.Contains("\"initialize\""))
                     {
-                        return JsonResp(new { jsonrpc = "2.0", id = "init", result = new { protocolVersion = "2026-07-28" } });
+                        var instr = host == "docker"
+                            ? "Always inspect container health before restarting."
+                            : "Verify entity_id domain before calling turn_on.";
+                        return JsonResp(new { jsonrpc = "2.0", id = "init", result = new { protocolVersion = "2026-07-28", instructions = instr } });
                     }
                     if (body.Contains("\"tools/list\""))
                     {
@@ -285,6 +288,10 @@ namespace ModelContextGateway.Tests
             var httpClient = new HttpClient(handler);
             var logger = new Mock<ILogger<ClientSession>>();
             var embeddingService = new Mock<IEmbeddingService>();
+            var sessionManager = new SessionManager(
+                context.RequestServices,
+                new Mock<IHttpClientFactory>().Object,
+                new Mock<ILogger<SessionManager>>().Object);
 
             var session = new ClientSession(
                 sessionId: "test-cm-session",
@@ -292,7 +299,7 @@ namespace ModelContextGateway.Tests
                 servers: _servers,
                 httpClient: httpClient,
                 embeddingService: embeddingService.Object,
-                sessionManager: null,
+                sessionManager: sessionManager,
                 logger: logger.Object,
                 rootServices: context.RequestServices
             )
@@ -519,6 +526,129 @@ namespace ModelContextGateway.Tests
             instructions.Should().Contain("execute_script");
             instructions.Should().Contain("router://code-mode/sdk.d.ts");
             instructions.Should().Contain("router://resources/catalog");
+        }
+
+        [Fact]
+        [Requirement("MCP-56", "MCP", RequirementType.Positive, "Downstream server initialize instructions are captured, cached in SessionManager, and returned directly in direct proxy mode (Surface 1) and rolled up in Meta-Mode initialize instructions (Surface 4).")]
+        public async Task ResolveSessionInstructionsAsync_SurfacesDownstreamInstructions_InDirectProxyAndMetaMode()
+        {
+            var context = CreateHttpContext("admin", sids: new List<string> { "S-1-5-32-544" });
+
+            // Surface 1: Direct proxy mode (!IsMetaMode) with a single target server returns that server's instructions directly
+            var sessionManager = new SessionManager(
+                context.RequestServices,
+                new Mock<IHttpClientFactory>().Object,
+                new Mock<ILogger<SessionManager>>().Object);
+            var singleServer = new List<McpServer>
+            {
+                new McpServer { Id = "docker", Alias = "dkr", DisplayName = "Docker Engine", Type = "http", Url = "http://docker:8000/mcp", Enabled = true }
+            };
+            var singleDirectSession = new ClientSession(
+                "direct-docker-sess",
+                context.Response,
+                singleServer,
+                new HttpClient(new MockHttpMessageHandler
+                {
+                    Handler = async (_) => new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent(
+                            JsonSerializer.Serialize(new
+                            {
+                                jsonrpc = "2.0",
+                                id = "init",
+                                result = new
+                                {
+                                    protocolVersion = "2026-07-28",
+                                    instructions = "Always inspect container health before restarting."
+                                }
+                            }),
+                            Encoding.UTF8,
+                            "application/json")
+                    }
+                }),
+                new Mock<IEmbeddingService>().Object,
+                sessionManager,
+                new Mock<ILogger<ClientSession>>().Object,
+                context.RequestServices)
+            {
+                IsMetaMode = false
+            };
+
+            var directInstructions = await singleDirectSession.ResolveSessionInstructionsAsync(
+                enableCodeMode: true,
+                initialRequestBody: GatewayMetadata.BuildInitializeRequest());
+            directInstructions.Should().Be("Always inspect container health before restarting.");
+            sessionManager.GetServerInstructionsCache("docker").Should().Be("Always inspect container health before restarting.");
+
+            // Surface 4: Meta-Mode session rolls up cached downstream server instructions into BuildGatewayInstructions
+            var metaSession = CreateSession(context, out _, isMetaMode: true);
+            await metaSession.EnsureBackendsInitializedAsync();
+
+            var metaInstructions = await metaSession.ResolveSessionInstructionsAsync(enableCodeMode: true);
+            metaInstructions.Should().Contain("Downstream Server Instructions:");
+            metaInstructions.Should().Contain("- [docker]: Always inspect container health before restarting.");
+            metaInstructions.Should().Contain("- [ha]: Verify entity_id domain before calling turn_on.");
+        }
+
+        [Fact]
+        [Requirement("MCP-56", "MCP", RequirementType.Positive, "Downstream server instructions are exposed in router://resources/server/{id}, router://active-servers, mcg.listServers() (Surface 2), and Code Mode TypeScript .d.ts JSDoc headers (Surface 3).")]
+        public async Task DownstreamServerInstructions_AreExposedAcrossServerResourcesSandboxAndTypeScriptDeclarations()
+        {
+            var context = CreateHttpContext("admin", sids: new List<string> { "S-1-5-32-544" });
+            var session = CreateSession(context, out _, isMetaMode: true);
+
+            // Populate backend connections, instructions cache, and resources cache
+            var resourcesList = await session.ListResourcesAsync("{}", context);
+            var dockerIndexEntry = resourcesList
+                .Select(r => JsonSerializer.SerializeToElement(r))
+                .First(r => r.GetProperty("uri").GetString() == "router://resources/server/docker");
+            dockerIndexEntry.GetProperty("description").GetString()
+                .Should().Contain("Always inspect container health before restarting.");
+
+            // Surface 2a: router://resources/server/docker includes instructions property
+            var serverRes = await session.ReadResourceAsync("router://resources/server/docker", "{\"jsonrpc\":\"2.0\",\"method\":\"resources/read\",\"id\":\"r-srv\"}", context);
+            var serverResElem = JsonSerializer.SerializeToElement(serverRes);
+            var serverResJson = JsonDocument.Parse(serverResElem.GetProperty("contents")[0].GetProperty("text").GetString()!).RootElement;
+            serverResJson.GetProperty("serverId").GetString().Should().Be("docker");
+            serverResJson.GetProperty("instructions").GetString().Should().Be("Always inspect container health before restarting.");
+
+            // Surface 2b: router://active-servers includes instructions property
+            var activeServersRes = await session.ReadResourceAsync("router://active-servers", "{\"jsonrpc\":\"2.0\",\"method\":\"resources/read\",\"id\":\"r-act\"}", context);
+            var activeServersElem = JsonSerializer.SerializeToElement(activeServersRes);
+            var activeServersJson = JsonDocument.Parse(activeServersElem.GetProperty("contents")[0].GetProperty("text").GetString()!).RootElement;
+            var dockerActive = activeServersJson.EnumerateArray().First(e => e.GetProperty("id").GetString() == "docker");
+            dockerActive.GetProperty("instructions").GetString().Should().Be("Always inspect container health before restarting.");
+
+            // Surface 2c: mcg.listServers() inside execute_script returns instructions
+            var scriptBody = JsonSerializer.Serialize(new
+            {
+                jsonrpc = "2.0",
+                id = "exec-srv-instr",
+                method = "tools/call",
+                @params = new
+                {
+                    name = "execute_script",
+                    arguments = new
+                    {
+                        script = "return await mcg.listServers();"
+                    }
+                }
+            });
+            var scriptRes = await session.CallToolAsync("execute_script", scriptBody, _dbFactory, context);
+            var scriptElem = JsonSerializer.SerializeToElement(scriptRes);
+            var serversArr = scriptElem.GetProperty("structuredContent").GetProperty("result");
+            var dockerSrv = serversArr.EnumerateArray().First(s => s.GetProperty("id").GetString() == "docker");
+            dockerSrv.GetProperty("instructions").GetString().Should().Be("Always inspect container health before restarting.");
+
+            // Surface 3: router://code-mode/sdk.d.ts and router://code-mode/types/docker include Server Instructions JSDoc
+            var sdkRes = await session.ReadResourceAsync("router://code-mode/sdk.d.ts", "{\"jsonrpc\":\"2.0\",\"method\":\"resources/read\",\"id\":\"r-sdk\"}", context);
+            var sdkDts = JsonSerializer.SerializeToElement(sdkRes).GetProperty("contents")[0].GetProperty("text").GetString()!;
+            sdkDts.Should().Contain("Server Instructions: Always inspect container health before restarting.");
+            sdkDts.Should().Contain("Server Instructions: Verify entity_id domain before calling turn_on.");
+
+            var dockerTypesRes = await session.ReadResourceAsync("router://code-mode/types/docker", "{\"jsonrpc\":\"2.0\",\"method\":\"resources/read\",\"id\":\"r-dt\"}", context);
+            var dockerDts = JsonSerializer.SerializeToElement(dockerTypesRes).GetProperty("contents")[0].GetProperty("text").GetString()!;
+            dockerDts.Should().Contain("Server Instructions: Always inspect container health before restarting.");
         }
     }
 }

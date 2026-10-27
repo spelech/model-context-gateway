@@ -260,6 +260,11 @@ namespace ModelContextGateway.Core.Routing
                         {
                             throw new Exception($"Initialize failed: {resp.Error.Message}");
                         }
+
+                        if (resp.Error == null && resp.Result.HasValue)
+                        {
+                            TryCacheBackendInitializeResult(server.Id, resp.Result.Value);
+                        }
                     }
 
                     // Send initialized notification to this backend
@@ -411,6 +416,98 @@ namespace ModelContextGateway.Core.Routing
             {
                 return GatewayMetadata.BuildInitializeRequest(protocolVersion: targetVersion);
             }
+        }
+
+        private void TryCacheBackendInitializeResult(string serverId, JsonElement resultElement)
+        {
+            if (resultElement.ValueKind != JsonValueKind.Object)
+            {
+                return;
+            }
+
+            if (resultElement.TryGetProperty("instructions", out var instrProp) &&
+                instrProp.ValueKind == JsonValueKind.String)
+            {
+                var instructions = instrProp.GetString();
+                if (!string.IsNullOrWhiteSpace(instructions))
+                {
+                    _sessionManager?.SetServerInstructionsCache(serverId, instructions);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Resolves the MCP 2026-07-28 instructions for this session:
+        /// - In direct proxy mode (!IsMetaMode), returns the downstream server's own instructions when available.
+        /// - In Meta-Mode, returns the gateway instructions with a rollup of any cached downstream server instructions.
+        /// </summary>
+        public async Task<string> ResolveSessionInstructionsAsync(bool enableCodeMode, string? initialRequestBody = null, TimeSpan? directWaitTimeout = null)
+        {
+            if (!string.IsNullOrWhiteSpace(initialRequestBody))
+            {
+                StartInitialization(initialRequestBody);
+            }
+
+            var enabledServers = _servers.Where(s => s.Enabled && s.Type != "custom").ToList();
+
+            if (!IsMetaMode && enabledServers.Count > 0)
+            {
+                bool anyMissing = enabledServers.Any(s => string.IsNullOrWhiteSpace(_sessionManager?.GetServerInstructionsCache(s.Id)));
+                if (anyMissing)
+                {
+                    try
+                    {
+                        var waitMs = directWaitTimeout ?? TimeSpan.FromMilliseconds(500);
+                        await Task.WhenAny(EnsureBackendsInitializedAsync(), Task.Delay(waitMs));
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                if (enabledServers.Count == 1)
+                {
+                    var singleInstructions = _sessionManager?.GetServerInstructionsCache(enabledServers[0].Id);
+                    if (!string.IsNullOrWhiteSpace(singleInstructions))
+                    {
+                        return singleInstructions!;
+                    }
+                }
+                else
+                {
+                    var multiInstructions = new List<string>();
+                    foreach (var srv in enabledServers)
+                    {
+                        var instr = _sessionManager?.GetServerInstructionsCache(srv.Id);
+                        if (!string.IsNullOrWhiteSpace(instr))
+                        {
+                            var label = !string.IsNullOrWhiteSpace(srv.DisplayName) ? $"{srv.DisplayName} ({srv.Id})" : srv.Id;
+                            multiInstructions.Add($"[{label}]: {instr}");
+                        }
+                    }
+
+                    if (multiInstructions.Count == 1 && enabledServers.Count == 1)
+                    {
+                        return multiInstructions[0];
+                    }
+                    if (multiInstructions.Count > 0)
+                    {
+                        return string.Join("\n\n", multiInstructions);
+                    }
+                }
+            }
+
+            var cachedDownstream = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var srv in enabledServers)
+            {
+                var instr = _sessionManager?.GetServerInstructionsCache(srv.Id);
+                if (!string.IsNullOrWhiteSpace(instr))
+                {
+                    cachedDownstream[srv.Id] = instr!;
+                }
+            }
+
+            return GatewayMetadata.BuildGatewayInstructions(enableCodeMode, cachedDownstream);
         }
     }
 }

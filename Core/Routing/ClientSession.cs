@@ -325,7 +325,8 @@ namespace ModelContextGateway.Core.Routing
                                 id = s.Id,
                                 alias = s.Alias,
                                 name = s.DisplayName,
-                                enabled = s.Enabled
+                                enabled = s.Enabled,
+                                instructions = _sessionManager?.GetServerInstructionsCache(s.Id)
                             });
                         }
                     }
@@ -851,7 +852,8 @@ namespace ModelContextGateway.Core.Routing
                     EnsureBackendsInitializedAsync,
                     RewriteRequestJson,
                     getAuthorizedToolsAsync: () => ListAllAuthorizedDownstreamToolsAsync(httpContext),
-                    servers: _servers);
+                    servers: _servers,
+                    sessionManager: _sessionManager);
                 responsePayload = res != null ? JsonSerializer.Serialize(res) : null;
                 return res;
             }

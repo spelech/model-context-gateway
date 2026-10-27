@@ -58,19 +58,22 @@
 
 ---
 
-### Task 4: MCP `2026-07-28` Initialize Instructions & Autocomplete (`completion/complete`) (`MCP-55`)
+### Task 4: MCP `2026-07-28` Initialize Instructions, Downstream Instructions Propagation & Autocomplete (`completion/complete`) (`MCP-55`, `MCP-56`)
 
 **Files:**
 - Modify: `Core/GatewayMetadata.cs`
+- Modify: `Core/Routing/SessionManager.Cache.cs`
+- Modify: `Core/Routing/ClientSession/ClientSession.BackendInitializer.cs`
 - Modify: `Components/Capabilities/ProxyEndpoints.cs`
 - Modify: `Core/Routing/ClientSession.cs`
 - Modify: `Core/Routing/ClientSession/ClientSession.JsonRpcRewriter.cs`
 - Test: `ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs`
 
-- [x] **Step 1:** Add `GatewayMetadata.BuildGatewayInstructions(bool enableCodeMode)` and include `instructions` and `completions = new { }` in `InitializeResult` (`ProxyEndpoints.cs`).
-- [x] **Step 2:** Update `ClientSession.CompleteAsync` to resolve completions for `router__*` prompt arguments, `router://code-mode/types/{server_name}` and `router://resources/server/{server_name}` resource templates, and URL-encoded `mcp://{alias}/{encoded_uri}` downstream resource templates.
-- [x] **Step 3:** Update `ClientSession.JsonRpcRewriter.RewriteObject` so `params.ref.name` and `params.ref.uri` are rewritten for downstream `completion/complete` forwarding.
-- [x] **Step 4:** Add end-to-end tests in `ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs`.
+- [x] **Step 1:** Add `GatewayMetadata.BuildGatewayInstructions(bool enableCodeMode, IReadOnlyDictionary<string, string>? downstreamInstructions = null)` and include `instructions` and `completions = new { }` in `InitializeResult` (`ProxyEndpoints.cs`).
+- [x] **Step 2:** Capture and cache downstream `initialize` `instructions` in `ClientSession.BackendInitializer.cs` and `SessionManager.Cache.cs`, and surface them across all 4 surfaces: (1) direct proxy `initialize` (`ResolveSessionInstructionsAsync`), (2) `router://resources/server/{id}`, `router://active-servers`, and `mcg.listServers()`, (3) TypeScript `.d.ts` JSDoc headers (`CodeModeTypeGenerator`), and (4) Meta-Mode `initialize` instructions rollup.
+- [x] **Step 3:** Update `ClientSession.CompleteAsync` to resolve completions for `router__*` prompt arguments, `router://code-mode/types/{server_name}` and `router://resources/server/{server_name}` resource templates, and URL-encoded `mcp://{alias}/{encoded_uri}` downstream resource templates.
+- [x] **Step 4:** Update `ClientSession.JsonRpcRewriter.RewriteObject` so `params.ref.name` and `params.ref.uri` are rewritten for downstream `completion/complete` forwarding.
+- [x] **Step 5:** Add end-to-end tests in `ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs`.
 
 ---
 
