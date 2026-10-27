@@ -292,6 +292,17 @@ namespace ModelContextGateway.Core.CodeMode
                 engine.Evaluate(@"
                     const callTool = (toolName, toolArgs, options) => __callTool(toolName, toolArgs, options);
                     const listServers = () => __listServers();
+                    const getServerInstructions = async (serverId) => {
+                        if (!serverId) return null;
+                        const target = String(serverId).toLowerCase();
+                        const servers = await __listServers();
+                        if (!Array.isArray(servers)) return null;
+                        const found = servers.find(s =>
+                            (s && typeof s.id === 'string' && s.id.toLowerCase() === target) ||
+                            (s && typeof s.alias === 'string' && s.alias.toLowerCase() === target)
+                        );
+                        return found && found.instructions ? found.instructions : null;
+                    };
                     const listResources = (serverId) => __listResources(serverId ?? null);
                     const searchResources = (query) => __searchResources(query ?? '');
                     const readResource = (uri) => __readResource(uri);
@@ -320,11 +331,11 @@ namespace ModelContextGateway.Core.CodeMode
                 {
                     var parsedArgs = engine.Evaluate($"JSON.parse({JsonSerializer.Serialize(args.Value.GetRawText())})");
                     engine.SetValue("args", parsedArgs);
-                    engine.Evaluate("const mcg = { callTool, listServers, listResources, searchResources, readResource, listPrompts, getPrompt, tools, args };");
+                    engine.Evaluate("const mcg = { callTool, listServers, getServerInstructions, listResources, searchResources, readResource, listPrompts, getPrompt, tools, args };");
                 }
                 else
                 {
-                    engine.Evaluate("const args = undefined; const mcg = { callTool, listServers, listResources, searchResources, readResource, listPrompts, getPrompt, tools, args: undefined };");
+                    engine.Evaluate("const args = undefined; const mcg = { callTool, listServers, getServerInstructions, listResources, searchResources, readResource, listPrompts, getPrompt, tools, args: undefined };");
                 }
 
                 // Execute script

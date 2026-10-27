@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-27T00:46:56.0354548Z",
+    "generatedAt": "2026-10-27T02:06:09.3312962Z",
     "totalRequirements": 486,
     "positiveCount": 381,
     "guardrailCount": 105,
-    "totalProofs": 1131
+    "totalProofs": 1132
   },
   "requirements": [
     {
@@ -228,28 +228,28 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 49,
+          "lineNumber": 62,
           "testName": "Pipeline_QueryToken_MiddlewareBypass",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 320,
+          "lineNumber": 367,
           "testName": "Pipeline_AppKey_Create_And_Revoke",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 403,
+          "lineNumber": 450,
           "testName": "Pipeline_GET_AppKeys_Returns200",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 412,
+          "lineNumber": 459,
           "testName": "Pipeline_GET_AppKeysLimits_Returns200",
           "details": null
         },
@@ -538,14 +538,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 367,
+          "lineNumber": 414,
           "testName": "Pipeline_GET_Permissions_Mappings_Returns200",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 385,
+          "lineNumber": 432,
           "testName": "Pipeline_GET_Providers_Auth_Returns200",
           "details": null
         },
@@ -1790,7 +1790,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 171,
+          "lineNumber": 218,
           "testName": "Pipeline_Dashboard_Management_Suite",
           "details": null
         }
@@ -1806,7 +1806,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 349,
+          "lineNumber": 396,
           "testName": "Pipeline_GET_Clients_Returns200",
           "details": null
         }
@@ -1822,7 +1822,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 358,
+          "lineNumber": 405,
           "testName": "Pipeline_GET_Permissions_Policies_Returns200",
           "details": null
         }
@@ -1838,7 +1838,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 305,
+          "lineNumber": 352,
           "testName": "Pipeline_Permissions_Policy_And_Mapping_CRUD",
           "details": null
         }
@@ -3765,7 +3765,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 59,
+          "lineNumber": 60,
           "testName": "DockerDiscovery_SkipsContainer_ResolvingToPrivateIp",
           "details": null
         },
@@ -4918,7 +4918,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 439,
+          "lineNumber": 486,
           "testName": "Pipeline_GET_Health_Returns200",
           "details": null
         }
@@ -4934,7 +4934,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 340,
+          "lineNumber": 387,
           "testName": "Pipeline_GET_Servers_Returns200",
           "details": null
         }
@@ -4950,7 +4950,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 430,
+          "lineNumber": 477,
           "testName": "Pipeline_GET_Stats_Returns200",
           "details": null
         }
@@ -4966,7 +4966,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 331,
+          "lineNumber": 378,
           "testName": "Pipeline_GET_Version_Returns200",
           "details": null
         }
@@ -4982,7 +4982,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 143,
+          "lineNumber": 190,
           "testName": "Pipeline_POST_Message_FullProtocolSession_Suite",
           "details": null
         }
@@ -4998,7 +4998,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 86,
+          "lineNumber": 99,
           "testName": "Pipeline_POST_Sse_JSONRPC_Full_Protocol_Suite",
           "details": null
         }
@@ -5014,7 +5014,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 277,
+          "lineNumber": 324,
           "testName": "Pipeline_Server_CRUD_Endpoints",
           "details": null
         }
@@ -5655,28 +5655,28 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 46,
+          "lineNumber": 47,
           "testName": "Service_Initializes_With_Valid_Dependencies",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 80,
+          "lineNumber": 81,
           "testName": "ExecuteAsync_SkipsScan_WhenDockerSocketDoesNotExist",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 104,
+          "lineNumber": 105,
           "testName": "ParseDiscoveredServers_ParsesValidDockerContainerLabels",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 138,
+          "lineNumber": 139,
           "testName": "UpsertDiscoveredServers_AddsNewServers_AndDisablesStoppedServers",
           "details": null
         }
@@ -6255,28 +6255,28 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 188,
+          "lineNumber": 197,
           "testName": "ParseDiscoveredServers_Parses_McpAlias_Label",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 213,
+          "lineNumber": 222,
           "testName": "ParseDiscoveredServers_Parses_McpNamespace_Fallback_Label",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 237,
+          "lineNumber": 246,
           "testName": "ParseDiscoveredServers_Ignores_Invalid_Alias_Characters",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs",
-          "lineNumber": 261,
+          "lineNumber": 270,
           "testName": "UpsertDiscoveredServers_PreservesExistingDbAlias_AndInsertsDiscoveredAlias",
           "details": null
         }
@@ -6431,21 +6431,21 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 500,
+          "lineNumber": 547,
           "testName": "TestCall_ResolvesServerAndStripsPrefix_AcrossDelimiters",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 535,
+          "lineNumber": 582,
           "testName": "TestResourceRead_LocalAndValidation_Behaviors",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 554,
+          "lineNumber": 601,
           "testName": "TestBench_ResolvesServerAlias_AcrossCapabilities",
           "details": null
         }
@@ -6832,7 +6832,7 @@
       "category": "MCP",
       "type": "Negative",
       "description": "Downstream server initialize instructions are captured, cached in SessionManager, and returned directly in direct proxy mode (Surface 1) and rolled up in Meta-Mode initialize instructions (Surface 4).",
-      "proofCount": 3,
+      "proofCount": 4,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -6844,15 +6844,22 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DownstreamInstructionsTests.cs",
-          "lineNumber": 289,
+          "lineNumber": 290,
           "testName": "DownstreamServerInstructions_AreExposedAcrossServerResourcesSandboxAndTypeScriptDeclarations",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/DownstreamInstructionsTests.cs",
-          "lineNumber": 335,
+          "lineNumber": 336,
           "testName": "DownstreamServerInstructions_EnforceRbacFiltering_AcrossInitializeActiveServersAndPrompts",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/DownstreamInstructionsTests.cs",
+          "lineNumber": 378,
+          "testName": "ColdStart_CodeModeSandbox_ListServers_InitializesBackendsAndReturnsInstructions",
           "details": null
         }
       ]
@@ -8210,7 +8217,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 394,
+          "lineNumber": 441,
           "testName": "Pipeline_GET_Audit_Returns200",
           "details": null
         }
@@ -8226,7 +8233,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 421,
+          "lineNumber": 468,
           "testName": "Pipeline_GET_Logs_Returns200",
           "details": null
         }
@@ -8320,7 +8327,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 63,
+          "lineNumber": 76,
           "testName": "Pipeline_WellKnown_Endpoints_ReturnSuccess",
           "details": null
         },
@@ -8802,7 +8809,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 376,
+          "lineNumber": 423,
           "testName": "Pipeline_GET_Providers_Secret_Returns200",
           "details": null
         },
@@ -9512,7 +9519,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 482,
+          "lineNumber": 529,
           "testName": "Pipeline_POST_MasterKey_RejectsWhenExternalKeySource",
           "details": null
         }
@@ -11000,7 +11007,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 254,
+          "lineNumber": 301,
           "testName": "Pipeline_Settings_Branding_ReadWrite",
           "details": null
         },
@@ -11030,7 +11037,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 448,
+          "lineNumber": 495,
           "testName": "Branding_Logo_Upload_And_Retrieval_Works",
           "details": null
         }

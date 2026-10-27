@@ -55,16 +55,20 @@ namespace ModelContextGateway.Infrastructure.Identity
                 }
             }
 
-            if (httpContext.User.Identity != null && httpContext.User.Identity.IsAuthenticated)
+            if (httpContext.User.Identity != null && httpContext.User.Identity.IsAuthenticated &&
+                !string.Equals(httpContext.User.Identity.AuthenticationType, "OidcHeader", System.StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(httpContext.User.Identity.AuthenticationType, "AppKey", System.StringComparison.OrdinalIgnoreCase))
             {
                 var username = httpContext.User.Identity.Name ?? "";
                 string sid = "";
                 var groups = new List<string>();
+                var sids = new List<string>();
 
                 if (_windowsIdentityAccessor.TryGetWindowsIdentityDetails(httpContext.User.Identity, out var winSid, out var winGroups))
                 {
                     sid = winSid ?? "";
                     groups = winGroups;
+                    sids.AddRange(winGroups);
                 }
                 else if (httpContext.User.Identity is ClaimsIdentity claimsIdentity)
                 {
@@ -74,12 +78,17 @@ namespace ModelContextGateway.Infrastructure.Identity
                         sid = primarySidClaim.Value;
                     }
 
-                    groups = claimsIdentity.FindAll(ClaimTypes.GroupSid)
+                    var groupSids = claimsIdentity.FindAll(ClaimTypes.GroupSid)
                         .Select(c => c.Value)
                         .ToList();
+                    sids.AddRange(groupSids);
+
+                    var roles = claimsIdentity.FindAll(ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+                    groups = groupSids.Concat(roles).Distinct().ToList();
                 }
 
-                var sids = new List<string>(groups);
                 if (!string.IsNullOrEmpty(sid))
                 {
                     sids.Add(sid);

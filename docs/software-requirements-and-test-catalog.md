@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **486 Requirements Verified** across **1131 Test Proofs** (381 Functional Capabilities, 105 Safety Guardrails).
+> **Catalog Statistics:** **486 Requirements Verified** across **1132 Test Proofs** (381 Functional Capabilities, 105 Safety Guardrails).
 
 ---
 
@@ -15,7 +15,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **70** | 3 | 67 | 146 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **134** | 124 | 10 | 298 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **134** | 124 | 10 | 299 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **67** | 56 | 11 | 143 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **36** | 32 | 4 | 42 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **42** | 35 | 7 | 214 proofs |
@@ -73,10 +73,10 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L189`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L189) (`AppKeys_Sha256Hashing_VerificationWorks`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L338`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L338) (`ServiceCollection_Resolves_VaultUserSecretStore_WhenConfigured`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L388`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L388) (`ExternalJwtAuthenticationHandler_Authenticates_Valid_Bearer_Jwt`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L49`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L49) (`Pipeline_QueryToken_MiddlewareBypass`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L320`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L320) (`Pipeline_AppKey_Create_And_Revoke`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L403`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L403) (`Pipeline_GET_AppKeys_Returns200`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L412`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L412) (`Pipeline_GET_AppKeysLimits_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L62`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L62) (`Pipeline_QueryToken_MiddlewareBypass`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L367`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L367) (`Pipeline_AppKey_Create_And_Revoke`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L450`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L450) (`Pipeline_GET_AppKeys_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L459`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L459) (`Pipeline_GET_AppKeysLimits_Returns200`)
   - [Backend xUnit] [`ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L252`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L252) (`AppKeyScopes_RestrictTargetAccessPrecisely`)
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L22`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L22) (`initializes with default state`)
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L57`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L57) (`handles fetch error gracefully without crashing`)
@@ -121,8 +121,8 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L17`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L17) (`ResolveIdentityAsync_ReturnsFirstNonAnonymousUser`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L38`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L38) (`ResolveIdentityAsync_FallsBackToAnonymous_WhenNoUserResolved`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L55`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CompositeIdentityProviderTests.cs#L55) (`ResolveIdentityAsync_FallsBackToOidcProvider_WhenAnonymous`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L367`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L367) (`Pipeline_GET_Permissions_Mappings_Returns200`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L385`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L385) (`Pipeline_GET_Providers_Auth_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L414`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L414) (`Pipeline_GET_Permissions_Mappings_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L432`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L432) (`Pipeline_GET_Providers_Auth_Returns200`)
   - [Backend xUnit] [`ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L93`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L93) (`GroupMapping_AllowsUser_WhenMappingResolvesToAllowedInternalGroup`)
   - [Backend xUnit] [`ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L111`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/GroupMappingsAndSpecAuthTests.cs#L111) (`GroupMapping_AllowsUser_WhenOidcGroupMapsToAllowedInternalGroup`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L629`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L629) (`AuthMiddleware_Allows_SSO_Session_With_RemoteUser_Header`)
@@ -466,25 +466,25 @@
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L171`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L171) (`Pipeline_Dashboard_Management_Suite`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L218`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L218) (`Pipeline_Dashboard_Management_Suite`)
 
 ### `[AUTH-PIPELINE-GET-CLIENTS]` GET /api/clients returns active client sessions with 200 OK.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L349`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L349) (`Pipeline_GET_Clients_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L396`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L396) (`Pipeline_GET_Clients_Returns200`)
 
 ### `[AUTH-PIPELINE-GET-POLICIES]` GET /api/permissions/policies returns access policies with 200 OK.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L358`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L358) (`Pipeline_GET_Permissions_Policies_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L405`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L405) (`Pipeline_GET_Permissions_Policies_Returns200`)
 
 ### `[AUTH-PIPELINE-PERM-CRUD]` Permissions policy and group mapping CRUD endpoints manage RBAC rules.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L305`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L305) (`Pipeline_Permissions_Policy_And_Mapping_CRUD`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L352`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L352) (`Pipeline_Permissions_Policy_And_Mapping_CRUD`)
 
 ### `[AUTH-PREFIX-EXTRACTION]` ExtractKeyPrefix parses semantic prefixes, Base62 selectors, and legacy tokens accurately.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -974,43 +974,43 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L439`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L439) (`Pipeline_GET_Health_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L486`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L486) (`Pipeline_GET_Health_Returns200`)
 
 ### `[API-PIPELINE-GET-SERVERS]` GET /api/servers returns backend servers list with 200 OK.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L340`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L340) (`Pipeline_GET_Servers_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L387`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L387) (`Pipeline_GET_Servers_Returns200`)
 
 ### `[API-PIPELINE-GET-STATS]` GET /api/stats returns server statistics with 200 OK.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L430`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L430) (`Pipeline_GET_Stats_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L477`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L477) (`Pipeline_GET_Stats_Returns200`)
 
 ### `[API-PIPELINE-GET-VERSION]` GET /api/version returns version information with 200 OK.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L331`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L331) (`Pipeline_GET_Version_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L378`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L378) (`Pipeline_GET_Version_Returns200`)
 
 ### `[API-PIPELINE-POST-MESSAGE-PROTOCOL]` Full end-to-end JSON-RPC session message suite executes over HTTP POST.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L143`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L143) (`Pipeline_POST_Message_FullProtocolSession_Suite`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L190`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L190) (`Pipeline_POST_Message_FullProtocolSession_Suite`)
 
 ### `[API-PIPELINE-POST-SSE-PROTOCOL]` Full end-to-end JSON-RPC protocol suite executes across SSE pipeline.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L86`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L86) (`Pipeline_POST_Sse_JSONRPC_Full_Protocol_Suite`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L99`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L99) (`Pipeline_POST_Sse_JSONRPC_Full_Protocol_Suite`)
 
 ### `[API-PIPELINE-SERVER-CRUD]` Backend server CRUD pipeline endpoints persist and manage downstream servers.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L277`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L277) (`Pipeline_Server_CRUD_Endpoints`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L324`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L324) (`Pipeline_Server_CRUD_Endpoints`)
 
 ### `[HEALTH-PROBE-ALL-ENABLED-FLEET]` BackendHealthCheckService probes all enabled backend servers in the fleet.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1161,10 +1161,10 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (5):**
   - [Backend xUnit] [`ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L83`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SeederAndDiscoveryTests.cs#L83) (`DockerAutoDiscovery_ScanContainers_HandlesMissingSocketGracefully`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L46`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L46) (`Service_Initializes_With_Valid_Dependencies`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L80`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L80) (`ExecuteAsync_SkipsScan_WhenDockerSocketDoesNotExist`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L104`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L104) (`ParseDiscoveredServers_ParsesValidDockerContainerLabels`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L138`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L138) (`UpsertDiscoveredServers_AddsNewServers_AndDisablesStoppedServers`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L47`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L47) (`Service_Initializes_With_Valid_Dependencies`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L81`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L81) (`ExecuteAsync_SkipsScan_WhenDockerSocketDoesNotExist`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L105`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L105) (`ParseDiscoveredServers_ParsesValidDockerContainerLabels`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L139`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L139) (`UpsertDiscoveredServers_AddsNewServers_AndDisablesStoppedServers`)
 
 ### `[MCP-15]` All JSON-RPC results return a resultType discriminator (complete or input_required) per MCP 2026-07-28 spec.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1250,9 +1250,9 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (3):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L500`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L500) (`TestCall_ResolvesServerAndStripsPrefix_AcrossDelimiters`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L535`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L535) (`TestResourceRead_LocalAndValidation_Behaviors`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L554`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L554) (`TestBench_ResolvesServerAlias_AcrossCapabilities`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L547`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L547) (`TestCall_ResolvesServerAndStripsPrefix_AcrossDelimiters`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L582`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L582) (`TestResourceRead_LocalAndValidation_Behaviors`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L601`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L601) (`TestBench_ResolvesServerAlias_AcrossCapabilities`)
 
 ### `[MCP-36]` PromptRoutingManager resolves prompt directly on cold-start without requiring prior prompts/list call.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1833,13 +1833,13 @@
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L394`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L394) (`Pipeline_GET_Audit_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L441`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L441) (`Pipeline_GET_Audit_Returns200`)
 
 ### `[API-PIPELINE-GET-LOGS]` GET /api/logs returns system log records with 200 OK.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L421`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L421) (`Pipeline_GET_Logs_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L468`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L468) (`Pipeline_GET_Logs_Returns200`)
 
 ### `[AUTH-107]` RegisterClient successfully handles DCR requests when open DCR is enabled.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -1904,7 +1904,7 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L164`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L164) (`VaultUserSecretStore_DeleteSecretAsync_DeletesFromVaultKv2`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L187`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L187) (`VaultUserSecretStore_GetServerIdsAsync_ListsPathsFromVaultKv2`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L216`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EnterpriseAuthAndVaultScenarioTests.cs#L216) (`VaultUserSecretStore_Resolves_Enterprise_Path_Template_And_Discrete_KVs`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L376`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L376) (`Pipeline_GET_Providers_Secret_Returns200`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L423`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L423) (`Pipeline_GET_Providers_Secret_Returns200`)
   - [Backend xUnit] [`ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L37`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L37) (`GetSecretAsync_MintsTokenViaTokenExchange_AndCachesResponse`)
   - [Backend xUnit] [`ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L190`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L190) (`CompositeSecretRetriever_RoutesOboAndPocketIdAliases_ToTokenExchangeRetriever`)
   - [Frontend Vitest] [`frontend/src/test/stores/useProviderStore.test.ts#L41`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useProviderStore.test.ts#L41) (`successfully loads auth and secret providers`)
@@ -2113,7 +2113,7 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L241`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L241) (`SetMasterKey_RejectsWhenKeySourceIsExternalOrVault`)
   - [Backend xUnit] [`ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L259`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L259) (`AdminMcpServer_ManageSystem_SetMasterKey_ReencryptsCleanly`)
   - [Backend xUnit] [`ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L338`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L338) (`SetMasterKey_RejectsInvalidOrShortKeys`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L482`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L482) (`Pipeline_POST_MasterKey_RejectsWhenExternalKeySource`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L529`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L529) (`Pipeline_POST_MasterKey_RejectsWhenExternalKeySource`)
 
 ### `[SEC-MASTERKEY-CONFIGURED-STATUS-BADGE]` Displays configured badge and rotate button when custom master key is configured.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -2510,7 +2510,7 @@
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (3):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L254`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L254) (`Pipeline_Settings_Branding_ReadWrite`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L301`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L301) (`Pipeline_Settings_Branding_ReadWrite`)
   - [Frontend Vitest] [`frontend/src/test/components/HeaderBranding.test.tsx#L7`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/HeaderBranding.test.tsx#L7) (`identifies image URLs and paths accurately`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L6) (`renders branding label and FontAwesome icon preview when icon is a CSS class`)
 
@@ -2518,7 +2518,7 @@
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L448`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L448) (`Branding_Logo_Upload_And_Retrieval_Works`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L495`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L495) (`Branding_Logo_Upload_And_Retrieval_Works`)
 
 ### `[UI-07]` Audits desktop viewport layout for zero horizontal overflow and high UX score.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -2904,7 +2904,7 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L28`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L28) (`IsValidServerUrl_Rejects_Invalid_Http_Urls`)
   - [Backend xUnit] [`ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L53`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L53) (`Validation_Rejects_TypeOnly_Update_Leaving_Incompatible_Url`)
   - [Backend xUnit] [`ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L352`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L352) (`ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L59`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L59) (`DockerDiscovery_SkipsContainer_ResolvingToPrivateIp`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L60`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L60) (`DockerDiscovery_SkipsContainer_ResolvingToPrivateIp`)
   - [Backend xUnit] [`ModelContextGateway.Tests/EmbeddingServiceTests.cs#L83`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EmbeddingServiceTests.cs#L83) (`ApiEmbeddingService_GetEmbeddingAsync_Throws_On_Http_Error`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L58`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L58) (`McpClient_NamedHttpClient_Applies_SsrfConnectCallback_AndBlocksPrivateIps`)
   - [Backend xUnit] [`ModelContextGateway.Tests/McpIntegrationTests.cs#L1054`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L1054) (`CustomFilesSanitization_PreventsDirectoryTraversal`)
@@ -3335,10 +3335,10 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (4):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L188`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L188) (`ParseDiscoveredServers_Parses_McpAlias_Label`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L213`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L213) (`ParseDiscoveredServers_Parses_McpNamespace_Fallback_Label`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L237`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L237) (`ParseDiscoveredServers_Ignores_Invalid_Alias_Characters`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L261`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L261) (`UpsertDiscoveredServers_PreservesExistingDbAlias_AndInsertsDiscoveredAlias`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L197`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L197) (`ParseDiscoveredServers_Parses_McpAlias_Label`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L222`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L222) (`ParseDiscoveredServers_Parses_McpNamespace_Fallback_Label`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L246`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L246) (`ParseDiscoveredServers_Ignores_Invalid_Alias_Characters`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L270`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L270) (`UpsertDiscoveredServers_PreservesExistingDbAlias_AndInsertsDiscoveredAlias`)
 
 ### `[MCP-32]` InMemorySimdToolVectorStore scores tool embeddings using .NET 10 hardware SIMD TensorPrimitives.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -3381,10 +3381,11 @@
 ### `[MCP-56]` Downstream server initialize instructions are captured, cached in SessionManager, and returned directly in direct proxy mode (Surface 1) and rolled up in Meta-Mode initialize instructions (Surface 4).
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (3):**
+* **Verification Proofs (4):**
   - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L238`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L238) (`ResolveSessionInstructionsAsync_SurfacesDownstreamInstructions_InDirectProxyAndMetaMode`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L289`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L289) (`DownstreamServerInstructions_AreExposedAcrossServerResourcesSandboxAndTypeScriptDeclarations`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L335`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L335) (`DownstreamServerInstructions_EnforceRbacFiltering_AcrossInitializeActiveServersAndPrompts`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L290`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L290) (`DownstreamServerInstructions_AreExposedAcrossServerResourcesSandboxAndTypeScriptDeclarations`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L336`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L336) (`DownstreamServerInstructions_EnforceRbacFiltering_AcrossInitializeActiveServersAndPrompts`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L378`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L378) (`ColdStart_CodeModeSandbox_ListServers_InitializesBackendsAndReturnsInstructions`)
 
 ### `[AUTH-106]` Exchange throws InvalidOperationException when request is null.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -3402,7 +3403,7 @@
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (8):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L63`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L63) (`Pipeline_WellKnown_Endpoints_ReturnSuccess`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/PipelineIntegrationTests.cs#L76`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L76) (`Pipeline_WellKnown_Endpoints_ReturnSuccess`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L159`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L159) (`Exchange_ClientCredentials_ValidSecret_ReturnsSignInResult`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L206`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L206) (`Exchange_ClientCredentials_InvalidSecret_ReturnsForbid`)
   - [Backend xUnit] [`ModelContextGateway.Tests/AuthorizationControllerTests.cs#L251`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L251) (`Exchange_ClientCredentials_ExpiredClient_ReturnsForbid`)
@@ -3655,10 +3656,10 @@
 | `AUTH-PERSONAL-APPKEY-CREATE` | **Guardrail** | `AUTH` | Non-admin users can create personal App Keys up to quota | [`AppKeysControllerTests.cs:L191`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L191) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-LIST` | Positive | `AUTH` | Non-admin users can view their personal App Keys | [`AppKeysControllerTests.cs:L125`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L125) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE` | Positive | `AUTH` | Custom user quotas override default limit | [`AppKeysControllerTests.cs:L223`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L223) | Backend xUnit |
-| `AUTH-PIPELINE-ADMIN-DASHBOARD` | Positive | `AUTH` | Dashboard management API suite executes for authorized administrators. | [`PipelineIntegrationTests.cs:L171`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L171) | Backend xUnit |
-| `AUTH-PIPELINE-GET-CLIENTS` | Positive | `AUTH` | GET /api/clients returns active client sessions with 200 OK. | [`PipelineIntegrationTests.cs:L349`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L349) | Backend xUnit |
-| `AUTH-PIPELINE-GET-POLICIES` | Positive | `AUTH` | GET /api/permissions/policies returns access policies with 200 OK. | [`PipelineIntegrationTests.cs:L358`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L358) | Backend xUnit |
-| `AUTH-PIPELINE-PERM-CRUD` | Positive | `AUTH` | Permissions policy and group mapping CRUD endpoints manage RBAC rules. | [`PipelineIntegrationTests.cs:L305`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L305) | Backend xUnit |
+| `AUTH-PIPELINE-ADMIN-DASHBOARD` | Positive | `AUTH` | Dashboard management API suite executes for authorized administrators. | [`PipelineIntegrationTests.cs:L218`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L218) | Backend xUnit |
+| `AUTH-PIPELINE-GET-CLIENTS` | Positive | `AUTH` | GET /api/clients returns active client sessions with 200 OK. | [`PipelineIntegrationTests.cs:L396`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L396) | Backend xUnit |
+| `AUTH-PIPELINE-GET-POLICIES` | Positive | `AUTH` | GET /api/permissions/policies returns access policies with 200 OK. | [`PipelineIntegrationTests.cs:L405`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L405) | Backend xUnit |
+| `AUTH-PIPELINE-PERM-CRUD` | Positive | `AUTH` | Permissions policy and group mapping CRUD endpoints manage RBAC rules. | [`PipelineIntegrationTests.cs:L352`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L352) | Backend xUnit |
 | `AUTH-PREFIX-EXTRACTION` | Positive | `AUTH` | ExtractKeyPrefix parses semantic prefixes, Base62 selectors, and legacy tokens accurately. | [`AppKeyAuthenticationTests.cs:L451`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L451) | Backend xUnit |
 | `AUTH-QUERY-TOKEN-EXTRACTION` | Positive | `AUTH` | Query string token middleware extracts access_token or token query parameter to Authorization header. | [`EndpointAuthorizationTests.cs:L7`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/EndpointAuthorizationTests.cs#L7) | Backend xUnit |
 | `AUTH-RBAC-GROUP-ALLOW` | Positive | `AUTH` | RBAC grants access when user claims match the required policy security group. | [`FineGrainedRbacTests.cs:L94`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/FineGrainedRbacTests.cs#L94) | Backend xUnit |
@@ -3805,13 +3806,13 @@
 | `GUARD-UNSUPPORTED-DB-PROVIDER` | **Guardrail** | `GUARD` | DbConnectionFactory fails closed and throws InvalidOperationException when configured with unsupported database provider. | [`MultiDatabaseProviderIntegrationTests.cs:L29`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MultiDatabaseProviderIntegrationTests.cs#L29) | Backend xUnit |
 | `GUARD-VALIDATION-STDIO-SHELL-OPERATORS` | **Guardrail** | `GUARD` | ServerValidationHelper validates stdio commands against unsafe shell operators, piping, and command injection. | [`ServerEndpointsValidationTests.cs:L7`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L7) | Backend xUnit |
 | `MCP-ADMIN-TOOL-TEST-CALL-ERROR` | **Guardrail** | `GUARD` | AdminMcpServer test_tool_call propagates downstream backend errors with visibility. | [`AdminMcpServerTests.cs:L650`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L650) | Backend xUnit |
-| `API-PIPELINE-GET-HEALTH` | Positive | `MCP` | GET /health returns gateway health status with 200 OK. | [`PipelineIntegrationTests.cs:L439`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L439) | Backend xUnit |
-| `API-PIPELINE-GET-SERVERS` | Positive | `MCP` | GET /api/servers returns backend servers list with 200 OK. | [`PipelineIntegrationTests.cs:L340`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L340) | Backend xUnit |
-| `API-PIPELINE-GET-STATS` | Positive | `MCP` | GET /api/stats returns server statistics with 200 OK. | [`PipelineIntegrationTests.cs:L430`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L430) | Backend xUnit |
-| `API-PIPELINE-GET-VERSION` | Positive | `MCP` | GET /api/version returns version information with 200 OK. | [`PipelineIntegrationTests.cs:L331`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L331) | Backend xUnit |
-| `API-PIPELINE-POST-MESSAGE-PROTOCOL` | Positive | `MCP` | Full end-to-end JSON-RPC session message suite executes over HTTP POST. | [`PipelineIntegrationTests.cs:L143`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L143) | Backend xUnit |
-| `API-PIPELINE-POST-SSE-PROTOCOL` | Positive | `MCP` | Full end-to-end JSON-RPC protocol suite executes across SSE pipeline. | [`PipelineIntegrationTests.cs:L86`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L86) | Backend xUnit |
-| `API-PIPELINE-SERVER-CRUD` | Positive | `MCP` | Backend server CRUD pipeline endpoints persist and manage downstream servers. | [`PipelineIntegrationTests.cs:L277`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L277) | Backend xUnit |
+| `API-PIPELINE-GET-HEALTH` | Positive | `MCP` | GET /health returns gateway health status with 200 OK. | [`PipelineIntegrationTests.cs:L486`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L486) | Backend xUnit |
+| `API-PIPELINE-GET-SERVERS` | Positive | `MCP` | GET /api/servers returns backend servers list with 200 OK. | [`PipelineIntegrationTests.cs:L387`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L387) | Backend xUnit |
+| `API-PIPELINE-GET-STATS` | Positive | `MCP` | GET /api/stats returns server statistics with 200 OK. | [`PipelineIntegrationTests.cs:L477`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L477) | Backend xUnit |
+| `API-PIPELINE-GET-VERSION` | Positive | `MCP` | GET /api/version returns version information with 200 OK. | [`PipelineIntegrationTests.cs:L378`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L378) | Backend xUnit |
+| `API-PIPELINE-POST-MESSAGE-PROTOCOL` | Positive | `MCP` | Full end-to-end JSON-RPC session message suite executes over HTTP POST. | [`PipelineIntegrationTests.cs:L190`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L190) | Backend xUnit |
+| `API-PIPELINE-POST-SSE-PROTOCOL` | Positive | `MCP` | Full end-to-end JSON-RPC protocol suite executes across SSE pipeline. | [`PipelineIntegrationTests.cs:L99`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L99) | Backend xUnit |
+| `API-PIPELINE-SERVER-CRUD` | Positive | `MCP` | Backend server CRUD pipeline endpoints persist and manage downstream servers. | [`PipelineIntegrationTests.cs:L324`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L324) | Backend xUnit |
 | `HEALTH-PROBE-ALL-ENABLED-FLEET` | Positive | `MCP` | BackendHealthCheckService probes all enabled backend servers in the fleet. | [`BackendHealthCheckServiceTests.cs:L281`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L281) | Backend xUnit |
 | `HEALTH-PROBE-CUSTOM-SERVER-CONNECTED` | Positive | `MCP` | BackendHealthCheckService marks registered custom servers as Connected. | [`BackendHealthCheckServiceTests.cs:L384`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L384) | Backend xUnit |
 | `HEALTH-PROBE-DISABLED-SERVER` | Positive | `MCP` | BackendHealthCheckService marks disabled servers as Disabled. | [`BackendHealthCheckServiceTests.cs:L252`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendHealthCheckServiceTests.cs#L252) | Backend xUnit |
@@ -3840,11 +3841,11 @@
 | `MCP-28` | **Guardrail** | `MCP` | ToolRoutingManager rejects ambiguous bare tool calls when duplicate tool names exist across distinct servers, listing candidates with namespaces. | [`ToolRoutingManagerTests.cs:L647`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L647) | Backend xUnit |
 | `MCP-29` | **Guardrail** | `MCP` | ServerValidationHelper rejects invalid characters in Alias. | [`ServerEndpointsValidationTests.cs:L72`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ServerEndpointsValidationTests.cs#L72) | Backend xUnit |
 | `MCP-30` | Positive | `MCP` | IsUserAuthorizedAsync matches granular tool policies across /, :, and __ delimiters. | [`UnifiedMcpAuthorizationTests.cs:L284`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/UnifiedMcpAuthorizationTests.cs#L284) | Backend xUnit |
-| `MCP-31` | **Guardrail** | `MCP` | DockerAutoDiscoveryService parses mcp.alias from Docker container labels | [`DockerAutoDiscoveryServiceTests.cs:L188`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L188) | Backend xUnit |
+| `MCP-31` | **Guardrail** | `MCP` | DockerAutoDiscoveryService parses mcp.alias from Docker container labels | [`DockerAutoDiscoveryServiceTests.cs:L197`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DockerAutoDiscoveryServiceTests.cs#L197) | Backend xUnit |
 | `MCP-32` | **Guardrail** | `MCP` | InMemorySimdToolVectorStore scores tool embeddings using .NET 10 hardware SIMD TensorPrimitives. | [`InMemorySimdToolVectorStoreTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/InMemorySimdToolVectorStoreTests.cs#L8) | Backend xUnit |
 | `MCP-33` | Positive | `MCP` | OpenAiEmbeddingProvider generates embeddings via OpenAI and Ollama compatible endpoints. | [`OpenAiEmbeddingProviderTests.cs:L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/OpenAiEmbeddingProviderTests.cs#L26) | Backend xUnit |
 | `MCP-34` | **Guardrail** | `MCP` | ToolRoutingManager gracefully falls back to keyword matching when NoOpEmbeddingProvider is active. | [`ToolRoutingManagerFallbackTests.cs:L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerFallbackTests.cs#L26) | Backend xUnit |
-| `MCP-35` | Positive | `MCP` | Test call and prompt endpoints resolve server and strip prefix across slash, dunder, and colon delimiters. | [`PipelineIntegrationTests.cs:L500`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L500) | Backend xUnit |
+| `MCP-35` | Positive | `MCP` | Test call and prompt endpoints resolve server and strip prefix across slash, dunder, and colon delimiters. | [`PipelineIntegrationTests.cs:L547`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L547) | Backend xUnit |
 | `MCP-36` | Positive | `MCP` | PromptRoutingManager resolves prompt directly on cold-start without requiring prior prompts/list call. | [`PromptAndResourceResilienceTests.cs:L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L11) | Backend xUnit |
 | `MCP-37` | Positive | `MCP` | ResourceRoutingManager resolves mcp:// URIs directly on cold-start without prior resources/list. | [`PromptAndResourceResilienceTests.cs:L120`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L120) | Backend xUnit |
 | `MCP-38` | Positive | `MCP` | PromptRoutingManager supports slash, colon, and double-underscore delimiters for prompts/get. | [`PromptAndResourceResilienceTests.cs:L56`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PromptAndResourceResilienceTests.cs#L56) | Backend xUnit |
@@ -3939,13 +3940,13 @@
 | `UI-112` | Positive | `MCP` | renders nothing when isAddEditOpen is false | [`ServerModal.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L1) | Frontend Vitest |
 | `UI-121` | Positive | `MCP` | should open Add Server modal and switch secret provider types | [`server-management.spec.ts:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/server-management.spec.ts#L1) | Playwright E2E |
 | `UI-SERVERS-ALIAS-MANAGEMENT` | Positive | `MCP` | renders server alias badge alongside server id when configured | [`ServerCard.test.tsx:L145`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerCard.test.tsx#L145) | Frontend Vitest |
-| `API-PIPELINE-GET-AUDIT` | Positive | `SEC` | GET /api/audit returns audit log records with 200 OK. | [`PipelineIntegrationTests.cs:L394`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L394) | Backend xUnit |
-| `API-PIPELINE-GET-LOGS` | Positive | `SEC` | GET /api/logs returns system log records with 200 OK. | [`PipelineIntegrationTests.cs:L421`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L421) | Backend xUnit |
+| `API-PIPELINE-GET-AUDIT` | Positive | `SEC` | GET /api/audit returns audit log records with 200 OK. | [`PipelineIntegrationTests.cs:L441`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L441) | Backend xUnit |
+| `API-PIPELINE-GET-LOGS` | Positive | `SEC` | GET /api/logs returns system log records with 200 OK. | [`PipelineIntegrationTests.cs:L468`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L468) | Backend xUnit |
 | `AUTH-106` | **Guardrail** | `SEC` | Exchange throws InvalidOperationException when request is null. | [`AuthorizationControllerTests.cs:L19`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L19) | Backend xUnit |
 | `AUTH-107` | Positive | `SEC` | RegisterClient successfully handles DCR requests when open DCR is enabled. | [`AuthorizationControllerTests.cs:L36`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L36) | Backend xUnit |
 | `AUTH-108` | **Guardrail** | `SEC` | Authorize throws InvalidOperationException when OIDC request is null. | [`AuthorizationControllerTests.cs:L77`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L77) | Backend xUnit |
 | `AUTH-109` | Positive | `SEC` | RegisterClient uses IOAuthClientRepository when IOpenIddictApplicationManager is null. | [`AuthorizationControllerTests.cs:L94`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L94) | Backend xUnit |
-| `AUTH-111` | **Guardrail** | `SEC` | Pipeline exposes RFC 9728 OAuth Protected Resource discovery endpoints with dynamic resource identifiers. | [`PipelineIntegrationTests.cs:L63`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L63) | Backend xUnit |
+| `AUTH-111` | **Guardrail** | `SEC` | Pipeline exposes RFC 9728 OAuth Protected Resource discovery endpoints with dynamic resource identifiers. | [`PipelineIntegrationTests.cs:L76`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L76) | Backend xUnit |
 | `AUTH-112` | **Guardrail** | `SEC` | Authorize resolves client application from IOAuthClientRepository and redirects to consent. | [`AuthorizationControllerTests.cs:L297`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L297) | Backend xUnit |
 | `AUTH-113` | Positive | `SEC` | RegisterClient supports public clients with PKCE (token_endpoint_auth_method: none) and omits client secret. | [`AuthorizationControllerTests.cs:L351`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L351) | Backend xUnit |
 | `AUTH-114` | **Guardrail** | `SEC` | RegisterClient rejects invalid or non-absolute redirect URIs with standard RFC 7591 invalid_redirect_uri error. | [`AuthorizationControllerTests.cs:L400`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L400) | Backend xUnit |
@@ -4046,8 +4047,8 @@
 | `UI-02` | Positive | `UI` | Inspect modal displays spinner loading state while querying server capabilities | [`ServerInspectModal.test.tsx:L61`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerInspectModal.test.tsx#L61) | Frontend Vitest |
 | `UI-03` | Positive | `UI` | Grouped server view renders category sections and supports collapsible groups | [`DashboardView.test.tsx:L63`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/DashboardView.test.tsx#L63) | Frontend Vitest |
 | `UI-04` | Positive | `UI` | Tool selector filters available tools by selected backend server | [`ToolTesterCard.test.tsx:L77`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ToolTesterCard.test.tsx#L77) | Frontend Vitest |
-| `UI-05` | Positive | `UI` | Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API. | [`PipelineIntegrationTests.cs:L254`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L254) | Backend xUnit |
-| `UI-06` | Positive | `UI` | Router supports uploading and retrieving custom branding logo images via dedicated endpoints. | [`PipelineIntegrationTests.cs:L448`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L448) | Backend xUnit |
+| `UI-05` | Positive | `UI` | Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API. | [`PipelineIntegrationTests.cs:L301`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L301) | Backend xUnit |
+| `UI-06` | Positive | `UI` | Router supports uploading and retrieving custom branding logo images via dedicated endpoints. | [`PipelineIntegrationTests.cs:L495`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L495) | Backend xUnit |
 | `UI-07` | Positive | `UI` | Audits desktop viewport layout for zero horizontal overflow and high UX score. | [`layout-inspector.spec.ts:L276`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/layout-inspector.spec.ts#L276) | Playwright E2E |
 | `UI-102` | Positive | `UI` | Dashboard renders stats card, connected server list, and setup instructions | [`DashboardView.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/DashboardView.test.tsx#L1) | Frontend Vitest |
 | `UI-103` | Positive | `UI` | Interactive tool tester renders server and tool selection dropdowns | [`ToolTesterCard.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ToolTesterCard.test.tsx#L1) | Frontend Vitest |

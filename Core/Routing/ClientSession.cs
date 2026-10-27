@@ -31,6 +31,8 @@ namespace ModelContextGateway.Core.Routing
         private readonly List<Task> _backendInitTasks = new();
         private readonly ConcurrentDictionary<string, CancellationTokenSource> _activeRequestCancellationTokens = new();
         private readonly ConcurrentDictionary<string, TaskCompletionSource<JsonRpcResponse>> _clientPendingRequests = new();
+        private UserIdentityContext? _lastKnownIdentity;
+        private string? _lastKnownPassThroughToken;
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -243,7 +245,7 @@ namespace ModelContextGateway.Core.Routing
                             if (rawId != null)
                             {
                                 var scopeId = _sessionId;
-                                if (_sessionId == "global-stateless-session" && httpContext != null)
+                                if (_sessionId.StartsWith("global-stateless-session", StringComparison.Ordinal) && httpContext != null)
                                 {
                                     scopeId = $"{_sessionId}:{httpContext.TraceIdentifier}";
                                 }
@@ -315,16 +317,29 @@ namespace ModelContextGateway.Core.Routing
             {
                 ListServersAsync = async () =>
                 {
+                    if (_backendConnections.IsEmpty && _servers.Any(s => s.Enabled && s.Type != "custom" && string.IsNullOrWhiteSpace(_sessionManager?.GetServerInstructionsCache(s.Id))))
+                    {
+                        try
+                        {
+                            await EnsureBackendsInitializedAsync();
+                        }
+                        catch
+                        {
+                        }
+                    }
+
                     var result = new List<object>();
                     foreach (var s in _servers.Where(s => s.Enabled))
                     {
-                        if (await IsUserAuthorizedAsync("tools/list", $"server:{s.Id}", httpContext))
+                        if (await IsServerAuthorizedForInstructionsAsync(s.Id, httpContext))
                         {
                             result.Add(new
                             {
                                 id = s.Id,
                                 alias = s.Alias,
                                 name = s.DisplayName,
+                                displayName = s.DisplayName,
+                                categories = s.Categories ?? new List<string>(),
                                 enabled = s.Enabled,
                                 instructions = _sessionManager?.GetServerInstructionsCache(s.Id)
                             });

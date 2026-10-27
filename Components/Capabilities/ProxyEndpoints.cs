@@ -11,432 +11,52 @@ namespace ModelContextGateway.Components.Capabilities
         public static IEndpointRouteBuilder MapProxyEndpoints(this IEndpointRouteBuilder app)
         {
             // ----------------------------------------------------
-            // MCP CLIENT SSE HANDLER
+            // MCP CLIENT SSE & STREAMABLE HTTP HANDLER
             // ----------------------------------------------------
             app.MapMethods("/sse", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpContext, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
             {
+                if (httpContext.Request.Method == "HEAD")
+                {
+                    httpContext.Response.Headers.ContentType = "text/event-stream";
+                    httpContext.Response.Headers.CacheControl = "no-cache";
+                    httpContext.Response.Headers.Connection = "keep-alive";
+                    return;
+                }
+
+                if (httpContext.Request.Method == "POST")
+                {
+                    bool isMetaMode = httpContext.Request.Query["meta"] != "false";
+                    var statelessSessionId = isMetaMode ? "global-stateless-session" : "global-stateless-session-direct";
+                    await HandleStatelessPostRequestAsync(httpContext, sessionManager, logger, statelessSessionId, targetServerId: null, isMetaMode);
+                    return;
+                }
+
+                // Stateful GET /sse establishment
                 httpContext.Response.Headers.ContentType = "text/event-stream";
                 httpContext.Response.Headers.CacheControl = "no-cache";
                 httpContext.Response.Headers.Connection = "keep-alive";
 
-                if (httpContext.Request.Method == "HEAD")
-                {
-                    return;
-                }
-
-                // Read body if POST
-                string requestBody = string.Empty;
-                string method = string.Empty;
-                JsonElement? id = null;
-                if (httpContext.Request.Method == "POST")
-                {
-                    try
-                    {
-                        httpContext.Request.EnableBuffering();
-                        using (var reader = new StreamReader(httpContext.Request.Body, leaveOpen: true))
-                        {
-                            requestBody = await reader.ReadToEndAsync();
-                            httpContext.Request.Body.Position = 0;
-                        }
-
-                        if (!string.IsNullOrEmpty(requestBody))
-                        {
-                            using var doc = JsonDocument.Parse(requestBody);
-                            var root = doc.RootElement;
-                            if (root.TryGetProperty("method", out var methodProp))
-                            {
-                                method = methodProp.GetString() ?? string.Empty;
-                            }
-                            if (root.TryGetProperty("id", out var idProp))
-                            {
-                                id = idProp.Clone();
-                            }
-                            logger.LogDebug("[JSON-RPC Client -> Gateway] {Payload}", PiiSanitizer.SanitizePayload(requestBody));
-                        }
-                    }
-                    catch (UnauthorizedAccessException exAuth)
-                    {
-                        logger.LogWarning(exAuth, "Unauthorized access during stateless request handling");
-                        httpContext.Response.StatusCode = 403;
-                        httpContext.Response.Headers.ContentType = "application/json";
-                        await httpContext.Response.WriteAsJsonAsync(new
-                        {
-                            jsonrpc = "2.0",
-                            error = new { code = -32001, message = exAuth.Message }
-                        });
-                        return;
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, "Failed to parse POST /sse body");
-                    }
-                }
-
-                // Determine if this is a subsequent request for an existing stateless/global session
-                bool isSubsequentRequest = httpContext.Request.Method == "POST" &&
-                                           method != "initialize" &&
-                                           method != "server/discover";
-
-                if (isSubsequentRequest)
-                {
-                    var globalSessionId = "global-stateless-session";
-                    var activeSession = sessionManager.GetSession(globalSessionId);
-                    if (activeSession == null)
-                    {
-                        bool isMetaMode = httpContext.Request.Query["meta"] != "false";
-                        activeSession = await sessionManager.CreateSessionAsync(globalSessionId, httpContext.Response, targetServerId: null, isMetaMode);
-                    }
-                    else
-                    {
-                        activeSession.UpdateClientResponse(httpContext.Response);
-                    }
-
-                    httpContext.Response.OnCompleted(() =>
-                    {
-                        if (activeSession.GetClientResponse() == httpContext.Response)
-                        {
-                            activeSession.DecoupleClientResponse();
-                        }
-                        return Task.CompletedTask;
-                    });
-
-                    sessionManager.IncrementTotalRequests();
-                    logger.LogInformation("Routing stateless POST /sse request method {Method} to global session", method);
-                    try
-                    {
-                        if (string.IsNullOrEmpty(method))
-                        {
-                            if (id != null)
-                            {
-                                var idStr = id.Value.ValueKind == JsonValueKind.String ? id.Value.GetString() : id.Value.GetRawText();
-                                if (idStr != null && activeSession.TryHandleClientResponse(idStr, requestBody))
-                                {
-                                    httpContext.Response.StatusCode = 202;
-                                    return;
-                                }
-                            }
-                            httpContext.Response.StatusCode = 400;
-                            return;
-                        }
-
-                        if (method == "notifications/cancelled")
-                        {
-                            using var doc = JsonDocument.Parse(requestBody);
-                            var root = doc.RootElement;
-                            if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("requestId", out var reqIdProp))
-                            {
-                                var reqId = reqIdProp.ValueKind == JsonValueKind.String ? reqIdProp.GetString() : reqIdProp.GetRawText();
-                                if (!string.IsNullOrEmpty(reqId))
-                                {
-                                    activeSession.CancelRequest(reqId, httpContext.TraceIdentifier);
-                                }
-                            }
-                            httpContext.Response.StatusCode = 202;
-                            return;
-                        }
-
-                        if (method == "tools/list")
-                        {
-                            var tools = await activeSession.ListToolsAsync(requestBody, httpContext);
-                            var response = new
-                            {
-                                jsonrpc = "2.0",
-                                id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(new { tools })
-                            };
-                            httpContext.Response.Headers.ContentType = "application/json";
-                            await httpContext.Response.WriteAsJsonAsync(response);
-                            return;
-                        }
-                        else if (method == "tools/call")
-                        {
-                            var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
-                            using var doc = JsonDocument.Parse(requestBody);
-                            var root = doc.RootElement;
-                            if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
-                            {
-                                var toolName = nameProp.GetString() ?? string.Empty;
-                                var res = await activeSession.CallToolAsync(toolName, requestBody, dbFactory, httpContext);
-                                var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
-                                var response = new
-                                {
-                                    jsonrpc = "2.0",
-                                    id = id != null ? (object)id : null,
-                                    result = ProtocolHelper.EnsureResultType(targetRes)
-                                };
-                                httpContext.Response.Headers.ContentType = "application/json";
-                                await httpContext.Response.WriteAsJsonAsync(response);
-                                return;
-                            }
-                            httpContext.Response.StatusCode = 400;
-                            return;
-                        }
-                        else if (method == "resources/list")
-                        {
-                            var resources = await activeSession.ListResourcesAsync(requestBody, httpContext);
-                            var response = new
-                            {
-                                jsonrpc = "2.0",
-                                id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(new { resources })
-                            };
-                            httpContext.Response.Headers.ContentType = "application/json";
-                            await httpContext.Response.WriteAsJsonAsync(response);
-                            return;
-                        }
-                        else if (method == "resources/templates/list")
-                        {
-                            var templates = await activeSession.ListResourceTemplatesAsync(requestBody, httpContext);
-                            var response = new
-                            {
-                                jsonrpc = "2.0",
-                                id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(new { templates })
-                            };
-                            httpContext.Response.Headers.ContentType = "application/json";
-                            await httpContext.Response.WriteAsJsonAsync(response);
-                            return;
-                        }
-                        else if (method == "resources/read")
-                        {
-                            using var doc = JsonDocument.Parse(requestBody);
-                            var root = doc.RootElement;
-                            if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("uri", out var uriProp))
-                            {
-                                var uri = uriProp.GetString() ?? string.Empty;
-                                var res = await activeSession.ReadResourceAsync(uri, requestBody, httpContext);
-                                var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
-                                var response = new
-                                {
-                                    jsonrpc = "2.0",
-                                    id = id != null ? (object)id : null,
-                                    result = ProtocolHelper.EnsureResultType(targetRes)
-                                };
-                                httpContext.Response.Headers.ContentType = "application/json";
-                                await httpContext.Response.WriteAsJsonAsync(response);
-                                return;
-                            }
-                            httpContext.Response.StatusCode = 400;
-                            return;
-                        }
-                        else if (method == "prompts/list")
-                        {
-                            var prompts = await activeSession.ListPromptsAsync(requestBody, httpContext);
-                            var response = new
-                            {
-                                jsonrpc = "2.0",
-                                id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(new { prompts })
-                            };
-                            httpContext.Response.Headers.ContentType = "application/json";
-                            await httpContext.Response.WriteAsJsonAsync(response);
-                            return;
-                        }
-                        else if (method == "prompts/get")
-                        {
-                            using var doc = JsonDocument.Parse(requestBody);
-                            var root = doc.RootElement;
-                            if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
-                            {
-                                var name = nameProp.GetString() ?? string.Empty;
-                                var res = await activeSession.GetPromptAsync(name, requestBody, httpContext);
-                                var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
-                                var response = new
-                                {
-                                    jsonrpc = "2.0",
-                                    id = id != null ? (object)id : null,
-                                    result = ProtocolHelper.EnsureResultType(targetRes)
-                                };
-                                httpContext.Response.Headers.ContentType = "application/json";
-                                await httpContext.Response.WriteAsJsonAsync(response);
-                                return;
-                            }
-                            httpContext.Response.StatusCode = 400;
-                            return;
-                        }
-                        else if (method == "completion/complete")
-                        {
-                            var res = await activeSession.CompleteAsync(requestBody, httpContext);
-                            var response = new
-                            {
-                                jsonrpc = "2.0",
-                                id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(res)
-                            };
-                            httpContext.Response.Headers.ContentType = "application/json";
-                            await httpContext.Response.WriteAsJsonAsync(response);
-                            return;
-                        }
-                        else if (method == "subscriptions/listen")
-                        {
-                            var response = new
-                            {
-                                jsonrpc = "2.0",
-                                id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(new
-                                {
-                                    status = "listening",
-                                    subscriptions = new { }
-                                })
-                            };
-                            httpContext.Response.Headers.ContentType = "application/json";
-                            await httpContext.Response.WriteAsJsonAsync(response);
-                            return;
-                        }
-                        else if (method == "roots/list")
-                        {
-                            var response = new
-                            {
-                                jsonrpc = "2.0",
-                                id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(new
-                                {
-                                    roots = new[] {
-                                        new {
-                                            uri = "file:///containers",
-                                            name = "Docker Containers Workspace"
-                                        }
-                                    }
-                                })
-                            };
-                            httpContext.Response.Headers.ContentType = "application/json";
-                            await httpContext.Response.WriteAsJsonAsync(response);
-                            return;
-                        }
-                        else
-                        {
-                            await activeSession.BroadcastNotificationAsync(method, requestBody);
-                            httpContext.Response.StatusCode = 202;
-                            return;
-                        }
-                    }
-                    catch (UnauthorizedAccessException exAuth)
-                    {
-                        logger.LogWarning(exAuth, "Unauthorized access during stateless request handling");
-                        httpContext.Response.StatusCode = 403;
-                        httpContext.Response.Headers.ContentType = "application/json";
-                        await httpContext.Response.WriteAsJsonAsync(new
-                        {
-                            jsonrpc = "2.0",
-                            error = new { code = -32001, message = exAuth.Message }
-                        });
-                        return;
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, "Error routing stateless message");
-                        httpContext.Response.StatusCode = 500;
-                        return;
-                    }
-                }
-
-                // Otherwise, this is a new session establishment request (GET /sse or POST with initialize/discover)
-                var sessionId = (httpContext.Request.Method == "POST") ? "global-stateless-session" : Guid.NewGuid().ToString("N");
+                var sessionId = Guid.NewGuid().ToString("N");
                 logger.LogInformation("New client SSE connection ({Method}). SessionId: {SessionId}", httpContext.Request.Method, sessionId);
 
-                // Write SSE endpoint event
                 var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
                 if (string.IsNullOrEmpty(scheme))
                 {
                     scheme = httpContext.Request.Scheme;
                 }
 
-                var host = httpContext.Request.Host.Value;
+                var host = httpContext.Request.Headers["X-Forwarded-Host"].ToString();
+                if (string.IsNullOrEmpty(host))
+                {
+                    host = httpContext.Request.Host.Value;
+                }
+
                 var absoluteUrl = $"{scheme}://{host}/message?sessionId={sessionId}";
                 await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
                 await httpContext.Response.Body.FlushAsync();
 
                 bool metaMode = httpContext.Request.Query["meta"] != "false";
-
-                // Retrieve or create session
-                ClientSession session;
-                var existingSession = sessionManager.GetSession(sessionId);
-                if (existingSession != null)
-                {
-                    session = existingSession;
-                    if (sessionId == "global-stateless-session")
-                    {
-                        session.UpdateClientResponse(httpContext.Response);
-                    }
-                }
-                else
-                {
-                    session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId: null, metaMode);
-                }
-
-                if (sessionId == "global-stateless-session")
-                {
-                    httpContext.Response.OnCompleted(() =>
-                    {
-                        if (session.GetClientResponse() == httpContext.Response)
-                        {
-                            session.DecoupleClientResponse();
-                        }
-                        return Task.CompletedTask;
-                    });
-                }
-
-                if (httpContext.Request.Method == "POST")
-                {
-                    if (method == "initialize")
-                    {
-                        string clientProtocolVersion = GatewayMetadata.ExtractRequestedProtocolVersion(requestBody);
-                        var enableCodeMode = httpContext.RequestServices.GetService<DynamicEmbeddingService>()?.GetSettings()?.EnableCodeMode ?? true;
-                        var resolvedInstructions = await session.ResolveSessionInstructionsAsync(enableCodeMode, requestBody, httpContext: httpContext);
-
-                        var response = new
-                        {
-                            jsonrpc = "2.0",
-                            id = id != null ? (object)id : null,
-                            result = ProtocolHelper.EnsureResultType(new
-                            {
-                                protocolVersion = clientProtocolVersion,
-                                capabilities = new
-                                {
-                                    tools = new { listChanged = true },
-                                    prompts = new { listChanged = true },
-                                    resources = new { listChanged = true },
-                                    completions = new { },
-                                    subscriptions = new { }
-                                },
-                                serverInfo = new { name = "ModelContextGateway", version = AppVersion },
-                                instructions = resolvedInstructions
-                            })
-                        };
-                        var json = JsonSerializer.Serialize(response);
-                        await httpContext.Response.WriteAsync($"event: message\ndata: {json}\n\n");
-                        await httpContext.Response.Body.FlushAsync();
-                        session.StartInitialization(requestBody);
-                    }
-                    else if (method == "server/discover")
-                    {
-                        var enableCodeMode = httpContext.RequestServices.GetService<DynamicEmbeddingService>()?.GetSettings()?.EnableCodeMode ?? true;
-                        var resolvedInstructions = await session.ResolveSessionInstructionsAsync(enableCodeMode, requestBody, httpContext: httpContext);
-                        var response = new
-                        {
-                            jsonrpc = "2.0",
-                            id = id != null ? (object)id : null,
-                            result = ProtocolHelper.EnsureResultType(new
-                            {
-                                supportedVersions = GatewayMetadata.SupportedProtocolVersions,
-                                capabilities = new
-                                {
-                                    tools = new { listChanged = true },
-                                    prompts = new { listChanged = true },
-                                    resources = new { listChanged = true },
-                                    completions = new { },
-                                    subscriptions = new { }
-                                },
-                                serverInfo = new { name = "ModelContextGateway", version = AppVersion },
-                                instructions = resolvedInstructions
-                            })
-                        };
-                        var json = JsonSerializer.Serialize(response);
-                        await httpContext.Response.WriteAsync($"event: message\ndata: {json}\n\n");
-                        await httpContext.Response.Body.FlushAsync();
-                        session.StartInitialization(requestBody);
-                    }
-                }
+                await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId: null, metaMode);
 
                 // Keep connection alive
                 try
@@ -454,10 +74,7 @@ namespace ModelContextGateway.Components.Capabilities
                 }
                 finally
                 {
-                    if (sessionId != "global-stateless-session")
-                    {
-                        sessionManager.CloseSession(sessionId);
-                    }
+                    sessionManager.CloseSession(sessionId);
                 }
             }).RequireAuthorization();
 
@@ -584,18 +201,47 @@ namespace ModelContextGateway.Components.Capabilities
                     // RBAC Check for targetServerId
                     var compositeProvider = httpContext.RequestServices.GetRequiredService<CompositeIdentityProvider>();
                     var identity = await compositeProvider.ResolveIdentityAsync(httpContext);
+                    var config = httpContext.RequestServices.GetService<IConfiguration>();
+                    var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
+                    using var conn = dbFactory.CreateConnection();
 
-                    if (!SecurityValidationHelper.IsAdmin(identity, httpContext.RequestServices.GetService<IConfiguration>()))
+                    var externalIds = identity.GroupNames.Concat(identity.AllSids).Distinct().ToList();
+                    if (!string.IsNullOrEmpty(identity.Username) && !externalIds.Contains(identity.Username))
                     {
-                        var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
-                        using var conn = dbFactory.CreateConnection();
+                        externalIds.Add(identity.Username);
+                    }
+
+                    var mappedGroups = new List<string>();
+                    if (externalIds.Count > 0)
+                    {
+                        try
+                        {
+                            const string mapSql = "SELECT InternalGroup FROM GroupMappings WHERE ExternalId IN @ExternalIds;";
+                            mappedGroups = (await conn.QueryAsync<string>(mapSql, new { ExternalIds = externalIds.ToArray() })).ToList();
+                        }
+                        catch (Exception exMap)
+                        {
+                            logger.LogWarning(exMap, "Failed to query GroupMappings in ProxyEndpoints, assuming empty");
+                        }
+                    }
+
+                    if (!SecurityValidationHelper.IsAdmin(identity, config, httpContext, mappedGroups))
+                    {
                         var targetServerKey = $"server:{targetServerId}";
+
+                        var allUserGroups = identity.GroupNames
+                            .Concat(identity.AllSids)
+                            .Concat(mappedGroups)
+                            .Concat(!string.IsNullOrEmpty(identity.Username) ? new[] { identity.Username } : Array.Empty<string>())
+                            .Where(g => !string.IsNullOrEmpty(g))
+                            .Distinct()
+                            .ToArray();
 
                         if (dbFactory.ProviderName == "sqlite")
                         {
                             const string countSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId;";
                             int policyCount = await conn.ExecuteScalarAsync<int>(countSql, new { TargetId = targetServerKey });
-                            if (policyCount == 0)
+                            if (policyCount == 0 || allUserGroups.Length == 0)
                             {
                                 httpContext.Response.StatusCode = 403;
                                 var audit = httpContext.RequestServices.GetService<IAuditLogger>();
@@ -618,10 +264,10 @@ namespace ModelContextGateway.Components.Capabilities
                             }
 
                             const string denySql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId AND RequiredGroup IN @GroupNames AND IsAllowed = 0;";
-                            int denyCount = await conn.ExecuteScalarAsync<int>(denySql, new { TargetId = targetServerKey, GroupNames = identity.GroupNames });
+                            int denyCount = await conn.ExecuteScalarAsync<int>(denySql, new { TargetId = targetServerKey, GroupNames = allUserGroups });
 
                             const string allowSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId AND RequiredGroup IN @GroupNames AND IsAllowed = 1;";
-                            int allowCount = await conn.ExecuteScalarAsync<int>(allowSql, new { TargetId = targetServerKey, GroupNames = identity.GroupNames });
+                            int allowCount = await conn.ExecuteScalarAsync<int>(allowSql, new { TargetId = targetServerKey, GroupNames = allUserGroups });
 
                             if (denyCount > 0 || allowCount == 0)
                             {
@@ -647,7 +293,7 @@ namespace ModelContextGateway.Components.Capabilities
                         }
                         else
                         {
-                            var groupNamesCsv = string.Join(",", identity.GroupNames);
+                            var groupNamesCsv = string.Join(",", allUserGroups);
                             object parameters = dbFactory.ProviderName == "mysql"
                                 ? new
                                 {
@@ -691,47 +337,24 @@ namespace ModelContextGateway.Components.Capabilities
                     }
                 }
 
-                var isSse = httpContext.Request.Headers.Accept.ToString().Contains("text/event-stream");
-                var isPost = HttpMethods.IsPost(httpContext.Request.Method);
                 bool metaMode = httpContext.Request.Query["meta"] == "true";
 
-                string sessionId = Guid.NewGuid().ToString("N");
-
-                // Read body if POST
-                string requestBody = string.Empty;
-                string method = string.Empty;
-                JsonElement? id = null;
+                if (httpContext.Request.Method == "HEAD")
+                {
+                    httpContext.Response.Headers.ContentType = "text/event-stream";
+                    httpContext.Response.Headers.CacheControl = "no-cache";
+                    httpContext.Response.Headers.Connection = "keep-alive";
+                    return;
+                }
 
                 if (httpContext.Request.Method == "POST")
                 {
-                    try
-                    {
-                        httpContext.Request.EnableBuffering();
-                        using (var reader = new StreamReader(httpContext.Request.Body, leaveOpen: true))
-                        {
-                            requestBody = await reader.ReadToEndAsync();
-                            httpContext.Request.Body.Position = 0;
-                        }
-
-                        if (!string.IsNullOrEmpty(requestBody))
-                        {
-                            using var doc = JsonDocument.Parse(requestBody);
-                            var root = doc.RootElement;
-                            if (root.TryGetProperty("method", out var methodProp))
-                            {
-                                method = methodProp.GetString() ?? string.Empty;
-                            }
-                            if (root.TryGetProperty("id", out var idProp))
-                            {
-                                id = idProp.Clone();
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, "Failed to parse POST message body for /mcp");
-                    }
+                    var statelessSessionId = $"global-stateless-session-{targetServerId.ToLowerInvariant()}-{(metaMode ? "meta" : "direct")}";
+                    await HandleStatelessPostRequestAsync(httpContext, sessionManager, logger, statelessSessionId, targetServerId, metaMode);
+                    return;
                 }
+
+                string sessionId = Guid.NewGuid().ToString("N");
 
                 httpContext.Response.Headers.ContentType = "text/event-stream";
                 httpContext.Response.Headers.CacheControl = "no-cache";
@@ -745,82 +368,16 @@ namespace ModelContextGateway.Components.Capabilities
                     scheme = httpContext.Request.Scheme;
                 }
 
-                var host = httpContext.Request.Host.Value;
+                var host = httpContext.Request.Headers["X-Forwarded-Host"].ToString();
+                if (string.IsNullOrEmpty(host))
+                {
+                    host = httpContext.Request.Host.Value;
+                }
                 var absoluteUrl = $"{scheme}://{host}/mcp/message?sessionId={sessionId}";
                 await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
                 await httpContext.Response.Body.FlushAsync();
 
-                var session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId, metaMode);
-
-                if (httpContext.Request.Method == "POST" && (method == "initialize" || method == "server/discover"))
-                {
-                    try
-                    {
-                        logger.LogDebug("Processing initial JSON-RPC message in POST /mcp body: {Body}", PiiSanitizer.SanitizePayload(requestBody));
-                        var serverName = "ModelContextGateway";
-                        if (!string.IsNullOrWhiteSpace(targetServerId))
-                        {
-                            var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
-                            using var dbConn = dbFactory.CreateConnection();
-                            var rawServers = await dbConn.QueryAsync<McpServer>("SELECT * FROM Servers");
-                            var allServers = rawServers.ToList();
-                            var targetServer = allServers.FirstOrDefault(s => s.Id == targetServerId);
-                            if (targetServer != null)
-                            {
-                                serverName = targetServer.DisplayName;
-                            }
-                            else if (allServers.Any(s => s.Categories != null && s.Categories.Any(c => string.Equals(c, targetServerId, StringComparison.OrdinalIgnoreCase))))
-                            {
-                                serverName = char.ToUpper(targetServerId[0]) + targetServerId.Substring(1) + " Services";
-                            }
-                        }
-                        var enableCodeMode = httpContext.RequestServices.GetService<DynamicEmbeddingService>()?.GetSettings()?.EnableCodeMode ?? true;
-                        var resolvedInstructions = await session.ResolveSessionInstructionsAsync(enableCodeMode, requestBody, httpContext: httpContext);
-                        var response = method == "server/discover" ? (object)new
-                        {
-                            jsonrpc = "2.0",
-                            id = id != null ? (object)id : null,
-                            result = ProtocolHelper.EnsureResultType(new
-                            {
-                                supportedVersions = GatewayMetadata.SupportedProtocolVersions,
-                                capabilities = new
-                                {
-                                    tools = new { listChanged = true },
-                                    prompts = new { listChanged = true },
-                                    resources = new { listChanged = true },
-                                    completions = new { },
-                                    subscriptions = new { }
-                                },
-                                serverInfo = new { name = serverName, version = AppVersion },
-                                instructions = resolvedInstructions
-                            })
-                        } : new
-                        {
-                            jsonrpc = "2.0",
-                            id = id != null ? (object)id : null,
-                            result = ProtocolHelper.EnsureResultType(new
-                            {
-                                protocolVersion = GatewayMetadata.ExtractRequestedProtocolVersion(requestBody),
-                                capabilities = new
-                                {
-                                    tools = new { listChanged = true },
-                                    prompts = new { listChanged = true },
-                                    resources = new { listChanged = true },
-                                    completions = new { },
-                                    subscriptions = new { }
-                                },
-                                serverInfo = new { name = serverName, version = AppVersion },
-                                instructions = resolvedInstructions
-                            })
-                        };
-                        await session.WriteMessageAsync(response);
-                        session.StartInitialization(requestBody);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, "Failed to initialize POST message body for /mcp SessionId: {SessionId}", sessionId);
-                    }
-                }
+                await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId, metaMode);
 
                 try
                 {
@@ -953,6 +510,17 @@ namespace ModelContextGateway.Components.Capabilities
 
                         await session.WriteMessageAsync(response);
                         session.StartInitialization(body);
+                        return Results.Accepted();
+                    }
+                    else if (method == "ping")
+                    {
+                        var response = new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = ProtocolHelper.EnsureResultType(new { })
+                        };
+                        await session.WriteMessageAsync(response);
                         return Results.Accepted();
                     }
                     else if (method == "tools/list")
@@ -1269,7 +837,11 @@ namespace ModelContextGateway.Components.Capabilities
                     scheme = httpContext.Request.Scheme;
                 }
 
-                var host = httpContext.Request.Host.Value;
+                var host = httpContext.Request.Headers["X-Forwarded-Host"].ToString();
+                if (string.IsNullOrEmpty(host))
+                {
+                    host = httpContext.Request.Host.Value;
+                }
                 var absoluteUrl = $"{scheme}://{host}/admin/message?sessionId={sessionId}";
                 await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
                 await httpContext.Response.Body.FlushAsync();
@@ -1292,6 +864,509 @@ namespace ModelContextGateway.Components.Capabilities
                     AdminEndpoints.UnregisterSession(sessionId);
                 }
             }
+        }
+
+        private static async Task HandleStatelessPostRequestAsync(
+            HttpContext httpContext,
+            SessionManager sessionManager,
+            ILogger<Program> logger,
+            string statelessSessionId,
+            string? targetServerId,
+            bool isMetaMode)
+        {
+            string requestBody = string.Empty;
+            string method = string.Empty;
+            JsonElement? id = null;
+
+            try
+            {
+                httpContext.Request.EnableBuffering();
+                using (var reader = new StreamReader(httpContext.Request.Body, leaveOpen: true))
+                {
+                    requestBody = await reader.ReadToEndAsync();
+                    httpContext.Request.Body.Position = 0;
+                }
+
+                if (string.IsNullOrEmpty(requestBody) &&
+                    httpContext.Items.TryGetValue("MCP_RAW_BODY", out var rawObj) &&
+                    rawObj is string rawBodyStr &&
+                    !string.IsNullOrEmpty(rawBodyStr))
+                {
+                    requestBody = rawBodyStr;
+                }
+
+                if (!string.IsNullOrEmpty(requestBody))
+                {
+                    using var doc = JsonDocument.Parse(requestBody);
+                    var root = doc.RootElement;
+                    if (root.TryGetProperty("method", out var methodProp))
+                    {
+                        method = methodProp.GetString() ?? string.Empty;
+                    }
+                    if (root.TryGetProperty("id", out var idProp))
+                    {
+                        id = idProp.Clone();
+                    }
+                    logger.LogDebug("[JSON-RPC Client -> Gateway] {Payload}", PiiSanitizer.SanitizePayload(requestBody));
+                }
+
+                if (string.IsNullOrEmpty(method) &&
+                    httpContext.Items.TryGetValue("MCP_METHOD", out var mcpMethodObj) &&
+                    mcpMethodObj is string mcpMethodStr)
+                {
+                    method = mcpMethodStr;
+                }
+            }
+            catch (UnauthorizedAccessException exAuth)
+            {
+                logger.LogWarning(exAuth, "Unauthorized access during stateless request handling");
+                httpContext.Response.StatusCode = 403;
+                httpContext.Response.Headers.ContentType = "application/json";
+                await httpContext.Response.WriteAsJsonAsync(new
+                {
+                    jsonrpc = "2.0",
+                    error = new { code = -32001, message = exAuth.Message }
+                });
+                return;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to parse stateless POST body");
+                httpContext.Response.StatusCode = 400;
+                httpContext.Response.Headers.ContentType = "application/json";
+                await httpContext.Response.WriteAsJsonAsync(new
+                {
+                    jsonrpc = "2.0",
+                    error = new { code = -32700, message = "Parse error" }
+                });
+                return;
+            }
+
+            var activeSession = sessionManager.GetSession(statelessSessionId);
+            if (activeSession == null)
+            {
+                activeSession = await sessionManager.CreateSessionAsync(statelessSessionId, httpContext.Response, targetServerId, isMetaMode);
+            }
+            else
+            {
+                activeSession.UpdateClientResponse(httpContext.Response);
+            }
+
+            httpContext.Response.OnCompleted(() =>
+            {
+                if (activeSession.GetClientResponse() == httpContext.Response)
+                {
+                    activeSession.DecoupleClientResponse();
+                }
+                return Task.CompletedTask;
+            });
+
+            sessionManager.IncrementTotalRequests();
+            logger.LogInformation("Routing stateless POST request method {Method} to session {SessionId}", method, statelessSessionId);
+
+            try
+            {
+                if (string.IsNullOrEmpty(method))
+                {
+                    if (id != null)
+                    {
+                        var idStr = id.Value.ValueKind == JsonValueKind.String ? id.Value.GetString() : id.Value.GetRawText();
+                        if (idStr != null && activeSession.TryHandleClientResponse(idStr, requestBody))
+                        {
+                            httpContext.Response.StatusCode = 202;
+                            return;
+                        }
+                    }
+                    httpContext.Response.StatusCode = 400;
+                    return;
+                }
+
+                if (method == "initialize" || method == "server/discover")
+                {
+                    var serverName = await ResolveTargetServerDisplayNameAsync(httpContext, targetServerId);
+                    var enableCodeMode = httpContext.RequestServices.GetService<DynamicEmbeddingService>()?.GetSettings()?.EnableCodeMode ?? true;
+                    var resolvedInstructions = await activeSession.ResolveSessionInstructionsAsync(enableCodeMode, requestBody, httpContext: httpContext);
+
+                    object response = method == "server/discover"
+                        ? new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = ProtocolHelper.EnsureResultType(new
+                            {
+                                supportedVersions = GatewayMetadata.SupportedProtocolVersions,
+                                capabilities = new
+                                {
+                                    tools = new { listChanged = true },
+                                    prompts = new { listChanged = true },
+                                    resources = new { listChanged = true },
+                                    completions = new { },
+                                    subscriptions = new { }
+                                },
+                                serverInfo = new { name = serverName, version = AppVersion },
+                                instructions = resolvedInstructions
+                            })
+                        }
+                        : new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = ProtocolHelper.EnsureResultType(new
+                            {
+                                protocolVersion = GatewayMetadata.ExtractRequestedProtocolVersion(requestBody),
+                                capabilities = new
+                                {
+                                    tools = new { listChanged = true },
+                                    prompts = new { listChanged = true },
+                                    resources = new { listChanged = true },
+                                    completions = new { },
+                                    subscriptions = new { }
+                                },
+                                serverInfo = new { name = serverName, version = AppVersion },
+                                instructions = resolvedInstructions
+                            })
+                        };
+
+                    httpContext.Response.Headers.ContentType = "application/json";
+                    await httpContext.Response.WriteAsJsonAsync(response);
+                    activeSession.StartInitialization(requestBody);
+                    return;
+                }
+
+                if (method == "ping")
+                {
+                    var response = new
+                    {
+                        jsonrpc = "2.0",
+                        id = id != null ? (object)id : null,
+                        result = ProtocolHelper.EnsureResultType(new { })
+                    };
+                    httpContext.Response.Headers.ContentType = "application/json";
+                    await httpContext.Response.WriteAsJsonAsync(response);
+                    return;
+                }
+
+                if (method == "notifications/cancelled")
+                {
+                    if (!string.IsNullOrEmpty(requestBody))
+                    {
+                        using var doc = JsonDocument.Parse(requestBody);
+                        var root = doc.RootElement;
+                        if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("requestId", out var reqIdProp))
+                        {
+                            var reqId = reqIdProp.ValueKind == JsonValueKind.String ? reqIdProp.GetString() : reqIdProp.GetRawText();
+                            if (!string.IsNullOrEmpty(reqId))
+                            {
+                                activeSession.CancelRequest(reqId, httpContext.TraceIdentifier);
+                            }
+                        }
+                    }
+                    await activeSession.BroadcastNotificationAsync(method, requestBody);
+                    httpContext.Response.StatusCode = 202;
+                    return;
+                }
+
+                if (method.StartsWith("notifications/", StringComparison.Ordinal))
+                {
+                    await activeSession.BroadcastNotificationAsync(method, requestBody);
+                    httpContext.Response.StatusCode = 202;
+                    return;
+                }
+
+                if (method == "tools/list")
+                {
+                    var tools = await activeSession.ListToolsAsync(string.IsNullOrEmpty(requestBody) ? "{}" : requestBody, httpContext);
+                    var response = new
+                    {
+                        jsonrpc = "2.0",
+                        id = id != null ? (object)id : null,
+                        result = ProtocolHelper.EnsureResultType(new { tools })
+                    };
+                    httpContext.Response.Headers.ContentType = "application/json";
+                    await httpContext.Response.WriteAsJsonAsync(response);
+                    return;
+                }
+
+                if (method == "tools/call")
+                {
+                    var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
+                    string? toolName = null;
+                    if (!string.IsNullOrEmpty(requestBody))
+                    {
+                        using var doc = JsonDocument.Parse(requestBody);
+                        var root = doc.RootElement;
+                        if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
+                        {
+                            toolName = nameProp.GetString();
+                        }
+                    }
+                    if (string.IsNullOrEmpty(toolName) &&
+                        httpContext.Items.TryGetValue("MCP_ITEM_NAME", out var itemObj) &&
+                        itemObj is string itemStr)
+                    {
+                        toolName = itemStr;
+                    }
+
+                    if (!string.IsNullOrEmpty(toolName))
+                    {
+                        var res = await activeSession.CallToolAsync(toolName, requestBody, dbFactory, httpContext);
+                        var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
+                        var response = new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = ProtocolHelper.EnsureResultType(targetRes)
+                        };
+                        httpContext.Response.Headers.ContentType = "application/json";
+                        await httpContext.Response.WriteAsJsonAsync(response);
+                        return;
+                    }
+                    httpContext.Response.StatusCode = 400;
+                    return;
+                }
+
+                if (method == "resources/list")
+                {
+                    var resources = await activeSession.ListResourcesAsync(string.IsNullOrEmpty(requestBody) ? "{}" : requestBody, httpContext);
+                    var response = new
+                    {
+                        jsonrpc = "2.0",
+                        id = id != null ? (object)id : null,
+                        result = ProtocolHelper.EnsureResultType(new { resources })
+                    };
+                    httpContext.Response.Headers.ContentType = "application/json";
+                    await httpContext.Response.WriteAsJsonAsync(response);
+                    return;
+                }
+
+                if (method == "resources/templates/list")
+                {
+                    var templates = await activeSession.ListResourceTemplatesAsync(string.IsNullOrEmpty(requestBody) ? "{}" : requestBody, httpContext);
+                    var response = new
+                    {
+                        jsonrpc = "2.0",
+                        id = id != null ? (object)id : null,
+                        result = ProtocolHelper.EnsureResultType(new { templates })
+                    };
+                    httpContext.Response.Headers.ContentType = "application/json";
+                    await httpContext.Response.WriteAsJsonAsync(response);
+                    return;
+                }
+
+                if (method == "resources/read")
+                {
+                    string? uri = null;
+                    if (!string.IsNullOrEmpty(requestBody))
+                    {
+                        using var doc = JsonDocument.Parse(requestBody);
+                        var root = doc.RootElement;
+                        if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("uri", out var uriProp))
+                        {
+                            uri = uriProp.GetString();
+                        }
+                    }
+                    if (string.IsNullOrEmpty(uri) &&
+                        httpContext.Items.TryGetValue("MCP_ITEM_NAME", out var itemObj) &&
+                        itemObj is string itemStr)
+                    {
+                        uri = itemStr;
+                    }
+
+                    if (!string.IsNullOrEmpty(uri))
+                    {
+                        var res = await activeSession.ReadResourceAsync(uri, requestBody, httpContext);
+                        var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
+                        var response = new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = ProtocolHelper.EnsureResultType(targetRes)
+                        };
+                        httpContext.Response.Headers.ContentType = "application/json";
+                        await httpContext.Response.WriteAsJsonAsync(response);
+                        return;
+                    }
+                    httpContext.Response.StatusCode = 400;
+                    return;
+                }
+
+                if (method == "prompts/list")
+                {
+                    var prompts = await activeSession.ListPromptsAsync(string.IsNullOrEmpty(requestBody) ? "{}" : requestBody, httpContext);
+                    var response = new
+                    {
+                        jsonrpc = "2.0",
+                        id = id != null ? (object)id : null,
+                        result = ProtocolHelper.EnsureResultType(new { prompts })
+                    };
+                    httpContext.Response.Headers.ContentType = "application/json";
+                    await httpContext.Response.WriteAsJsonAsync(response);
+                    return;
+                }
+
+                if (method == "prompts/get")
+                {
+                    string? name = null;
+                    if (!string.IsNullOrEmpty(requestBody))
+                    {
+                        using var doc = JsonDocument.Parse(requestBody);
+                        var root = doc.RootElement;
+                        if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
+                        {
+                            name = nameProp.GetString();
+                        }
+                    }
+                    if (string.IsNullOrEmpty(name) &&
+                        httpContext.Items.TryGetValue("MCP_ITEM_NAME", out var itemObj) &&
+                        itemObj is string itemStr)
+                    {
+                        name = itemStr;
+                    }
+
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        var res = await activeSession.GetPromptAsync(name, requestBody, httpContext);
+                        var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
+                        var response = new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = ProtocolHelper.EnsureResultType(targetRes)
+                        };
+                        httpContext.Response.Headers.ContentType = "application/json";
+                        await httpContext.Response.WriteAsJsonAsync(response);
+                        return;
+                    }
+                    httpContext.Response.StatusCode = 400;
+                    return;
+                }
+
+                if (method == "completion/complete")
+                {
+                    var res = await activeSession.CompleteAsync(requestBody, httpContext);
+                    var response = new
+                    {
+                        jsonrpc = "2.0",
+                        id = id != null ? (object)id : null,
+                        result = ProtocolHelper.EnsureResultType(res)
+                    };
+                    httpContext.Response.Headers.ContentType = "application/json";
+                    await httpContext.Response.WriteAsJsonAsync(response);
+                    return;
+                }
+
+                if (method == "subscriptions/listen")
+                {
+                    var response = new
+                    {
+                        jsonrpc = "2.0",
+                        id = id != null ? (object)id : null,
+                        result = ProtocolHelper.EnsureResultType(new
+                        {
+                            status = "listening",
+                            subscriptions = new { }
+                        })
+                    };
+                    httpContext.Response.Headers.ContentType = "application/json";
+                    await httpContext.Response.WriteAsJsonAsync(response);
+                    return;
+                }
+
+                if (method == "roots/list")
+                {
+                    var response = new
+                    {
+                        jsonrpc = "2.0",
+                        id = id != null ? (object)id : null,
+                        result = ProtocolHelper.EnsureResultType(new
+                        {
+                            roots = new[] {
+                                new {
+                                    uri = "file:///containers",
+                                    name = "Docker Containers Workspace"
+                                }
+                            }
+                        })
+                    };
+                    httpContext.Response.Headers.ContentType = "application/json";
+                    await httpContext.Response.WriteAsJsonAsync(response);
+                    return;
+                }
+
+                if (id == null)
+                {
+                    await activeSession.BroadcastNotificationAsync(method, requestBody);
+                    httpContext.Response.StatusCode = 202;
+                    return;
+                }
+
+                var results = await activeSession.BroadcastRequestAsync(requestBody);
+                if (results.Count > 0)
+                {
+                    var response = new
+                    {
+                        jsonrpc = "2.0",
+                        id = (object)id,
+                        result = ProtocolHelper.EnsureResultType(results.First().Value)
+                    };
+                    httpContext.Response.Headers.ContentType = "application/json";
+                    await httpContext.Response.WriteAsJsonAsync(response);
+                    return;
+                }
+
+                httpContext.Response.StatusCode = 202;
+            }
+            catch (UnauthorizedAccessException exAuth)
+            {
+                logger.LogWarning(exAuth, "Unauthorized access during stateless request handling");
+                httpContext.Response.StatusCode = 403;
+                httpContext.Response.Headers.ContentType = "application/json";
+                await httpContext.Response.WriteAsJsonAsync(new
+                {
+                    jsonrpc = "2.0",
+                    error = new { code = -32001, message = exAuth.Message }
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error routing stateless message");
+                httpContext.Response.StatusCode = 500;
+            }
+        }
+
+        private static async Task<string> ResolveTargetServerDisplayNameAsync(HttpContext httpContext, string? targetServerId)
+        {
+            if (string.IsNullOrWhiteSpace(targetServerId))
+            {
+                return "ModelContextGateway";
+            }
+
+            try
+            {
+                var dbFactory = httpContext.RequestServices.GetService<IDbConnectionFactory>();
+                if (dbFactory != null)
+                {
+                    using var dbConn = dbFactory.CreateConnection();
+                    var rawServers = await dbConn.QueryAsync<McpServer>("SELECT * FROM Servers");
+                    var allServers = rawServers.ToList();
+                    var targetServer = allServers.FirstOrDefault(s =>
+                        string.Equals(s.Id, targetServerId, StringComparison.OrdinalIgnoreCase) ||
+                        (!string.IsNullOrWhiteSpace(s.Alias) && string.Equals(s.Alias, targetServerId, StringComparison.OrdinalIgnoreCase)));
+                    if (targetServer != null && !string.IsNullOrWhiteSpace(targetServer.DisplayName))
+                    {
+                        return targetServer.DisplayName;
+                    }
+                    if (allServers.Any(s => s.Categories != null && s.Categories.Any(c => string.Equals(c, targetServerId, StringComparison.OrdinalIgnoreCase))))
+                    {
+                        return char.ToUpper(targetServerId[0]) + targetServerId.Substring(1) + " Services";
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return "ModelContextGateway";
         }
     }
 }

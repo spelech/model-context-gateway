@@ -22,24 +22,25 @@ namespace ModelContextGateway.Core.Routing
             }
             catch (ObjectDisposedException)
             {
-                return new UserIdentityContext("system", "System", new List<string>());
+                return _lastKnownIdentity ?? new UserIdentityContext("system", "System", new List<string>());
             }
 
             if (contextToUse == null)
             {
-                return new UserIdentityContext("anonymous", "None", new List<string>());
+                return _lastKnownIdentity ?? new UserIdentityContext("anonymous", "None", new List<string>());
             }
 
             try
             {
                 if (contextToUse.Items.TryGetValue("ResolvedUserIdentity", out var cachedIdentityObj) && cachedIdentityObj is UserIdentityContext cachedIdentity)
                 {
+                    _lastKnownIdentity = cachedIdentity;
                     return cachedIdentity;
                 }
             }
             catch (ObjectDisposedException)
             {
-                return new UserIdentityContext("system", "System", new List<string>());
+                return _lastKnownIdentity ?? new UserIdentityContext("system", "System", new List<string>());
             }
 
             UserIdentityContext identity;
@@ -113,11 +114,12 @@ namespace ModelContextGateway.Core.Routing
                     // Context disposed while caching identity
                 }
 
+                _lastKnownIdentity = identity;
                 return identity;
             }
             catch (ObjectDisposedException)
             {
-                return new UserIdentityContext("system", "System", new List<string>());
+                return _lastKnownIdentity ?? new UserIdentityContext("system", "System", new List<string>());
             }
         }
 

@@ -323,7 +323,7 @@ namespace ModelContextGateway.Components.Servers
 
             if (idsToDisable.Count > 0)
             {
-                conn.Execute(@"UPDATE Servers SET Enabled = 0 WHERE Id IN @Ids", new { Ids = idsToDisable });
+                conn.Execute(@"UPDATE Servers SET Enabled = 0 WHERE Id IN @Ids", new { Ids = idsToDisable.ToArray() });
                 changed = true;
             }
 
