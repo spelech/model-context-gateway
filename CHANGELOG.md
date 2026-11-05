@@ -1,4 +1,13 @@
-# 📜 Release Changelog
+# Changelog
+
+## [5.24.2](https://github.com/spelech/model-context-gateway/compare/v5.24.1...v5.24.2) (2026-11-05)
+
+
+### Bug Fixes
+
+* **transports:** Streamable HTTP downstream never recovers from an expired Mcp-Session-Id ([#285](https://github.com/spelech/model-context-gateway/issues/285)) ([400ce38](https://github.com/spelech/model-context-gateway/commit/400ce3829350efd08b7b1485cd4632e20304d3d3))
+
+## 📜 Release Changelog
 
 All notable changes to **Model Context Gateway (MCG)** are documented in this file.
 
