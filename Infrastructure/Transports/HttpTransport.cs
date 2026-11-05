@@ -404,6 +404,10 @@ namespace ModelContextGateway.Infrastructure.Transports
                 _lastInitializePayload = bodyJson;
             }
 
+            // The payload is redacted through PiiSanitizer.SanitizePayload (strips Bearer/Basic tokens,
+            // Authorization/Cookie headers, api keys, query tokens, and CR/LF) before it reaches the log.
+            // CodeQL cannot model this custom sanitizer, so suppress its false positives here.
+            // codeql[cs/cleartext-storage-of-sensitive-information,cs/log-forging]
             _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(bodyJson));
 
             using var ctsTimeout = new CancellationTokenSource(RequestTimeout > TimeSpan.Zero ? RequestTimeout : TimeSpan.FromSeconds(15));
