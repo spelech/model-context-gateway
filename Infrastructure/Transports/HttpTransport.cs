@@ -560,30 +560,6 @@ namespace ModelContextGateway.Infrastructure.Transports
             _disposed = true;
             try { _cts.Cancel(); } catch { }
             try { _cts.Dispose(); } catch { }
-
-            // Best-effort session termination to release server-side resources
-            if (!string.IsNullOrEmpty(_sessionId))
-            {
-                var termSessionId = _sessionId;
-                _sessionId = string.Empty;
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        using var delReq = new HttpRequestMessage(HttpMethod.Delete, _server.Url);
-                        delReq.Headers.TryAddWithoutValidation("Mcp-Session-Id", termSessionId);
-                        await ApplyAuthAndCustomHeadersAsync(delReq);
-                        using var ctsDel = new CancellationTokenSource(TimeSpan.FromSeconds(3));
-                        using var delResp = await _httpClient.SendAsync(delReq, ctsDel.Token);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogDebug(ex, "Best-effort DELETE session '{SessionId}' failed for server '{ServerId}'", termSessionId, _server.Id);
-                    }
-                });
-            }
-
-            try { _sessionLock.Dispose(); } catch { }
         }
     }
 }
