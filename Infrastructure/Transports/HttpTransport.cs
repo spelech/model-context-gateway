@@ -17,7 +17,9 @@ namespace ModelContextGateway.Infrastructure.Transports
         private readonly ILogger _logger;
         private readonly ISecretRetriever? _secretRetriever;
         private readonly CancellationTokenSource _cts = new();
+        private readonly SemaphoreSlim _sessionLock = new(1, 1);
         private string _sessionId = string.Empty;
+        private string? _lastInitializePayload;
         private bool _disposed = false;
 
         public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null, System.Security.Principal.WindowsIdentity? callerWindowsIdentity = null, string? forwardedUser = null, IUserSecretStore? userSecretStore = null)
@@ -227,28 +229,11 @@ namespace ModelContextGateway.Infrastructure.Transports
             }
         }
 
-        public Task ConnectAsync()
+        private async Task<HttpRequestMessage> CreateHttpRequestMessageAsync(string bodyJson, string? targetAuthToken, string? sessionId)
         {
-            // HTTP transport does not need persistent connection
-            return Task.CompletedTask;
-        }
-
-        public void StartReader(Func<JsonRpcMessage, Task> onMessageReceived)
-        {
-            // HTTP transport has no background reader
-        }
-
-        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
-        {
-            if (_disposed)
-            {
-                return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Not connected" } };
-            }
-
-            _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(bodyJson));
             var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            using var req = new HttpRequestMessage(HttpMethod.Post, _server.Url) { Content = content };
+            var req = new HttpRequestMessage(HttpMethod.Post, _server.Url) { Content = content };
 
             if (!string.IsNullOrEmpty(targetAuthToken))
             {
@@ -266,17 +251,17 @@ namespace ModelContextGateway.Infrastructure.Transports
             req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
-            if (!string.IsNullOrEmpty(_sessionId))
+            if (!string.IsNullOrEmpty(sessionId))
             {
-                req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
+                req.Headers.TryAddWithoutValidation("Mcp-Session-Id", sessionId);
             }
 
             await ApplyAuthAndCustomHeadersAsync(req);
+            return req;
+        }
 
-            using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-            using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, ctsTimeout.Token);
-
-            HttpResponseMessage resp;
+        private async Task<HttpResponseMessage> ExecuteHttpRequestAsync(HttpRequestMessage req, CancellationToken cancellationToken)
+        {
             var authShape = (_server.AuthShape ?? "bearer").ToLowerInvariant();
             bool isImpersonation = string.Equals(authShape, "impersonation", StringComparison.OrdinalIgnoreCase) ||
                                    string.Equals(authShape, "kerberos-impersonate", StringComparison.OrdinalIgnoreCase);
@@ -300,7 +285,7 @@ namespace ModelContextGateway.Infrastructure.Transports
 #pragma warning disable CA1416
                 try
                 {
-                    resp = await System.Security.Principal.WindowsIdentity.RunImpersonatedAsync(
+                    return await System.Security.Principal.WindowsIdentity.RunImpersonatedAsync(
                         _callerWindowsIdentity.AccessToken,
                         async () =>
                         {
@@ -311,7 +296,7 @@ namespace ModelContextGateway.Infrastructure.Transports
                             };
                             using var impClient = new HttpClient(handler);
                             using var impReq = CloneHttpRequestMessage(req);
-                            return await impClient.SendAsync(impReq, HttpCompletionOption.ResponseHeadersRead, linked.Token);
+                            return await impClient.SendAsync(impReq, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                         });
                 }
                 catch (Exception ex)
@@ -324,18 +309,144 @@ namespace ModelContextGateway.Infrastructure.Transports
             }
             else
             {
-                resp = await _httpClient.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, linked.Token);
+                return await _httpClient.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            }
+        }
+
+        private async Task<bool> TryRecoverSessionAsync(string failedSessionId, CancellationToken cancellationToken)
+        {
+            await _sessionLock.WaitAsync(cancellationToken);
+            try
+            {
+                // If another concurrent request already rotated the session, we consider it recovered
+                if (!string.IsNullOrEmpty(_sessionId) && _sessionId != failedSessionId)
+                {
+                    _logger.LogDebug("Session for backend '{ServerId}' was already refreshed by another concurrent call (Current: '{SessionId}').", _server.Id, _sessionId);
+                    return true;
+                }
+
+                _sessionId = string.Empty;
+
+                var initPayload = !string.IsNullOrEmpty(_lastInitializePayload)
+                    ? _lastInitializePayload
+                    : GatewayMetadata.BuildInitializeRequest();
+
+                _logger.LogInformation("Performing downstream handshake re-initialization for backend '{ServerId}'...", _server.Id);
+
+                using var initReq = await CreateHttpRequestMessageAsync(initPayload, targetAuthToken: null, sessionId: null);
+                using var initResp = await ExecuteHttpRequestAsync(initReq, cancellationToken);
+
+                if (!initResp.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Downstream re-initialization handshake failed for backend '{ServerId}' with HTTP {StatusCode}", _server.Id, initResp.StatusCode);
+                    return false;
+                }
+
+                if (initResp.Headers.TryGetValues("Mcp-Session-Id", out var sVals))
+                {
+                    _sessionId = sVals.FirstOrDefault() ?? string.Empty;
+                }
+                else if (initResp.Content.Headers.TryGetValues("Mcp-Session-Id", out var scVals))
+                {
+                    _sessionId = scVals.FirstOrDefault() ?? string.Empty;
+                }
+
+                // Send notifications/initialized to complete the handshake if supported
+                try
+                {
+                    var notifJson = "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}";
+                    using var notifReq = await CreateHttpRequestMessageAsync(notifJson, targetAuthToken: null, _sessionId);
+                    using var notifResp = await ExecuteHttpRequestAsync(notifReq, cancellationToken);
+                }
+                catch (Exception notifEx)
+                {
+                    _logger.LogDebug(notifEx, "Best-effort notifications/initialized during recovery returned error for server '{ServerId}'", _server.Id);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to recover session for backend '{ServerId}'", _server.Id);
+                return false;
+            }
+            finally
+            {
+                _sessionLock.Release();
+            }
+        }
+
+        public Task ConnectAsync()
+        {
+            // HTTP transport does not need persistent connection
+            return Task.CompletedTask;
+        }
+
+        public void StartReader(Func<JsonRpcMessage, Task> onMessageReceived)
+        {
+            // HTTP transport has no background reader
+        }
+
+        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
+        {
+            return await SendRequestInternalAsync(method, bodyJson, targetAuthToken, isRetry: false);
+        }
+
+        private async Task<JsonRpcResponse> SendRequestInternalAsync(string method, string bodyJson, string? targetAuthToken, bool isRetry)
+        {
+            if (_disposed)
+            {
+                return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Not connected" } };
+            }
+
+            if (string.Equals(method, "initialize", StringComparison.OrdinalIgnoreCase))
+            {
+                _lastInitializePayload = bodyJson;
+            }
+
+            _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(bodyJson));
+
+            using var ctsTimeout = new CancellationTokenSource(RequestTimeout > TimeSpan.Zero ? RequestTimeout : TimeSpan.FromSeconds(15));
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, ctsTimeout.Token);
+
+            string initialSessionSnapshot = _sessionId;
+            using var req = await CreateHttpRequestMessageAsync(bodyJson, targetAuthToken, initialSessionSnapshot);
+
+            var resp = await ExecuteHttpRequestAsync(req, linked.Token);
+
+            // Handle session eviction / expiration (HTTP 404 or HTTP 400 when sent with a session id)
+            bool isSessionError = (resp.StatusCode == HttpStatusCode.NotFound || resp.StatusCode == HttpStatusCode.BadRequest);
+            bool isInitializeMethod = string.Equals(method, "initialize", StringComparison.OrdinalIgnoreCase);
+
+            if (isSessionError && !string.IsNullOrEmpty(initialSessionSnapshot) && !isRetry && !isInitializeMethod)
+            {
+                _logger.LogWarning("Streamable HTTP backend '{ServerId}' rejected request '{Method}' with HTTP {StatusCode} (Session '{SessionId}' may have expired). Initiating transparent session re-initialization.",
+                    _server.Id, method, resp.StatusCode, initialSessionSnapshot);
+
+                resp.Dispose();
+
+                bool reinitialized = await TryRecoverSessionAsync(initialSessionSnapshot, linked.Token);
+                if (reinitialized)
+                {
+                    _logger.LogInformation("Successfully recovered session for backend '{ServerId}' (New Session: '{SessionId}'). Retrying request '{Method}'.",
+                        _server.Id, _sessionId, method);
+                    return await SendRequestInternalAsync(method, bodyJson, targetAuthToken, isRetry: true);
+                }
             }
 
             resp.EnsureSuccessStatusCode();
 
-            if (resp.Headers.TryGetValues("Mcp-Session-Id", out var sVals))
+            // Strictly capture Mcp-Session-Id only on successful (2xx) responses
+            if (resp.IsSuccessStatusCode)
             {
-                _sessionId = sVals.FirstOrDefault() ?? _sessionId;
-            }
-            else if (resp.Content.Headers.TryGetValues("Mcp-Session-Id", out var scVals))
-            {
-                _sessionId = scVals.FirstOrDefault() ?? _sessionId;
+                if (resp.Headers.TryGetValues("Mcp-Session-Id", out var sVals))
+                {
+                    _sessionId = sVals.FirstOrDefault() ?? _sessionId;
+                }
+                else if (resp.Content.Headers.TryGetValues("Mcp-Session-Id", out var scVals))
+                {
+                    _sessionId = scVals.FirstOrDefault() ?? _sessionId;
+                }
             }
 
             string responseBody = string.Empty;
@@ -449,6 +560,30 @@ namespace ModelContextGateway.Infrastructure.Transports
             _disposed = true;
             try { _cts.Cancel(); } catch { }
             try { _cts.Dispose(); } catch { }
+
+            // Best-effort session termination to release server-side resources
+            if (!string.IsNullOrEmpty(_sessionId))
+            {
+                var termSessionId = _sessionId;
+                _sessionId = string.Empty;
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        using var delReq = new HttpRequestMessage(HttpMethod.Delete, _server.Url);
+                        delReq.Headers.TryAddWithoutValidation("Mcp-Session-Id", termSessionId);
+                        await ApplyAuthAndCustomHeadersAsync(delReq);
+                        using var ctsDel = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+                        using var delResp = await _httpClient.SendAsync(delReq, ctsDel.Token);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "Best-effort DELETE session '{SessionId}' failed for server '{ServerId}'", termSessionId, _server.Id);
+                    }
+                });
+            }
+
+            try { _sessionLock.Dispose(); } catch { }
         }
     }
 }
