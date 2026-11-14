@@ -1,6 +1,6 @@
 # Model Context Gateway (MCG)
 
-![Version](https://img.shields.io/badge/version-v5.24.2-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v5.24.3-orange?style=for-the-badge)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://spelech.github.io/model-context-gateway/)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
@@ -177,11 +177,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.24.3`** | 2026-11-14 | fix(oauth,ui): Persistent OpenIddict Certificates, Configurable Token Lifetimes, Guaranteed `offline_access` Refresh Token Issuance, and Consent Form Deduplication. |
 | **`v5.24.2`** | 2026-11-05 | fix(transports): Streamable HTTP Downstream Mcp-Session-Id Expiration Recovery and Session Latching Guard. |
 | **`v5.24.1`** | 2026-10-26 | fix(proxy,sqlite,instructions): Synchronous Streamable HTTP `POST /sse` & `POST /{targetServerId}` Handling, SQLite `IN @Ids`/`@GroupNames` Array Parameter Expansion, Cold-Start `instructions` Resolution, and `mcg.getServerInstructions()` Helper. |
 | **`v5.24.0`** | 2026-10-26 | feat(codemode,mcp): Code Mode TypeScript SDK Resources (`.d.ts`), Sandbox Discovery APIs (`mcg.*`), Meta-Mode Resource Compaction, Built-in Code Mode Prompts, MCP `2026-07-28` Spec Enhancements, and 4-Surface Downstream `instructions` Propagation. |
 | **`v5.23.0`** | 2026-10-25 | feat(codemode): MCP Code Mode JavaScript Sandbox Engine, Dual Dispatcher, Auto-Unboxing, Multi-Select Tag Groups UI, and Resource Guardrails. |
-| **`v5.22.2`** | 2026-10-25 | fix(healthcheck): Add `text/event-stream` to probe `Accept` header per MCP specification and persist `HealthCheckMode` across SQL repositories. |
 
 ---
 

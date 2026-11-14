@@ -23,7 +23,7 @@ namespace ModelContextGateway.Components.Authorization
 
     public static class ProtectedResourceHelper
     {
-        public static readonly string[] DefaultScopesSupported = new[] { "openid", "profile", "email", "mcp:access" };
+        public static readonly string[] DefaultScopesSupported = new[] { "openid", "profile", "email", "offline_access", "mcp:access", "mcp_client", "api" };
         public static readonly string[] DefaultBearerMethodsSupported = new[] { "header" };
 
         public static string GetCanonicalUrl(HttpContext context, IConfiguration? config)
