@@ -112,6 +112,23 @@ namespace ModelContextGateway.Extensions
                     options.DisableScopeValidation();
                     options.DisableResourceValidation();
 
+                    var accessTokenHoursStr = config["OpenIddict:AccessTokenLifetimeHours"]
+                        ?? config["MCG_ACCESS_TOKEN_HOURS"]
+                        ?? Environment.GetEnvironmentVariable("MCG_ACCESS_TOKEN_HOURS");
+                    var accessTokenHours = int.TryParse(accessTokenHoursStr, out var parsedAccessHours) && parsedAccessHours > 0
+                        ? parsedAccessHours
+                        : 168; // 7 days default to prevent frequent connector disconnections
+
+                    var refreshTokenDaysStr = config["OpenIddict:RefreshTokenLifetimeDays"]
+                        ?? config["MCG_REFRESH_TOKEN_DAYS"]
+                        ?? Environment.GetEnvironmentVariable("MCG_REFRESH_TOKEN_DAYS");
+                    var refreshTokenDays = int.TryParse(refreshTokenDaysStr, out var parsedRefreshDays) && parsedRefreshDays > 0
+                        ? parsedRefreshDays
+                        : 90; // 90 days default
+
+                    options.SetAccessTokenLifetime(TimeSpan.FromHours(accessTokenHours));
+                    options.SetRefreshTokenLifetime(TimeSpan.FromDays(refreshTokenDays));
+
                     var certPath = config["MCG_JWT_CERT_PATH"]
                         ?? config["MCG_OPENIDDICT_CERT_PATH"]
                         ?? config["OpenIddict:CertificatePath"]
@@ -138,7 +155,8 @@ namespace ModelContextGateway.Extensions
                             certPath, certPass, System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.MachineKeySet);
                         options.AddSigningCertificate(cert).AddEncryptionCertificate(cert);
                     }
-                    else if (string.Equals(autoCert, "true", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(autoCert, "true", StringComparison.OrdinalIgnoreCase) ||
+                             (env.EnvironmentName != Environments.Production && !string.Equals(useDevCerts, "true", StringComparison.OrdinalIgnoreCase)))
                     {
                         string dataDir = DbKeyHelper.ResolveDataDirectory(config);
                         string autoPfxPath = System.IO.Path.Combine(dataDir, ".openiddict.pfx");

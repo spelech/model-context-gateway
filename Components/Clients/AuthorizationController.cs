@@ -173,12 +173,16 @@ namespace ModelContextGateway.Components.Clients
                         }));
                 }
 
-                var identity = new ClaimsIdentity(result.Principal.Claims, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-                var scopes = result.Principal.GetScopes();
-                if (scopes.Any())
+                if (!string.IsNullOrEmpty(request.ClientId))
                 {
-                    identity.SetScopes(scopes);
+                    _ = _activityTracker?.RecordClientUsageAsync(request.ClientId);
                 }
+
+                var identity = new ClaimsIdentity(result.Principal.Claims, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                var scopes = result.Principal.GetScopes().ToHashSet(StringComparer.Ordinal);
+                scopes.Add(OpenIddictConstants.Scopes.OfflineAccess);
+                identity.SetScopes(scopes);
+
                 var resources = result.Principal.GetResources();
                 if (resources.Any())
                 {
@@ -266,11 +270,10 @@ namespace ModelContextGateway.Components.Clients
                     claims.Add(new Claim(OpenIddictConstants.Claims.Subject, username));
                 }
                 var identity = new ClaimsIdentity(claims, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-                var requestedScopes = request.GetScopes();
-                if (requestedScopes.Any())
-                {
-                    identity.SetScopes(requestedScopes);
-                }
+                var requestedScopes = request.GetScopes().ToHashSet(StringComparer.Ordinal);
+                requestedScopes.Add(OpenIddictConstants.Scopes.OfflineAccess);
+                identity.SetScopes(requestedScopes);
+
                 var requestedResources = request.GetResources();
                 if (requestedResources.Any())
                 {

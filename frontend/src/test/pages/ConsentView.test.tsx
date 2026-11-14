@@ -26,7 +26,7 @@ describe('ConsentView Component', () => {
     expect(screen.getByText(/Slack App/i)).toBeInTheDocument();
     
     const form = container.querySelector('form');
-    expect(form?.getAttribute('action')).toBe('/connect/authorize?client_id=123&client_name=Slack%20App');
+    expect(form?.getAttribute('action')).toBe('/connect/authorize');
     
     const clientIdInput = container.querySelector('input[name="client_id"]') as HTMLInputElement;
     expect(clientIdInput).toBeInTheDocument();

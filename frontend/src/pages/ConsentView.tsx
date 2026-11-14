@@ -13,7 +13,7 @@ export const ConsentView: React.FC = () => {
     <div className="card" style={{ maxWidth: 400, margin: '100px auto', textAlign: 'center' }}>
       <h1>Authorize Access</h1>
       <p>The application <span className="highlight">{clientName}</span> is requesting access to your MCP isolated backend resources.</p>
-      <form method="post" action={`/connect/authorize${window.location.search}`}>
+      <form method="post" action="/connect/authorize">
         {params.map(([key, value], idx) => (
           <input key={`${key}-${idx}`} type="hidden" name={key} value={value} />
         ))}
