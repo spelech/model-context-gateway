@@ -36,6 +36,11 @@ namespace ModelContextGateway.Core.Routing
             {
                 throw new NotSupportedException($"Transport type '{server.Type}' is not supported by the gateway.");
             }
+
+            if (server.RequestTimeoutSeconds is > 0)
+            {
+                _transport.RequestTimeout = TimeSpan.FromSeconds(server.RequestTimeoutSeconds.Value);
+            }
         }
 
         public async Task ConnectAsync()
@@ -70,9 +75,9 @@ namespace ModelContextGateway.Core.Routing
             });
         }
 
-        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
+        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null, CancellationToken cancellationToken = default, TimeSpan? timeoutOverride = null)
         {
-            return await _transport.SendRequestAsync(method, bodyJson, targetAuthToken);
+            return await _transport.SendRequestAsync(method, bodyJson, targetAuthToken, cancellationToken, timeoutOverride);
         }
 
         public async Task<JsonRpcResponse> CallMethodAsync(string method, object parameters, string? overrideId = null)

@@ -12,9 +12,10 @@ namespace ModelContextGateway.Infrastructure.Persistence
             DatabaseInitializer.EnsureAliasColumn(conn);
             DatabaseInitializer.EnsureOAuthColumns(conn);
             DatabaseInitializer.EnsureHealthCheckModeColumn(conn);
+            DatabaseInitializer.EnsureServerRuntimeColumns(conn);
             await conn.ExecuteAsync(@"
-                INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri, HealthCheckMode)
-                VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri, @HealthCheckMode)
+                INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri, HealthCheckMode, RequestTimeoutSeconds, MaxConcurrentRequests, ConcurrencyKeyField)
+                VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri, @HealthCheckMode, @RequestTimeoutSeconds, @MaxConcurrentRequests, @ConcurrencyKeyField)
                 ON CONFLICT(Id) DO UPDATE SET
                     Alias = @Alias,
                     DisplayName = @DisplayName,
@@ -39,7 +40,10 @@ namespace ModelContextGateway.Infrastructure.Persistence
                     OAuthTokenUrl = @OAuthTokenUrl,
                     OAuthScopes = @OAuthScopes,
                     OAuthRedirectUri = @OAuthRedirectUri,
-                    HealthCheckMode = @HealthCheckMode;
+                    HealthCheckMode = @HealthCheckMode,
+                    RequestTimeoutSeconds = @RequestTimeoutSeconds,
+                    MaxConcurrentRequests = @MaxConcurrentRequests,
+                    ConcurrencyKeyField = @ConcurrencyKeyField;
             ", server);
         }
 

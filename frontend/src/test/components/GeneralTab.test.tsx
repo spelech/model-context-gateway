@@ -68,7 +68,57 @@ describe('GeneralTab component', () => {
       toolSearchDefaultLimit: 5,
       toolSearchMinScore: 0.35,
       toolSearchScoreDropoffRatio: 0.6,
+      toolExecutionTimeoutSeconds: 120,
+      maxToolOutputChars: 0,
     });
+  });
+
+  /**
+   * @requirement MCP-EXEC-TIMEOUT-AND-OUTPUT-LIMITS
+   * @category MCP
+   * @type PositiveFeature
+   * @description Renders GeneralTab with configurable tool execution timeout and max tool output chars and triggers save.
+   */
+  it('renders GeneralTab with tool execution timeout and max output chars inputs and triggers save', async () => {
+    const saveSpy = vi.fn().mockResolvedValue(true);
+    render(
+      <GeneralTab
+        settings={{
+          embeddingProvider: 'local',
+          embeddingModelDir: 'data/models',
+          embeddingApiUrl: 'http://litellm:4000/v1/embeddings',
+          embeddingApiModel: 'all-MiniLM-L6-v2',
+          embeddingApiKey: '',
+          toolExecutionTimeoutSeconds: 180,
+          maxToolOutputChars: 3500,
+        }}
+        saveEmbeddingSettings={saveSpy}
+      />
+    );
+
+    const timeoutInput = screen.getByTestId('settings-tool-execution-timeout-input');
+    const maxOutputInput = screen.getByTestId('settings-max-tool-output-chars-input');
+
+    expect(timeoutInput).toHaveValue(180);
+    expect(maxOutputInput).toHaveValue(3500);
+
+    fireEvent.change(timeoutInput, { target: { value: '240' } });
+    fireEvent.change(maxOutputInput, { target: { value: '4096' } });
+
+    expect(timeoutInput).toHaveValue(240);
+    expect(maxOutputInput).toHaveValue(4096);
+
+    const saveBtn = screen.getByRole('button', { name: /save settings/i });
+    await act(async () => {
+      fireEvent.click(saveBtn);
+    });
+
+    expect(saveSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        toolExecutionTimeoutSeconds: 240,
+        maxToolOutputChars: 4096,
+      })
+    );
   });
 
   /**

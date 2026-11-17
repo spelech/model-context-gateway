@@ -53,7 +53,7 @@ namespace ModelContextGateway.Tests
             );
 
             Assert.NotNull(tools);
-            Assert.Equal(2, tools.Count);
+            Assert.Equal(3, tools.Count);
         }
 
         [Fact]

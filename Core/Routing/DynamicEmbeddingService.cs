@@ -67,19 +67,50 @@ namespace ModelContextGateway.Core.Routing
                     using var scope = _serviceProvider.CreateScope();
                     var dbFactory = scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
                     using var conn = dbFactory.CreateConnection();
+                    DatabaseInitializer.EnsureSettingsColumns(conn);
 
                     var exists = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM Settings WHERE Id = 'default'");
                     if (exists == 0)
                     {
-                        conn.Execute(@"INSERT INTO Settings (Id, DashboardTitle, DashboardIcon, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys, ToolSearchDefaultLimit, ToolSearchMinScore, ToolSearchScoreDropoffRatio)
-                            VALUES ('default', @DashboardTitle, @DashboardIcon, @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey, @EmbeddingApiModel, @EmbeddingModelDir, @GlobalMaxKeys, @UserMaxKeys, @ToolSearchDefaultLimit, @ToolSearchMinScore, @ToolSearchScoreDropoffRatio)", _settings);
+                        conn.Execute(@"INSERT INTO Settings (
+                                Id, DashboardTitle, DashboardIcon, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey,
+                                EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys, UserSecretStorage,
+                                AllowOpenClientRegistration, ToolSearchDefaultLimit, ToolSearchMinScore, ToolSearchScoreDropoffRatio,
+                                EnableCodeMode, CodeModeExecutionTimeoutSeconds, ToolExecutionTimeoutSeconds, MaxToolOutputChars,
+                                CodeModeMaxToolCalls, CodeModeMaxMemoryMb, CodeModeMaxStatements, CodeModeAllowedGroups)
+                            VALUES (
+                                'default', @DashboardTitle, @DashboardIcon, @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey,
+                                @EmbeddingApiModel, @EmbeddingModelDir, @GlobalMaxKeys, @UserMaxKeys, @UserSecretStorage,
+                                @AllowOpenClientRegistration, @ToolSearchDefaultLimit, @ToolSearchMinScore, @ToolSearchScoreDropoffRatio,
+                                @EnableCodeMode, @CodeModeExecutionTimeoutSeconds, @ToolExecutionTimeoutSeconds, @MaxToolOutputChars,
+                                @CodeModeMaxToolCalls, @CodeModeMaxMemoryMb, @CodeModeMaxStatements, @CodeModeAllowedGroups)", _settings);
                     }
                     else
                     {
-                        conn.Execute(@"UPDATE Settings SET DashboardTitle = @DashboardTitle, DashboardIcon = @DashboardIcon, EmbeddingProvider = @EmbeddingProvider, EmbeddingApiUrl = @EmbeddingApiUrl, EmbeddingApiKey = @EmbeddingApiKey,
-                            EmbeddingApiModel = @EmbeddingApiModel, EmbeddingModelDir = @EmbeddingModelDir,
-                            GlobalMaxKeys = @GlobalMaxKeys, UserMaxKeys = @UserMaxKeys,
-                            ToolSearchDefaultLimit = @ToolSearchDefaultLimit, ToolSearchMinScore = @ToolSearchMinScore, ToolSearchScoreDropoffRatio = @ToolSearchScoreDropoffRatio WHERE Id = 'default'", _settings);
+                        conn.Execute(@"UPDATE Settings SET
+                            DashboardTitle = @DashboardTitle,
+                            DashboardIcon = @DashboardIcon,
+                            EmbeddingProvider = @EmbeddingProvider,
+                            EmbeddingApiUrl = @EmbeddingApiUrl,
+                            EmbeddingApiKey = @EmbeddingApiKey,
+                            EmbeddingApiModel = @EmbeddingApiModel,
+                            EmbeddingModelDir = @EmbeddingModelDir,
+                            GlobalMaxKeys = @GlobalMaxKeys,
+                            UserMaxKeys = @UserMaxKeys,
+                            UserSecretStorage = @UserSecretStorage,
+                            AllowOpenClientRegistration = @AllowOpenClientRegistration,
+                            ToolSearchDefaultLimit = @ToolSearchDefaultLimit,
+                            ToolSearchMinScore = @ToolSearchMinScore,
+                            ToolSearchScoreDropoffRatio = @ToolSearchScoreDropoffRatio,
+                            EnableCodeMode = @EnableCodeMode,
+                            CodeModeExecutionTimeoutSeconds = @CodeModeExecutionTimeoutSeconds,
+                            ToolExecutionTimeoutSeconds = @ToolExecutionTimeoutSeconds,
+                            MaxToolOutputChars = @MaxToolOutputChars,
+                            CodeModeMaxToolCalls = @CodeModeMaxToolCalls,
+                            CodeModeMaxMemoryMb = @CodeModeMaxMemoryMb,
+                            CodeModeMaxStatements = @CodeModeMaxStatements,
+                            CodeModeAllowedGroups = @CodeModeAllowedGroups
+                            WHERE Id = 'default'", _settings);
                     }
                 }
                 catch (Exception ex)
@@ -99,6 +130,7 @@ namespace ModelContextGateway.Core.Routing
                     using var scope = _serviceProvider.CreateScope();
                     var dbFactory = scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
                     using var conn = dbFactory.CreateConnection();
+                    DatabaseInitializer.EnsureSettingsColumns(conn);
 
                     var dbSettings = conn.QueryFirstOrDefault<RouterSettings>("SELECT * FROM Settings WHERE Id = 'default'");
                     if (dbSettings != null)

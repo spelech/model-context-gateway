@@ -10,8 +10,8 @@ namespace ModelContextGateway.Infrastructure.Persistence
         public async Task SaveServerAsync(IDbConnection conn, McpServer server)
         {
             await conn.ExecuteAsync(@"
-                INSERT INTO `Servers` (`Id`, `Alias`, `DisplayName`, `Url`, `Enabled`, `Hidden`, `Type`, `SecretProvider`, `SecretItemKey`, `SecretMount`, `SecretPath`, `SecretField`, `AuthShape`, `CustomHeaderName`, `Categories`, `ApiKey`, `HeadersJson`, `EnableOAuth3Lo`, `OAuthClientId`, `OAuthClientSecret`, `OAuthAuthorizationUrl`, `OAuthTokenUrl`, `OAuthScopes`, `OAuthRedirectUri`)
-                VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri)
+                INSERT INTO `Servers` (`Id`, `Alias`, `DisplayName`, `Url`, `Enabled`, `Hidden`, `Type`, `SecretProvider`, `SecretItemKey`, `SecretMount`, `SecretPath`, `SecretField`, `AuthShape`, `CustomHeaderName`, `Categories`, `ApiKey`, `HeadersJson`, `EnableOAuth3Lo`, `OAuthClientId`, `OAuthClientSecret`, `OAuthAuthorizationUrl`, `OAuthTokenUrl`, `OAuthScopes`, `OAuthRedirectUri`, `HealthCheckMode`, `RequestTimeoutSeconds`, `MaxConcurrentRequests`, `ConcurrencyKeyField`)
+                VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri, @HealthCheckMode, @RequestTimeoutSeconds, @MaxConcurrentRequests, @ConcurrencyKeyField)
                 ON DUPLICATE KEY UPDATE
                     `Alias` = @Alias,
                     `DisplayName` = @DisplayName,
@@ -35,7 +35,11 @@ namespace ModelContextGateway.Infrastructure.Persistence
                     `OAuthAuthorizationUrl` = @OAuthAuthorizationUrl,
                     `OAuthTokenUrl` = @OAuthTokenUrl,
                     `OAuthScopes` = @OAuthScopes,
-                    `OAuthRedirectUri` = @OAuthRedirectUri;
+                    `OAuthRedirectUri` = @OAuthRedirectUri,
+                    `HealthCheckMode` = @HealthCheckMode,
+                    `RequestTimeoutSeconds` = @RequestTimeoutSeconds,
+                    `MaxConcurrentRequests` = @MaxConcurrentRequests,
+                    `ConcurrencyKeyField` = @ConcurrencyKeyField;
             ", server);
         }
 

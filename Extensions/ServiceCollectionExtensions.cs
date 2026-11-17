@@ -173,7 +173,10 @@ namespace ModelContextGateway.Extensions
             builder.Services.AddMcpOpenIddict(builder.Environment, builder.Configuration);
             builder.Services.AddControllers();
 
-            builder.Services.AddHttpClient("McpClient");
+            builder.Services.AddHttpClient("McpClient", client =>
+            {
+                client.Timeout = Timeout.InfiniteTimeSpan;
+            });
             builder.Services.ConfigureAll<Microsoft.Extensions.Http.HttpClientFactoryOptions>(options =>
             {
                 options.HttpMessageHandlerBuilderActions.Add(b =>
@@ -189,6 +192,8 @@ namespace ModelContextGateway.Extensions
                 });
             });
             builder.Services.AddSingleton<SessionManager>();
+            builder.Services.AddSingleton<ModelContextGateway.Core.Routing.ToolOutputBuffer>();
+            builder.Services.AddSingleton<ModelContextGateway.Core.Routing.BackendConcurrencyGate>();
 
             // Register Docker Auto-Discovery Service
             builder.Services.AddHostedService<DockerAutoDiscoveryService>();

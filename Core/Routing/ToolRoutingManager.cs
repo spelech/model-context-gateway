@@ -31,12 +31,21 @@ namespace ModelContextGateway.Core.Routing
         private IEmbeddingProvider? _embeddingProvider;
         private IToolVectorStore? _vectorStore;
         private ICodeModeExecutionEngine? _codeModeEngine;
+        private ToolOutputBuffer? _outputBuffer;
+        private BackendConcurrencyGate? _concurrencyGate;
 
-        public ToolRoutingManager(IEmbeddingProvider? embeddingProvider = null, IToolVectorStore? vectorStore = null, ICodeModeExecutionEngine? codeModeEngine = null)
+        public ToolRoutingManager(
+            IEmbeddingProvider? embeddingProvider = null,
+            IToolVectorStore? vectorStore = null,
+            ICodeModeExecutionEngine? codeModeEngine = null,
+            ToolOutputBuffer? outputBuffer = null,
+            BackendConcurrencyGate? concurrencyGate = null)
         {
             _embeddingProvider = embeddingProvider;
             _vectorStore = vectorStore ?? new InMemorySimdToolVectorStore();
             _codeModeEngine = codeModeEngine ?? new CodeModeExecutionEngine();
+            _outputBuffer = outputBuffer ?? new ToolOutputBuffer();
+            _concurrencyGate = concurrencyGate ?? new BackendConcurrencyGate();
         }
 
         /// <summary>
@@ -67,6 +76,24 @@ namespace ModelContextGateway.Core.Routing
         }
 
         /// <summary>
+        /// Gets or sets the bounded output buffer for large tool/search responses.
+        /// </summary>
+        public ToolOutputBuffer OutputBuffer
+        {
+            get => _outputBuffer ??= new ToolOutputBuffer();
+            set => _outputBuffer = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the per-server/per-slot FIFO concurrency gate.
+        /// </summary>
+        public BackendConcurrencyGate ConcurrencyGate
+        {
+            get => _concurrencyGate ??= new BackendConcurrencyGate();
+            set => _concurrencyGate = value;
+        }
+
+        /// <summary>
         /// Gets the active thread-safe namespaced tool-to-server routing map.
         /// </summary>
         public ConcurrentDictionary<string, string> ToolRoutingTable => _toolRoutingTable;
@@ -80,20 +107,23 @@ namespace ModelContextGateway.Core.Routing
                 new()
                 {
                     name = "search_tools",
-                    description = "Semantically search across all registered internal MCP tools (Excel, Docker, Plex, Home Assistant, etc.) using keywords. Returns the matching tool names, descriptions, and input schemas (or compact TypeScript call signatures when format='typescript'). Use this first to discover what tools are available.",
+                    description = "Semantically search across all registered internal MCP tools (Excel, Docker, Plex, Home Assistant, etc.) using keywords. Returns the matching tool names, descriptions, and input schemas (or compact TypeScript/compact/names outputs when format is set). Use this first to discover what tools are available.",
                     inputSchema = new
                     {
                         type = "object",
                         properties = new
                         {
                             query = new { type = "string", description = "The natural language query or intent to find relevant tools." },
+                            server = new { type = "string", description = "Optional server ID or alias to filter tool discovery to a single backend server." },
                             limit = new { type = "integer", description = "Optional maximum number of matching tools to return. Overrides the admin configured default limit." },
                             min_score = new { type = "number", description = "Optional minimum score threshold between 0.0 and 1.0 to filter low-confidence noise." },
                             score_dropoff_ratio = new { type = "number", description = "Optional relative score dropoff ratio between 0.0 and 1.0. Filters tools scoring below top_score * ratio." },
                             mode = new { type = "string", @enum = new[] { "hybrid", "semantic", "lexical" }, description = "Search mode: 'hybrid' (default), 'semantic' (pure vector), or 'lexical' (pure keyword)." },
                             dense_weight = new { type = "number", description = "Weight between 0.0 (pure lexical) and 1.0 (pure semantic). Default is 0.5 (balanced)." },
-                            format = new { type = "string", @enum = new[] { "json", "typescript" }, description = "Output format: 'json' (default, returns full JSON Schemas) or 'typescript' (returns compact TypeScript function declarations with JSDoc for Code Mode)." },
-                            include_typescript = new { type = "boolean", description = "Optional flag to attach a 'typescriptSignature' field to each returned JSON tool schema." }
+                            format = new { type = "string", @enum = new[] { "json", "typescript", "compact", "names" }, description = "Output format: 'json' (default, returns full JSON Schemas), 'typescript' (compact TS declarations without full JSON schemas), 'compact' (names, brief descriptions, param names), or 'names' (newline-separated tool names)." },
+                            include_typescript = new { type = "boolean", description = "Optional flag to attach a 'typescriptSignature' field to each returned JSON tool schema." },
+                            offset = new { type = "integer", description = "Optional starting character offset when paging large search results." },
+                            max_chars = new { type = "integer", description = "Optional maximum output character length before buffering overflow into read_output." }
                         },
                         required = new[] { "query" }
                     },
@@ -102,7 +132,7 @@ namespace ModelContextGateway.Core.Routing
                         type = "object",
                         properties = new
                         {
-                            tools = new { type = "array", items = new { type = "object" } },
+                            tools = new { type = "array" },
                             format = new { type = "string" },
                             count = new { type = "integer" }
                         },
@@ -128,7 +158,12 @@ namespace ModelContextGateway.Core.Routing
                         {
                             name = new { type = "string", description = "The name of the tool to execute (e.g. 'docker/list_containers', 'docker__list_containers', or bare 'list_containers')." },
                             arguments = new { type = "object", description = "The arguments JSON object expected by the target tool." },
-                            target_auth_token = new { type = "string", description = "Optional authentication token if the backend tool requires dynamic pass-through authorization." }
+                            target_auth_token = new { type = "string", description = "Optional authentication token if the backend tool requires dynamic pass-through authorization." },
+                            timeout_seconds = new { type = "integer", description = "Optional per-call timeout override in seconds (overrides server and gateway defaults)." },
+                            max_chars = new { type = "integer", description = "Optional maximum response characters before buffering overflow into read_output." },
+                            offset = new { type = "integer", description = "Optional starting character offset into the response output." },
+                            filter = new { type = "string", description = "Optional regex or case-insensitive substring filter applied line-by-line before slicing." },
+                            concurrency_key = new { type = "string", description = "Optional explicit concurrency slot key for serialized backends (e.g. 'main', 'support')." }
                         },
                         required = new[] { "name", "arguments" }
                     },
@@ -140,6 +175,45 @@ namespace ModelContextGateway.Core.Routing
                         idempotentHint = false,
                         openWorldHint = true
                     }
+                },
+                new()
+                {
+                    name = "read_output",
+                    description = "Read a specific character slice from an oversized tool or search output previously buffered by MCG (identified by output_id returned in truncated responses).",
+                    inputSchema = new
+                    {
+                        type = "object",
+                        properties = new
+                        {
+                            output_id = new { type = "string", description = "The buffer identifier returned in a truncated tool response." },
+                            offset = new { type = "integer", description = "Zero-based character offset to start reading from (default: 0)." },
+                            max_chars = new { type = "integer", description = "Maximum number of characters to return in this page (default: 4000)." }
+                        },
+                        required = new[] { "output_id" }
+                    },
+                    outputSchema = new
+                    {
+                        type = "object",
+                        properties = new
+                        {
+                            output_id = new { type = "string" },
+                            tool_name = new { type = "string" },
+                            total_chars = new { type = "integer" },
+                            returned_chars = new { type = "integer" },
+                            offset = new { type = "integer" },
+                            has_more = new { type = "boolean" },
+                            next_offset = new { type = new[] { "integer", "null" } }
+                        },
+                        required = new[] { "output_id", "total_chars", "returned_chars", "offset", "has_more" }
+                    },
+                    annotations = new
+                    {
+                        title = "Read Buffered Tool Output",
+                        readOnlyHint = true,
+                        destructiveHint = false,
+                        idempotentHint = true,
+                        openWorldHint = false
+                    }
                 }
             };
 
@@ -148,14 +222,15 @@ namespace ModelContextGateway.Core.Routing
                 tools.Add(new MetaToolDefinition
                 {
                     name = "execute_script",
-                    description = "Execute a JavaScript script to programmatically chain and orchestrate internal MCP tools, resources, and prompts using an in-memory sandbox. Tools can be called via await tools.<server>.<tool>(arguments) or await mcg.callTool(name, arguments). Also supports await mcg.listServers(), await mcg.listResources(serverId?), await mcg.searchResources(query), await mcg.readResource(uri), await mcg.listPrompts(serverId?), and await mcg.getPrompt(name, args). Read resource 'router://code-mode/sdk.d.ts' or 'router://code-mode/types/{server_name}' for TypeScript signatures.",
+                    description = "Execute a JavaScript script to programmatically chain and orchestrate internal MCP tools, resources, and prompts using an in-memory sandbox. Tools can be called via await tools.<server>.<tool>(arguments, options?) or await mcg.callTool(name, arguments, options?). Also supports await mcg.readOutput(outputId, opts?), await mcg.listServers(), await mcg.listResources(serverId?), await mcg.searchResources(query), await mcg.readResource(uri), await mcg.listPrompts(serverId?), and await mcg.getPrompt(name, args). Read resource 'router://code-mode/sdk.d.ts' or 'router://code-mode/types/{server_name}' for TypeScript signatures.",
                     inputSchema = new
                     {
                         type = "object",
                         properties = new
                         {
                             script = new { type = "string", description = "The JavaScript script content to execute." },
-                            arguments = new { type = "object", description = "Optional JSON object with caller parameters accessible in the script as global args." }
+                            arguments = new { type = "object", description = "Optional JSON object with caller parameters accessible in the script as global args." },
+                            timeout_seconds = new { type = "integer", description = "Optional per-call execution timeout override in seconds." }
                         },
                         required = new[] { "script" }
                     },

@@ -10,7 +10,7 @@ namespace ModelContextGateway.Infrastructure.Transports
         private readonly string? _forwardedUser;
         private readonly IUserSecretStore? _userSecretStore;
 
-        public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(15);
+        public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(120);
         private readonly McpServer _server;
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
@@ -464,24 +464,32 @@ namespace ModelContextGateway.Infrastructure.Transports
             }
         }
 
-        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
+        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null, CancellationToken cancellationToken = default, TimeSpan? timeoutOverride = null)
         {
             if (_stateManager.IsDisconnected)
             {
                 return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Not connected" } };
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
+            using var callerLinked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken);
+
             if (_messageUrl == null)
             {
-                using var ctsTimeout = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
-                ctsTimeout.CancelAfter(TimeSpan.FromSeconds(5));
+                using var ctsEndpointTimeout = CancellationTokenSource.CreateLinkedTokenSource(callerLinked.Token);
+                ctsEndpointTimeout.CancelAfter(TimeSpan.FromSeconds(5));
                 try
                 {
-                    await _endpointTcs.Task.WaitAsync(ctsTimeout.Token);
+                    await _endpointTcs.Task.WaitAsync(ctsEndpointTimeout.Token);
+                }
+                catch (OperationCanceledException) when (!callerLinked.IsCancellationRequested)
+                {
+                    _logger.LogDebug("Timeout waiting for SSE endpoint URL.");
                 }
                 catch (OperationCanceledException)
                 {
-                    _logger.LogDebug("Timeout waiting for SSE endpoint URL.");
+                    throw;
                 }
                 catch (Exception ex)
                 {
@@ -539,6 +547,13 @@ namespace ModelContextGateway.Infrastructure.Transports
                 _logger.LogWarning(ex, "Failed to parse/rewrite JSON ID in SendRequestAsync");
             }
 
+            var effectiveTimeout = timeoutOverride is { TotalMilliseconds: > 0 }
+                ? timeoutOverride.Value
+                : (RequestTimeout > TimeSpan.Zero ? RequestTimeout : TimeSpan.FromSeconds(120));
+
+            using var ctsTimeout = new CancellationTokenSource(effectiveTimeout);
+            using var timeoutLinked = CancellationTokenSource.CreateLinkedTokenSource(callerLinked.Token, ctsTimeout.Token);
+
             if (isNotification)
             {
                 var content = new StringContent(modifiedBody, Encoding.UTF8, "application/json");
@@ -566,13 +581,20 @@ namespace ModelContextGateway.Infrastructure.Transports
                     req.Headers.Add("X-Target-Auth", targetAuthToken);
                 }
 
-                using var res = await _httpClient.SendAsync(req, _cts.Token);
-                res.EnsureSuccessStatusCode();
+                try
+                {
+                    using var res = await _httpClient.SendAsync(req, timeoutLinked.Token);
+                    res.EnsureSuccessStatusCode();
+                }
+                catch (OperationCanceledException) when (ctsTimeout.IsCancellationRequested && !callerLinked.IsCancellationRequested)
+                {
+                    throw new TimeoutException($"Notification '{method}' to SSE backend '{_server.Id}' timed out after {effectiveTimeout.TotalSeconds:0.#} seconds.");
+                }
 
                 return new JsonRpcResponse();
             }
 
-            var tcs = _stateManager.CreateTrackedRequest(upstreamRequestId, originalId, _sessionId, _cts.Token, RequestTimeout);
+            var tcs = _stateManager.CreateTrackedRequest(upstreamRequestId, originalId, _sessionId, callerLinked.Token, effectiveTimeout);
 
             try
             {
@@ -603,13 +625,21 @@ namespace ModelContextGateway.Infrastructure.Transports
 
                 _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(modifiedBody));
 
-                using var res = await _httpClient.SendAsync(req, _cts.Token);
+                using var res = await _httpClient.SendAsync(req, timeoutLinked.Token);
                 res.EnsureSuccessStatusCode();
 
-                var response = await tcs.Task.WaitAsync(RequestTimeout, _cts.Token);
+                var response = await tcs.Task.WaitAsync(timeoutLinked.Token);
                 var responseJson = JsonSerializer.Serialize(response, _jsonOptions);
                 _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(responseJson));
                 return response;
+            }
+            catch (TimeoutException)
+            {
+                throw new TimeoutException($"Request '{method}' to SSE backend '{_server.Id}' timed out after {effectiveTimeout.TotalSeconds:0.#} seconds.");
+            }
+            catch (OperationCanceledException) when (ctsTimeout.IsCancellationRequested && !callerLinked.IsCancellationRequested)
+            {
+                throw new TimeoutException($"Request '{method}' to SSE backend '{_server.Id}' timed out after {effectiveTimeout.TotalSeconds:0.#} seconds.");
             }
             finally
             {

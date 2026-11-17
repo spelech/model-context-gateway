@@ -26,6 +26,9 @@ export interface McpServer {
   oauthTokenUrl?: string;
   oauthScopes?: string;
   oauthRedirectUri?: string;
+  requestTimeoutSeconds?: number | null;
+  maxConcurrentRequests?: number | null;
+  concurrencyKeyField?: string | null;
 }
 
 export interface ServerPayload {
@@ -51,6 +54,9 @@ export interface ServerPayload {
   oauthTokenUrl?: string;
   oauthScopes?: string;
   oauthRedirectUri?: string;
+  requestTimeoutSeconds?: number | null;
+  maxConcurrentRequests?: number | null;
+  concurrencyKeyField?: string | null;
 }
 
 export interface InspectCapabilityData {

@@ -31,7 +31,8 @@ namespace ModelContextGateway.Tests
 
             var scriptTool = tools.FirstOrDefault(t => t.name == "execute_script");
             scriptTool.Should().BeNull();
-            tools.Should().HaveCount(2);
+            tools.Should().HaveCount(3);
+            tools.Select(t => t.name).Should().Contain(new[] { "search_tools", "execute_tool", "read_output" });
         }
 
         [Fact]

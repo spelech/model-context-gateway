@@ -39,7 +39,7 @@ namespace ModelContextGateway.Core.Routing
             }
             if (msg.Contains("timeout") || msg.Contains("deadline") || msg.Contains("timed out"))
             {
-                return $"Request to '{serverId}' timed out. Please check if the service is running, responsive, or under heavy load.";
+                return $"Request to '{serverId}' timed out. You can pass a higher 'timeout_seconds' argument (or set RequestTimeoutSeconds on server '{serverId}') for slow operations, or check if the service is running and responsive.";
             }
             if (msg.Contains("conn") || msg.Contains("refused") || msg.Contains("socket") || msg.Contains("unreachable"))
             {

@@ -22,7 +22,7 @@ Standard MCP tool calling requires the LLM to emit a tool call, wait for the ful
 
 ## Calling `execute_script`
 
-When Code Mode is enabled, the gateway exposes `execute_script` alongside `search_tools` and `execute_tool` on the default Meta-Mode endpoint (`/sse` or `/mcp`).
+When Code Mode is enabled, the gateway exposes `execute_script` alongside `search_tools`, `execute_tool`, and `read_output` on the default Meta-Mode endpoint (`/sse` or `/mcp`).
 
 ### Input Schema
 
@@ -32,6 +32,7 @@ The `execute_script` meta-tool accepts the following parameters:
 | :--- | :--- | :--- | :--- | :--- |
 | `script` | `code` | `string` | **Yes** | Asynchronous JavaScript body to execute. The gateway wraps your code in an `async` function automatically, so top-level `await` and `return` statements work directly. |
 | `arguments` | `args` | `object` | No | Optional JSON object of input parameters injected into the global `args` (and `arguments`) variable inside the sandbox. |
+| `timeout_seconds` | — | `integer` | No | Optional per-call wall-clock timeout override in seconds (`1`–`3600`). |
 
 > [!TIP]
 > **Parameter Aliases for LLM Compatibility**
@@ -41,11 +42,11 @@ The `execute_script` meta-tool accepts the following parameters:
 
 ## Sandbox API Reference
 
-Scripts run inside a strict, isolated JavaScript environment with two built-in tool dispatchers, injected input variables, and structured console logging.
+Scripts run inside a strict, isolated JavaScript environment with built-in tool dispatchers, buffered output paging (`mcg.readOutput`), injected input variables, and structured console logging.
 
-### 1. Explicit Dispatcher: `mcg.callTool(toolName, args)`
+### 1. Explicit Dispatcher: `mcg.callTool(toolName, args, options?)`
 
-Use `await mcg.callTool(toolName, args)` to invoke any namespaced downstream tool or gateway meta-tool (`search_tools`, `execute_tool`).
+Use `await mcg.callTool(toolName, args, options?)` to invoke any namespaced downstream tool or gateway meta-tool (`search_tools`, `execute_tool`, `read_output`). Optional `options` (`McgCallOptions`) supports `authToken`, `timeoutSeconds`, `maxChars`, `offset`, `filter`, and `concurrencyKey`. When a response is truncated to an `output_id`, page through the buffered text using `await mcg.readOutput(outputId, { offset, maxChars })`.
 
 ```javascript
 // Call a namespaced downstream tool
@@ -244,7 +245,7 @@ Every script executes inside a Jint JavaScript engine with strict resource const
 | Setting | API / DB Property | Default | Valid Range | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | **Enable Code Mode** | `EnableCodeMode` | `true` | `true` / `false` | Advertises `execute_script` in Meta-Mode `tools/list` and permits script execution. |
-| **Execution Timeout** | `CodeModeExecutionTimeoutSeconds` | `30` sec | `1` – `300` sec | Maximum wall-clock duration before the sandbox cancels the script and any in-flight tool calls. |
+| **Execution Timeout** | `CodeModeExecutionTimeoutSeconds` | `120` sec | `1` – `3600` sec | Maximum wall-clock duration before the sandbox cancels the script and any in-flight tool calls. |
 | **Max Tool Calls** | `CodeModeMaxToolCalls` | `50` calls | `1` – `500` calls | Maximum number of downstream tool invocations allowed within a single `execute_script` run. |
 | **Max Memory Limit** | `CodeModeMaxMemoryMb` | `64` MB | `8` – `512` MB | Per-script JavaScript heap allocation cap enforced by the Jint engine. |
 | **Max Statements** | `CodeModeMaxStatements` | `100,000` | `100` – `10,000,000` | Maximum JavaScript AST statements executed per run to halt tight CPU loops immediately. |

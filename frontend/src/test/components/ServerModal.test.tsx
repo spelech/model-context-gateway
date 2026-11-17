@@ -298,4 +298,69 @@ describe('ServerModal component', () => {
       })
     );
   });
+
+  /**
+   * @requirement MCP-TIMEOUT-CONCURRENCY-UI
+   * @category MCP
+   * @type PositiveFeature
+   * @description submits per-server timeout and concurrency slot settings when configured and sends null when cleared on edit
+   */
+  it('submits and clears per-server timeout and concurrency slot settings', async () => {
+    const saveSpy = vi.fn().mockResolvedValue(undefined);
+    useServerStore.setState({ isAddEditOpen: true, editingServer: null, saveServer: saveSpy });
+    const { rerender } = render(<ServerModal />);
+
+    fireEvent.change(screen.getByTestId('server-name-input'), { target: { value: 'Playwright Stealth' } });
+    fireEvent.change(screen.getByTestId('server-url-input'), { target: { value: 'http://playwright:3000/mcp' } });
+    fireEvent.change(screen.getByTestId('server-request-timeout-input'), { target: { value: '180' } });
+    fireEvent.change(screen.getByTestId('server-max-concurrency-input'), { target: { value: '1' } });
+    fireEvent.change(screen.getByTestId('server-concurrency-key-field-input'), { target: { value: 'role,browser' } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('server-save-btn'));
+    });
+
+    expect(saveSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        displayName: 'Playwright Stealth',
+        requestTimeoutSeconds: 180,
+        maxConcurrentRequests: 1,
+        concurrencyKeyField: 'role,browser',
+      })
+    );
+
+    // Edit existing server and clear fields -> sends null
+    saveSpy.mockClear();
+    useServerStore.setState({
+      isAddEditOpen: true,
+      editingServer: {
+        ...existingServer,
+        requestTimeoutSeconds: 180,
+        maxConcurrentRequests: 1,
+        concurrencyKeyField: 'role',
+      },
+      saveServer: saveSpy,
+    });
+    rerender(<ServerModal />);
+
+    expect(screen.getByTestId('server-request-timeout-input')).toHaveValue(180);
+    expect(screen.getByTestId('server-max-concurrency-input')).toHaveValue(1);
+    expect(screen.getByTestId('server-concurrency-key-field-input')).toHaveValue('role');
+
+    fireEvent.change(screen.getByTestId('server-request-timeout-input'), { target: { value: '' } });
+    fireEvent.change(screen.getByTestId('server-max-concurrency-input'), { target: { value: '' } });
+    fireEvent.change(screen.getByTestId('server-concurrency-key-field-input'), { target: { value: '' } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('server-save-btn'));
+    });
+
+    expect(saveSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestTimeoutSeconds: null,
+        maxConcurrentRequests: null,
+        concurrencyKeyField: null,
+      })
+    );
+  });
 });

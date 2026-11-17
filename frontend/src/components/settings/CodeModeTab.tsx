@@ -11,7 +11,7 @@ export interface CodeModeTabProps {
 
 export const CodeModeTab: React.FC<CodeModeTabProps> = ({ settings, availableGroups = [], onSave }) => {
   const [enableCodeMode, setEnableCodeMode] = useState<boolean>(settings?.enableCodeMode ?? true);
-  const [timeoutSeconds, setTimeoutSeconds] = useState<number>(settings?.codeModeExecutionTimeoutSeconds ?? 30);
+  const [timeoutSeconds, setTimeoutSeconds] = useState<number>(settings?.codeModeExecutionTimeoutSeconds ?? 120);
   const [maxToolCalls, setMaxToolCalls] = useState<number>(settings?.codeModeMaxToolCalls ?? 50);
   const [maxMemoryMb, setMaxMemoryMb] = useState<number>(settings?.codeModeMaxMemoryMb ?? 64);
   const [maxStatements, setMaxStatements] = useState<number>(settings?.codeModeMaxStatements ?? 100000);
@@ -165,14 +165,14 @@ export const CodeModeTab: React.FC<CodeModeTabProps> = ({ settings, availableGro
               <input
                 type="range"
                 min={1}
-                max={120}
+                max={600}
                 id="codeModeExecutionTimeoutSeconds"
                 data-testid="input-timeout"
                 value={timeoutSeconds}
                 onChange={(e) => setTimeoutSeconds(Number(e.target.value))}
                 style={{ width: '100%' }}
               />
-              <small style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Maximum wall-clock execution time (1–120s).</small>
+              <small style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Maximum wall-clock execution time (1–600s).</small>
             </div>
 
             <div className="form-group">

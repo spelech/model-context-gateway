@@ -43,6 +43,9 @@ erDiagram
         boolean AutoDiscovered "Flag indicating dynamic auto-discovery"
         string Alias "Optional secondary server alias"
         string HealthCheckMode "Health probe mode: RootOrigin or JsonRpcPing"
+        int RequestTimeoutSeconds "Optional per-server tool timeout override in seconds"
+        int MaxConcurrentRequests "Optional per-slot max concurrent requests (0 = unlimited)"
+        string ConcurrencyKeyField "Optional argument field path for concurrency slot sharding"
     }
 
     Settings {
@@ -58,8 +61,10 @@ erDiagram
         int ToolSearchDefaultLimit "Default result limit for search_tools (default 5)"
         float ToolSearchMinScore "Minimum relevance score floor (default 0.35)"
         float ToolSearchScoreDropoffRatio "Relative score drop-off ratio (default 0.60)"
+        int ToolExecutionTimeoutSeconds "Default downstream tool execution timeout in seconds (default 120)"
+        int MaxToolOutputChars "Global max chars before buffering overflow into read_output (0 = unlimited)"
         boolean EnableCodeMode "Master toggle for execute_script sandbox"
-        int CodeModeExecutionTimeoutSeconds "Sandbox execution timeout in seconds (default 30)"
+        int CodeModeExecutionTimeoutSeconds "Sandbox execution timeout in seconds (default 120)"
         int CodeModeMaxToolCalls "Maximum tool calls per script execution (default 50)"
         int CodeModeMaxMemoryMb "Maximum JS heap memory in MB (default 64)"
         int CodeModeMaxStatements "Maximum JS AST statements per script (default 100000)"
@@ -201,6 +206,9 @@ Stores backend downstream server registrations, transport parameters, credential
 | `AutoDiscovered` | `BOOLEAN / INT` | No | Default `0` | Flag set when registered dynamically via Docker socket discovery |
 | `Alias` | `VARCHAR(100)` | Yes | | Optional secondary short identifier for tool routing |
 | `HealthCheckMode` | `VARCHAR(50)` | No | Default `'RootOrigin'` | Background probe strategy: `'RootOrigin'` or `'JsonRpcPing'` |
+| `RequestTimeoutSeconds` | `INT` | Yes | | Optional per-server request timeout override in seconds (`> 0`) |
+| `MaxConcurrentRequests` | `INT` | No | Default `0` | Optional per-slot concurrent request cap (`0` = unlimited, `1` = strict FIFO per slot) |
+| `ConcurrencyKeyField` | `VARCHAR(255)` | Yes | | Optional argument field path(s) used to derive concurrency slot keys |
 
 ---
 
@@ -330,8 +338,10 @@ Stores global singleton settings controlling vector embeddings, user quotas, and
 | `ToolSearchDefaultLimit` | `INT` | No | Default `5` | Default maximum results returned by `search_tools` (`1`–`100`) |
 | `ToolSearchMinScore` | `DOUBLE / FLOAT` | No | Default `0.35` | Minimum relevance floor for `search_tools` (`0.0`–`1.0`) |
 | `ToolSearchScoreDropoffRatio` | `DOUBLE / FLOAT` | No | Default `0.60` | Relative cutoff ratio compared against the top `search_tools` hit (`0.0`–`1.0`) |
+| `ToolExecutionTimeoutSeconds` | `INT` | No | Default `120` | Default downstream tool execution timeout in seconds (`1`–`3600`) |
+| `MaxToolOutputChars` | `INT` | No | Default `0` | Global max output characters before buffering overflow into `read_output` (`0` = unlimited) |
 | `EnableCodeMode` | `BOOLEAN / INT` | No | Default `1` | Master toggle enabling `execute_script` in Meta-Mode |
-| `CodeModeExecutionTimeoutSeconds` | `INT` | No | Default `30` | Maximum wall-clock execution timeout in seconds (`1`–`300`) |
+| `CodeModeExecutionTimeoutSeconds` | `INT` | No | Default `120` | Maximum wall-clock execution timeout in seconds (`1`–`3600`) |
 | `CodeModeMaxToolCalls` | `INT` | No | Default `50` | Maximum downstream tool calls per script execution (`1`–`500`) |
 | `CodeModeMaxMemoryMb` | `INT` | No | Default `64` | Maximum Jint JavaScript heap allocation in megabytes (`8`–`512`) |
 | `CodeModeMaxStatements` | `INT` | No | Default `100000` | Maximum JavaScript AST statements evaluated per script (`100`–`10000000`) |

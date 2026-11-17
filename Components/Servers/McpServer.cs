@@ -30,6 +30,9 @@ namespace ModelContextGateway.Components.Servers
         public string? OAuthScopes { get; set; }
         public string? OAuthRedirectUri { get; set; }
         public string HealthCheckMode { get; set; } = "ping"; // "ping", "root", "none"
+        public int? RequestTimeoutSeconds { get; set; }
+        public int? MaxConcurrentRequests { get; set; }
+        public string? ConcurrencyKeyField { get; set; }
     }
 
     public class BackendStatus

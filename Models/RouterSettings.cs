@@ -21,7 +21,9 @@ namespace ModelContextGateway.Models
         public double ToolSearchMinScore { get; set; } = 0.35;
         public double ToolSearchScoreDropoffRatio { get; set; } = 0.60;
         public bool EnableCodeMode { get; set; } = true;
-        public int CodeModeExecutionTimeoutSeconds { get; set; } = 30;
+        public int CodeModeExecutionTimeoutSeconds { get; set; } = 120;
+        public int ToolExecutionTimeoutSeconds { get; set; } = 120;
+        public int MaxToolOutputChars { get; set; } = 0; // 0 = unlimited
         public int CodeModeMaxToolCalls { get; set; } = 50;
         public int CodeModeMaxMemoryMb { get; set; } = 64;
         public int CodeModeMaxStatements { get; set; } = 100000;

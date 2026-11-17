@@ -42,10 +42,12 @@ The vector embedding engine powers the **Meta-Mode** tool discovery function (`s
 ### 3. In-Memory SIMD Vector Store & Calibrated Hybrid Search
 * **In-Memory SIMD Acceleration (`IToolVectorStore`)**: Tool vectors are indexed in memory. Cosine similarities are calculated using **.NET 10 hardware SIMD intrinsics** (`System.Numerics.Tensors.TensorPrimitives.CosineSimilarity`), providing sub-millisecond query evaluation without requiring external vector databases for catalogs up to 5,000+ tools.
 * **Calibrated Linear Combination**: The search engine blends dense vector semantic similarity with normalized lexical matching (`Score = α × DenseScore + (1 - α) × SparseScore`) across tool names, descriptions, tags, and JSON schemas.
-* **Tool Search Thresholding & Drop-Off Controls**:
+* **Tool Search Thresholding, Timeouts & Output Caps**:
   - **Default Result Limit (`ToolSearchDefaultLimit`)**: Maximum tools returned by `search_tools` when `limit` is omitted (default `5`, range `1`–`100`).
   - **Minimum Relevance Score (`ToolSearchMinScore`)**: Absolute relevance floor below which candidate tools are filtered out (default `0.35`, range `0.0`–`1.0`).
   - **Score Drop-Off Ratio (`ToolSearchScoreDropoffRatio`)**: Relative cutoff ratio compared against the top-scoring match (`Score >= topScore × ratio`, default `0.60`, range `0.0`–`1.0`).
+  - **Default Tool Timeout (`ToolExecutionTimeoutSeconds`)**: Gateway-wide default per-call execution timeout in seconds (`1`–`3600`, default `120`) when not overridden by server or per-call parameters.
+  - **Max Tool Output Chars (`MaxToolOutputChars`)**: Optional default character limit before oversized responses overflow into the bounded `read_output` buffer (`0` = unlimited by default; per-call `max_chars` and `X-MCG-Max-Output-Chars` remain available).
 * **Graceful Degradation**: If embedding providers are disabled or offline, MCG seamlessly falls back to normalized keyword ranking with zero downtime.
 
 ---
@@ -113,7 +115,7 @@ Configure fine-grained access rules and map external directory groups:
 Configure the sandboxed JavaScript execution engine (`execute_script`) that allows AI agents to chain multiple MCP tool calls in a single turn:
 
 * **Enable Code Mode (`EnableCodeMode`)**: Master toggle (`true` by default) that controls whether `execute_script` is advertised in Meta-Mode `tools/list` responses and available for execution.
-* **Execution Timeout (`CodeModeExecutionTimeoutSeconds`)**: Maximum wall-clock duration in seconds (`1`–`300`, default `30`) before a running script and its pending downstream tool calls are cancelled.
+* **Execution Timeout (`CodeModeExecutionTimeoutSeconds`)**: Maximum wall-clock duration in seconds (`1`–`3600`, default `120`) before a running script and its pending downstream tool calls are cancelled.
 * **Max Tool Calls (`CodeModeMaxToolCalls`)**: Maximum number of `mcg.callTool` / `tools.<server>.<tool>` invocations allowed during a single script execution (`1`–`500`, default `50`).
 * **Max Memory Limit (`CodeModeMaxMemoryMb`)**: Per-execution JavaScript heap memory cap enforced by the Jint sandbox (`8`–`512` MB, default `64` MB).
 * **Max Statements (`CodeModeMaxStatements`)**: Maximum AST statements evaluated per script (`100`–`10,000,000`, default `100,000`) to halt infinite loops immediately.

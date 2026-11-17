@@ -31,7 +31,10 @@ BEGIN
         [Categories]        NVARCHAR(MAX) NOT NULL DEFAULT '[]',
         [ApiKey]            NVARCHAR(MAX) NULL,
         [HeadersJson]       NVARCHAR(MAX) NULL,
-        [AutoDiscovered]    BIT NOT NULL DEFAULT 0
+        [AutoDiscovered]    BIT NOT NULL DEFAULT 0,
+        [RequestTimeoutSeconds] INT NULL,
+        [MaxConcurrentRequests] INT NULL,
+        [ConcurrencyKeyField] VARCHAR(100) NULL
     );
 END;
 GO
@@ -48,7 +51,20 @@ BEGIN
         [EmbeddingModelDir]       VARCHAR(500) NULL,
         [RequireManualApproval]   BIT NOT NULL DEFAULT 0,
         [GlobalMaxKeys]           INT NOT NULL DEFAULT 100,
-        [UserMaxKeys]             INT NOT NULL DEFAULT 5
+        [UserMaxKeys]             INT NOT NULL DEFAULT 5,
+        [UserSecretStorage]       VARCHAR(50) NOT NULL DEFAULT 'Database',
+        [AllowOpenClientRegistration] BIT NOT NULL DEFAULT 1,
+        [ToolSearchDefaultLimit]  INT NOT NULL DEFAULT 5,
+        [ToolSearchMinScore]      FLOAT NOT NULL DEFAULT 0.35,
+        [ToolSearchScoreDropoffRatio] FLOAT NOT NULL DEFAULT 0.60,
+        [EnableCodeMode]          BIT NOT NULL DEFAULT 1,
+        [CodeModeExecutionTimeoutSeconds] INT NOT NULL DEFAULT 120,
+        [ToolExecutionTimeoutSeconds] INT NOT NULL DEFAULT 120,
+        [MaxToolOutputChars]      INT NOT NULL DEFAULT 0,
+        [CodeModeMaxToolCalls]    INT NOT NULL DEFAULT 50,
+        [CodeModeMaxMemoryMb]     INT NOT NULL DEFAULT 64,
+        [CodeModeMaxStatements]   INT NOT NULL DEFAULT 100000,
+        [CodeModeAllowedGroups]   NVARCHAR(MAX) NOT NULL DEFAULT ''
     );
 END;
 GO

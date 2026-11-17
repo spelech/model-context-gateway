@@ -220,6 +220,51 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 {
                     conn.Execute("ALTER TABLE Settings ADD COLUMN ToolSearchScoreDropoffRatio REAL DEFAULT 0.60;");
                 }
+
+                if (!cols.Contains("AllowOpenClientRegistration"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN AllowOpenClientRegistration INTEGER DEFAULT 1;");
+                }
+
+                if (!cols.Contains("EnableCodeMode"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN EnableCodeMode INTEGER DEFAULT 1;");
+                }
+
+                if (!cols.Contains("CodeModeExecutionTimeoutSeconds"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN CodeModeExecutionTimeoutSeconds INTEGER DEFAULT 120;");
+                }
+
+                if (!cols.Contains("ToolExecutionTimeoutSeconds"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN ToolExecutionTimeoutSeconds INTEGER DEFAULT 120;");
+                }
+
+                if (!cols.Contains("MaxToolOutputChars"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN MaxToolOutputChars INTEGER DEFAULT 0;");
+                }
+
+                if (!cols.Contains("CodeModeMaxToolCalls"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN CodeModeMaxToolCalls INTEGER DEFAULT 50;");
+                }
+
+                if (!cols.Contains("CodeModeMaxMemoryMb"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN CodeModeMaxMemoryMb INTEGER DEFAULT 64;");
+                }
+
+                if (!cols.Contains("CodeModeMaxStatements"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN CodeModeMaxStatements INTEGER DEFAULT 100000;");
+                }
+
+                if (!cols.Contains("CodeModeAllowedGroups"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN CodeModeAllowedGroups TEXT DEFAULT '';");
+                }
             }
 
             // 4. AppKeys.OwnerSid and AppKeys.KeyType
@@ -336,6 +381,21 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 {
                     conn.Execute("ALTER TABLE Servers ADD COLUMN DynamicAuthPrompt TEXT NULL;");
                 }
+
+                if (!serversCols.Contains("RequestTimeoutSeconds"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN RequestTimeoutSeconds INTEGER NULL;");
+                }
+
+                if (!serversCols.Contains("MaxConcurrentRequests"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN MaxConcurrentRequests INTEGER NULL;");
+                }
+
+                if (!serversCols.Contains("ConcurrencyKeyField"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN ConcurrencyKeyField TEXT NULL;");
+                }
             }
 
             // 6. OAuthClients table
@@ -445,6 +505,12 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         ALTER TABLE [dbo].[Servers] ADD [AllowPassThroughAuth] BIT NOT NULL DEFAULT 0;
                     IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'DynamicAuthPrompt' AND Object_ID = Object_ID(N'dbo.Servers'))
                         ALTER TABLE [dbo].[Servers] ADD [DynamicAuthPrompt] NVARCHAR(MAX) NULL;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Servers') AND name = 'RequestTimeoutSeconds')
+                        ALTER TABLE [dbo].[Servers] ADD [RequestTimeoutSeconds] INT NULL;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Servers') AND name = 'MaxConcurrentRequests')
+                        ALTER TABLE [dbo].[Servers] ADD [MaxConcurrentRequests] INT NULL;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Servers') AND name = 'ConcurrencyKeyField')
+                        ALTER TABLE [dbo].[Servers] ADD [ConcurrencyKeyField] VARCHAR(200) NULL;
                 END;
 
                 IF OBJECT_ID('dbo.Settings', 'U') IS NOT NULL
@@ -467,6 +533,32 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         ALTER TABLE [dbo].[Settings] ADD [GlobalMaxKeys] INT NOT NULL DEFAULT 100;
                     IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'UserMaxKeys')
                         ALTER TABLE [dbo].[Settings] ADD [UserMaxKeys] INT NOT NULL DEFAULT 5;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'UserSecretStorage')
+                        ALTER TABLE [dbo].[Settings] ADD [UserSecretStorage] VARCHAR(50) NOT NULL DEFAULT 'Database';
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'AllowOpenClientRegistration')
+                        ALTER TABLE [dbo].[Settings] ADD [AllowOpenClientRegistration] BIT NOT NULL DEFAULT 1;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'ToolSearchDefaultLimit')
+                        ALTER TABLE [dbo].[Settings] ADD [ToolSearchDefaultLimit] INT NOT NULL DEFAULT 5;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'ToolSearchMinScore')
+                        ALTER TABLE [dbo].[Settings] ADD [ToolSearchMinScore] FLOAT NOT NULL DEFAULT 0.35;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'ToolSearchScoreDropoffRatio')
+                        ALTER TABLE [dbo].[Settings] ADD [ToolSearchScoreDropoffRatio] FLOAT NOT NULL DEFAULT 0.60;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'EnableCodeMode')
+                        ALTER TABLE [dbo].[Settings] ADD [EnableCodeMode] BIT NOT NULL DEFAULT 1;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'CodeModeExecutionTimeoutSeconds')
+                        ALTER TABLE [dbo].[Settings] ADD [CodeModeExecutionTimeoutSeconds] INT NOT NULL DEFAULT 120;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'ToolExecutionTimeoutSeconds')
+                        ALTER TABLE [dbo].[Settings] ADD [ToolExecutionTimeoutSeconds] INT NOT NULL DEFAULT 120;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'MaxToolOutputChars')
+                        ALTER TABLE [dbo].[Settings] ADD [MaxToolOutputChars] INT NOT NULL DEFAULT 0;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'CodeModeMaxToolCalls')
+                        ALTER TABLE [dbo].[Settings] ADD [CodeModeMaxToolCalls] INT NOT NULL DEFAULT 50;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'CodeModeMaxMemoryMb')
+                        ALTER TABLE [dbo].[Settings] ADD [CodeModeMaxMemoryMb] INT NOT NULL DEFAULT 64;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'CodeModeMaxStatements')
+                        ALTER TABLE [dbo].[Settings] ADD [CodeModeMaxStatements] INT NOT NULL DEFAULT 100000;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'CodeModeAllowedGroups')
+                        ALTER TABLE [dbo].[Settings] ADD [CodeModeAllowedGroups] NVARCHAR(MAX) NOT NULL DEFAULT '';
                 END;
             ");
 
@@ -754,6 +846,21 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 {
                     conn.Execute("ALTER TABLE Servers ADD COLUMN DynamicAuthPrompt TEXT NULL;");
                 }
+
+                if (!serversCols.Contains("RequestTimeoutSeconds"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `RequestTimeoutSeconds` INT NULL;");
+                }
+
+                if (!serversCols.Contains("MaxConcurrentRequests"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `MaxConcurrentRequests` INT NULL;");
+                }
+
+                if (!serversCols.Contains("ConcurrencyKeyField"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `ConcurrencyKeyField` VARCHAR(200) NULL;");
+                }
             }
 
             var settingsTableExists = conn.ExecuteScalar<int>(@"
@@ -811,6 +918,16 @@ namespace ModelContextGateway.Infrastructure.Persistence
                     conn.Execute("ALTER TABLE `Settings` ADD COLUMN `UserMaxKeys` INT NOT NULL DEFAULT 5;");
                 }
 
+                if (!settingsCols.Contains("UserSecretStorage"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `UserSecretStorage` VARCHAR(50) NOT NULL DEFAULT 'Database';");
+                }
+
+                if (!settingsCols.Contains("AllowOpenClientRegistration"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `AllowOpenClientRegistration` TINYINT(1) NOT NULL DEFAULT 1;");
+                }
+
                 if (!settingsCols.Contains("ToolSearchDefaultLimit"))
                 {
                     conn.Execute("ALTER TABLE `Settings` ADD COLUMN `ToolSearchDefaultLimit` INT NOT NULL DEFAULT 5;");
@@ -824,6 +941,46 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 if (!settingsCols.Contains("ToolSearchScoreDropoffRatio"))
                 {
                     conn.Execute("ALTER TABLE `Settings` ADD COLUMN `ToolSearchScoreDropoffRatio` DOUBLE NOT NULL DEFAULT 0.60;");
+                }
+
+                if (!settingsCols.Contains("EnableCodeMode"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EnableCodeMode` TINYINT(1) NOT NULL DEFAULT 1;");
+                }
+
+                if (!settingsCols.Contains("CodeModeExecutionTimeoutSeconds"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `CodeModeExecutionTimeoutSeconds` INT NOT NULL DEFAULT 120;");
+                }
+
+                if (!settingsCols.Contains("ToolExecutionTimeoutSeconds"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `ToolExecutionTimeoutSeconds` INT NOT NULL DEFAULT 120;");
+                }
+
+                if (!settingsCols.Contains("MaxToolOutputChars"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `MaxToolOutputChars` INT NOT NULL DEFAULT 0;");
+                }
+
+                if (!settingsCols.Contains("CodeModeMaxToolCalls"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `CodeModeMaxToolCalls` INT NOT NULL DEFAULT 50;");
+                }
+
+                if (!settingsCols.Contains("CodeModeMaxMemoryMb"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `CodeModeMaxMemoryMb` INT NOT NULL DEFAULT 64;");
+                }
+
+                if (!settingsCols.Contains("CodeModeMaxStatements"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `CodeModeMaxStatements` INT NOT NULL DEFAULT 100000;");
+                }
+
+                if (!settingsCols.Contains("CodeModeAllowedGroups"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `CodeModeAllowedGroups` LONGTEXT NULL;");
                 }
             }
 
@@ -1016,7 +1173,10 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         HeadersJson TEXT,
                         AutoDiscovered INTEGER DEFAULT 0,
                         AllowPassThroughAuth INTEGER DEFAULT 0,
-                        DynamicAuthPrompt TEXT
+                        DynamicAuthPrompt TEXT,
+                        RequestTimeoutSeconds INTEGER NULL,
+                        MaxConcurrentRequests INTEGER NULL,
+                        ConcurrencyKeyField TEXT NULL
                     );
 
                     CREATE TABLE IF NOT EXISTS Settings (
@@ -1031,9 +1191,18 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         GlobalMaxKeys INTEGER DEFAULT 100,
                         UserMaxKeys INTEGER DEFAULT 5,
                         UserSecretStorage TEXT DEFAULT 'Database',
+                        AllowOpenClientRegistration INTEGER DEFAULT 1,
                         ToolSearchDefaultLimit INTEGER DEFAULT 5,
                         ToolSearchMinScore REAL DEFAULT 0.35,
-                        ToolSearchScoreDropoffRatio REAL DEFAULT 0.60
+                        ToolSearchScoreDropoffRatio REAL DEFAULT 0.60,
+                        EnableCodeMode INTEGER DEFAULT 1,
+                        CodeModeExecutionTimeoutSeconds INTEGER DEFAULT 120,
+                        ToolExecutionTimeoutSeconds INTEGER DEFAULT 120,
+                        MaxToolOutputChars INTEGER DEFAULT 0,
+                        CodeModeMaxToolCalls INTEGER DEFAULT 50,
+                        CodeModeMaxMemoryMb INTEGER DEFAULT 64,
+                        CodeModeMaxStatements INTEGER DEFAULT 100000,
+                        CodeModeAllowedGroups TEXT DEFAULT ''
                     );
 
                     CREATE TABLE IF NOT EXISTS UserServerCredentials (
@@ -1175,7 +1344,10 @@ namespace ModelContextGateway.Infrastructure.Persistence
                             [HeadersJson]       NVARCHAR(MAX) NULL,
                             [AutoDiscovered]    BIT NOT NULL DEFAULT 0,
                             [AllowPassThroughAuth] BIT NOT NULL DEFAULT 0,
-                            [DynamicAuthPrompt] NVARCHAR(MAX) NULL
+                            [DynamicAuthPrompt] NVARCHAR(MAX) NULL,
+                            [RequestTimeoutSeconds] INT NULL,
+                            [MaxConcurrentRequests] INT NULL,
+                            [ConcurrencyKeyField] VARCHAR(200) NULL
                         );
                     END;
 
@@ -1194,9 +1366,18 @@ namespace ModelContextGateway.Infrastructure.Persistence
                             [GlobalMaxKeys]           INT NOT NULL DEFAULT 100,
                             [UserMaxKeys]             INT NOT NULL DEFAULT 5,
                             [UserSecretStorage]       VARCHAR(50) NOT NULL DEFAULT 'Database',
+                            [AllowOpenClientRegistration] BIT NOT NULL DEFAULT 1,
                             [ToolSearchDefaultLimit]  INT NOT NULL DEFAULT 5,
                             [ToolSearchMinScore]      FLOAT NOT NULL DEFAULT 0.35,
-                            [ToolSearchScoreDropoffRatio] FLOAT NOT NULL DEFAULT 0.60
+                            [ToolSearchScoreDropoffRatio] FLOAT NOT NULL DEFAULT 0.60,
+                            [EnableCodeMode]          BIT NOT NULL DEFAULT 1,
+                            [CodeModeExecutionTimeoutSeconds] INT NOT NULL DEFAULT 120,
+                            [ToolExecutionTimeoutSeconds] INT NOT NULL DEFAULT 120,
+                            [MaxToolOutputChars]      INT NOT NULL DEFAULT 0,
+                            [CodeModeMaxToolCalls]    INT NOT NULL DEFAULT 50,
+                            [CodeModeMaxMemoryMb]     INT NOT NULL DEFAULT 64,
+                            [CodeModeMaxStatements]   INT NOT NULL DEFAULT 100000,
+                            [CodeModeAllowedGroups]   NVARCHAR(MAX) NOT NULL DEFAULT ''
                         );
                     END;
 
@@ -1358,7 +1539,10 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         `HeadersJson`       LONGTEXT NULL,
                         `AutoDiscovered`    TINYINT(1) NOT NULL DEFAULT 0,
                         `AllowPassThroughAuth` TINYINT(1) NOT NULL DEFAULT 0,
-                        `DynamicAuthPrompt` LONGTEXT NULL
+                        `DynamicAuthPrompt` LONGTEXT NULL,
+                        `RequestTimeoutSeconds` INT NULL,
+                        `MaxConcurrentRequests` INT NULL,
+                        `ConcurrencyKeyField` VARCHAR(200) NULL
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
                     CREATE TABLE IF NOT EXISTS `Settings` (
@@ -1374,9 +1558,18 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         `GlobalMaxKeys`           INT NOT NULL DEFAULT 100,
                         `UserMaxKeys`             INT NOT NULL DEFAULT 5,
                         `UserSecretStorage`       VARCHAR(50) NOT NULL DEFAULT 'Database',
+                        `AllowOpenClientRegistration` TINYINT(1) NOT NULL DEFAULT 1,
                         `ToolSearchDefaultLimit`  INT NOT NULL DEFAULT 5,
                         `ToolSearchMinScore`      DOUBLE NOT NULL DEFAULT 0.35,
-                        `ToolSearchScoreDropoffRatio` DOUBLE NOT NULL DEFAULT 0.60
+                        `ToolSearchScoreDropoffRatio` DOUBLE NOT NULL DEFAULT 0.60,
+                        `EnableCodeMode`          TINYINT(1) NOT NULL DEFAULT 1,
+                        `CodeModeExecutionTimeoutSeconds` INT NOT NULL DEFAULT 120,
+                        `ToolExecutionTimeoutSeconds` INT NOT NULL DEFAULT 120,
+                        `MaxToolOutputChars`      INT NOT NULL DEFAULT 0,
+                        `CodeModeMaxToolCalls`    INT NOT NULL DEFAULT 50,
+                        `CodeModeMaxMemoryMb`     INT NOT NULL DEFAULT 64,
+                        `CodeModeMaxStatements`   INT NOT NULL DEFAULT 100000,
+                        `CodeModeAllowedGroups`   LONGTEXT NULL
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
                     CREATE TABLE IF NOT EXISTS `UserServerCredentials` (

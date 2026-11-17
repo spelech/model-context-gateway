@@ -387,6 +387,9 @@ namespace ModelContextGateway.Core.Routing
                                 s.OAuthTokenUrl,
                                 s.OAuthScopes,
                                 s.OAuthRedirectUri,
+                                s.RequestTimeoutSeconds,
+                                s.MaxConcurrentRequests,
+                                s.ConcurrencyKeyField,
                                 HasOAuthClientSecret = !string.IsNullOrEmpty(s.OAuthClientSecret),
                                 ConnectionStatus = s.Enabled ? (status?.Status ?? "Disconnected") : "Disabled",
                                 ConnectionAttempts = status?.Attempts ?? 0,
@@ -426,6 +429,9 @@ namespace ModelContextGateway.Core.Routing
                             server.OAuthTokenUrl,
                             server.OAuthScopes,
                             server.OAuthRedirectUri,
+                            server.RequestTimeoutSeconds,
+                            server.MaxConcurrentRequests,
+                            server.ConcurrencyKeyField,
                             HasOAuthClientSecret = !string.IsNullOrEmpty(server.OAuthClientSecret),
                             ConnectionStatus = server.Enabled ? (status?.Status ?? "Disconnected") : "Disabled",
                             ConnectionAttempts = status?.Attempts ?? 0,
@@ -1216,6 +1222,51 @@ namespace ModelContextGateway.Core.Routing
                             {
                                 current.ToolSearchScoreDropoffRatio = tssdr;
                             }
+
+                            if (args.TryGetProperty("userSecretStorage", out var ussProp))
+                            {
+                                current.UserSecretStorage = ussProp.GetString() ?? current.UserSecretStorage;
+                            }
+
+                            if (args.TryGetProperty("enableCodeMode", out var ecmProp))
+                            {
+                                current.EnableCodeMode = ecmProp.GetBoolean();
+                            }
+
+                            if (args.TryGetProperty("codeModeExecutionTimeoutSeconds", out var cmetProp) && cmetProp.TryGetInt32(out var cmet))
+                            {
+                                current.CodeModeExecutionTimeoutSeconds = cmet;
+                            }
+
+                            if (args.TryGetProperty("toolExecutionTimeoutSeconds", out var tetProp) && tetProp.TryGetInt32(out var tet))
+                            {
+                                current.ToolExecutionTimeoutSeconds = tet;
+                            }
+
+                            if (args.TryGetProperty("maxToolOutputChars", out var mtocProp) && mtocProp.TryGetInt32(out var mtoc))
+                            {
+                                current.MaxToolOutputChars = mtoc;
+                            }
+
+                            if (args.TryGetProperty("codeModeMaxToolCalls", out var cmmtcProp) && cmmtcProp.TryGetInt32(out var cmmtc))
+                            {
+                                current.CodeModeMaxToolCalls = cmmtc;
+                            }
+
+                            if (args.TryGetProperty("codeModeMaxMemoryMb", out var cmmmProp) && cmmmProp.TryGetInt32(out var cmmm))
+                            {
+                                current.CodeModeMaxMemoryMb = cmmm;
+                            }
+
+                            if (args.TryGetProperty("codeModeMaxStatements", out var cmmsProp) && cmmsProp.TryGetInt32(out var cmms))
+                            {
+                                current.CodeModeMaxStatements = cmms;
+                            }
+
+                            if (args.TryGetProperty("codeModeAllowedGroups", out var cmagProp))
+                            {
+                                current.CodeModeAllowedGroups = cmagProp.GetString() ?? current.CodeModeAllowedGroups;
+                            }
                         }
 
                         _dynamicEmbeddingService.SaveSettings(current);
@@ -1737,6 +1788,22 @@ namespace ModelContextGateway.Core.Routing
                 server.OAuthRedirectUri = ruriProp.GetString();
             }
 
+            if (args.TryGetProperty("requestTimeoutSeconds", out var rtsProp) && rtsProp.TryGetInt32(out var rts))
+            {
+                server.RequestTimeoutSeconds = rts > 0 ? rts : null;
+            }
+
+            if (args.TryGetProperty("maxConcurrentRequests", out var mcrProp) && mcrProp.TryGetInt32(out var mcr))
+            {
+                server.MaxConcurrentRequests = mcr > 0 ? mcr : null;
+            }
+
+            if (args.TryGetProperty("concurrencyKeyField", out var ckfProp))
+            {
+                var ckf = ckfProp.GetString();
+                server.ConcurrencyKeyField = string.IsNullOrWhiteSpace(ckf) ? null : ckf.Trim();
+            }
+
             return server;
         }
 
@@ -1787,6 +1854,12 @@ namespace ModelContextGateway.Core.Routing
                     if (deserialized.OAuthRedirectUri != null)
                     {
                         server.OAuthRedirectUri = deserialized.OAuthRedirectUri;
+                    }
+                    server.RequestTimeoutSeconds = deserialized.RequestTimeoutSeconds is > 0 ? deserialized.RequestTimeoutSeconds : null;
+                    server.MaxConcurrentRequests = deserialized.MaxConcurrentRequests is > 0 ? deserialized.MaxConcurrentRequests : null;
+                    if (deserialized.ConcurrencyKeyField != null)
+                    {
+                        server.ConcurrencyKeyField = string.IsNullOrWhiteSpace(deserialized.ConcurrencyKeyField) ? null : deserialized.ConcurrencyKeyField.Trim();
                     }
                 }
             }
@@ -1890,6 +1963,26 @@ namespace ModelContextGateway.Core.Routing
             {
                 server.OAuthRedirectUri = ururiProp.GetString();
             }
+
+            if (args.TryGetProperty("requestTimeoutSeconds", out var urtsProp))
+            {
+                server.RequestTimeoutSeconds = urtsProp.ValueKind == JsonValueKind.Null
+                    ? null
+                    : (urtsProp.TryGetInt32(out var urts) && urts > 0 ? urts : null);
+            }
+
+            if (args.TryGetProperty("maxConcurrentRequests", out var umcrProp))
+            {
+                server.MaxConcurrentRequests = umcrProp.ValueKind == JsonValueKind.Null
+                    ? null
+                    : (umcrProp.TryGetInt32(out var umcr) && umcr > 0 ? umcr : null);
+            }
+
+            if (args.TryGetProperty("concurrencyKeyField", out var uckfProp))
+            {
+                var uckf = uckfProp.GetString();
+                server.ConcurrencyKeyField = string.IsNullOrWhiteSpace(uckf) ? null : uckf.Trim();
+            }
         }
 
         private void ValidateServerConfig(McpServer server)
@@ -1982,7 +2075,10 @@ namespace ModelContextGateway.Core.Routing
                             oAuthAuthorizationUrl = new { type = "string", description = "OAuth 2.0 authorization endpoint URL" },
                             oAuthTokenUrl = new { type = "string", description = "OAuth 2.0 token endpoint URL" },
                             oAuthScopes = new { type = "string", description = "OAuth 2.0 requested scopes (space-delimited)" },
-                            oAuthRedirectUri = new { type = "string", description = "OAuth 2.0 redirect URI registered with provider" }
+                            oAuthRedirectUri = new { type = "string", description = "OAuth 2.0 redirect URI registered with provider" },
+                            requestTimeoutSeconds = new { type = "integer", description = "Per-server request timeout in seconds (overrides global default; null/0 uses gateway default)" },
+                            maxConcurrentRequests = new { type = "integer", description = "Max concurrent in-flight tool calls per slot on this server (e.g. 1 to serialize)" },
+                            concurrencyKeyField = new { type = "string", description = "Comma-separated tool argument field name(s) partitioning concurrency slots (e.g. 'role,slot')" }
                         },
                         required = new[] { "action" }
                     }
@@ -2108,7 +2204,18 @@ namespace ModelContextGateway.Core.Routing
                             embeddingApiModel = new { type = "string", description = "Embedding model name" },
                             embeddingModelDir = new { type = "string", description = "Local embedding directory" },
                             globalMaxKeys = new { type = "integer", description = "Global maximum active AppKeys" },
-                            userMaxKeys = new { type = "integer", description = "User maximum active AppKeys" }
+                            userMaxKeys = new { type = "integer", description = "User maximum active AppKeys" },
+                            toolSearchDefaultLimit = new { type = "integer", description = "Default max results for semantic tool search" },
+                            toolSearchMinScore = new { type = "number", description = "Minimum similarity score for tool search" },
+                            toolSearchScoreDropoffRatio = new { type = "number", description = "Score drop-off ratio for tool search" },
+                            enableCodeMode = new { type = "boolean", description = "Enable JavaScript Code Mode execution" },
+                            codeModeExecutionTimeoutSeconds = new { type = "integer", description = "Default Code Mode script execution timeout in seconds (120)" },
+                            toolExecutionTimeoutSeconds = new { type = "integer", description = "Global default tool call execution timeout in seconds (120)" },
+                            maxToolOutputChars = new { type = "integer", description = "Global default maximum characters returned per tool call (0 = unlimited)" },
+                            codeModeMaxToolCalls = new { type = "integer", description = "Max backend tool calls per Code Mode script" },
+                            codeModeMaxMemoryMb = new { type = "integer", description = "Max Jint memory limit in MB" },
+                            codeModeMaxStatements = new { type = "integer", description = "Max Jint statement limit" },
+                            codeModeAllowedGroups = new { type = "string", description = "Comma-separated groups allowed to use Code Mode" }
                         },
                         required = new[] { "action" }
                     }

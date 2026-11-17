@@ -104,4 +104,41 @@ describe('CodeModeTab', () => {
       })
     );
   });
+
+  /**
+   * @requirement UI-CODE-03
+   * @category UI
+   * @type PositiveFeature
+   * @description CodeModeTab defaults execution timeout to 120s when omitted and supports slider values up to 600s.
+   */
+  it('defaults execution timeout to 120s and allows saving up to 600s', async () => {
+    const mockSave = vi.fn().mockResolvedValue(true);
+    render(
+      <CodeModeTab
+        settings={{
+          enableCodeMode: true,
+        }}
+        availableGroups={[]}
+        onSave={mockSave}
+      />
+    );
+
+    const timeoutInput = screen.getByTestId('input-timeout') as HTMLInputElement;
+    expect(timeoutInput).toHaveValue('120');
+    expect(timeoutInput.max).toBe('600');
+
+    fireEvent.change(timeoutInput, { target: { value: '600' } });
+    expect(timeoutInput).toHaveValue('600');
+
+    const saveBtn = screen.getByTestId('btn-save-code-mode');
+    await act(async () => {
+      fireEvent.click(saveBtn);
+    });
+
+    expect(mockSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        codeModeExecutionTimeoutSeconds: 600,
+      })
+    );
+  });
 });

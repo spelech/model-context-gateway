@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **489 Requirements Verified** across **1135 Test Proofs** (382 Functional Capabilities, 107 Safety Guardrails).
+> **Catalog Statistics:** **510 Requirements Verified** across **1156 Test Proofs** (402 Functional Capabilities, 108 Safety Guardrails).
 
 ---
 
@@ -15,10 +15,10 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **70** | 3 | 67 | 146 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **134** | 124 | 10 | 299 proofs |
-| **`SEC`** | Secrets Providers & Encryption | **67** | 56 | 11 | 143 proofs |
-| **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **39** | 33 | 6 | 45 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **42** | 35 | 7 | 214 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **152** | 142 | 10 | 317 proofs |
+| **`SEC`** | Secrets Providers & Encryption | **68** | 56 | 12 | 144 proofs |
+| **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **40** | 34 | 6 | 46 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **43** | 36 | 7 | 215 proofs |
 
 ---
 
@@ -458,7 +458,7 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/AppKeysControllerTests.cs#L223`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AppKeysControllerTests.cs#L223) (`CreateAppKey_CustomQuotaOverride_AllowsHigherLimit`)
   - [Frontend Vitest] [`frontend/src/test/stores/useClientStore.test.ts#L594`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L594) (`sets user quota override and refreshes quota list`)
   - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L6) (`renders GeneralTab with security default quota inputs and triggers save`)
-  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L129`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L129) (`updates form state when settings prop changes`)
+  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L179`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L179) (`updates form state when settings prop changes`)
   - [Frontend Vitest] [`frontend/src/test/components/AppKeysCard.test.tsx#L215`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/AppKeysCard.test.tsx#L215) (`manages custom user quotas in admin quotas tab`)
   - [Playwright E2E] [`frontend/e2e/personal-appkeys-and-quotas.spec.ts#L134`](https://github.com/spelech/model-context-gateway/blob/main/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L134) (`Admin Context: configures custom user quota override`)
 
@@ -1591,20 +1591,62 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L137`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L137) (`ExecuteAsync_NonJsonContent_ReturnsRawText`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L13`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L13) (`GetMetaTools_IncludesExecuteScript_WhenEnabled`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L25`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L25) (`GetMetaTools_OmitsExecuteScript_WhenDisabled`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L420`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L420) (`ExecuteScript_ChainingSearchTools_ExecutesSuccessfully`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L421`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L421) (`ExecuteScript_ChainingSearchTools_ExecutesSuccessfully`)
 
 ### `[MCP-CODE-02]` ExecuteScript returns structured execution envelope with result and telemetry.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (2):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L162`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L162) (`ExecuteScript_ValidExecution_ReturnsStructuredEnvelope`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L215`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L215) (`ExecuteScript_WithCodeParameter_ExecutesSuccessfully`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L163`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L163) (`ExecuteScript_ValidExecution_ReturnsStructuredEnvelope`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L216`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L216) (`ExecuteScript_WithCodeParameter_ExecutesSuccessfully`)
+
+### `[MCP-CODE-CONCURRENT-OPTIONS-READOUTPUT]` CodeModeExecutionEngine supports Promise.all concurrent tool calls with McgCallOptions and mcg.readOutput.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L564`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L564) (`CodeModeExecutionEngine_PromiseAll_AndMcgCallOptions_AndReadOutput_WorkSafely`)
 
 ### `[MCP-COLDSTART-01]` Full cold-start cycle: SessionManager cache seeded -> search_tools -> execute_tool dispatches to downstream mock server and returns output.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L130`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L130) (`ColdStartCycle_SeedsRoutingTable_AndDispatchesExecuteToolDownstream`)
+
+### `[MCP-CONCURRENCY-CANCEL-SAFETY]` Cancelling a queued waiter never leaks permits or blocks subsequent FIFO waiters.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendConcurrencyGateTests.cs#L113`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendConcurrencyGateTests.cs#L113) (`AcquireAsync_CancelledWaiter_DoesNotLeakSlot`)
+
+### `[MCP-CONCURRENCY-FIFO]` BackendConcurrencyGate serializes requests in strict FIFO arrival order when limit is 1.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendConcurrencyGateTests.cs#L9`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendConcurrencyGateTests.cs#L9) (`AcquireAsync_WithLimitOne_SerializesInStrictFifoOrder`)
+
+### `[MCP-CONCURRENCY-KEY-OVERRIDE]` ResolveSlotKey prioritizes explicit concurrency_key over server ConcurrencyKeyField.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendConcurrencyGateTests.cs#L101`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendConcurrencyGateTests.cs#L101) (`ResolveSlotKey_PrioritizesExplicitKeyOverConfiguredField`)
+
+### `[MCP-CONCURRENCY-ROUTING-E2E]` execute_tool enforces per-slot FIFO serialization on 'main' while allowing 'support' slot to execute concurrently.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L656`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L656) (`ExecuteTool_ConcurrencyGate_SerializesSameSlotAndParallelizesDistinctSlots`)
+
+### `[MCP-CONCURRENCY-SLOTS]` BackendConcurrencyGate isolates distinct slot keys such as 'main' and 'support' for concurrent execution.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/BackendConcurrencyGateTests.cs#L61`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendConcurrencyGateTests.cs#L61) (`AcquireAsync_DistinctSlots_RunInParallelWhileSameSlotSerializes`)
+
+### `[MCP-DISCOVERY-LEAN-FORMATS]` search_tools supports format='typescript'|'compact'|'names' without bloated inputSchema blobs, server filtering, and output paging.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L294) (`SearchTools_LeanFormats_ServerFilter_AndPaging_WorkAsExpected`)
 
 ### `[MCP-DOWNSTREAM-INIT-DIAGNOSTICS]` Initializes downstream MCP backends with detailed diagnostic logging.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1629,6 +1671,12 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/ToolErrorFormatterTests.cs#L27`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolErrorFormatterTests.cs#L27) (`TransformException_FormatsExceptionWithRemediation`)
+
+### `[MCP-EXEC-TIMEOUT-AND-OUTPUT-LIMITS]` Renders GeneralTab with configurable tool execution timeout and max tool output chars and triggers save.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L76) (`renders GeneralTab with tool execution timeout and max output chars inputs and triggers save`)
 
 ### `[MCP-EXEC-TOOL-ENFORCE-AUTH-POLICIES]` Meta-mode execute_tool strictly enforces target tool authorization policies
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1708,6 +1756,48 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/TransportResilienceTests.cs#L123`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportResilienceTests.cs#L123) (`MockDownstreamMcpServer_HandlesResourcesAndPrompts`)
 
+### `[MCP-OUTPUT-BUFFER-LRU]` ToolOutputBuffer evicts least-recently-used entries when entry count or char budget is exceeded.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolOutputBufferTests.cs#L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolOutputBufferTests.cs#L26) (`Store_EvictsLeastRecentlyUsedEntries_WhenLimitsExceeded`)
+
+### `[MCP-OUTPUT-BUFFER-TTL]` ToolOutputBuffer expires entries after sliding TTL elapses.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolOutputBufferTests.cs#L48`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolOutputBufferTests.cs#L48) (`TryReadChunk_PrunesExpiredEntries_BySlidingTtl`)
+
+### `[MCP-OUTPUT-FILTER]` ShapeText supports line-level regex filtering and safe substring fallback on invalid regex.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolOutputBufferTests.cs#L108`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolOutputBufferTests.cs#L108) (`ShapeText_FiltersByRegexAndFallsBackToSubstringOnInvalidPattern`)
+
+### `[MCP-OUTPUT-PAGING]` ShapeText truncates oversized payloads within max_chars budget and allows full reconstruction via TryReadChunk.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolOutputBufferTests.cs#L74`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolOutputBufferTests.cs#L74) (`ShapeText_TruncatesWithinLimit_AndPagesCleanlyToCompletion`)
+
+### `[MCP-OUTPUT-READ-TOOL-ISOLATION]` execute_tool buffers large output into read_output and isolates buffered reads per session/owner.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L439`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L439) (`ExecuteTool_LargeOutput_BuffersAndEnforcesSessionIsolation`)
+
+### `[MCP-OUTPUT-STRUCTURED-CAP]` ShapeToolResult replaces oversized structuredContent with compact paging metadata.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolOutputBufferTests.cs#L125`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolOutputBufferTests.cs#L125) (`ShapeToolResult_ReplacesOversizedStructuredContentWithCompactMetadata`)
+
+### `[MCP-PERSISTENCE-TIMEOUT-OUTPUT-CONCURRENCY]` DatabaseRepository persists and retrieves server timeout/concurrency fields and global tool timeout/output settings.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L764`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L764) (`DatabaseRepository_PersistsTimeoutOutputAndConcurrencySettings`)
+
 ### `[MCP-RESILIENT-01]` Prefix-based resilient routing: execute_tool called with unregistered but prefixed tool name dynamically resolves server and executes.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
@@ -1718,25 +1808,25 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L74`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L74) (`renders GeneralTab with tool search limit and threshold inputs and triggers save`)
+  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L124`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L124) (`renders GeneralTab with tool search limit and threshold inputs and triggers save`)
 
 ### `[MCP-SESSION-BUILTIN-PROMPTS]` ClientSession lists built-in diagnostic and routing prompts.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L115`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L115) (`ListPromptsAsync_ReturnsBuiltinDiagnosticPrompts`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L116`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L116) (`ListPromptsAsync_ReturnsBuiltinDiagnosticPrompts`)
 
 ### `[MCP-SESSION-BUILTIN-RESOURCES]` ClientSession lists built-in resources including router://status.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L99`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L99) (`ListResourcesAsync_ReturnsBuiltinRouterStatusResource`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L100`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L100) (`ListResourcesAsync_ReturnsBuiltinRouterStatusResource`)
 
 ### `[MCP-SESSION-CALL-SEARCH-TOOLS]` ClientSession calls built-in search_tools and returns structured search results.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L132`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L132) (`CallToolAsync_SearchTools_ExecutesSuccessfullyWithStructuredContent`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L133`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L133) (`CallToolAsync_SearchTools_ExecutesSuccessfullyWithStructuredContent`)
 
 ### `[MCP-SESSION-ERROR-TRANSFORM-CANCEL-SAMPLING]` Translates backend error codes, handles cancellation tokens, and executes sampling requests.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1748,7 +1838,7 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L176`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L176) (`GetPromptAsync_DiagnoseFailure_ReturnsDiagnosticInstructions`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L177`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L177) (`GetPromptAsync_DiagnoseFailure_ReturnsDiagnosticInstructions`)
 
 ### `[MCP-SESSION-MANAGER-PER-SERVER-CACHE]` SessionManager caches and isolates connections per downstream backend server.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1766,19 +1856,37 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L153`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L153) (`ReadResourceAsync_RouterStatus_ReturnsOnlineStatusPayload`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L154`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L154) (`ReadResourceAsync_RouterStatus_ReturnsOnlineStatusPayload`)
 
 ### `[MCP-SESSION-REQUEST-CANCELLATION]` ClientSession registers and triggers request cancellation for active cancellation tokens.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L198`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L198) (`RegisterRequestCancellation_And_CancelRequest_CancelsActiveToken`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L199`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L199) (`RegisterRequestCancellation_And_CancelRequest_CancelsActiveToken`)
 
 ### `[MCP-SESSION-UNREGISTERED-RESPONSE]` ClientSession returns false when handling client response for unregistered request ID.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L214`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L214) (`TryHandleClientResponse_ReturnsFalse_WhenNoPendingRequest`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L215`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L215) (`TryHandleClientResponse_ReturnsFalse_WhenNoPendingRequest`)
+
+### `[MCP-TIMEOUT-CONCURRENCY-UI]` submits per-server timeout and concurrency slot settings when configured and sends null when cleared on edit
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/ServerModal.test.tsx#L302`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L302) (`submits and clears per-server timeout and concurrency slot settings`)
+
+### `[MCP-TIMEOUT-HIERARCHY]` Timeout resolution honors per-call > HTTP header/query > server > global > 120s and strips MCG meta-parameters before forwarding.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L86`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L86) (`ExecuteTool_TimeoutHierarchy_AndMetaParamStripping_WorksEndToEnd`)
+
+### `[MCP-TIMEOUT-INFINITE-HTTPCLIENT]` Named McpClient HttpClient uses Timeout.InfiniteTimeSpan so per-request CancellationToken governs tool timeouts.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L65`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L65) (`AddModelContextGatewayServices_ConfiguresMcpClientWithInfiniteTimeout`)
 
 ### `[MCP-WIRE-JSONRPC-SPEC]` MockDownstreamMcpServer treats messages with omitted id as notifications returning 202 Accepted with empty body.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -2119,7 +2227,7 @@
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L250`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L250) (`renders configured badge and rotate key button when master key is Configured`)
+  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L300`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L300) (`renders configured badge and rotate key button when master key is Configured`)
 
 ### `[SEC-MASTERKEY-CUSTOM-MODAL-REENCRYPTION]` Validates master key inputs (length, match) and triggers atomic re-encryption.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -2133,13 +2241,13 @@
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L207`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L207) (`renders locked badge when master key is managed externally`)
+  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L257`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L257) (`renders locked badge when master key is managed externally`)
 
 ### `[SEC-MASTERKEY-UI-STATUS-BANNER]` Displays warning banner when keySource is AutoGenerated and opens custom master key modal.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L173`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L173) (`renders AutoGenerated warning banner and opens MasterKeyModal`)
+  - [Frontend Vitest] [`frontend/src/test/components/GeneralTab.test.tsx#L223`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L223) (`renders AutoGenerated warning banner and opens MasterKeyModal`)
 
 ### `[SEC-PII-BASIC-COOKIE-QUERY-USERINFO]` PiiSanitizer redacts Basic auth credentials, session cookies, query access tokens, and URL userinfo credentials.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -2366,6 +2474,12 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L482`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L482) (`ClientSession_ConcurrentStatelessRequestIsolateCancellation`)
+
+### `[TRANS-STDIO-CONCURRENT-SAME-ID]` StdioTransport isolates concurrent requests sharing identical JSON-RPC IDs and completes all callers accurately.
+* **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L512`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L512) (`StdioTransport_ConcurrentCallsWithIdenticalJsonRpcIds_CompleteAccurately`)
 
 ### `[TRANS-STDIO-DRAIN-BUFFER-EOF]` STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
@@ -2753,6 +2867,12 @@
 * **Verification Proofs (1):**
   - [Frontend Vitest] [`frontend/src/test/components/CodeModeTab.test.tsx#L45`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CodeModeTab.test.tsx#L45) (`allows adding and removing allowed groups and triggers onSave`)
 
+### `[UI-CODE-03]` CodeModeTab defaults execution timeout to 120s when omitted and supports slider values up to 600s.
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Frontend Vitest] [`frontend/src/test/components/CodeModeTab.test.tsx#L108`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CodeModeTab.test.tsx#L108) (`defaults execution timeout to 120s and allows saving up to 600s`)
+
 ---
 
 ## 3. Boundary & Guardrail Invariants ("What the Application DOES NOT DO")
@@ -3080,20 +3200,20 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L10`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L10) (`ExecuteAsync_InfiniteLoop_TerminatesOnStatementLimit`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L49`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L49) (`ExecuteAsync_MemoryLimit_TerminatesOnMemoryExceeded`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L63`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L63) (`ExecuteAsync_ConsoleLogging_CapturesLogs`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L69`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L69) (`ExecuteScript_DisabledCodeMode_ReturnsError`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L70`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L70) (`ExecuteScript_DisabledCodeMode_ReturnsError`)
 
 ### `[GUARD-CODE-02]` Execution timeout terminates long-running script.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (2):**
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L23`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L23) (`ExecuteAsync_Timeout_TerminatesExecution`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L117`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L117) (`ExecuteScript_MissingScript_ReturnsError`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L118`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L118) (`ExecuteScript_MissingScript_ReturnsError`)
 
 ### `[GUARD-CODE-03]` ExecuteScript returns structured envelope with isError on script runtime exception.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L372`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L372) (`ExecuteScript_RuntimeError_ReturnsStructuredErrorEnvelope`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L373`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L373) (`ExecuteScript_RuntimeError_ReturnsStructuredErrorEnvelope`)
 
 ### `[GUARD-CODE-04]` Exceeding MaxToolCalls aborts execution.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
@@ -3470,16 +3590,22 @@
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (4):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L37`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L37) (`ExecuteScript_UnauthorizedGroup_ReturnsSecurityError`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L48`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L48) (`IsCodeModeAuthorized_PermitsAdminWildcardAndMatchingGroups`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L265`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L265) (`ExecuteScript_UnauthorizedCallerGroup_ReturnsSecurityErrorEnvelope`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L318`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L318) (`ExecuteScript_AdminBypass_ExecutesSuccessfully`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L38`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L38) (`ExecuteScript_UnauthorizedGroup_ReturnsSecurityError`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L49`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L49) (`IsCodeModeAuthorized_PermitsAdminWildcardAndMatchingGroups`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L266`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L266) (`ExecuteScript_UnauthorizedCallerGroup_ReturnsSecurityErrorEnvelope`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L319`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L319) (`ExecuteScript_AdminBypass_ExecutesSuccessfully`)
 
 ### `[SEC-CODE-02]` Sandbox prevents CLR reflection and process spawning.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L36`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L36) (`ExecuteAsync_ReflectionAttempt_IsBlocked`)
+
+### `[SEC-OUTPUT-ISOLATION]` ToolOutputBuffer isolates buffered outputs strictly per ownerKey.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolOutputBufferTests.cs#L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolOutputBufferTests.cs#L8) (`TryReadChunk_EnforcesStrictOwnerIsolation`)
 
 ### `[SEC-PROVIDER-GUARD-CORRUPT-ENCRYPTED-FIELD]` Router must not overwrite corrupt encrypted database fields if an update occurs without user reset.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -3789,7 +3915,7 @@
 | `GUARD-CLIENT-MISSING-NAME` | **Guardrail** | `GUARD` | CreateClient fails closed when DisplayName is missing | [`ClientsControllerTests.cs:L270`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L270) | Backend xUnit |
 | `GUARD-CODE-01` | **Guardrail** | `GUARD` | Statement cap terminates infinite loops within allotted execution budget. | [`CodeModeEngineSandboxTests.cs:L10`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L10) | Backend xUnit |
 | `GUARD-CODE-02` | **Guardrail** | `GUARD` | Execution timeout terminates long-running script. | [`CodeModeEngineSandboxTests.cs:L23`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L23) | Backend xUnit |
-| `GUARD-CODE-03` | **Guardrail** | `GUARD` | ExecuteScript returns structured envelope with isError on script runtime exception. | [`CodeModeRoutingIntegrationTests.cs:L372`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L372) | Backend xUnit |
+| `GUARD-CODE-03` | **Guardrail** | `GUARD` | ExecuteScript returns structured envelope with isError on script runtime exception. | [`CodeModeRoutingIntegrationTests.cs:L373`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L373) | Backend xUnit |
 | `GUARD-CODE-04` | **Guardrail** | `GUARD` | Exceeding MaxToolCalls aborts execution. | [`CodeModeRuntimeInteropTests.cs:L46`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L46) | Backend xUnit |
 | `GUARD-DISPOSED-01` | Positive | `GUARD` | Stateless HTTP POST lifecycle: HTTP response completes, HttpContext is marked disposed, background backend initialization completes successfully without ObjectDisposedException. | [`DownstreamSessionIntegrationTests.cs:L225`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L225) | Backend xUnit |
 | `GUARD-HTTP-NO-SECRET-RETRIEVER` | **Guardrail** | `GUARD` | HTTP stateless transport fails closed with InvalidOperationException when no secret retriever is configured | [`HttpTransportTests.cs:L54`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/HttpTransportTests.cs#L54) | Backend xUnit |
@@ -3919,12 +4045,20 @@
 | `MCP-ADMIN-TOOLS-LIST-COUNT` | Positive | `MCP` | AdminMcpServer tools/list returns all 10 consolidated tools with complete JSON schemas. | [`AdminMcpServerTests.cs:L152`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L152) | Backend xUnit |
 | `MCP-ADMIN-ZOD-STRICT-RESPONSE` | Positive | `MCP` | JsonRpcResponse serialization omits null result, error, and _meta fields completely to satisfy Zod strict validation. | [`AdminEndpointsTests.cs:L452`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L452) | Backend xUnit |
 | `MCP-CODE-01` | Positive | `MCP` | RouterSettings provides default Code Mode configuration values. | [`CodeModeSettingsTests.cs:L7`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeSettingsTests.cs#L7) | Backend xUnit |
-| `MCP-CODE-02` | Positive | `MCP` | ExecuteScript returns structured execution envelope with result and telemetry. | [`CodeModeRoutingIntegrationTests.cs:L162`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L162) | Backend xUnit |
+| `MCP-CODE-02` | Positive | `MCP` | ExecuteScript returns structured execution envelope with result and telemetry. | [`CodeModeRoutingIntegrationTests.cs:L163`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L163) | Backend xUnit |
+| `MCP-CODE-CONCURRENT-OPTIONS-READOUTPUT` | Positive | `MCP` | CodeModeExecutionEngine supports Promise.all concurrent tool calls with McgCallOptions and mcg.readOutput. | [`ToolTimeoutOutputAndConcurrencyRoutingTests.cs:L564`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L564) | Backend xUnit |
 | `MCP-COLDSTART-01` | Positive | `MCP` | Full cold-start cycle: SessionManager cache seeded -> search_tools -> execute_tool dispatches to downstream mock server and returns output. | [`DownstreamSessionIntegrationTests.cs:L130`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L130) | Backend xUnit |
+| `MCP-CONCURRENCY-CANCEL-SAFETY` | Positive | `MCP` | Cancelling a queued waiter never leaks permits or blocks subsequent FIFO waiters. | [`BackendConcurrencyGateTests.cs:L113`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendConcurrencyGateTests.cs#L113) | Backend xUnit |
+| `MCP-CONCURRENCY-FIFO` | Positive | `MCP` | BackendConcurrencyGate serializes requests in strict FIFO arrival order when limit is 1. | [`BackendConcurrencyGateTests.cs:L9`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendConcurrencyGateTests.cs#L9) | Backend xUnit |
+| `MCP-CONCURRENCY-KEY-OVERRIDE` | Positive | `MCP` | ResolveSlotKey prioritizes explicit concurrency_key over server ConcurrencyKeyField. | [`BackendConcurrencyGateTests.cs:L101`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendConcurrencyGateTests.cs#L101) | Backend xUnit |
+| `MCP-CONCURRENCY-ROUTING-E2E` | Positive | `MCP` | execute_tool enforces per-slot FIFO serialization on 'main' while allowing 'support' slot to execute concurrently. | [`ToolTimeoutOutputAndConcurrencyRoutingTests.cs:L656`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L656) | Backend xUnit |
+| `MCP-CONCURRENCY-SLOTS` | Positive | `MCP` | BackendConcurrencyGate isolates distinct slot keys such as 'main' and 'support' for concurrent execution. | [`BackendConcurrencyGateTests.cs:L61`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendConcurrencyGateTests.cs#L61) | Backend xUnit |
+| `MCP-DISCOVERY-LEAN-FORMATS` | Positive | `MCP` | search_tools supports format='typescript'|'compact'|'names' without bloated inputSchema blobs, server filtering, and output paging. | [`ToolTimeoutOutputAndConcurrencyRoutingTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L294) | Backend xUnit |
 | `MCP-DOWNSTREAM-INIT-DIAGNOSTICS` | Positive | `MCP` | Initializes downstream MCP backends with detailed diagnostic logging. | [`McpIntegrationTests.cs:L317`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L317) | Backend xUnit |
 | `MCP-ERROR-ACTIONABLE-SUGGESTION-CATEGORIES` | Positive | `MCP` | ToolErrorFormatter categorizes error messages and produces domain-specific remediation guidance. | [`ToolErrorFormatterTests.cs:L42`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolErrorFormatterTests.cs#L42) | Backend xUnit |
 | `MCP-ERROR-FORMAT-JSONRPC-REMEDIATION` | Positive | `MCP` | ToolErrorFormatter attaches actionable suggestions and remediation resource URIs to JSON-RPC error payloads. | [`ToolErrorFormatterTests.cs:L7`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolErrorFormatterTests.cs#L7) | Backend xUnit |
 | `MCP-ERROR-FORMAT-UNHANDLED-EXCEPTION` | Positive | `MCP` | ToolErrorFormatter converts unhandled exceptions to standardized JSON-RPC error format with suggestions. | [`ToolErrorFormatterTests.cs:L27`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolErrorFormatterTests.cs#L27) | Backend xUnit |
+| `MCP-EXEC-TIMEOUT-AND-OUTPUT-LIMITS` | Positive | `MCP` | Renders GeneralTab with configurable tool execution timeout and max tool output chars and triggers save. | [`GeneralTab.test.tsx:L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L76) | Frontend Vitest |
 | `MCP-EXEC-TOOL-ENFORCE-AUTH-POLICIES` | Positive | `MCP` | Meta-mode execute_tool strictly enforces target tool authorization policies | [`PairwiseIntegrationMatrixTests.cs:L567`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L567) | Backend xUnit |
 | `MCP-EXEC-TOOL-ENFORCE-CATEGORY-SCOPES` | Positive | `MCP` | Router meta-mode execute_tool validates and enforces category scopes on target tool calls | [`CategoryScopedAppKeysTests.cs:L428`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L428) | Backend xUnit |
 | `MCP-FILES-DIR-HELPER-INIT` | Positive | `MCP` | CustomFilesDirectoryHelper initializes and creates required directories on startup. | [`McpIntegrationTests.cs:L1069`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L1069) | Backend xUnit |
@@ -3938,18 +4072,28 @@
 | `MCP-JSONRPC-SERIALIZE-PLAIN-NO-OVERFLOW` | Positive | `MCP` | Serializing plain JsonRpcMessage does not cause recursive converter invocation or stack overflow. | [`McpIntegrationTests.cs:L303`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L303) | Backend xUnit |
 | `MCP-MOCK-JSONRPC-FLOW` | Positive | `MCP` | MockDownstreamMcpServer handles initialize, initialized, tools/list, and tools/call JSON-RPC 2.0 protocol cycles. | [`MockDownstreamMcpServerTests.cs:L11`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L11) | Backend xUnit |
 | `MCP-MOCK-RESOURCES-PROMPTS-SUPPORT` | Positive | `MCP` | MockDownstreamMcpServer handles resources/list and prompts/list MCP protocol methods. | [`TransportResilienceTests.cs:L123`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportResilienceTests.cs#L123) | Backend xUnit |
+| `MCP-OUTPUT-BUFFER-LRU` | Positive | `MCP` | ToolOutputBuffer evicts least-recently-used entries when entry count or char budget is exceeded. | [`ToolOutputBufferTests.cs:L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolOutputBufferTests.cs#L26) | Backend xUnit |
+| `MCP-OUTPUT-BUFFER-TTL` | Positive | `MCP` | ToolOutputBuffer expires entries after sliding TTL elapses. | [`ToolOutputBufferTests.cs:L48`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolOutputBufferTests.cs#L48) | Backend xUnit |
+| `MCP-OUTPUT-FILTER` | Positive | `MCP` | ShapeText supports line-level regex filtering and safe substring fallback on invalid regex. | [`ToolOutputBufferTests.cs:L108`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolOutputBufferTests.cs#L108) | Backend xUnit |
+| `MCP-OUTPUT-PAGING` | Positive | `MCP` | ShapeText truncates oversized payloads within max_chars budget and allows full reconstruction via TryReadChunk. | [`ToolOutputBufferTests.cs:L74`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolOutputBufferTests.cs#L74) | Backend xUnit |
+| `MCP-OUTPUT-READ-TOOL-ISOLATION` | Positive | `MCP` | execute_tool buffers large output into read_output and isolates buffered reads per session/owner. | [`ToolTimeoutOutputAndConcurrencyRoutingTests.cs:L439`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L439) | Backend xUnit |
+| `MCP-OUTPUT-STRUCTURED-CAP` | Positive | `MCP` | ShapeToolResult replaces oversized structuredContent with compact paging metadata. | [`ToolOutputBufferTests.cs:L125`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolOutputBufferTests.cs#L125) | Backend xUnit |
+| `MCP-PERSISTENCE-TIMEOUT-OUTPUT-CONCURRENCY` | Positive | `MCP` | DatabaseRepository persists and retrieves server timeout/concurrency fields and global tool timeout/output settings. | [`ToolTimeoutOutputAndConcurrencyRoutingTests.cs:L764`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L764) | Backend xUnit |
 | `MCP-RESILIENT-01` | Positive | `MCP` | Prefix-based resilient routing: execute_tool called with unregistered but prefixed tool name dynamically resolves server and executes. | [`DownstreamSessionIntegrationTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L294) | Backend xUnit |
-| `MCP-SEARCH-TOOL-LIMITS-AND-THRESHOLDS` | Positive | `MCP` | Renders GeneralTab with configurable tool search limits and thresholds and triggers save. | [`GeneralTab.test.tsx:L74`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L74) | Frontend Vitest |
-| `MCP-SESSION-BUILTIN-PROMPTS` | Positive | `MCP` | ClientSession lists built-in diagnostic and routing prompts. | [`ClientSessionTests.cs:L115`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L115) | Backend xUnit |
-| `MCP-SESSION-BUILTIN-RESOURCES` | Positive | `MCP` | ClientSession lists built-in resources including router://status. | [`ClientSessionTests.cs:L99`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L99) | Backend xUnit |
-| `MCP-SESSION-CALL-SEARCH-TOOLS` | Positive | `MCP` | ClientSession calls built-in search_tools and returns structured search results. | [`ClientSessionTests.cs:L132`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L132) | Backend xUnit |
+| `MCP-SEARCH-TOOL-LIMITS-AND-THRESHOLDS` | Positive | `MCP` | Renders GeneralTab with configurable tool search limits and thresholds and triggers save. | [`GeneralTab.test.tsx:L124`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L124) | Frontend Vitest |
+| `MCP-SESSION-BUILTIN-PROMPTS` | Positive | `MCP` | ClientSession lists built-in diagnostic and routing prompts. | [`ClientSessionTests.cs:L116`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L116) | Backend xUnit |
+| `MCP-SESSION-BUILTIN-RESOURCES` | Positive | `MCP` | ClientSession lists built-in resources including router://status. | [`ClientSessionTests.cs:L100`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L100) | Backend xUnit |
+| `MCP-SESSION-CALL-SEARCH-TOOLS` | Positive | `MCP` | ClientSession calls built-in search_tools and returns structured search results. | [`ClientSessionTests.cs:L133`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L133) | Backend xUnit |
 | `MCP-SESSION-ERROR-TRANSFORM-CANCEL-SAMPLING` | Positive | `MCP` | Translates backend error codes, handles cancellation tokens, and executes sampling requests. | [`McpIntegrationTests.cs:L880`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L880) | Backend xUnit |
-| `MCP-SESSION-GET-PROMPT-DIAGNOSE` | Positive | `MCP` | ClientSession gets router__diagnose_failure prompt and returns diagnostic prompt instructions. | [`ClientSessionTests.cs:L176`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L176) | Backend xUnit |
+| `MCP-SESSION-GET-PROMPT-DIAGNOSE` | Positive | `MCP` | ClientSession gets router__diagnose_failure prompt and returns diagnostic prompt instructions. | [`ClientSessionTests.cs:L177`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L177) | Backend xUnit |
 | `MCP-SESSION-MANAGER-PER-SERVER-CACHE` | Positive | `MCP` | SessionManager caches and isolates connections per downstream backend server. | [`McpIntegrationTests.cs:L1084`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L1084) | Backend xUnit |
 | `MCP-SESSION-METAMODE-TOOLS` | Positive | `MCP` | ClientSession exposes meta-mode tools search_tools and execute_tool in meta mode. | [`ClientSessionTests.cs:L80`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L80) | Backend xUnit |
-| `MCP-SESSION-READ-ROUTER-STATUS` | Positive | `MCP` | ClientSession reads router://status resource and returns online gateway metadata. | [`ClientSessionTests.cs:L153`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L153) | Backend xUnit |
-| `MCP-SESSION-REQUEST-CANCELLATION` | Positive | `MCP` | ClientSession registers and triggers request cancellation for active cancellation tokens. | [`ClientSessionTests.cs:L198`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L198) | Backend xUnit |
-| `MCP-SESSION-UNREGISTERED-RESPONSE` | Positive | `MCP` | ClientSession returns false when handling client response for unregistered request ID. | [`ClientSessionTests.cs:L214`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L214) | Backend xUnit |
+| `MCP-SESSION-READ-ROUTER-STATUS` | Positive | `MCP` | ClientSession reads router://status resource and returns online gateway metadata. | [`ClientSessionTests.cs:L154`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L154) | Backend xUnit |
+| `MCP-SESSION-REQUEST-CANCELLATION` | Positive | `MCP` | ClientSession registers and triggers request cancellation for active cancellation tokens. | [`ClientSessionTests.cs:L199`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L199) | Backend xUnit |
+| `MCP-SESSION-UNREGISTERED-RESPONSE` | Positive | `MCP` | ClientSession returns false when handling client response for unregistered request ID. | [`ClientSessionTests.cs:L215`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L215) | Backend xUnit |
+| `MCP-TIMEOUT-CONCURRENCY-UI` | Positive | `MCP` | submits per-server timeout and concurrency slot settings when configured and sends null when cleared on edit | [`ServerModal.test.tsx:L302`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L302) | Frontend Vitest |
+| `MCP-TIMEOUT-HIERARCHY` | Positive | `MCP` | Timeout resolution honors per-call > HTTP header/query > server > global > 120s and strips MCG meta-parameters before forwarding. | [`ToolTimeoutOutputAndConcurrencyRoutingTests.cs:L86`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L86) | Backend xUnit |
+| `MCP-TIMEOUT-INFINITE-HTTPCLIENT` | Positive | `MCP` | Named McpClient HttpClient uses Timeout.InfiniteTimeSpan so per-request CancellationToken governs tool timeouts. | [`ToolTimeoutOutputAndConcurrencyRoutingTests.cs:L65`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L65) | Backend xUnit |
 | `MCP-WIRE-JSONRPC-SPEC` | Positive | `MCP` | MockDownstreamMcpServer treats messages with omitted id as notifications returning 202 Accepted with empty body. | [`MockDownstreamMcpServerTests.cs:L98`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L98) | Backend xUnit |
 | `MCP-WIRE-PROTOCOL-MATRIX` | Positive | `MCP` | MockDownstreamMcpServer dynamically negotiates requested protocol version. | [`MockDownstreamMcpServerTests.cs:L80`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MockDownstreamMcpServerTests.cs#L80) | Backend xUnit |
 | `UI-104` | Positive | `MCP` | renders resource tester with servers and resources | [`ResourceTesterCard.test.tsx:L1`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ResourceTesterCard.test.tsx#L1) | Frontend Vitest |
@@ -3988,7 +4132,7 @@
 | `SEC-AUDIT-PER-REQUEST-ACTOR-ATTRIBUTION` | Positive | `SEC` | Audit logger attributes per-request actor credentials accurately across stateless calls. | [`McpIntegrationTests.cs:L128`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L128) | Backend xUnit |
 | `SEC-AUDIT-POLICY-SAVE-ACTION` | Positive | `SEC` | PermissionsController records audit action when access policy is saved. | [`AuditQueryApiTests.cs:L83`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditQueryApiTests.cs#L83) | Backend xUnit |
 | `SEC-AUDIT-QUERY-FILTERED-ROWS` | Positive | `SEC` | Audit queries support filtering by user, server, and pagination while recording query access in audit log. | [`AuditQueryApiTests.cs:L60`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditQueryApiTests.cs#L60) | Backend xUnit |
-| `SEC-CODE-01` | **Guardrail** | `SEC` | ExecuteScript rejects unauthorized SSO groups. | [`CodeModeRoutingIntegrationTests.cs:L37`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L37) | Backend xUnit |
+| `SEC-CODE-01` | **Guardrail** | `SEC` | ExecuteScript rejects unauthorized SSO groups. | [`CodeModeRoutingIntegrationTests.cs:L38`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L38) | Backend xUnit |
 | `SEC-CODE-02` | **Guardrail** | `SEC` | Sandbox prevents CLR reflection and process spawning. | [`CodeModeEngineSandboxTests.cs:L36`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L36) | Backend xUnit |
 | `SEC-GATEWAY-ZERO-CONFIG-BOOT` | Positive | `SEC` | Gateway boots from a blank slate with zero master key environment variables, auto-generates .master.key, and serves health and admin endpoints. | [`AdminAutomationSkillTests.cs:L352`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminAutomationSkillTests.cs#L352) | Backend xUnit |
 | `SEC-HTTP-SECRET-URL-FALLBACK` | Positive | `SEC` | HttpTransport falls back to URL and SecretItemKey when specific secret paths are unconfigured. | [`TransportsAuthShapeTests.cs:L160`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L160) | Backend xUnit |
@@ -4008,10 +4152,11 @@
 | `SEC-LOG-PROVIDER-REDACT-EXCEPTIONS` | Positive | `SEC` | SanitizingLoggerProvider sanitizes exception messages and stack traces to prevent credential leaks in error logs. | [`SanitizingLoggerProviderTests.cs:L76`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SanitizingLoggerProviderTests.cs#L76) | Backend xUnit |
 | `SEC-LOG-PROVIDER-REDACT-SECRETS` | Positive | `SEC` | SanitizingLoggerProvider automatically redacts Bearer tokens, API keys, and credentials in log message strings. | [`SanitizingLoggerProviderTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SanitizingLoggerProviderTests.cs#L8) | Backend xUnit |
 | `SEC-MASTERKEY-ATOMIC-REENCRYPTION` | Positive | `SEC` | Atomically re-encrypts database credentials when setting a custom master key. | [`MasterKeyReEncryptionTests.cs:L142`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs#L142) | Backend xUnit |
-| `SEC-MASTERKEY-CONFIGURED-STATUS-BADGE` | Positive | `SEC` | Displays configured badge and rotate button when custom master key is configured. | [`GeneralTab.test.tsx:L250`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L250) | Frontend Vitest |
+| `SEC-MASTERKEY-CONFIGURED-STATUS-BADGE` | Positive | `SEC` | Displays configured badge and rotate button when custom master key is configured. | [`GeneralTab.test.tsx:L300`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L300) | Frontend Vitest |
 | `SEC-MASTERKEY-CUSTOM-MODAL-REENCRYPTION` | Positive | `SEC` | Validates master key inputs (length, match) and triggers atomic re-encryption. | [`MasterKeyModal.test.tsx:L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/MasterKeyModal.test.tsx#L6) | Frontend Vitest |
-| `SEC-MASTERKEY-EXTERNAL-LOCKED-BADGE` | Positive | `SEC` | Displays locked badge when master key is externally managed via Vault or Environment. | [`GeneralTab.test.tsx:L207`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L207) | Frontend Vitest |
-| `SEC-MASTERKEY-UI-STATUS-BANNER` | Positive | `SEC` | Displays warning banner when keySource is AutoGenerated and opens custom master key modal. | [`GeneralTab.test.tsx:L173`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L173) | Frontend Vitest |
+| `SEC-MASTERKEY-EXTERNAL-LOCKED-BADGE` | Positive | `SEC` | Displays locked badge when master key is externally managed via Vault or Environment. | [`GeneralTab.test.tsx:L257`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L257) | Frontend Vitest |
+| `SEC-MASTERKEY-UI-STATUS-BANNER` | Positive | `SEC` | Displays warning banner when keySource is AutoGenerated and opens custom master key modal. | [`GeneralTab.test.tsx:L223`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L223) | Frontend Vitest |
+| `SEC-OUTPUT-ISOLATION` | **Guardrail** | `SEC` | ToolOutputBuffer isolates buffered outputs strictly per ownerKey. | [`ToolOutputBufferTests.cs:L8`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolOutputBufferTests.cs#L8) | Backend xUnit |
 | `SEC-PII-BASIC-COOKIE-QUERY-USERINFO` | Positive | `SEC` | PiiSanitizer redacts Basic auth credentials, session cookies, query access tokens, and URL userinfo credentials. | [`PiiSanitizerTests.cs:L53`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PiiSanitizerTests.cs#L53) | Backend xUnit |
 | `SEC-PII-BEARER-TOKEN` | Positive | `SEC` | PiiSanitizer redacts Bearer authentication tokens from payload strings. | [`PiiSanitizerTests.cs:L5`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PiiSanitizerTests.cs#L5) | Backend xUnit |
 | `SEC-PII-CONNECTION-STRING-PASSWORD` | Positive | `SEC` | PiiSanitizer redacts database connection string passwords. | [`PiiSanitizerTests.cs:L29`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/PiiSanitizerTests.cs#L29) | Backend xUnit |
@@ -4055,6 +4200,7 @@
 | `TRANS-SSE-SENDREQUEST-DISCONNECT-GUARD` | **Guardrail** | `TRANS` | SseTransport SendRequestAsync returns -32001 Not Connected when backend is disconnected. | [`TransportResilienceTests.cs:L36`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportResilienceTests.cs#L36) | Backend xUnit |
 | `TRANS-SSE-STREAM-LIFECYCLE` | Positive | `TRANS` | SSE transport correctly resolves relative endpoint URLs and ignores keep-alive SSE comments. | [`SseTransportTests.cs:L100`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/SseTransportTests.cs#L100) | Backend xUnit |
 | `TRANS-STATELESS-CANCELLATION-ISOLATION` | Positive | `TRANS` | Isolates cancellation tokens between concurrent stateless client requests. | [`ConcurrentResponseIsolationTests.cs:L482`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs#L482) | Backend xUnit |
+| `TRANS-STDIO-CONCURRENT-SAME-ID` | Positive | `TRANS` | StdioTransport isolates concurrent requests sharing identical JSON-RPC IDs and completes all callers accurately. | [`ToolTimeoutOutputAndConcurrencyRoutingTests.cs:L512`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L512) | Backend xUnit |
 | `TRANS-STDIO-DISPOSED-GUARD` | **Guardrail** | `TRANS` | StdioTransport SendRequestAsync returns -32001 Process Not Running when transport has been disposed. | [`TransportResilienceTests.cs:L101`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportResilienceTests.cs#L101) | Backend xUnit |
 | `TRANS-STDIO-DRAIN-BUFFER-EOF` | Positive | `TRANS` | STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly | [`StdioTransportTests.cs:L472`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L472) | Backend xUnit |
 | `TRANS-STDIO-SPAWN-TOOL-CALL` | Positive | `TRANS` | STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls | [`StdioTransportTests.cs:L49`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/StdioTransportTests.cs#L49) | Backend xUnit |
@@ -4104,5 +4250,6 @@
 | `UI-32` | Positive | `UI` | Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials. | [`useClientStore.test.ts:L76`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useClientStore.test.ts#L76) | Frontend Vitest |
 | `UI-CODE-01` | Positive | `UI` | CodeModeTab renders master toggle, quota sliders, and group selector. | [`CodeModeTab.test.tsx:L6`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CodeModeTab.test.tsx#L6) | Frontend Vitest |
 | `UI-CODE-02` | Positive | `UI` | CodeModeTab allows adding and removing allowed groups and saves changes. | [`CodeModeTab.test.tsx:L45`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CodeModeTab.test.tsx#L45) | Frontend Vitest |
+| `UI-CODE-03` | Positive | `UI` | CodeModeTab defaults execution timeout to 120s when omitted and supports slider values up to 600s. | [`CodeModeTab.test.tsx:L108`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/CodeModeTab.test.tsx#L108) | Frontend Vitest |
 | `UI-CONFIRM-MODAL` | **Guardrail** | `UI` | Centralized promise-based confirmation store resolves true on confirmation and false on cancellation. | [`useConfirmStore.test.ts:L4`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/stores/useConfirmStore.test.ts#L4) | Frontend Vitest |
 | `UI-TOAST-TRANSITION` | **Guardrail** | `UI` | Displays error toast notification when saving invalid JSON credentials for user-provided server. | [`MyMcpServers.test.tsx:L25`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/pages/MyMcpServers.test.tsx#L25) | Frontend Vitest |
