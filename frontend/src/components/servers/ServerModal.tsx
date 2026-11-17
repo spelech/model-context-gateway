@@ -49,6 +49,13 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
   const [oauthTokenUrl, setOauthTokenUrl] = useState(editingServer?.oauthTokenUrl || (editingServer as any)?.oAuthTokenUrl || '');
   const [oauthScopes, setOauthScopes] = useState(editingServer?.oauthScopes || (editingServer as any)?.oAuthScopes || '');
   const [oauthRedirectUri, setOauthRedirectUri] = useState(editingServer?.oauthRedirectUri || (editingServer as any)?.oAuthRedirectUri || '');
+  const [requestTimeoutSeconds, setRequestTimeoutSeconds] = useState<string>(
+    editingServer?.requestTimeoutSeconds != null ? String(editingServer.requestTimeoutSeconds) : ''
+  );
+  const [maxConcurrentRequests, setMaxConcurrentRequests] = useState<string>(
+    editingServer?.maxConcurrentRequests != null ? String(editingServer.maxConcurrentRequests) : ''
+  );
+  const [concurrencyKeyField, setConcurrencyKeyField] = useState<string>(editingServer?.concurrencyKeyField || '');
 
   const ALIAS_REGEX = /^[a-zA-Z0-9_-]*$/;
 
@@ -114,6 +121,32 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
     }
     if (oauthClientSecret) {
       serverPayload.oauthClientSecret = oauthClientSecret;
+    }
+
+    const trimmedTimeout = requestTimeoutSeconds.trim();
+    if (trimmedTimeout) {
+      const parsedTimeout = parseInt(trimmedTimeout, 10);
+      if (!isNaN(parsedTimeout) && parsedTimeout > 0) {
+        serverPayload.requestTimeoutSeconds = parsedTimeout;
+      }
+    } else if (editingServer?.requestTimeoutSeconds != null) {
+      serverPayload.requestTimeoutSeconds = null;
+    }
+
+    const trimmedConcurrency = maxConcurrentRequests.trim();
+    if (trimmedConcurrency) {
+      const parsedConcurrency = parseInt(trimmedConcurrency, 10);
+      if (!isNaN(parsedConcurrency) && parsedConcurrency > 0) {
+        serverPayload.maxConcurrentRequests = parsedConcurrency;
+      }
+    } else if (editingServer?.maxConcurrentRequests != null) {
+      serverPayload.maxConcurrentRequests = null;
+    }
+
+    if (concurrencyKeyField.trim()) {
+      serverPayload.concurrencyKeyField = concurrencyKeyField.trim();
+    } else if (editingServer?.concurrencyKeyField) {
+      serverPayload.concurrencyKeyField = null;
     }
 
     try {
@@ -487,6 +520,61 @@ const ServerModalDialog: React.FC<ServerModalDialogProps> = ({
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="form-group" style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))' }}>
+            <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '10px', color: 'var(--text-primary, #e2e8f0)' }}>
+              <i className="fa-solid fa-gauge-high" style={{ marginRight: '6px', color: 'var(--primary)' }}></i>
+              Runtime Timeouts &amp; Concurrency Serialization (Optional)
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="server-request-timeout-seconds">Request Timeout (Seconds)</label>
+                <input
+                  type="number"
+                  id="server-request-timeout-seconds"
+                  data-testid="server-request-timeout-input"
+                  min="1"
+                  max="3600"
+                  placeholder="Inherit global default (120s)"
+                  value={requestTimeoutSeconds}
+                  onChange={(e) => setRequestTimeoutSeconds(e.target.value)}
+                />
+                <small style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '4px' }}>
+                  Overrides gateway tool timeout for this backend.
+                </small>
+              </div>
+              <div className="form-group">
+                <label htmlFor="server-max-concurrent-requests">Max Concurrent Requests / Slot</label>
+                <input
+                  type="number"
+                  id="server-max-concurrent-requests"
+                  data-testid="server-max-concurrency-input"
+                  min="1"
+                  max="100"
+                  placeholder="Unlimited (blank)"
+                  value={maxConcurrentRequests}
+                  onChange={(e) => setMaxConcurrentRequests(e.target.value)}
+                />
+                <small style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '4px' }}>
+                  Use 1 to FIFO-serialize calls per slot (e.g. Playwright).
+                </small>
+              </div>
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label htmlFor="server-concurrency-key-field">Concurrency Slot Key Field(s)</label>
+              <input
+                type="text"
+                id="server-concurrency-key-field"
+                data-testid="server-concurrency-key-field-input"
+                placeholder="e.g. role,browser (comma-separated argument names)"
+                value={concurrencyKeyField}
+                onChange={(e) => setConcurrencyKeyField(e.target.value)}
+              />
+              <small style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '4px' }}>
+                Tool argument fields checked in order to partition concurrency gates (e.g. 'main' vs 'support').
+              </small>
+            </div>
           </div>
 
           <div className="modal-footer">

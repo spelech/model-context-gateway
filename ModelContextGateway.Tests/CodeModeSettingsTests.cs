@@ -11,7 +11,9 @@ namespace ModelContextGateway.Tests
             var settings = new RouterSettings();
 
             settings.EnableCodeMode.Should().BeTrue();
-            settings.CodeModeExecutionTimeoutSeconds.Should().Be(30);
+            settings.CodeModeExecutionTimeoutSeconds.Should().Be(120);
+            settings.ToolExecutionTimeoutSeconds.Should().Be(120);
+            settings.MaxToolOutputChars.Should().Be(0);
             settings.CodeModeMaxToolCalls.Should().Be(50);
             settings.CodeModeMaxMemoryMb.Should().Be(64);
             settings.CodeModeMaxStatements.Should().Be(100000);

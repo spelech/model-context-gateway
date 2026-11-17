@@ -107,18 +107,30 @@ namespace ModelContextGateway.Infrastructure.Persistence
         public async Task<RouterSettings?> GetSettingsAsync()
         {
             using var conn = _dbFactory.CreateConnection();
+            DatabaseInitializer.EnsureSettingsColumns(conn);
             return await conn.QueryFirstOrDefaultAsync<RouterSettings>("SELECT * FROM Settings WHERE Id = 'default';");
         }
 
         public async Task SaveSettingsAsync(RouterSettings settings)
         {
             using var conn = _dbFactory.CreateConnection();
+            DatabaseInitializer.EnsureSettingsColumns(conn);
             var exists = await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Settings WHERE Id = 'default';");
             if (exists == 0)
             {
                 const string insertSql = @"
-                    INSERT INTO Settings (Id, DashboardTitle, DashboardIcon, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys, ToolSearchDefaultLimit, ToolSearchMinScore, ToolSearchScoreDropoffRatio)
-                    VALUES ('default', @DashboardTitle, @DashboardIcon, @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey, @EmbeddingApiModel, @EmbeddingModelDir, @GlobalMaxKeys, @UserMaxKeys, @ToolSearchDefaultLimit, @ToolSearchMinScore, @ToolSearchScoreDropoffRatio);";
+                    INSERT INTO Settings (
+                        Id, DashboardTitle, DashboardIcon, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey,
+                        EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys, UserSecretStorage,
+                        AllowOpenClientRegistration, ToolSearchDefaultLimit, ToolSearchMinScore, ToolSearchScoreDropoffRatio,
+                        EnableCodeMode, CodeModeExecutionTimeoutSeconds, ToolExecutionTimeoutSeconds, MaxToolOutputChars,
+                        CodeModeMaxToolCalls, CodeModeMaxMemoryMb, CodeModeMaxStatements, CodeModeAllowedGroups)
+                    VALUES (
+                        'default', @DashboardTitle, @DashboardIcon, @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey,
+                        @EmbeddingApiModel, @EmbeddingModelDir, @GlobalMaxKeys, @UserMaxKeys, @UserSecretStorage,
+                        @AllowOpenClientRegistration, @ToolSearchDefaultLimit, @ToolSearchMinScore, @ToolSearchScoreDropoffRatio,
+                        @EnableCodeMode, @CodeModeExecutionTimeoutSeconds, @ToolExecutionTimeoutSeconds, @MaxToolOutputChars,
+                        @CodeModeMaxToolCalls, @CodeModeMaxMemoryMb, @CodeModeMaxStatements, @CodeModeAllowedGroups);";
                 await conn.ExecuteAsync(insertSql, settings);
             }
             else
@@ -134,9 +146,19 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         EmbeddingModelDir = @EmbeddingModelDir,
                         GlobalMaxKeys = @GlobalMaxKeys,
                         UserMaxKeys = @UserMaxKeys,
+                        UserSecretStorage = @UserSecretStorage,
+                        AllowOpenClientRegistration = @AllowOpenClientRegistration,
                         ToolSearchDefaultLimit = @ToolSearchDefaultLimit,
                         ToolSearchMinScore = @ToolSearchMinScore,
-                        ToolSearchScoreDropoffRatio = @ToolSearchScoreDropoffRatio
+                        ToolSearchScoreDropoffRatio = @ToolSearchScoreDropoffRatio,
+                        EnableCodeMode = @EnableCodeMode,
+                        CodeModeExecutionTimeoutSeconds = @CodeModeExecutionTimeoutSeconds,
+                        ToolExecutionTimeoutSeconds = @ToolExecutionTimeoutSeconds,
+                        MaxToolOutputChars = @MaxToolOutputChars,
+                        CodeModeMaxToolCalls = @CodeModeMaxToolCalls,
+                        CodeModeMaxMemoryMb = @CodeModeMaxMemoryMb,
+                        CodeModeMaxStatements = @CodeModeMaxStatements,
+                        CodeModeAllowedGroups = @CodeModeAllowedGroups
                     WHERE Id = 'default';";
                 await conn.ExecuteAsync(updateSql, settings);
             }
@@ -151,12 +173,13 @@ namespace ModelContextGateway.Infrastructure.Persistence
             DatabaseInitializer.EnsureAliasColumn(conn);
             DatabaseInitializer.EnsureOAuthColumns(conn);
             DatabaseInitializer.EnsureHealthCheckModeColumn(conn);
+            DatabaseInitializer.EnsureServerRuntimeColumns(conn);
             return await conn.QueryAsync<McpServer>(@"
                 SELECT Id, Alias, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider,
                        SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape,
                        CustomHeaderName, ApiKey, HeadersJson, AutoDiscovered,
                        EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri,
-                       HealthCheckMode
+                       HealthCheckMode, RequestTimeoutSeconds, MaxConcurrentRequests, ConcurrencyKeyField
                 FROM Servers;");
         }
 
@@ -166,6 +189,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
             DatabaseInitializer.EnsureAliasColumn(conn);
             DatabaseInitializer.EnsureOAuthColumns(conn);
             DatabaseInitializer.EnsureHealthCheckModeColumn(conn);
+            DatabaseInitializer.EnsureServerRuntimeColumns(conn);
             return await conn.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = @Enabled;", new { Enabled = 1 });
         }
 
@@ -175,6 +199,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
             DatabaseInitializer.EnsureAliasColumn(conn);
             DatabaseInitializer.EnsureOAuthColumns(conn);
             DatabaseInitializer.EnsureHealthCheckModeColumn(conn);
+            DatabaseInitializer.EnsureServerRuntimeColumns(conn);
             return await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @Id OR (Alias IS NOT NULL AND Alias = @Id) LIMIT 1;", new { Id = id });
         }
 
@@ -184,13 +209,14 @@ namespace ModelContextGateway.Infrastructure.Persistence
             DatabaseInitializer.EnsureAliasColumn(conn);
             DatabaseInitializer.EnsureOAuthColumns(conn);
             DatabaseInitializer.EnsureHealthCheckModeColumn(conn);
+            DatabaseInitializer.EnsureServerRuntimeColumns(conn);
             var provider = _dbFactory.ProviderName.ToLower();
 
             if (provider == "sqlite")
             {
                 const string sql = @"
-                    INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri, HealthCheckMode)
-                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri, @HealthCheckMode)
+                    INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri, HealthCheckMode, RequestTimeoutSeconds, MaxConcurrentRequests, ConcurrencyKeyField)
+                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri, @HealthCheckMode, @RequestTimeoutSeconds, @MaxConcurrentRequests, @ConcurrencyKeyField)
                     ON CONFLICT(Id) DO UPDATE SET
                         Alias = @Alias, DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
                         SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, SecretMount = @SecretMount,
@@ -199,7 +225,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         HeadersJson = @HeadersJson, AutoDiscovered = @AutoDiscovered,
                         EnableOAuth3Lo = @EnableOAuth3Lo, OAuthClientId = @OAuthClientId, OAuthClientSecret = @OAuthClientSecret,
                         OAuthAuthorizationUrl = @OAuthAuthorizationUrl, OAuthTokenUrl = @OAuthTokenUrl, OAuthScopes = @OAuthScopes, OAuthRedirectUri = @OAuthRedirectUri,
-                        HealthCheckMode = @HealthCheckMode;";
+                        HealthCheckMode = @HealthCheckMode, RequestTimeoutSeconds = @RequestTimeoutSeconds, MaxConcurrentRequests = @MaxConcurrentRequests, ConcurrencyKeyField = @ConcurrencyKeyField;";
                 await conn.ExecuteAsync(sql, server);
             }
             else if (provider == "mssql")
@@ -214,20 +240,20 @@ namespace ModelContextGateway.Infrastructure.Persistence
                             HeadersJson = @HeadersJson, AutoDiscovered = @AutoDiscovered,
                             EnableOAuth3Lo = @EnableOAuth3Lo, OAuthClientId = @OAuthClientId, OAuthClientSecret = @OAuthClientSecret,
                             OAuthAuthorizationUrl = @OAuthAuthorizationUrl, OAuthTokenUrl = @OAuthTokenUrl, OAuthScopes = @OAuthScopes, OAuthRedirectUri = @OAuthRedirectUri,
-                            HealthCheckMode = @HealthCheckMode WHERE Id = @Id;
+                            HealthCheckMode = @HealthCheckMode, RequestTimeoutSeconds = @RequestTimeoutSeconds, MaxConcurrentRequests = @MaxConcurrentRequests, ConcurrencyKeyField = @ConcurrencyKeyField WHERE Id = @Id;
                     END
                     ELSE
                     BEGIN
-                        INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri, HealthCheckMode)
-                        VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri, @HealthCheckMode);
+                        INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri, HealthCheckMode, RequestTimeoutSeconds, MaxConcurrentRequests, ConcurrencyKeyField)
+                        VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri, @HealthCheckMode, @RequestTimeoutSeconds, @MaxConcurrentRequests, @ConcurrencyKeyField);
                     END;";
                 await conn.ExecuteAsync(sql, server);
             }
             else if (provider == "mysql")
             {
                 const string sql = @"
-                    INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri, HealthCheckMode)
-                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri, @HealthCheckMode)
+                    INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri, HealthCheckMode, RequestTimeoutSeconds, MaxConcurrentRequests, ConcurrencyKeyField)
+                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @SecretMount, @SecretPath, @SecretField, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AutoDiscovered, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri, @HealthCheckMode, @RequestTimeoutSeconds, @MaxConcurrentRequests, @ConcurrencyKeyField)
                     ON DUPLICATE KEY UPDATE
                         Alias = @Alias, DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
                         SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, SecretMount = @SecretMount,
@@ -236,7 +262,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         HeadersJson = @HeadersJson, AutoDiscovered = @AutoDiscovered,
                         EnableOAuth3Lo = @EnableOAuth3Lo, OAuthClientId = @OAuthClientId, OAuthClientSecret = @OAuthClientSecret,
                         OAuthAuthorizationUrl = @OAuthAuthorizationUrl, OAuthTokenUrl = @OAuthTokenUrl, OAuthScopes = @OAuthScopes, OAuthRedirectUri = @OAuthRedirectUri,
-                        HealthCheckMode = @HealthCheckMode;";
+                        HealthCheckMode = @HealthCheckMode, RequestTimeoutSeconds = @RequestTimeoutSeconds, MaxConcurrentRequests = @MaxConcurrentRequests, ConcurrencyKeyField = @ConcurrencyKeyField;";
                 await conn.ExecuteAsync(sql, server);
             }
         }

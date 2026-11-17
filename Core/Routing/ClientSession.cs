@@ -71,6 +71,18 @@ namespace ModelContextGateway.Core.Routing
                 {
                     _toolRoutingManager.CodeModeEngine = codeMode;
                 }
+
+                var outputBuffer = _rootServices.GetService(typeof(ToolOutputBuffer)) as ToolOutputBuffer;
+                if (outputBuffer != null)
+                {
+                    _toolRoutingManager.OutputBuffer = outputBuffer;
+                }
+
+                var concurrencyGate = _rootServices.GetService(typeof(BackendConcurrencyGate)) as BackendConcurrencyGate;
+                if (concurrencyGate != null)
+                {
+                    _toolRoutingManager.ConcurrencyGate = concurrencyGate;
+                }
             }
         }
 
@@ -270,13 +282,24 @@ namespace ModelContextGateway.Core.Routing
                         var config = contextToUse?.RequestServices?.GetService<IConfiguration>();
                         bool isCallerAdmin = SecurityValidationHelper.IsAdmin(identity, config, contextToUse);
 
+                        int? requestTimeoutSecondsOverride = ExtractPositiveIntOverride(contextToUse, "X-MCG-Timeout-Seconds", "timeoutSeconds");
+                        int? requestMaxOutputCharsOverride = ExtractPositiveIntOverride(contextToUse, "X-MCG-Max-Output-Chars", "maxOutputChars");
+                        string ownerKey = !string.IsNullOrWhiteSpace(identity.Sid)
+                            ? $"sid:{identity.Sid}"
+                            : (!string.IsNullOrWhiteSpace(identity.Username) && !string.Equals(identity.Username, "anonymous", StringComparison.OrdinalIgnoreCase)
+                                ? $"user:{identity.Username}"
+                                : $"session:{_sessionId}");
+
                         var sandboxCallbacks = BuildSandboxCallbacks(httpContext);
 
                         var res = await _toolRoutingManager.CallToolAsync(toolName, body, dbFactory, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson, cts.Token, _sessionManager, _sessionId,
                             filterAuthorizedToolsAsync: async (tools) => await FilterAuthorizedAsync(tools, "tools/list", "name", httpContext),
                             callerGroups: identity.GroupNames,
                             isCallerAdmin: isCallerAdmin,
-                            sandboxCallbacks: sandboxCallbacks);
+                            sandboxCallbacks: sandboxCallbacks,
+                            requestTimeoutSecondsOverride: requestTimeoutSecondsOverride,
+                            requestMaxOutputCharsOverride: requestMaxOutputCharsOverride,
+                            ownerKey: ownerKey);
                         responsePayload = res != null ? JsonSerializer.Serialize(res) : null;
                         return res;
                     }
@@ -895,5 +918,38 @@ namespace ModelContextGateway.Core.Routing
             }
         }
 
+        private static int? ExtractPositiveIntOverride(HttpContext? context, string headerName, string queryParamName)
+        {
+            if (context == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                if (context.Request.Headers.TryGetValue(headerName, out var headerValues))
+                {
+                    var raw = headerValues.FirstOrDefault();
+                    if (!string.IsNullOrWhiteSpace(raw) && int.TryParse(raw.Trim(), out var parsed) && parsed > 0)
+                    {
+                        return parsed;
+                    }
+                }
+
+                if (context.Request.Query.TryGetValue(queryParamName, out var queryValues))
+                {
+                    var raw = queryValues.FirstOrDefault();
+                    if (!string.IsNullOrWhiteSpace(raw) && int.TryParse(raw.Trim(), out var parsed) && parsed > 0)
+                    {
+                        return parsed;
+                    }
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+
+            return null;
+        }
     }
 }

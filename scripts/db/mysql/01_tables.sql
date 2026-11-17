@@ -23,7 +23,10 @@ CREATE TABLE IF NOT EXISTS `Servers` (
     `Categories`        LONGTEXT NOT NULL,
     `ApiKey`            LONGTEXT NULL,
     `HeadersJson`       LONGTEXT NULL,
-    `AutoDiscovered`    TINYINT(1) NOT NULL DEFAULT 0
+    `AutoDiscovered`    TINYINT(1) NOT NULL DEFAULT 0,
+    `RequestTimeoutSeconds` INT NULL,
+    `MaxConcurrentRequests` INT NULL,
+    `ConcurrencyKeyField` VARCHAR(100) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 2. Settings Table
@@ -36,7 +39,20 @@ CREATE TABLE IF NOT EXISTS `Settings` (
     `EmbeddingModelDir`       VARCHAR(500) NULL,
     `RequireManualApproval`   TINYINT(1) NOT NULL DEFAULT 0,
     `GlobalMaxKeys`           INT NOT NULL DEFAULT 100,
-    `UserMaxKeys`             INT NOT NULL DEFAULT 5
+    `UserMaxKeys`             INT NOT NULL DEFAULT 5,
+    `UserSecretStorage`       VARCHAR(50) NOT NULL DEFAULT 'Database',
+    `AllowOpenClientRegistration` TINYINT(1) NOT NULL DEFAULT 1,
+    `ToolSearchDefaultLimit`  INT NOT NULL DEFAULT 5,
+    `ToolSearchMinScore`      DOUBLE NOT NULL DEFAULT 0.35,
+    `ToolSearchScoreDropoffRatio` DOUBLE NOT NULL DEFAULT 0.60,
+    `EnableCodeMode`          TINYINT(1) NOT NULL DEFAULT 1,
+    `CodeModeExecutionTimeoutSeconds` INT NOT NULL DEFAULT 120,
+    `ToolExecutionTimeoutSeconds` INT NOT NULL DEFAULT 120,
+    `MaxToolOutputChars`      INT NOT NULL DEFAULT 0,
+    `CodeModeMaxToolCalls`    INT NOT NULL DEFAULT 50,
+    `CodeModeMaxMemoryMb`     INT NOT NULL DEFAULT 64,
+    `CodeModeMaxStatements`   INT NOT NULL DEFAULT 100000,
+    `CodeModeAllowedGroups`   LONGTEXT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 3. Secret Providers Configuration Table

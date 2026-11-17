@@ -11,7 +11,7 @@ namespace ModelContextGateway.Infrastructure.Transports
         private readonly System.Security.Principal.WindowsIdentity? _callerWindowsIdentity;
         private readonly string? _forwardedUser;
         private readonly IUserSecretStore? _userSecretStore;
-        public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(15);
+        public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(120);
         private readonly McpServer _server;
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
@@ -387,17 +387,19 @@ namespace ModelContextGateway.Infrastructure.Transports
             // HTTP transport has no background reader
         }
 
-        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
+        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null, CancellationToken cancellationToken = default, TimeSpan? timeoutOverride = null)
         {
-            return await SendRequestInternalAsync(method, bodyJson, targetAuthToken, isRetry: false);
+            return await SendRequestInternalAsync(method, bodyJson, targetAuthToken, isRetry: false, cancellationToken, timeoutOverride);
         }
 
-        private async Task<JsonRpcResponse> SendRequestInternalAsync(string method, string bodyJson, string? targetAuthToken, bool isRetry)
+        private async Task<JsonRpcResponse> SendRequestInternalAsync(string method, string bodyJson, string? targetAuthToken, bool isRetry, CancellationToken cancellationToken, TimeSpan? timeoutOverride)
         {
             if (_disposed)
             {
                 return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Not connected" } };
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             if (string.Equals(method, "initialize", StringComparison.OrdinalIgnoreCase))
             {
@@ -410,125 +412,136 @@ namespace ModelContextGateway.Infrastructure.Transports
             // alerts are dismissed via the Security tab.
             _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(bodyJson));
 
-            using var ctsTimeout = new CancellationTokenSource(RequestTimeout > TimeSpan.Zero ? RequestTimeout : TimeSpan.FromSeconds(15));
-            using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, ctsTimeout.Token);
+            var effectiveTimeout = timeoutOverride is { TotalMilliseconds: > 0 }
+                ? timeoutOverride.Value
+                : (RequestTimeout > TimeSpan.Zero ? RequestTimeout : TimeSpan.FromSeconds(120));
 
-            string initialSessionSnapshot = _sessionId;
-            using var req = await CreateHttpRequestMessageAsync(bodyJson, targetAuthToken, initialSessionSnapshot);
+            using var ctsTimeout = new CancellationTokenSource(effectiveTimeout);
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken, ctsTimeout.Token);
 
-            var resp = await ExecuteHttpRequestAsync(req, linked.Token);
-
-            // Handle session eviction / expiration (HTTP 404 or HTTP 400 when sent with a session id)
-            bool isSessionError = (resp.StatusCode == HttpStatusCode.NotFound || resp.StatusCode == HttpStatusCode.BadRequest);
-            bool isInitializeMethod = string.Equals(method, "initialize", StringComparison.OrdinalIgnoreCase);
-
-            if (isSessionError && !string.IsNullOrEmpty(initialSessionSnapshot) && !isRetry && !isInitializeMethod)
+            try
             {
-                _logger.LogWarning("Streamable HTTP backend '{ServerId}' rejected request '{Method}' with HTTP {StatusCode} (Session '{SessionId}' may have expired). Initiating transparent session re-initialization.",
-                    _server.Id, method, resp.StatusCode, initialSessionSnapshot);
+                string initialSessionSnapshot = _sessionId;
+                using var req = await CreateHttpRequestMessageAsync(bodyJson, targetAuthToken, initialSessionSnapshot);
 
-                resp.Dispose();
+                using var resp = await ExecuteHttpRequestAsync(req, linked.Token);
 
-                bool reinitialized = await TryRecoverSessionAsync(initialSessionSnapshot, linked.Token);
-                if (reinitialized)
+                // Handle session eviction / expiration (HTTP 404 or HTTP 400 when sent with a session id)
+                bool isSessionError = (resp.StatusCode == HttpStatusCode.NotFound || resp.StatusCode == HttpStatusCode.BadRequest);
+                bool isInitializeMethod = string.Equals(method, "initialize", StringComparison.OrdinalIgnoreCase);
+
+                if (isSessionError && !string.IsNullOrEmpty(initialSessionSnapshot) && !isRetry && !isInitializeMethod)
                 {
-                    _logger.LogInformation("Successfully recovered session for backend '{ServerId}' (New Session: '{SessionId}'). Retrying request '{Method}'.",
-                        _server.Id, _sessionId, method);
-                    return await SendRequestInternalAsync(method, bodyJson, targetAuthToken, isRetry: true);
-                }
-            }
+                    _logger.LogWarning("Streamable HTTP backend '{ServerId}' rejected request '{Method}' with HTTP {StatusCode} (Session '{SessionId}' may have expired). Initiating transparent session re-initialization.",
+                        _server.Id, method, resp.StatusCode, initialSessionSnapshot);
 
-            resp.EnsureSuccessStatusCode();
+                    resp.Dispose();
 
-            // Strictly capture Mcp-Session-Id only on successful (2xx) responses
-            if (resp.IsSuccessStatusCode)
-            {
-                if (resp.Headers.TryGetValues("Mcp-Session-Id", out var sVals))
-                {
-                    _sessionId = sVals.FirstOrDefault() ?? _sessionId;
-                }
-                else if (resp.Content.Headers.TryGetValues("Mcp-Session-Id", out var scVals))
-                {
-                    _sessionId = scVals.FirstOrDefault() ?? _sessionId;
-                }
-            }
-
-            string responseBody = string.Empty;
-            var mediaType = resp.Content.Headers.ContentType?.MediaType?.ToLowerInvariant();
-            if (mediaType == "text/event-stream")
-            {
-                using var stream = await resp.Content.ReadAsStreamAsync(linked.Token);
-                using var reader = new StreamReader(stream);
-                var currentDataLines = new List<string>();
-                string? line;
-                while ((line = await reader.ReadLineAsync(linked.Token)) != null)
-                {
-                    var trimmed = line.Trim();
-                    if (trimmed.StartsWith("data:"))
+                    bool reinitialized = await TryRecoverSessionAsync(initialSessionSnapshot, linked.Token);
+                    if (reinitialized)
                     {
-                        currentDataLines.Add(trimmed.Substring(5).Trim());
+                        _logger.LogInformation("Successfully recovered session for backend '{ServerId}' (New Session: '{SessionId}'). Retrying request '{Method}'.",
+                            _server.Id, _sessionId, method);
+                        return await SendRequestInternalAsync(method, bodyJson, targetAuthToken, isRetry: true, cancellationToken, timeoutOverride);
                     }
-                    else if (string.IsNullOrEmpty(trimmed) && currentDataLines.Count > 0)
+                }
+
+                resp.EnsureSuccessStatusCode();
+
+                // Strictly capture Mcp-Session-Id only on successful (2xx) responses
+                if (resp.IsSuccessStatusCode)
+                {
+                    if (resp.Headers.TryGetValues("Mcp-Session-Id", out var sVals))
+                    {
+                        _sessionId = sVals.FirstOrDefault() ?? _sessionId;
+                    }
+                    else if (resp.Content.Headers.TryGetValues("Mcp-Session-Id", out var scVals))
+                    {
+                        _sessionId = scVals.FirstOrDefault() ?? _sessionId;
+                    }
+                }
+
+                string responseBody = string.Empty;
+                var mediaType = resp.Content.Headers.ContentType?.MediaType?.ToLowerInvariant();
+                if (mediaType == "text/event-stream")
+                {
+                    using var stream = await resp.Content.ReadAsStreamAsync(linked.Token);
+                    using var reader = new StreamReader(stream);
+                    var currentDataLines = new List<string>();
+                    string? line;
+                    while ((line = await reader.ReadLineAsync(linked.Token)) != null)
+                    {
+                        var trimmed = line.Trim();
+                        if (trimmed.StartsWith("data:"))
+                        {
+                            currentDataLines.Add(trimmed.Substring(5).Trim());
+                        }
+                        else if (string.IsNullOrEmpty(trimmed) && currentDataLines.Count > 0)
+                        {
+                            var eventJson = string.Join("\n", currentDataLines);
+                            currentDataLines.Clear();
+
+                            try
+                            {
+                                using var doc = JsonDocument.Parse(eventJson);
+                                var root = doc.RootElement;
+                                // Check if this event is a JSON-RPC response (has "result", "error", or an "id" without a notification "method")
+                                if (root.TryGetProperty("result", out _) ||
+                                    root.TryGetProperty("error", out _) ||
+                                    (root.TryGetProperty("id", out _) && !root.TryGetProperty("method", out _)))
+                                {
+                                    responseBody = eventJson;
+                                    break;
+                                }
+                            }
+                            catch
+                            {
+                                // Incomplete or non-JSON event payload; keep reading
+                            }
+                        }
+                    }
+
+                    // If EOF reached without a trailing blank line, check buffered lines
+                    if (string.IsNullOrEmpty(responseBody) && currentDataLines.Count > 0)
                     {
                         var eventJson = string.Join("\n", currentDataLines);
-                        currentDataLines.Clear();
-
                         try
                         {
                             using var doc = JsonDocument.Parse(eventJson);
                             var root = doc.RootElement;
-                            // Check if this event is a JSON-RPC response (has "result", "error", or an "id" without a notification "method")
                             if (root.TryGetProperty("result", out _) ||
                                 root.TryGetProperty("error", out _) ||
                                 (root.TryGetProperty("id", out _) && !root.TryGetProperty("method", out _)))
                             {
                                 responseBody = eventJson;
-                                break;
                             }
                         }
                         catch
                         {
-                            // Incomplete or non-JSON event payload; keep reading
-                        }
-                    }
-                }
-
-                // If EOF reached without a trailing blank line, check buffered lines
-                if (string.IsNullOrEmpty(responseBody) && currentDataLines.Count > 0)
-                {
-                    var eventJson = string.Join("\n", currentDataLines);
-                    try
-                    {
-                        using var doc = JsonDocument.Parse(eventJson);
-                        var root = doc.RootElement;
-                        if (root.TryGetProperty("result", out _) ||
-                            root.TryGetProperty("error", out _) ||
-                            (root.TryGetProperty("id", out _) && !root.TryGetProperty("method", out _)))
-                        {
                             responseBody = eventJson;
                         }
                     }
-                    catch
-                    {
-                        responseBody = eventJson;
-                    }
                 }
+                else
+                {
+                    responseBody = await resp.Content.ReadAsStringAsync(linked.Token);
+                }
+
+                _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(responseBody));
+                _logger.LogDebug("[HttpTransport DEBUG] Server {ServerId} responded with status {StatusCode}. Body: '{Body}'", _server.Id, resp.StatusCode, PiiSanitizer.SanitizePayload(responseBody));
+
+                if (string.IsNullOrWhiteSpace(responseBody))
+                {
+                    return new JsonRpcResponse();
+                }
+
+                var responseObj = JsonSerializer.Deserialize<JsonRpcResponse>(responseBody);
+                return responseObj ?? new JsonRpcResponse { Error = new JsonRpcError { Code = -32603, Message = "Failed to deserialize POST response" } };
             }
-            else
+            catch (OperationCanceledException) when (ctsTimeout.IsCancellationRequested && !_cts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
             {
-                responseBody = await resp.Content.ReadAsStringAsync(linked.Token);
+                throw new TimeoutException($"Request '{method}' to HTTP backend '{_server.Id}' timed out after {effectiveTimeout.TotalSeconds:0.#} seconds.");
             }
-
-            _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(responseBody));
-            _logger.LogDebug("[HttpTransport DEBUG] Server {ServerId} responded with status {StatusCode}. Body: '{Body}'", _server.Id, resp.StatusCode, PiiSanitizer.SanitizePayload(responseBody));
-
-            if (string.IsNullOrWhiteSpace(responseBody))
-            {
-                return new JsonRpcResponse();
-            }
-
-            var responseObj = JsonSerializer.Deserialize<JsonRpcResponse>(responseBody);
-            return responseObj ?? new JsonRpcResponse { Error = new JsonRpcError { Code = -32603, Message = "Failed to deserialize POST response" } };
         }
 
         public async Task<JsonRpcResponse> CallMethodAsync(string method, object parameters, string? overrideId = null)

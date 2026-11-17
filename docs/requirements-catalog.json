@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-11-14T15:05:09.4634675Z",
-    "totalRequirements": 489,
-    "positiveCount": 382,
-    "guardrailCount": 107,
-    "totalProofs": 1135
+    "generatedAt": "2026-11-17T03:12:29.0769502Z",
+    "totalRequirements": 510,
+    "positiveCount": 402,
+    "guardrailCount": 108,
+    "totalProofs": 1156
   },
   "requirements": [
     {
@@ -1760,7 +1760,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/GeneralTab.test.tsx",
-          "lineNumber": 129,
+          "lineNumber": 179,
           "testName": "updates form state when settings prop changes",
           "details": null
         },
@@ -4305,7 +4305,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 69,
+          "lineNumber": 70,
           "testName": "ExecuteScript_DisabledCodeMode_ReturnsError",
           "details": null
         }
@@ -4328,7 +4328,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 117,
+          "lineNumber": 118,
           "testName": "ExecuteScript_MissingScript_ReturnsError",
           "details": null
         }
@@ -4344,7 +4344,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 372,
+          "lineNumber": 373,
           "testName": "ExecuteScript_RuntimeError_ReturnsStructuredErrorEnvelope",
           "details": null
         }
@@ -7563,7 +7563,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 420,
+          "lineNumber": 421,
           "testName": "ExecuteScript_ChainingSearchTools_ExecutesSuccessfully",
           "details": null
         }
@@ -7579,15 +7579,31 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 162,
+          "lineNumber": 163,
           "testName": "ExecuteScript_ValidExecution_ReturnsStructuredEnvelope",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 215,
+          "lineNumber": 216,
           "testName": "ExecuteScript_WithCodeParameter_ExecutesSuccessfully",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-CODE-CONCURRENT-OPTIONS-READOUTPUT",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "CodeModeExecutionEngine supports Promise.all concurrent tool calls with McgCallOptions and mcg.readOutput.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs",
+          "lineNumber": 564,
+          "testName": "CodeModeExecutionEngine_PromiseAll_AndMcgCallOptions_AndReadOutput_WorkSafely",
           "details": null
         }
       ]
@@ -7604,6 +7620,102 @@
           "filePath": "ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs",
           "lineNumber": 130,
           "testName": "ColdStartCycle_SeedsRoutingTable_AndDispatchesExecuteToolDownstream",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-CONCURRENCY-CANCEL-SAFETY",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Cancelling a queued waiter never leaks permits or blocks subsequent FIFO waiters.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendConcurrencyGateTests.cs",
+          "lineNumber": 113,
+          "testName": "AcquireAsync_CancelledWaiter_DoesNotLeakSlot",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-CONCURRENCY-FIFO",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "BackendConcurrencyGate serializes requests in strict FIFO arrival order when limit is 1.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendConcurrencyGateTests.cs",
+          "lineNumber": 9,
+          "testName": "AcquireAsync_WithLimitOne_SerializesInStrictFifoOrder",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-CONCURRENCY-KEY-OVERRIDE",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "ResolveSlotKey prioritizes explicit concurrency_key over server ConcurrencyKeyField.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendConcurrencyGateTests.cs",
+          "lineNumber": 101,
+          "testName": "ResolveSlotKey_PrioritizesExplicitKeyOverConfiguredField",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-CONCURRENCY-ROUTING-E2E",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "execute_tool enforces per-slot FIFO serialization on \u0027main\u0027 while allowing \u0027support\u0027 slot to execute concurrently.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs",
+          "lineNumber": 656,
+          "testName": "ExecuteTool_ConcurrencyGate_SerializesSameSlotAndParallelizesDistinctSlots",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-CONCURRENCY-SLOTS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "BackendConcurrencyGate isolates distinct slot keys such as \u0027main\u0027 and \u0027support\u0027 for concurrent execution.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/BackendConcurrencyGateTests.cs",
+          "lineNumber": 61,
+          "testName": "AcquireAsync_DistinctSlots_RunInParallelWhileSameSlotSerializes",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-DISCOVERY-LEAN-FORMATS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "search_tools supports format=\u0027typescript\u0027|\u0027compact\u0027|\u0027names\u0027 without bloated inputSchema blobs, server filtering, and output paging.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs",
+          "lineNumber": 294,
+          "testName": "SearchTools_LeanFormats_ServerFilter_AndPaging_WorkAsExpected",
           "details": null
         }
       ]
@@ -7668,6 +7780,22 @@
           "filePath": "ModelContextGateway.Tests/ToolErrorFormatterTests.cs",
           "lineNumber": 27,
           "testName": "TransformException_FormatsExceptionWithRemediation",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-EXEC-TIMEOUT-AND-OUTPUT-LIMITS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Renders GeneralTab with configurable tool execution timeout and max tool output chars and triggers save.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/GeneralTab.test.tsx",
+          "lineNumber": 76,
+          "testName": "renders GeneralTab with tool execution timeout and max output chars inputs and triggers save",
           "details": null
         }
       ]
@@ -7881,6 +8009,118 @@
       ]
     },
     {
+      "id": "MCP-OUTPUT-BUFFER-LRU",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "ToolOutputBuffer evicts least-recently-used entries when entry count or char budget is exceeded.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolOutputBufferTests.cs",
+          "lineNumber": 26,
+          "testName": "Store_EvictsLeastRecentlyUsedEntries_WhenLimitsExceeded",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-OUTPUT-BUFFER-TTL",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "ToolOutputBuffer expires entries after sliding TTL elapses.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolOutputBufferTests.cs",
+          "lineNumber": 48,
+          "testName": "TryReadChunk_PrunesExpiredEntries_BySlidingTtl",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-OUTPUT-FILTER",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "ShapeText supports line-level regex filtering and safe substring fallback on invalid regex.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolOutputBufferTests.cs",
+          "lineNumber": 108,
+          "testName": "ShapeText_FiltersByRegexAndFallsBackToSubstringOnInvalidPattern",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-OUTPUT-PAGING",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "ShapeText truncates oversized payloads within max_chars budget and allows full reconstruction via TryReadChunk.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolOutputBufferTests.cs",
+          "lineNumber": 74,
+          "testName": "ShapeText_TruncatesWithinLimit_AndPagesCleanlyToCompletion",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-OUTPUT-READ-TOOL-ISOLATION",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "execute_tool buffers large output into read_output and isolates buffered reads per session/owner.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs",
+          "lineNumber": 439,
+          "testName": "ExecuteTool_LargeOutput_BuffersAndEnforcesSessionIsolation",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-OUTPUT-STRUCTURED-CAP",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "ShapeToolResult replaces oversized structuredContent with compact paging metadata.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolOutputBufferTests.cs",
+          "lineNumber": 125,
+          "testName": "ShapeToolResult_ReplacesOversizedStructuredContentWithCompactMetadata",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-PERSISTENCE-TIMEOUT-OUTPUT-CONCURRENCY",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "DatabaseRepository persists and retrieves server timeout/concurrency fields and global tool timeout/output settings.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs",
+          "lineNumber": 764,
+          "testName": "DatabaseRepository_PersistsTimeoutOutputAndConcurrencySettings",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-RESILIENT-01",
       "category": "MCP",
       "type": "Positive",
@@ -7906,7 +8146,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/GeneralTab.test.tsx",
-          "lineNumber": 74,
+          "lineNumber": 124,
           "testName": "renders GeneralTab with tool search limit and threshold inputs and triggers save",
           "details": null
         }
@@ -7922,7 +8162,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
-          "lineNumber": 115,
+          "lineNumber": 116,
           "testName": "ListPromptsAsync_ReturnsBuiltinDiagnosticPrompts",
           "details": null
         }
@@ -7938,7 +8178,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
-          "lineNumber": 99,
+          "lineNumber": 100,
           "testName": "ListResourcesAsync_ReturnsBuiltinRouterStatusResource",
           "details": null
         }
@@ -7954,7 +8194,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
-          "lineNumber": 132,
+          "lineNumber": 133,
           "testName": "CallToolAsync_SearchTools_ExecutesSuccessfullyWithStructuredContent",
           "details": null
         }
@@ -7986,7 +8226,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
-          "lineNumber": 176,
+          "lineNumber": 177,
           "testName": "GetPromptAsync_DiagnoseFailure_ReturnsDiagnosticInstructions",
           "details": null
         }
@@ -8034,7 +8274,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
-          "lineNumber": 153,
+          "lineNumber": 154,
           "testName": "ReadResourceAsync_RouterStatus_ReturnsOnlineStatusPayload",
           "details": null
         }
@@ -8050,7 +8290,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
-          "lineNumber": 198,
+          "lineNumber": 199,
           "testName": "RegisterRequestCancellation_And_CancelRequest_CancelsActiveToken",
           "details": null
         }
@@ -8066,8 +8306,56 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
-          "lineNumber": 214,
+          "lineNumber": 215,
           "testName": "TryHandleClientResponse_ReturnsFalse_WhenNoPendingRequest",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-TIMEOUT-CONCURRENCY-UI",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "submits per-server timeout and concurrency slot settings when configured and sends null when cleared on edit",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/ServerModal.test.tsx",
+          "lineNumber": 302,
+          "testName": "submits and clears per-server timeout and concurrency slot settings",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-TIMEOUT-HIERARCHY",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Timeout resolution honors per-call \u003E HTTP header/query \u003E server \u003E global \u003E 120s and strips MCG meta-parameters before forwarding.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs",
+          "lineNumber": 86,
+          "testName": "ExecuteTool_TimeoutHierarchy_AndMetaParamStripping_WorksEndToEnd",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-TIMEOUT-INFINITE-HTTPCLIENT",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Named McpClient HttpClient uses Timeout.InfiniteTimeSpan so per-request CancellationToken governs tool timeouts.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs",
+          "lineNumber": 65,
+          "testName": "AddModelContextGatewayServices_ConfiguresMcpClientWithInfiniteTimeout",
           "details": null
         }
       ]
@@ -9166,28 +9454,28 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 37,
+          "lineNumber": 38,
           "testName": "ExecuteScript_UnauthorizedGroup_ReturnsSecurityError",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 48,
+          "lineNumber": 49,
           "testName": "IsCodeModeAuthorized_PermitsAdminWildcardAndMatchingGroups",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 265,
+          "lineNumber": 266,
           "testName": "ExecuteScript_UnauthorizedCallerGroup_ReturnsSecurityErrorEnvelope",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 318,
+          "lineNumber": 319,
           "testName": "ExecuteScript_AdminBypass_ExecutesSuccessfully",
           "details": null
         }
@@ -9535,7 +9823,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/GeneralTab.test.tsx",
-          "lineNumber": 250,
+          "lineNumber": 300,
           "testName": "renders configured badge and rotate key button when master key is Configured",
           "details": null
         }
@@ -9581,7 +9869,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/GeneralTab.test.tsx",
-          "lineNumber": 207,
+          "lineNumber": 257,
           "testName": "renders locked badge when master key is managed externally",
           "details": null
         }
@@ -9597,8 +9885,24 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "frontend/src/test/components/GeneralTab.test.tsx",
-          "lineNumber": 173,
+          "lineNumber": 223,
           "testName": "renders AutoGenerated warning banner and opens MasterKeyModal",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-OUTPUT-ISOLATION",
+      "category": "SEC",
+      "type": "Negative",
+      "description": "ToolOutputBuffer isolates buffered outputs strictly per ownerKey.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolOutputBufferTests.cs",
+          "lineNumber": 8,
+          "testName": "TryReadChunk_EnforcesStrictOwnerIsolation",
           "details": null
         }
       ]
@@ -10322,6 +10626,22 @@
           "filePath": "ModelContextGateway.Tests/ConcurrentResponseIsolationTests.cs",
           "lineNumber": 482,
           "testName": "ClientSession_ConcurrentStatelessRequestIsolateCancellation",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "TRANS-STDIO-CONCURRENT-SAME-ID",
+      "category": "TRANS",
+      "type": "Positive",
+      "description": "StdioTransport isolates concurrent requests sharing identical JSON-RPC IDs and completes all callers accurately.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs",
+          "lineNumber": 512,
+          "testName": "StdioTransport_ConcurrentCallsWithIdenticalJsonRpcIds_CompleteAccurately",
           "details": null
         }
       ]
@@ -12163,6 +12483,22 @@
           "filePath": "frontend/src/test/components/CodeModeTab.test.tsx",
           "lineNumber": 45,
           "testName": "allows adding and removing allowed groups and triggers onSave",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-CODE-03",
+      "category": "UI",
+      "type": "Positive",
+      "description": "CodeModeTab defaults execution timeout to 120s when omitted and supports slider values up to 600s.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "frontend/src/test/components/CodeModeTab.test.tsx",
+          "lineNumber": 108,
+          "testName": "defaults execution timeout to 120s and allows saving up to 600s",
           "details": null
         }
       ]

@@ -470,7 +470,7 @@ namespace ModelContextGateway.Core.Routing
                         {
                             return true;
                         }
-                        if (IsMetaDiscoveryTarget(targetId) && (IsMetaMode || targetId == "search_tools" || targetId == "execute_tool" || targetId == "execute_script"))
+                        if (IsMetaDiscoveryTarget(targetId) && (IsMetaMode || targetId == "search_tools" || targetId == "execute_tool" || targetId == "execute_script" || targetId == "read_output"))
                         {
                             const string anyAllowSql = "SELECT COUNT(*) FROM AccessPolicies WHERE RequiredGroup IN @GroupNames AND IsAllowed = 1;";
                             int anyAllowCount = await conn.ExecuteScalarAsync<int>(anyAllowSql, new { GroupNames = allUserGroups.ToArray() });
@@ -533,6 +533,7 @@ namespace ModelContextGateway.Core.Routing
             return targetId == "search_tools" ||
                    targetId == "execute_tool" ||
                    targetId == "execute_script" ||
+                   targetId == "read_output" ||
                    string.Equals(targetId, "router://code-mode/guide", StringComparison.OrdinalIgnoreCase) ||
                    string.Equals(targetId, "router://code-mode/sdk.d.ts", StringComparison.OrdinalIgnoreCase) ||
                    string.Equals(targetId, "router://resources/catalog", StringComparison.OrdinalIgnoreCase) ||

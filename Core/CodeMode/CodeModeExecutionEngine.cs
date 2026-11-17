@@ -18,19 +18,32 @@ namespace ModelContextGateway.Core.CodeMode
         {
             var sw = Stopwatch.StartNew();
             var logs = new List<string>();
+            var logsLock = new object();
+            var engineLock = new object();
             var result = new CodeModeExecutionResult
             {
                 Logs = logs
             };
 
+            void AddLog(string line)
+            {
+                lock (logsLock)
+                {
+                    logs.Add(line);
+                }
+            }
+
+            using var timeoutCts = new CancellationTokenSource();
+            if (settings.CodeModeExecutionTimeoutSeconds > 0)
+            {
+                timeoutCts.CancelAfter(TimeSpan.FromSeconds(settings.CodeModeExecutionTimeoutSeconds));
+            }
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+
+            int toolCallsCount = 0;
+
             try
             {
-                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                if (settings.CodeModeExecutionTimeoutSeconds > 0)
-                {
-                    cts.CancelAfter(TimeSpan.FromSeconds(settings.CodeModeExecutionTimeoutSeconds));
-                }
-
                 var engine = new Engine(options =>
                 {
                     if (settings.CodeModeMaxMemoryMb > 0)
@@ -45,35 +58,31 @@ namespace ModelContextGateway.Core.CodeMode
                     {
                         options.TimeoutInterval(TimeSpan.FromSeconds(settings.CodeModeExecutionTimeoutSeconds));
                     }
-                    options.CancellationToken(cts.Token);
+                    options.CancellationToken(linkedCts.Token);
                 });
 
-                // Inject console
+                // Inject console (synchronized for Promise.all concurrency)
                 engine.SetValue("__console_log", new Action<object[]>(arguments =>
                 {
                     var msg = string.Join(" ", arguments.Select(a => a?.ToString() ?? "null"));
-                    logs.Add($"[INFO] {msg}");
+                    AddLog($"[INFO] {msg}");
                 }));
                 engine.SetValue("__console_warn", new Action<object[]>(arguments =>
                 {
                     var msg = string.Join(" ", arguments.Select(a => a?.ToString() ?? "null"));
-                    logs.Add($"[WARN] {msg}");
+                    AddLog($"[WARN] {msg}");
                 }));
                 engine.SetValue("__console_error", new Action<object[]>(arguments =>
                 {
                     var msg = string.Join(" ", arguments.Select(a => a?.ToString() ?? "null"));
-                    logs.Add($"[ERROR] {msg}");
+                    AddLog($"[ERROR] {msg}");
                 }));
                 engine.Evaluate("const console = { log: (...args) => __console_log(args), warn: (...args) => __console_warn(args), error: (...args) => __console_error(args) };");
 
-                // Tool & sandbox operation dispatcher & quota enforcement
-                int toolCallsCount = 0;
                 void IncrementAndEnforceQuota()
                 {
-                    toolCallsCount++;
-                    result.ToolCallsCount = toolCallsCount;
-
-                    if (settings.CodeModeMaxToolCalls > 0 && toolCallsCount > settings.CodeModeMaxToolCalls)
+                    int current = Interlocked.Increment(ref toolCallsCount);
+                    if (settings.CodeModeMaxToolCalls > 0 && current > settings.CodeModeMaxToolCalls)
                     {
                         throw new InvalidOperationException($"Tool invocation quota exceeded: maximum tool invocation limit of {settings.CodeModeMaxToolCalls} calls reached.");
                     }
@@ -129,7 +138,10 @@ namespace ModelContextGateway.Core.CodeMode
                                 try
                                 {
                                     using var jsonDoc = JsonDocument.Parse(text);
-                                    return engine.Evaluate($"JSON.parse({JsonSerializer.Serialize(text)})");
+                                    lock (engineLock)
+                                    {
+                                        return engine.Evaluate($"JSON.parse({JsonSerializer.Serialize(text)})");
+                                    }
                                 }
                                 catch (JsonException)
                                 {
@@ -159,7 +171,10 @@ namespace ModelContextGateway.Core.CodeMode
                                 try
                                 {
                                     using var jsonDoc = JsonDocument.Parse(text);
-                                    return engine.Evaluate($"JSON.parse({JsonSerializer.Serialize(text)})");
+                                    lock (engineLock)
+                                    {
+                                        return engine.Evaluate($"JSON.parse({JsonSerializer.Serialize(text)})");
+                                    }
                                 }
                                 catch (JsonException)
                                 {
@@ -169,7 +184,10 @@ namespace ModelContextGateway.Core.CodeMode
                         }
                     }
 
-                    return engine.Evaluate($"JSON.parse({JsonSerializer.Serialize(responseElement.GetRawText())})");
+                    lock (engineLock)
+                    {
+                        return engine.Evaluate($"JSON.parse({JsonSerializer.Serialize(responseElement.GetRawText())})");
+                    }
                 }
 
                 engine.SetValue("__callTool", new Func<string, object?, object?, Task<object>>(async (toolName, toolArgs, options) =>
@@ -181,22 +199,7 @@ namespace ModelContextGateway.Core.CodeMode
                         throw new ArgumentException("Tool name must be specified.", nameof(toolName));
                     }
 
-                    string? authToken = null;
-                    if (options != null)
-                    {
-                        var optsElement = JsonSerializer.SerializeToElement(options);
-                        if (optsElement.ValueKind == JsonValueKind.Object)
-                        {
-                            if (optsElement.TryGetProperty("authToken", out var tokenProp) && tokenProp.ValueKind == JsonValueKind.String)
-                            {
-                                authToken = tokenProp.GetString();
-                            }
-                            else if (optsElement.TryGetProperty("auth_token", out var snakeTokenProp) && snakeTokenProp.ValueKind == JsonValueKind.String)
-                            {
-                                authToken = snakeTokenProp.GetString();
-                            }
-                        }
-                    }
+                    var callOptions = ParseCallOptions(options);
 
                     JsonElement argsElement;
                     if (toolArgs == null)
@@ -209,8 +212,59 @@ namespace ModelContextGateway.Core.CodeMode
                         argsElement = JsonSerializer.SerializeToElement(toolArgs);
                     }
 
-                    var rawResponse = await toolDispatcher(toolName, argsElement, authToken);
+                    object rawResponse;
+                    if (sandboxCallbacks?.CallToolWithOptionsAsync != null)
+                    {
+                        rawResponse = await sandboxCallbacks.CallToolWithOptionsAsync(toolName, argsElement, callOptions, linkedCts.Token);
+                    }
+                    else
+                    {
+                        rawResponse = await toolDispatcher(toolName, argsElement, callOptions?.AuthToken);
+                    }
+
                     return UnboxToJsValue(rawResponse);
+                }));
+
+                engine.SetValue("__readOutput", new Func<string, object?, Task<object>>(async (outputId, options) =>
+                {
+                    IncrementAndEnforceQuota();
+                    if (string.IsNullOrWhiteSpace(outputId))
+                    {
+                        throw new ArgumentException("outputId must be specified.", nameof(outputId));
+                    }
+
+                    int? offset = null;
+                    int? maxChars = null;
+                    if (options != null)
+                    {
+                        var optsEl = JsonSerializer.SerializeToElement(options);
+                        if (optsEl.ValueKind == JsonValueKind.Object)
+                        {
+                            if (TryGetInt(optsEl, out var offVal, "offset"))
+                            {
+                                offset = offVal;
+                            }
+                            if (TryGetInt(optsEl, out var mcVal, "maxChars", "max_chars"))
+                            {
+                                maxChars = mcVal;
+                            }
+                        }
+                    }
+
+                    if (sandboxCallbacks?.ReadOutputAsync != null)
+                    {
+                        var res = await sandboxCallbacks.ReadOutputAsync(outputId, offset, maxChars);
+                        return UnboxToJsValue(res);
+                    }
+
+                    var fallbackArgs = JsonSerializer.SerializeToElement(new
+                    {
+                        output_id = outputId,
+                        offset = offset ?? 0,
+                        max_chars = maxChars ?? 4000
+                    });
+                    var fallbackRes = await toolDispatcher("read_output", fallbackArgs, null);
+                    return UnboxToJsValue(fallbackRes);
                 }));
 
                 engine.SetValue("__listServers", new Func<Task<object>>(async () =>
@@ -288,9 +342,10 @@ namespace ModelContextGateway.Core.CodeMode
                     return UnboxToJsValue(res);
                 }));
 
-                // Setup dynamic proxy `tools`, top-level `callTool`, and `mcg`
+                // Setup dynamic proxy `tools`, top-level helpers, and `mcg`
                 engine.Evaluate(@"
                     const callTool = (toolName, toolArgs, options) => __callTool(toolName, toolArgs, options);
+                    const readOutput = (outputId, options) => __readOutput(outputId, options ?? null);
                     const listServers = () => __listServers();
                     const getServerInstructions = async (serverId) => {
                         if (!serverId) return null;
@@ -331,11 +386,11 @@ namespace ModelContextGateway.Core.CodeMode
                 {
                     var parsedArgs = engine.Evaluate($"JSON.parse({JsonSerializer.Serialize(args.Value.GetRawText())})");
                     engine.SetValue("args", parsedArgs);
-                    engine.Evaluate("const mcg = { callTool, listServers, getServerInstructions, listResources, searchResources, readResource, listPrompts, getPrompt, tools, args };");
+                    engine.Evaluate("const mcg = { callTool, readOutput, listServers, getServerInstructions, listResources, searchResources, readResource, listPrompts, getPrompt, tools, args };");
                 }
                 else
                 {
-                    engine.Evaluate("const args = undefined; const mcg = { callTool, listServers, getServerInstructions, listResources, searchResources, readResource, listPrompts, getPrompt, tools, args: undefined };");
+                    engine.Evaluate("const args = undefined; const mcg = { callTool, readOutput, listServers, getServerInstructions, listResources, searchResources, readResource, listPrompts, getPrompt, tools, args: undefined };");
                 }
 
                 // Execute script
@@ -376,44 +431,97 @@ namespace ModelContextGateway.Core.CodeMode
             catch (ExecutionCanceledException)
             {
                 result.IsError = true;
-                result.ErrorMessage = "Code mode execution was cancelled by timeout or client disconnect.";
+                result.ErrorMessage = timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested
+                    ? $"Code mode execution exceeded timeout limit ({settings.CodeModeExecutionTimeoutSeconds}s)."
+                    : "Code mode execution was cancelled by client disconnect.";
             }
             catch (OperationCanceledException)
             {
                 result.IsError = true;
-                result.ErrorMessage = "Code mode execution was cancelled by timeout or client disconnect.";
+                result.ErrorMessage = timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested
+                    ? $"Code mode execution exceeded timeout limit ({settings.CodeModeExecutionTimeoutSeconds}s)."
+                    : "Code mode execution was cancelled by client disconnect.";
             }
             catch (JavaScriptException ex)
             {
                 result.IsError = true;
                 result.ErrorMessage = $"JavaScript runtime error at line {ex.Location.Start.Line}, col {ex.Location.Start.Column}: {ex.Message}";
-                logs.Add($"[ERROR] {ex}");
+                AddLog($"[ERROR] {ex}");
             }
             catch (PromiseRejectedException ex)
             {
                 result.IsError = true;
                 result.ErrorMessage = $"JavaScript Promise rejected: {ex.Message}";
-                logs.Add($"[ERROR] {ex}");
+                AddLog($"[ERROR] {ex}");
             }
             catch (InvalidOperationException ex) when (ex.Message.Contains("maximum tool invocation limit"))
             {
                 result.IsError = true;
                 result.ErrorMessage = ex.Message;
-                logs.Add($"[ERROR] {ex.Message}");
+                AddLog($"[ERROR] {ex.Message}");
             }
             catch (Exception ex)
             {
                 result.IsError = true;
                 result.ErrorMessage = $"Script execution failed: {ex.Message}";
-                logs.Add($"[ERROR] {ex}");
+                AddLog($"[ERROR] {ex}");
             }
             finally
             {
                 sw.Stop();
                 result.ExecutionTimeMs = sw.ElapsedMilliseconds;
+                result.ToolCallsCount = Volatile.Read(ref toolCallsCount);
             }
 
             return result;
+        }
+
+        private static CodeModeCallOptions? ParseCallOptions(object? options)
+        {
+            if (options == null)
+            {
+                return null;
+            }
+
+            var optsElement = JsonSerializer.SerializeToElement(options);
+            if (optsElement.ValueKind != JsonValueKind.Object)
+            {
+                return null;
+            }
+
+            string? authToken = TryGetString(optsElement, "authToken", "auth_token");
+            int? timeoutSeconds = TryGetInt(optsElement, out var tVal, "timeoutSeconds", "timeout_seconds") ? tVal : null;
+            int? maxChars = TryGetInt(optsElement, out var mVal, "maxChars", "max_chars") ? mVal : null;
+            int? offset = TryGetInt(optsElement, out var oVal, "offset") ? oVal : null;
+            string? filter = TryGetString(optsElement, "filter");
+            string? concurrencyKey = TryGetString(optsElement, "concurrencyKey", "concurrency_key");
+
+            return new CodeModeCallOptions(authToken, timeoutSeconds, maxChars, offset, filter, concurrencyKey);
+        }
+
+        private static string? TryGetString(JsonElement obj, params string[] names)
+        {
+            foreach (var name in names)
+            {
+                if (obj.TryGetProperty(name, out var prop) && prop.ValueKind == JsonValueKind.String)
+                {
+                    return prop.GetString();
+                }
+            }
+            return null;
+        }
+
+        private static bool TryGetInt(JsonElement obj, out int value, params string[] names)
+        {
+            foreach (var name in names)
+            {
+                if (obj.TryGetProperty(name, out var prop) && prop.ValueKind == JsonValueKind.Number && prop.TryGetInt32(out value))
+                {
+                    return true;
+                }
+            }
+            value = 0;
+            return false;
         }
     }
 }

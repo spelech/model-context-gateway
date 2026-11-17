@@ -17,6 +17,8 @@ export interface EmbeddingSettings {
   toolSearchScoreDropoffRatio?: number;
   enableCodeMode?: boolean;
   codeModeExecutionTimeoutSeconds?: number;
+  toolExecutionTimeoutSeconds?: number;
+  maxToolOutputChars?: number;
   codeModeMaxToolCalls?: number;
   codeModeMaxMemoryMb?: number;
   codeModeMaxStatements?: number;

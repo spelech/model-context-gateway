@@ -16,7 +16,8 @@ namespace ModelContextGateway.Components.Servers
                 {
                     using var conn = dbFactory.CreateConnection();
                     DatabaseInitializer.EnsureOAuthColumns(conn);
-                    var rawServers = (await conn.QueryAsync(@"SELECT Id, Alias, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson, AllowPassThroughAuth, DynamicAuthPrompt, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri FROM Servers")).ToList();
+                    DatabaseInitializer.EnsureServerRuntimeColumns(conn);
+                    var rawServers = (await conn.QueryAsync(@"SELECT Id, Alias, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson, AllowPassThroughAuth, DynamicAuthPrompt, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri, RequestTimeoutSeconds, MaxConcurrentRequests, ConcurrencyKeyField FROM Servers")).ToList();
                     var statuses = sessionManager.BackendStatuses;
 
                     var sanitized = rawServers.Select(s =>
@@ -83,6 +84,9 @@ namespace ModelContextGateway.Components.Servers
                         try { categories = JsonSerializer.Deserialize<List<string>>(catStr) ?? new(); }
                         catch { categories = new(); }
 
+                        int? requestTimeoutSeconds = s.RequestTimeoutSeconds != null ? Convert.ToInt32(s.RequestTimeoutSeconds) : null;
+                        int? maxConcurrentRequests = s.MaxConcurrentRequests != null ? Convert.ToInt32(s.MaxConcurrentRequests) : null;
+
                         BackendStatus? status = null;
                         if (!string.IsNullOrEmpty(idStr))
                         {
@@ -113,6 +117,9 @@ namespace ModelContextGateway.Components.Servers
                             OAuthTokenUrl = (string?)s.OAuthTokenUrl,
                             OAuthScopes = (string?)s.OAuthScopes,
                             OAuthRedirectUri = (string?)s.OAuthRedirectUri,
+                            RequestTimeoutSeconds = requestTimeoutSeconds,
+                            MaxConcurrentRequests = maxConcurrentRequests,
+                            ConcurrencyKeyField = (string?)s.ConcurrencyKeyField,
                             ConnectionStatus = isEnabled ? (status?.Status ?? "Disconnected") : "Disabled",
                             ConnectionAttempts = status?.Attempts ?? 0,
                             ConnectionError = status?.Error ?? string.Empty
@@ -282,11 +289,20 @@ namespace ModelContextGateway.Components.Servers
                     server.OAuthRedirectUri = update.OAuthRedirectUri;
                 }
 
+                server.RequestTimeoutSeconds = update.RequestTimeoutSeconds is > 0 ? update.RequestTimeoutSeconds : null;
+                server.MaxConcurrentRequests = update.MaxConcurrentRequests is > 0 ? update.MaxConcurrentRequests : null;
+                if (update.ConcurrencyKeyField != null)
+                {
+                    server.ConcurrencyKeyField = string.IsNullOrWhiteSpace(update.ConcurrencyKeyField) ? null : update.ConcurrencyKeyField.Trim();
+                }
+
+                DatabaseInitializer.EnsureServerRuntimeColumns(conn);
                 var catJson = JsonSerializer.Serialize(server.Categories ?? new());
                 await conn.ExecuteAsync(@"UPDATE Servers SET Alias = @Alias, DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
                     SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, AuthShape = @AuthShape, CustomHeaderName = @CustomHeaderName,
                     Categories = @Categories, ApiKey = @ApiKey, HeadersJson = @HeadersJson, AllowPassThroughAuth = @AllowPassThroughAuth, DynamicAuthPrompt = @DynamicAuthPrompt,
-                    EnableOAuth3Lo = @EnableOAuth3Lo, OAuthClientId = @OAuthClientId, OAuthClientSecret = @OAuthClientSecret, OAuthAuthorizationUrl = @OAuthAuthorizationUrl, OAuthTokenUrl = @OAuthTokenUrl, OAuthScopes = @OAuthScopes, OAuthRedirectUri = @OAuthRedirectUri WHERE Id = @Id",
+                    EnableOAuth3Lo = @EnableOAuth3Lo, OAuthClientId = @OAuthClientId, OAuthClientSecret = @OAuthClientSecret, OAuthAuthorizationUrl = @OAuthAuthorizationUrl, OAuthTokenUrl = @OAuthTokenUrl, OAuthScopes = @OAuthScopes, OAuthRedirectUri = @OAuthRedirectUri,
+                    RequestTimeoutSeconds = @RequestTimeoutSeconds, MaxConcurrentRequests = @MaxConcurrentRequests, ConcurrencyKeyField = @ConcurrencyKeyField WHERE Id = @Id",
                     new
                     {
                         server.Alias,
@@ -311,6 +327,9 @@ namespace ModelContextGateway.Components.Servers
                         server.OAuthTokenUrl,
                         server.OAuthScopes,
                         server.OAuthRedirectUri,
+                        server.RequestTimeoutSeconds,
+                        server.MaxConcurrentRequests,
+                        server.ConcurrencyKeyField,
                         server.Id
                     });
 
@@ -360,6 +379,7 @@ namespace ModelContextGateway.Components.Servers
                 }
 
                 using var conn = dbFactory.CreateConnection();
+                DatabaseInitializer.EnsureServerRuntimeColumns(conn);
                 var existingServers = (await conn.QueryAsync<McpServer>("SELECT * FROM Servers")).ToList();
                 var aliasErr = ServerValidationHelper.ValidateAlias(server.Alias, server.Id, existingServers);
                 if (aliasErr != null)
@@ -377,10 +397,14 @@ namespace ModelContextGateway.Components.Servers
                     server.Alias = null;
                 }
 
+                server.RequestTimeoutSeconds = server.RequestTimeoutSeconds is > 0 ? server.RequestTimeoutSeconds : null;
+                server.MaxConcurrentRequests = server.MaxConcurrentRequests is > 0 ? server.MaxConcurrentRequests : null;
+                server.ConcurrencyKeyField = string.IsNullOrWhiteSpace(server.ConcurrencyKeyField) ? null : server.ConcurrencyKeyField.Trim();
+
                 var catJson = JsonSerializer.Serialize(server.Categories ?? new());
                 var dbStart = sw.ElapsedMilliseconds;
-                await conn.ExecuteAsync(@"INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AllowPassThroughAuth, DynamicAuthPrompt, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri)
-                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AllowPassThroughAuth, @DynamicAuthPrompt, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri)",
+                await conn.ExecuteAsync(@"INSERT INTO Servers (Id, Alias, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AllowPassThroughAuth, DynamicAuthPrompt, EnableOAuth3Lo, OAuthClientId, OAuthClientSecret, OAuthAuthorizationUrl, OAuthTokenUrl, OAuthScopes, OAuthRedirectUri, RequestTimeoutSeconds, MaxConcurrentRequests, ConcurrencyKeyField)
+                    VALUES (@Id, @Alias, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AllowPassThroughAuth, @DynamicAuthPrompt, @EnableOAuth3Lo, @OAuthClientId, @OAuthClientSecret, @OAuthAuthorizationUrl, @OAuthTokenUrl, @OAuthScopes, @OAuthRedirectUri, @RequestTimeoutSeconds, @MaxConcurrentRequests, @ConcurrencyKeyField)",
                     new
                     {
                         server.Id,
@@ -405,7 +429,10 @@ namespace ModelContextGateway.Components.Servers
                         server.OAuthAuthorizationUrl,
                         server.OAuthTokenUrl,
                         server.OAuthScopes,
-                        server.OAuthRedirectUri
+                        server.OAuthRedirectUri,
+                        server.RequestTimeoutSeconds,
+                        server.MaxConcurrentRequests,
+                        server.ConcurrencyKeyField
                     });
                 logger.LogInformation("DB Insert finished after {ms}ms", sw.ElapsedMilliseconds - dbStart);
 

@@ -35,7 +35,11 @@ namespace ModelContextGateway.Infrastructure.Persistence
                     OAuthAuthorizationUrl TEXT,
                     OAuthTokenUrl TEXT,
                     OAuthScopes TEXT,
-                    OAuthRedirectUri TEXT
+                    OAuthRedirectUri TEXT,
+                    HealthCheckMode TEXT DEFAULT 'ping',
+                    RequestTimeoutSeconds INTEGER NULL,
+                    MaxConcurrentRequests INTEGER NULL,
+                    ConcurrencyKeyField TEXT NULL
                 );
 
                 CREATE TABLE IF NOT EXISTS Settings (
@@ -49,7 +53,19 @@ namespace ModelContextGateway.Infrastructure.Persistence
                     EmbeddingModelDir TEXT,
                     GlobalMaxKeys INTEGER DEFAULT 100,
                     UserMaxKeys INTEGER DEFAULT 5,
-                    UserSecretStorage TEXT DEFAULT 'Database'
+                    UserSecretStorage TEXT DEFAULT 'Database',
+                    AllowOpenClientRegistration INTEGER DEFAULT 1,
+                    ToolSearchDefaultLimit INTEGER DEFAULT 5,
+                    ToolSearchMinScore REAL DEFAULT 0.35,
+                    ToolSearchScoreDropoffRatio REAL DEFAULT 0.60,
+                    EnableCodeMode INTEGER DEFAULT 1,
+                    CodeModeExecutionTimeoutSeconds INTEGER DEFAULT 120,
+                    ToolExecutionTimeoutSeconds INTEGER DEFAULT 120,
+                    MaxToolOutputChars INTEGER DEFAULT 0,
+                    CodeModeMaxToolCalls INTEGER DEFAULT 50,
+                    CodeModeMaxMemoryMb INTEGER DEFAULT 64,
+                    CodeModeMaxStatements INTEGER DEFAULT 100000,
+                    CodeModeAllowedGroups TEXT DEFAULT ''
                 );
 
                 CREATE TABLE IF NOT EXISTS UserServerCredentials (
@@ -152,6 +168,8 @@ namespace ModelContextGateway.Infrastructure.Persistence
             EnsureAliasColumn(conn);
             EnsureOAuthColumns(conn);
             EnsureHealthCheckModeColumn(conn);
+            EnsureServerRuntimeColumns(conn);
+            EnsureSettingsColumns(conn);
         }
 
         public static void EnsureAliasColumn(IDbConnection conn)
@@ -201,6 +219,60 @@ namespace ModelContextGateway.Infrastructure.Persistence
             catch
             {
                 // Column already exists
+            }
+        }
+
+        public static void EnsureServerRuntimeColumns(IDbConnection conn)
+        {
+            var columns = new[]
+            {
+                "ALTER TABLE Servers ADD COLUMN RequestTimeoutSeconds INTEGER NULL;",
+                "ALTER TABLE Servers ADD COLUMN MaxConcurrentRequests INTEGER NULL;",
+                "ALTER TABLE Servers ADD COLUMN ConcurrencyKeyField TEXT NULL;"
+            };
+
+            foreach (var sql in columns)
+            {
+                try
+                {
+                    conn.Execute(sql);
+                }
+                catch
+                {
+                    // Column already exists
+                }
+            }
+        }
+
+        public static void EnsureSettingsColumns(IDbConnection conn)
+        {
+            var columns = new[]
+            {
+                "ALTER TABLE Settings ADD COLUMN UserSecretStorage TEXT DEFAULT 'Database';",
+                "ALTER TABLE Settings ADD COLUMN AllowOpenClientRegistration INTEGER DEFAULT 1;",
+                "ALTER TABLE Settings ADD COLUMN ToolSearchDefaultLimit INTEGER DEFAULT 5;",
+                "ALTER TABLE Settings ADD COLUMN ToolSearchMinScore REAL DEFAULT 0.35;",
+                "ALTER TABLE Settings ADD COLUMN ToolSearchScoreDropoffRatio REAL DEFAULT 0.60;",
+                "ALTER TABLE Settings ADD COLUMN EnableCodeMode INTEGER DEFAULT 1;",
+                "ALTER TABLE Settings ADD COLUMN CodeModeExecutionTimeoutSeconds INTEGER DEFAULT 120;",
+                "ALTER TABLE Settings ADD COLUMN ToolExecutionTimeoutSeconds INTEGER DEFAULT 120;",
+                "ALTER TABLE Settings ADD COLUMN MaxToolOutputChars INTEGER DEFAULT 0;",
+                "ALTER TABLE Settings ADD COLUMN CodeModeMaxToolCalls INTEGER DEFAULT 50;",
+                "ALTER TABLE Settings ADD COLUMN CodeModeMaxMemoryMb INTEGER DEFAULT 64;",
+                "ALTER TABLE Settings ADD COLUMN CodeModeMaxStatements INTEGER DEFAULT 100000;",
+                "ALTER TABLE Settings ADD COLUMN CodeModeAllowedGroups TEXT DEFAULT '';"
+            };
+
+            foreach (var sql in columns)
+            {
+                try
+                {
+                    conn.Execute(sql);
+                }
+                catch
+                {
+                    // Column already exists
+                }
             }
         }
     }

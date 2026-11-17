@@ -24,11 +24,34 @@ namespace ModelContextGateway.Core.Routing
             Func<List<object>, Task<List<object>>>? filterAuthorizedToolsAsync = null,
             IEnumerable<string>? callerGroups = null,
             bool? isCallerAdmin = null,
-            CodeModeSandboxCallbacks? sandboxCallbacks = null)
+            CodeModeSandboxCallbacks? sandboxCallbacks = null,
+            int? requestTimeoutSecondsOverride = null,
+            int? requestMaxOutputCharsOverride = null,
+            string? ownerKey = null)
         {
             try
             {
-                var task = CallToolInternalAsync(toolName, body, dbFactory, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId, filterAuthorizedToolsAsync, callerGroups, isCallerAdmin, sandboxCallbacks);
+                var task = CallToolInternalAsync(
+                    toolName,
+                    body,
+                    dbFactory,
+                    backendConnections,
+                    servers,
+                    logger,
+                    httpClient,
+                    embeddingService,
+                    ensureBackendsInitializedAsync,
+                    rewriteRequestJson,
+                    cancellationToken,
+                    sessionManager,
+                    clientSessionId,
+                    filterAuthorizedToolsAsync,
+                    callerGroups,
+                    isCallerAdmin,
+                    sandboxCallbacks,
+                    requestTimeoutSecondsOverride,
+                    requestMaxOutputCharsOverride,
+                    ownerKey);
                 return await task.WaitAsync(cancellationToken);
             }
             catch (OperationCanceledException)
@@ -65,9 +88,16 @@ namespace ModelContextGateway.Core.Routing
             Func<List<object>, Task<List<object>>>? filterAuthorizedToolsAsync = null,
             IEnumerable<string>? callerGroups = null,
             bool? isCallerAdmin = null,
-            CodeModeSandboxCallbacks? sandboxCallbacks = null)
+            CodeModeSandboxCallbacks? sandboxCallbacks = null,
+            int? requestTimeoutSecondsOverride = null,
+            int? requestMaxOutputCharsOverride = null,
+            string? ownerKey = null)
         {
             await ensureBackendsInitializedAsync();
+
+            var resolvedOwnerKey = !string.IsNullOrWhiteSpace(ownerKey)
+                ? ownerKey!
+                : (!string.IsNullOrWhiteSpace(clientSessionId) ? $"session:{clientSessionId}" : "anonymous");
 
             if (toolName == "search_tools")
             {
@@ -75,6 +105,7 @@ namespace ModelContextGateway.Core.Routing
                 var root = doc.RootElement;
 
                 string query = "";
+                string? serverFilter = null;
                 string mode = "hybrid";
                 double denseWeight = 0.5;
                 int? callerLimit = null;
@@ -82,6 +113,8 @@ namespace ModelContextGateway.Core.Routing
                 double? callerScoreDropoffRatio = null;
                 string format = "json";
                 bool includeTypeScript = false;
+                int? callerOffset = null;
+                int? callerMaxChars = null;
 
                 if (root.TryGetProperty("params", out var paramsProp) &&
                     paramsProp.TryGetProperty("arguments", out var argsProp))
@@ -89,6 +122,10 @@ namespace ModelContextGateway.Core.Routing
                     if (argsProp.TryGetProperty("query", out var queryProp))
                     {
                         query = queryProp.GetString() ?? "";
+                    }
+                    if (argsProp.TryGetProperty("server", out var serverProp) && serverProp.ValueKind == JsonValueKind.String)
+                    {
+                        serverFilter = serverProp.GetString();
                     }
                     if (argsProp.TryGetProperty("mode", out var modeProp) && modeProp.ValueKind == JsonValueKind.String)
                     {
@@ -133,6 +170,14 @@ namespace ModelContextGateway.Core.Routing
                             includeTypeScript = incTsProp.GetBoolean();
                         }
                     }
+                    if (TryGetOptionalInt(argsProp, out var offVal, "offset"))
+                    {
+                        callerOffset = offVal;
+                    }
+                    if (TryGetOptionalInt(argsProp, out var mcVal, "max_chars", "maxChars"))
+                    {
+                        callerMaxChars = mcVal;
+                    }
                 }
 
                 var tools = new List<object>();
@@ -153,31 +198,9 @@ namespace ModelContextGateway.Core.Routing
                             _cachedTools.AddRange(globalCached);
                             _isCachePopulated = true;
 
-                            // CRITICAL FIX: Also populate the routing table from cached tool names
                             foreach (var item in globalCached)
                             {
-                                string? fullName = null;
-                                if (item is IDictionary<string, object> dict && dict.TryGetValue("name", out var nObj))
-                                {
-                                    fullName = nObj?.ToString();
-                                }
-                                else if (item is JsonElement je && je.TryGetProperty("name", out var pProp))
-                                {
-                                    fullName = pProp.GetString();
-                                }
-                                else if (item != null)
-                                {
-                                    try
-                                    {
-                                        using var itemDoc = JsonDocument.Parse(JsonSerializer.Serialize(item));
-                                        if (itemDoc.RootElement.TryGetProperty("name", out var nameEl))
-                                        {
-                                            fullName = nameEl.GetString();
-                                        }
-                                    }
-                                    catch { }
-                                }
-
+                                string? fullName = ExtractToolNameString(item);
                                 if (!string.IsNullOrEmpty(fullName))
                                 {
                                     string? srvId = null;
@@ -252,7 +275,12 @@ namespace ModelContextGateway.Core.Routing
                     tools = await filterAuthorizedToolsAsync(tools);
                 }
 
-                var routerSettings = (embeddingService as DynamicEmbeddingService)?.GetSettings();
+                if (!string.IsNullOrWhiteSpace(serverFilter))
+                {
+                    tools = FilterToolsByServer(tools, serverFilter!, servers);
+                }
+
+                var routerSettings = ResolveRouterSettings(embeddingService, dbFactory, logger);
                 int defaultLimit = routerSettings?.ToolSearchDefaultLimit ?? 5;
                 double defaultMinScore = routerSettings?.ToolSearchMinScore ?? 0.35;
                 double defaultDropoff = routerSettings?.ToolSearchScoreDropoffRatio ?? 0.60;
@@ -277,48 +305,78 @@ namespace ModelContextGateway.Core.Routing
                     cancellationToken: cancellationToken);
                 var toolSchemas = detailedResults.Select(r => r.Tool).ToList();
 
-                if (includeTypeScript)
-                {
-                    var enrichedSchemas = new List<object>(toolSchemas.Count);
-                    foreach (var toolItem in toolSchemas)
-                    {
-                        try
-                        {
-                            var elem = toolItem is JsonElement je ? je : JsonSerializer.SerializeToElement(toolItem);
-                            if (elem.ValueKind == JsonValueKind.Object)
-                            {
-                                var dict = JsonSerializer.Deserialize<Dictionary<string, object?>>(elem.GetRawText()) ?? new();
-                                dict["typescriptSignature"] = CodeModeTypeGenerator.GenerateSingleToolSignature(elem);
-                                enrichedSchemas.Add(dict);
-                            }
-                            else
-                            {
-                                enrichedSchemas.Add(toolItem);
-                            }
-                        }
-                        catch
-                        {
-                            enrichedSchemas.Add(toolItem);
-                        }
-                    }
-                    toolSchemas = enrichedSchemas;
-                }
-
                 string outputText;
                 object structuredPayload;
+
                 if (format == "typescript" || format == "ts")
                 {
+                    // Never include full inputSchema blobs inside structuredContent for lean discovery
                     outputText = CodeModeTypeGenerator.GenerateCompactToolSignatures(toolSchemas);
+                    var leanTools = detailedResults.Select(r => new
+                    {
+                        name = r.ToolName,
+                        serverId = r.ServerId,
+                        signature = CodeModeTypeGenerator.GenerateSingleToolSignature(r.Tool)
+                    }).ToList();
+
                     structuredPayload = new
                     {
-                        tools = toolSchemas,
+                        tools = leanTools,
                         format = "typescript",
-                        count = toolSchemas.Count,
-                        typescript = outputText
+                        count = leanTools.Count
+                    };
+                }
+                else if (format == "compact")
+                {
+                    var compactTools = BuildCompactSearchItems(detailedResults);
+                    outputText = JsonSerializer.Serialize(compactTools, new JsonSerializerOptions { WriteIndented = true });
+                    structuredPayload = new
+                    {
+                        tools = compactTools,
+                        format = "compact",
+                        count = compactTools.Count
+                    };
+                }
+                else if (format == "names")
+                {
+                    var names = detailedResults.Select(r => r.ToolName).ToList();
+                    outputText = string.Join("\n", names);
+                    structuredPayload = new
+                    {
+                        tools = names,
+                        format = "names",
+                        count = names.Count
                     };
                 }
                 else
                 {
+                    if (includeTypeScript)
+                    {
+                        var enrichedSchemas = new List<object>(toolSchemas.Count);
+                        foreach (var toolItem in toolSchemas)
+                        {
+                            try
+                            {
+                                var elem = toolItem is JsonElement je ? je : JsonSerializer.SerializeToElement(toolItem);
+                                if (elem.ValueKind == JsonValueKind.Object)
+                                {
+                                    var dict = JsonSerializer.Deserialize<Dictionary<string, object?>>(elem.GetRawText()) ?? new();
+                                    dict["typescriptSignature"] = CodeModeTypeGenerator.GenerateSingleToolSignature(elem);
+                                    enrichedSchemas.Add(dict);
+                                }
+                                else
+                                {
+                                    enrichedSchemas.Add(toolItem);
+                                }
+                            }
+                            catch
+                            {
+                                enrichedSchemas.Add(toolItem);
+                            }
+                        }
+                        toolSchemas = enrichedSchemas;
+                    }
+
                     outputText = JsonSerializer.Serialize(toolSchemas, new JsonSerializerOptions { WriteIndented = true });
                     structuredPayload = new
                     {
@@ -326,6 +384,32 @@ namespace ModelContextGateway.Core.Routing
                         format = "json",
                         count = toolSchemas.Count
                     };
+                }
+
+                int? effectiveMaxChars = (callerMaxChars is > 0 ? callerMaxChars : null)
+                    ?? (requestMaxOutputCharsOverride is > 0 ? requestMaxOutputCharsOverride : null)
+                    ?? (routerSettings?.MaxToolOutputChars is > 0 ? routerSettings.MaxToolOutputChars : null);
+
+                if ((effectiveMaxChars.HasValue && outputText.Length > effectiveMaxChars.Value) || (callerOffset is > 0))
+                {
+                    var shaped = OutputBuffer.ShapeText(resolvedOwnerKey, "search_tools", outputText, effectiveMaxChars, callerOffset, filter: null);
+                    outputText = shaped.Text;
+                    if (shaped.WasTruncated || (callerOffset is > 0))
+                    {
+                        structuredPayload = new
+                        {
+                            tools = Array.Empty<object>(),
+                            format = format,
+                            count = toolSchemas.Count,
+                            truncated = shaped.WasTruncated,
+                            output_id = shaped.OutputId,
+                            total_chars = shaped.TotalChars,
+                            returned_chars = shaped.ReturnedChars,
+                            offset = shaped.Offset,
+                            has_more = shaped.HasMore,
+                            next_offset = shaped.NextOffset
+                        };
+                    }
                 }
 
                 return new
@@ -340,6 +424,95 @@ namespace ModelContextGateway.Core.Routing
                     }
                 };
             }
+            else if (toolName == "read_output" || toolName == "mcg/read_output")
+            {
+                using var doc = JsonDocument.Parse(body);
+                var root = doc.RootElement;
+
+                string outputId = "";
+                int offset = 0;
+                int maxChars = 4000;
+
+                if (root.TryGetProperty("params", out var paramsProp) &&
+                    paramsProp.TryGetProperty("arguments", out var argsProp) &&
+                    argsProp.ValueKind == JsonValueKind.Object)
+                {
+                    if ((argsProp.TryGetProperty("output_id", out var oidProp) || argsProp.TryGetProperty("outputId", out oidProp)) &&
+                        oidProp.ValueKind == JsonValueKind.String)
+                    {
+                        outputId = oidProp.GetString() ?? "";
+                    }
+                    if (TryGetOptionalInt(argsProp, out var offVal, "offset") && offVal >= 0)
+                    {
+                        offset = offVal;
+                    }
+                    if (TryGetOptionalInt(argsProp, out var mcVal, "max_chars", "maxChars") && mcVal > 0)
+                    {
+                        maxChars = mcVal;
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(outputId))
+                {
+                    return new
+                    {
+                        resultType = "complete",
+                        isError = true,
+                        content = new[] {
+                            new {
+                                type = "text",
+                                text = "Error: output_id is required."
+                            }
+                        }
+                    };
+                }
+
+                if (!OutputBuffer.TryReadChunk(resolvedOwnerKey, outputId, offset, maxChars, out var chunk) || chunk == null)
+                {
+                    return new
+                    {
+                        resultType = "complete",
+                        isError = true,
+                        content = new[] {
+                            new {
+                                type = "text",
+                                text = "Error: Output buffer entry not found or expired for this session."
+                            }
+                        }
+                    };
+                }
+
+                var chunkMeta = new
+                {
+                    output_id = chunk.OutputId,
+                    tool_name = chunk.ToolName,
+                    total_chars = chunk.TotalChars,
+                    returned_chars = chunk.ReturnedChars,
+                    offset = chunk.Offset,
+                    has_more = chunk.HasMore,
+                    next_offset = chunk.NextOffset
+                };
+
+                var contentBlocks = new List<object>
+                {
+                    new { type = "text", text = chunk.Text }
+                };
+                if (chunk.HasMore)
+                {
+                    contentBlocks.Add(new
+                    {
+                        type = "text",
+                        text = JsonSerializer.Serialize(chunkMeta)
+                    });
+                }
+
+                return new
+                {
+                    resultType = "complete",
+                    structuredContent = chunkMeta,
+                    content = contentBlocks
+                };
+            }
             else if (toolName == "execute_tool")
             {
                 using var doc = JsonDocument.Parse(body);
@@ -348,6 +521,11 @@ namespace ModelContextGateway.Core.Routing
                 string targetName = "";
                 JsonElement targetArgs = default;
                 string? targetAuthToken = null;
+                int? callerTimeoutSeconds = null;
+                int? callerMaxChars = null;
+                int? callerOffset = null;
+                string? callerFilter = null;
+                string? callerConcurrencyKey = null;
 
                 if (root.TryGetProperty("params", out var paramsProp) &&
                     paramsProp.TryGetProperty("arguments", out var argsProp))
@@ -360,9 +538,33 @@ namespace ModelContextGateway.Core.Routing
                     {
                         targetArgs = targetArgsProp.Clone();
                     }
-                    if (argsProp.TryGetProperty("target_auth_token", out var targetAuthTokenProp))
+                    if ((argsProp.TryGetProperty("target_auth_token", out var targetAuthTokenProp) ||
+                         argsProp.TryGetProperty("targetAuthToken", out targetAuthTokenProp)) &&
+                        targetAuthTokenProp.ValueKind == JsonValueKind.String)
                     {
                         targetAuthToken = targetAuthTokenProp.GetString();
+                    }
+                    if (TryGetOptionalInt(argsProp, out var tsVal, "timeout_seconds", "timeoutSeconds") && tsVal > 0)
+                    {
+                        callerTimeoutSeconds = tsVal;
+                    }
+                    if (TryGetOptionalInt(argsProp, out var mcVal, "max_chars", "maxChars") && mcVal > 0)
+                    {
+                        callerMaxChars = mcVal;
+                    }
+                    if (TryGetOptionalInt(argsProp, out var offVal, "offset") && offVal >= 0)
+                    {
+                        callerOffset = offVal;
+                    }
+                    if (argsProp.TryGetProperty("filter", out var filterProp) && filterProp.ValueKind == JsonValueKind.String)
+                    {
+                        callerFilter = filterProp.GetString();
+                    }
+                    if ((argsProp.TryGetProperty("concurrency_key", out var ckProp) ||
+                         argsProp.TryGetProperty("concurrencyKey", out ckProp)) &&
+                        ckProp.ValueKind == JsonValueKind.String)
+                    {
+                        callerConcurrencyKey = ckProp.GetString();
                     }
                 }
 
@@ -417,6 +619,10 @@ namespace ModelContextGateway.Core.Routing
                     };
                 }
 
+                var effectiveTargetArgs = targetArgs.ValueKind == JsonValueKind.Undefined
+                    ? (object)new Dictionary<string, object>()
+                    : targetArgs;
+
                 var targetPayload = new
                 {
                     jsonrpc = "2.0",
@@ -425,14 +631,62 @@ namespace ModelContextGateway.Core.Routing
                     @params = new
                     {
                         name = targetName,
-                        arguments = targetArgs.ValueKind == JsonValueKind.Undefined ? (object)new Dictionary<string, object>() : targetArgs
+                        arguments = effectiveTargetArgs
                     }
                 };
                 var targetBody = JsonSerializer.Serialize(targetPayload);
 
+                if (targetName == "search_tools" || targetName == "read_output" || targetName == "mcg/read_output")
+                {
+                    return await CallToolInternalAsync(
+                        targetName,
+                        targetBody,
+                        dbFactory,
+                        backendConnections,
+                        servers,
+                        logger,
+                        httpClient,
+                        embeddingService,
+                        ensureBackendsInitializedAsync,
+                        rewriteRequestJson,
+                        cancellationToken,
+                        sessionManager,
+                        clientSessionId,
+                        filterAuthorizedToolsAsync,
+                        callerGroups,
+                        isCallerAdmin,
+                        sandboxCallbacks,
+                        requestTimeoutSecondsOverride,
+                        requestMaxOutputCharsOverride,
+                        resolvedOwnerKey);
+                }
+
+                var routerSettings = ResolveRouterSettings(embeddingService, dbFactory, logger);
+
                 try
                 {
-                    var result = await ExecuteTargetToolAsync(targetName, targetBody, targetAuthToken, dbFactory, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);
+                    var result = await ExecuteTargetToolAsync(
+                        targetName,
+                        targetBody,
+                        targetAuthToken,
+                        dbFactory,
+                        backendConnections,
+                        servers,
+                        logger,
+                        httpClient,
+                        ensureBackendsInitializedAsync,
+                        rewriteRequestJson,
+                        cancellationToken,
+                        sessionManager,
+                        clientSessionId,
+                        routerSettings,
+                        resolvedOwnerKey,
+                        callerTimeoutSeconds ?? requestTimeoutSecondsOverride,
+                        callerMaxChars ?? requestMaxOutputCharsOverride,
+                        callerOffset,
+                        callerFilter,
+                        callerConcurrencyKey,
+                        targetArgs);
                     return result;
                 }
                 catch (Exception ex)
@@ -452,20 +706,7 @@ namespace ModelContextGateway.Core.Routing
             }
             else if (toolName == "execute_script")
             {
-                var settings = (embeddingService as DynamicEmbeddingService)?.GetSettings();
-                if (settings == null && dbFactory != null)
-                {
-                    try
-                    {
-                        using var conn = dbFactory.CreateConnection();
-                        settings = conn.QueryFirstOrDefault<RouterSettings>("SELECT * FROM Settings WHERE Id = 'default'");
-                    }
-                    catch (Exception exSettings)
-                    {
-                        logger.LogWarning(exSettings, "Failed to load RouterSettings for execute_script");
-                    }
-                }
-                settings ??= new RouterSettings();
+                var settings = ResolveRouterSettings(embeddingService, dbFactory, logger);
 
                 if (!settings.EnableCodeMode)
                 {
@@ -518,6 +759,7 @@ namespace ModelContextGateway.Core.Routing
 
                 string? script = null;
                 JsonElement? scriptArgs = null;
+                int? callerScriptTimeoutSeconds = null;
 
                 if (root.TryGetProperty("params", out var paramsProp) &&
                     paramsProp.TryGetProperty("arguments", out var argsProp) &&
@@ -530,6 +772,10 @@ namespace ModelContextGateway.Core.Routing
                     if (argsProp.TryGetProperty("arguments", out var argumentsProp) && argumentsProp.ValueKind == JsonValueKind.Object)
                     {
                         scriptArgs = argumentsProp.Clone();
+                    }
+                    if (TryGetOptionalInt(argsProp, out var tsVal, "timeout_seconds", "timeoutSeconds") && tsVal > 0)
+                    {
+                        callerScriptTimeoutSeconds = tsVal;
                     }
                 }
 
@@ -548,7 +794,14 @@ namespace ModelContextGateway.Core.Routing
                     };
                 }
 
-                Func<string, JsonElement, string?, Task<object>> toolDispatcher = async (targetName, targetArgs, targetAuthToken) =>
+                int effectiveScriptTimeout = callerScriptTimeoutSeconds
+                    ?? (requestTimeoutSecondsOverride is > 0 ? requestTimeoutSecondsOverride.Value : settings.CodeModeExecutionTimeoutSeconds);
+
+                var effectiveSettings = effectiveScriptTimeout == settings.CodeModeExecutionTimeoutSeconds
+                    ? settings
+                    : CloneSettingsWithTimeout(settings, effectiveScriptTimeout);
+
+                async Task<object> DispatchScriptToolAsync(string targetName, JsonElement targetArgs, CodeModeCallOptions? options, CancellationToken scriptCt)
                 {
                     var (normalizedTargetName, ambiguityError) = NormalizeTargetToolName(targetName, servers, logger);
                     if (!string.IsNullOrEmpty(ambiguityError))
@@ -623,17 +876,61 @@ namespace ModelContextGateway.Core.Routing
                     };
                     var targetBody = JsonSerializer.Serialize(targetPayload);
 
-                    if (targetName == "search_tools")
+                    if (targetName == "search_tools" || targetName == "read_output" || targetName == "mcg/read_output")
                     {
-                        return await CallToolAsync("search_tools", targetBody, dbFactory!, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId, filterAuthorizedToolsAsync, callerGroups, isCallerAdmin);
+                        return await CallToolAsync(
+                            targetName,
+                            targetBody,
+                            dbFactory!,
+                            backendConnections,
+                            servers,
+                            logger,
+                            httpClient,
+                            embeddingService,
+                            ensureBackendsInitializedAsync,
+                            rewriteRequestJson,
+                            scriptCt,
+                            sessionManager,
+                            clientSessionId,
+                            filterAuthorizedToolsAsync,
+                            callerGroups,
+                            isCallerAdmin,
+                            sandboxCallbacks,
+                            options?.TimeoutSeconds ?? requestTimeoutSecondsOverride,
+                            options?.MaxChars ?? requestMaxOutputCharsOverride,
+                            resolvedOwnerKey);
                     }
 
-                    return await ExecuteTargetToolAsync(targetName, targetBody, targetAuthToken, dbFactory!, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);
-                };
+                    return await ExecuteTargetToolAsync(
+                        targetName,
+                        targetBody,
+                        options?.AuthToken,
+                        dbFactory!,
+                        backendConnections,
+                        servers,
+                        logger,
+                        httpClient,
+                        ensureBackendsInitializedAsync,
+                        rewriteRequestJson,
+                        scriptCt,
+                        sessionManager,
+                        clientSessionId,
+                        effectiveSettings,
+                        resolvedOwnerKey,
+                        options?.TimeoutSeconds ?? requestTimeoutSecondsOverride,
+                        options?.MaxChars ?? requestMaxOutputCharsOverride,
+                        options?.Offset,
+                        options?.Filter,
+                        options?.ConcurrencyKey,
+                        targetArgs);
+                }
 
-                var effectiveCallbacks = sandboxCallbacks ?? new CodeModeSandboxCallbacks
+                Func<string, JsonElement, string?, Task<object>> toolDispatcher = (targetName, targetArgs, targetAuthToken) =>
+                    DispatchScriptToolAsync(targetName, targetArgs, new CodeModeCallOptions(AuthToken: targetAuthToken), cancellationToken);
+
+                var effectiveCallbacks = new CodeModeSandboxCallbacks
                 {
-                    ListServersAsync = async () =>
+                    ListServersAsync = sandboxCallbacks?.ListServersAsync ?? (async () =>
                     {
                         var candidateServers = (servers ?? Enumerable.Empty<McpServer>()).Where(s => s.Enabled).ToList();
                         if (filterAuthorizedToolsAsync != null)
@@ -660,11 +957,39 @@ namespace ModelContextGateway.Core.Routing
                             })
                             .ToList();
                         return serverList;
-                    }
+                    }),
+                    ListResourcesAsync = sandboxCallbacks?.ListResourcesAsync,
+                    SearchResourcesAsync = sandboxCallbacks?.SearchResourcesAsync,
+                    ReadResourceAsync = sandboxCallbacks?.ReadResourceAsync,
+                    ListPromptsAsync = sandboxCallbacks?.ListPromptsAsync,
+                    GetPromptAsync = sandboxCallbacks?.GetPromptAsync,
+                    CallToolWithOptionsAsync = sandboxCallbacks?.CallToolWithOptionsAsync ?? DispatchScriptToolAsync,
+                    ReadOutputAsync = sandboxCallbacks?.ReadOutputAsync ?? (async (outputId, offsetArg, maxCharsArg) =>
+                    {
+                        if (!OutputBuffer.TryReadChunk(resolvedOwnerKey, outputId, offsetArg ?? 0, maxCharsArg ?? 4000, out var chunk) || chunk == null)
+                        {
+                            return new
+                            {
+                                error = "Output buffer entry not found or expired for this session."
+                            };
+                        }
+
+                        return new
+                        {
+                            output_id = chunk.OutputId,
+                            tool_name = chunk.ToolName,
+                            text = chunk.Text,
+                            total_chars = chunk.TotalChars,
+                            returned_chars = chunk.ReturnedChars,
+                            offset = chunk.Offset,
+                            has_more = chunk.HasMore,
+                            next_offset = chunk.NextOffset
+                        };
+                    })
                 };
 
                 var engine = _codeModeEngine ?? new CodeModeExecutionEngine();
-                var execResult = await engine.ExecuteAsync(script, scriptArgs, settings, toolDispatcher, cancellationToken, effectiveCallbacks);
+                var execResult = await engine.ExecuteAsync(script, scriptArgs, effectiveSettings, toolDispatcher, cancellationToken, effectiveCallbacks);
 
                 object? resultPayload = null;
                 if (execResult.IsError)
@@ -692,7 +1017,7 @@ namespace ModelContextGateway.Core.Routing
                 };
 
                 var serializedEnvelope = JsonSerializer.Serialize(envelope);
-                return new
+                object finalResponse = new
                 {
                     resultType = "complete",
                     isError = execResult.IsError,
@@ -704,9 +1029,54 @@ namespace ModelContextGateway.Core.Routing
                         }
                     }
                 };
+
+                int? scriptOutputLimit = (requestMaxOutputCharsOverride is > 0 ? requestMaxOutputCharsOverride : null)
+                    ?? (effectiveSettings.MaxToolOutputChars > 0 ? effectiveSettings.MaxToolOutputChars : null);
+
+                if (scriptOutputLimit.HasValue)
+                {
+                    return OutputBuffer.ShapeToolResult(finalResponse, resolvedOwnerKey, "execute_script", scriptOutputLimit, offset: null, filter: null);
+                }
+
+                return finalResponse;
             }
 
-            return await ExecuteTargetToolAsync(toolName, body, null, dbFactory, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);
+            // Direct downstream tool invocation (non-meta mode or direct call)
+            var directSettings = ResolveRouterSettings(embeddingService, dbFactory, logger);
+            JsonElement directArgs = default;
+            try
+            {
+                using var directDoc = JsonDocument.Parse(body);
+                if (directDoc.RootElement.TryGetProperty("params", out var p) &&
+                    p.TryGetProperty("arguments", out var a))
+                {
+                    directArgs = a.Clone();
+                }
+            }
+            catch { }
+
+            return await ExecuteTargetToolAsync(
+                toolName,
+                body,
+                null,
+                dbFactory,
+                backendConnections,
+                servers,
+                logger,
+                httpClient,
+                ensureBackendsInitializedAsync,
+                rewriteRequestJson,
+                cancellationToken,
+                sessionManager,
+                clientSessionId,
+                directSettings,
+                resolvedOwnerKey,
+                requestTimeoutSecondsOverride,
+                requestMaxOutputCharsOverride,
+                callerOffset: null,
+                callerFilter: null,
+                callerConcurrencyKey: null,
+                parsedTargetArgs: directArgs);
         }
 
         private async Task<object> ExecuteTargetToolAsync(
@@ -722,7 +1092,15 @@ namespace ModelContextGateway.Core.Routing
             Func<string, string, string, string> rewriteRequestJson,
             CancellationToken cancellationToken,
             SessionManager? sessionManager,
-            string? clientSessionId)
+            string? clientSessionId,
+            RouterSettings? routerSettings = null,
+            string? ownerKey = null,
+            int? timeoutSecondsOverride = null,
+            int? maxCharsOverride = null,
+            int? callerOffset = null,
+            string? callerFilter = null,
+            string? callerConcurrencyKey = null,
+            JsonElement parsedTargetArgs = default)
         {
             if (!_toolRoutingTable.ContainsKey(toolName))
             {
@@ -793,9 +1171,32 @@ namespace ModelContextGateway.Core.Routing
                     routingBody = rewriteRequestJson(body, "name", rawToolName);
                 }
 
+                // Compute effective timeout: caller/header override -> server.RequestTimeoutSeconds -> global ToolExecutionTimeoutSeconds -> 120s
+                int effectiveTimeoutSec = (timeoutSecondsOverride is > 0 ? timeoutSecondsOverride : null)
+                    ?? (targetServer?.RequestTimeoutSeconds is > 0 ? targetServer.RequestTimeoutSeconds : null)
+                    ?? (routerSettings?.ToolExecutionTimeoutSeconds is > 0 ? (int?)routerSettings.ToolExecutionTimeoutSeconds : null)
+                    ?? 120;
+                var effectiveTimeout = TimeSpan.FromSeconds(effectiveTimeoutSec);
+
+                // Compute effective output cap
+                int? effectiveMaxChars = (maxCharsOverride is > 0 ? maxCharsOverride : null)
+                    ?? (routerSettings?.MaxToolOutputChars is > 0 ? (int?)routerSettings.MaxToolOutputChars : null);
+
+                var resolvedOwnerKey = !string.IsNullOrWhiteSpace(ownerKey)
+                    ? ownerKey!
+                    : (!string.IsNullOrWhiteSpace(clientSessionId) ? $"session:{clientSessionId}" : "anonymous");
+
+                var slotKey = BackendConcurrencyGate.ResolveSlotKey(targetServer, parsedTargetArgs, callerConcurrencyKey);
+
                 try
                 {
-                    var resp = await conn.SendRequestAsync("tools/call", routingBody, targetAuthToken);
+                    await using var lease = await ConcurrencyGate.AcquireAsync(
+                        serverId,
+                        slotKey,
+                        targetServer?.MaxConcurrentRequests,
+                        cancellationToken);
+
+                    var resp = await conn.SendRequestAsync("tools/call", routingBody, targetAuthToken, cancellationToken, effectiveTimeout);
                     if (resp.Error != null)
                     {
                         var transformed = ToolErrorFormatter.TransformError(resp.Error, toolName, serverId);
@@ -813,14 +1214,26 @@ namespace ModelContextGateway.Core.Routing
                     }
                     if (resp.Result.HasValue)
                     {
-                        return ProtocolHelper.EnsureResultType(resp.Result.Value);
+                        var normalizedResult = ProtocolHelper.EnsureResultType(resp.Result.Value);
+                        return OutputBuffer.ShapeToolResult(
+                            normalizedResult,
+                            resolvedOwnerKey,
+                            toolName,
+                            effectiveMaxChars,
+                            callerOffset,
+                            callerFilter);
                     }
                     return resp;
                 }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw;
+                }
                 catch (System.Net.Http.HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    var srv = servers.FirstOrDefault(s => s.Id == serverId);
-                    var prompt = (srv != null && !string.IsNullOrEmpty(srv.DynamicAuthPrompt)) ? srv.DynamicAuthPrompt : "401 Unauthorized. Please provide a valid target_auth_token via execute_tool.";
+                    var prompt = (targetServer != null && !string.IsNullOrEmpty(targetServer.DynamicAuthPrompt))
+                        ? targetServer.DynamicAuthPrompt
+                        : "401 Unauthorized. Please provide a valid target_auth_token via execute_tool.";
                     return new
                     {
                         resultType = "complete",
@@ -851,6 +1264,178 @@ namespace ModelContextGateway.Core.Routing
             }
 
             throw new KeyNotFoundException($"Tool {toolName} not found in routing table.");
+        }
+
+        private static RouterSettings ResolveRouterSettings(
+            IEmbeddingService? embeddingService,
+            IDbConnectionFactory? dbFactory,
+            ILogger logger)
+        {
+            var settings = (embeddingService as DynamicEmbeddingService)?.GetSettings();
+            if (settings != null)
+            {
+                return settings;
+            }
+
+            if (dbFactory != null)
+            {
+                try
+                {
+                    using var conn = dbFactory.CreateConnection();
+                    if (conn != null)
+                    {
+                        settings = conn.QueryFirstOrDefault<RouterSettings>("SELECT * FROM Settings WHERE Id = 'default'");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogDebug(ex, "Could not load RouterSettings from database; using defaults.");
+                }
+            }
+
+            return settings ?? new RouterSettings();
+        }
+
+        private static RouterSettings CloneSettingsWithTimeout(RouterSettings source, int codeModeTimeoutSeconds)
+        {
+            return new RouterSettings
+            {
+                Id = source.Id,
+                DashboardTitle = source.DashboardTitle,
+                DashboardIcon = source.DashboardIcon,
+                EmbeddingProvider = source.EmbeddingProvider,
+                EmbeddingApiUrl = source.EmbeddingApiUrl,
+                EmbeddingApiKey = source.EmbeddingApiKey,
+                EmbeddingApiModel = source.EmbeddingApiModel,
+                EmbeddingModelDir = source.EmbeddingModelDir,
+                GlobalMaxKeys = source.GlobalMaxKeys,
+                UserMaxKeys = source.UserMaxKeys,
+                UserSecretStorage = source.UserSecretStorage,
+                AllowOpenClientRegistration = source.AllowOpenClientRegistration,
+                ToolSearchDefaultLimit = source.ToolSearchDefaultLimit,
+                ToolSearchMinScore = source.ToolSearchMinScore,
+                ToolSearchScoreDropoffRatio = source.ToolSearchScoreDropoffRatio,
+                EnableCodeMode = source.EnableCodeMode,
+                CodeModeExecutionTimeoutSeconds = codeModeTimeoutSeconds,
+                ToolExecutionTimeoutSeconds = source.ToolExecutionTimeoutSeconds,
+                MaxToolOutputChars = source.MaxToolOutputChars,
+                CodeModeMaxToolCalls = source.CodeModeMaxToolCalls,
+                CodeModeMaxMemoryMb = source.CodeModeMaxMemoryMb,
+                CodeModeMaxStatements = source.CodeModeMaxStatements,
+                CodeModeAllowedGroups = source.CodeModeAllowedGroups
+            };
+        }
+
+        private static List<object> FilterToolsByServer(List<object> tools, string serverFilter, IEnumerable<McpServer>? servers)
+        {
+            var trimmed = serverFilter.Trim();
+            var matchedServer = servers?.FirstOrDefault(s =>
+                string.Equals(s.Id, trimmed, StringComparison.OrdinalIgnoreCase) ||
+                (!string.IsNullOrWhiteSpace(s.Alias) && string.Equals(s.Alias, trimmed, StringComparison.OrdinalIgnoreCase)));
+
+            var candidates = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { trimmed };
+            if (matchedServer != null)
+            {
+                candidates.Add(matchedServer.Id);
+                if (!string.IsNullOrWhiteSpace(matchedServer.Alias))
+                {
+                    candidates.Add(matchedServer.Alias);
+                }
+            }
+
+            var filtered = new List<object>();
+            foreach (var item in tools)
+            {
+                var meta = ExtractToolMetadata(item);
+                bool matches = false;
+
+                if (!string.IsNullOrWhiteSpace(meta.ServerId) && candidates.Contains(meta.ServerId))
+                {
+                    matches = true;
+                }
+                else if (!string.IsNullOrWhiteSpace(meta.Name))
+                {
+                    foreach (var p in candidates)
+                    {
+                        if (meta.Name.StartsWith(p + "/", StringComparison.OrdinalIgnoreCase) ||
+                            meta.Name.StartsWith(p + "__", StringComparison.OrdinalIgnoreCase) ||
+                            meta.Name.StartsWith(p + ":", StringComparison.OrdinalIgnoreCase))
+                        {
+                            matches = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (matches)
+                {
+                    filtered.Add(item);
+                }
+            }
+
+            return filtered;
+        }
+
+        private static List<object> BuildCompactSearchItems(List<ToolSearchResult> results)
+        {
+            var list = new List<object>(results.Count);
+            foreach (var r in results)
+            {
+                var meta = ExtractToolMetadata(r.Tool);
+                var desc = meta.Description ?? string.Empty;
+                if (desc.Length > 160)
+                {
+                    desc = desc.Substring(0, 157) + "...";
+                }
+
+                list.Add(new
+                {
+                    name = r.ToolName,
+                    serverId = r.ServerId,
+                    description = desc,
+                    @params = meta.Parameters.Select(p => p.Name).ToArray()
+                });
+            }
+            return list;
+        }
+
+        private static string? ExtractToolNameString(object? item)
+        {
+            if (item == null)
+            {
+                return null;
+            }
+            if (item is IDictionary<string, object> dict && dict.TryGetValue("name", out var nObj))
+            {
+                return nObj?.ToString();
+            }
+            if (item is JsonElement je && je.TryGetProperty("name", out var pProp))
+            {
+                return pProp.GetString();
+            }
+            try
+            {
+                using var itemDoc = JsonDocument.Parse(JsonSerializer.Serialize(item));
+                if (itemDoc.RootElement.TryGetProperty("name", out var nameEl))
+                {
+                    return nameEl.GetString();
+                }
+            }
+            catch { }
+            return null;
+        }
+
+        private static bool TryGetOptionalInt(JsonElement obj, out int value, params string[] names)
+        {
+            foreach (var name in names)
+            {
+                if (obj.TryGetProperty(name, out var prop) && prop.ValueKind == JsonValueKind.Number && prop.TryGetInt32(out value))
+                {
+                    return true;
+                }
+            }
+            value = 0;
+            return false;
         }
     }
 }

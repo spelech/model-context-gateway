@@ -32,6 +32,8 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
   const [toolSearchDefaultLimit, setToolSearchDefaultLimit] = useState<number>(settings?.toolSearchDefaultLimit ?? 5);
   const [toolSearchMinScore, setToolSearchMinScore] = useState<number>(settings?.toolSearchMinScore ?? 0.35);
   const [toolSearchScoreDropoffRatio, setToolSearchScoreDropoffRatio] = useState<number>(settings?.toolSearchScoreDropoffRatio ?? 0.60);
+  const [toolExecutionTimeoutSeconds, setToolExecutionTimeoutSeconds] = useState<number>(settings?.toolExecutionTimeoutSeconds ?? 120);
+  const [maxToolOutputChars, setMaxToolOutputChars] = useState<number>(settings?.maxToolOutputChars ?? 0);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [isMasterKeyModalOpen, setIsMasterKeyModalOpen] = useState(false);
 
@@ -83,6 +85,8 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
       toolSearchDefaultLimit: Number(toolSearchDefaultLimit),
       toolSearchMinScore: Number(toolSearchMinScore),
       toolSearchScoreDropoffRatio: Number(toolSearchScoreDropoffRatio),
+      toolExecutionTimeoutSeconds: Number(toolExecutionTimeoutSeconds),
+      maxToolOutputChars: Number(maxToolOutputChars),
     });
     setSaveStatus(success ? 'saved' : 'error');
     setTimeout(() => setSaveStatus('idle'), 2500);
@@ -418,6 +422,47 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
             </div>
           </div>
           
+          <div className="form-group">
+            <h3 style={{ fontSize: '14px', marginBottom: '10px', marginTop: '20px', color: 'var(--primary)' }}><i className="fa-solid fa-sliders"></i> Tool Execution &amp; Output Limits</h3>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="settings-tool-execution-timeout">Default Tool Execution Timeout (Seconds)</label>
+              <input
+                type="number"
+                id="settings-tool-execution-timeout"
+                data-testid="settings-tool-execution-timeout-input"
+                min="1"
+                max="3600"
+                placeholder="120"
+                value={toolExecutionTimeoutSeconds}
+                onChange={(e) => setToolExecutionTimeoutSeconds(parseInt(e.target.value, 10) || 120)}
+              />
+              <small style={{ color: 'var(--text-muted)' }}>
+                Default timeout applied to downstream backend tool calls unless overridden per-server or per-call (default: 120s).
+              </small>
+            </div>
+            <div className="form-group">
+              <label htmlFor="settings-max-tool-output-chars">Default Max Tool Output Chars</label>
+              <input
+                type="number"
+                id="settings-max-tool-output-chars"
+                data-testid="settings-max-tool-output-chars-input"
+                min="0"
+                placeholder="0"
+                value={maxToolOutputChars}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  setMaxToolOutputChars(isNaN(val) || val < 0 ? 0 : val);
+                }}
+              />
+              <small style={{ color: 'var(--text-muted)' }}>
+                Maximum response characters before overflow is buffered in MCG for paging via <code>read_output</code> (0 = unlimited).
+              </small>
+            </div>
+          </div>
+
           <div className="form-group">
             <h3 style={{ fontSize: '14px', marginBottom: '10px', marginTop: '20px', color: 'var(--primary)' }}><i className="fa-solid fa-shield-halved"></i> Security Defaults</h3>
           </div>

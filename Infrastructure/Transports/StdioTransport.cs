@@ -7,7 +7,7 @@ namespace ModelContextGateway.Infrastructure.Transports
     {
         private readonly string? _passThroughToken;
 
-        public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(15);
+        public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(120);
         private readonly McpServer _server;
         private readonly ILogger _logger;
         private readonly JsonRpcStateManager _stateManager;
@@ -268,6 +268,33 @@ namespace ModelContextGateway.Infrastructure.Transports
             }
         }
 
+        private static object? GetJsonElementValue(JsonElement element)
+        {
+            switch (element.ValueKind)
+            {
+                case JsonValueKind.String:
+                    return element.GetString();
+                case JsonValueKind.Number:
+                    if (element.TryGetInt64(out long l))
+                    {
+                        return l;
+                    }
+                    if (element.TryGetDouble(out double d))
+                    {
+                        return d;
+                    }
+                    return element.GetRawText();
+                case JsonValueKind.True:
+                    return true;
+                case JsonValueKind.False:
+                    return false;
+                case JsonValueKind.Null:
+                    return null;
+                default:
+                    return element.GetRawText();
+            }
+        }
+
         private async Task ProcessMessageAsync(string line, Func<JsonRpcMessage, Task> onMessageReceived)
         {
             try
@@ -280,10 +307,15 @@ namespace ModelContextGateway.Infrastructure.Transports
 
                 if (message is JsonRpcResponse response && response.Id != null)
                 {
-                    var idStr = response.Id.ToString();
+                    var idStr = response.Id is JsonElement je
+                        ? (je.ValueKind == JsonValueKind.String ? je.GetString() : je.GetRawText())
+                        : response.Id?.ToString();
                     if (idStr != null)
                     {
-                        _stateManager.TryCompleteRequest(idStr, response);
+                        if (_stateManager.TryCompleteRequest(idStr, response))
+                        {
+                            return;
+                        }
                     }
                 }
 
@@ -392,40 +424,62 @@ namespace ModelContextGateway.Infrastructure.Transports
             });
         }
 
-        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
+        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null, CancellationToken cancellationToken = default, TimeSpan? timeoutOverride = null)
         {
             if (_disposed || _process == null || _process.HasExited)
             {
                 return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Process not running" } };
             }
 
-            string requestId = Guid.NewGuid().ToString("N");
+            cancellationToken.ThrowIfCancellationRequested();
+
+            string upstreamRequestId = Guid.NewGuid().ToString("N");
+            object? originalId = null;
             string modifiedBody = bodyJson;
 
             try
             {
-                using var doc = JsonDocument.Parse(bodyJson);
-                var root = doc.RootElement;
-                if (root.TryGetProperty("id", out var idProp))
+                var node = System.Text.Json.Nodes.JsonNode.Parse(bodyJson);
+                if (node is System.Text.Json.Nodes.JsonObject obj)
                 {
-                    requestId = idProp.ToString();
-                }
-                else
-                {
-                    var dict = JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, object>>(bodyJson) ?? new();
-                    dict["id"] = requestId;
-                    modifiedBody = JsonSerializer.Serialize(dict);
+                    if (obj.ContainsKey("id"))
+                    {
+                        var idNode = obj["id"];
+                        if (idNode != null)
+                        {
+                            using var doc = JsonDocument.Parse(idNode.ToJsonString());
+                            originalId = GetJsonElementValue(doc.RootElement);
+                        }
+                        else
+                        {
+                            originalId = null;
+                        }
+                    }
+
+                    obj["id"] = upstreamRequestId;
+                    modifiedBody = node.ToJsonString();
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to parse/rewrite JSON ID in StdioTransport.SendRequestAsync");
+            }
 
-            var tcs = _stateManager.CreateRequest(requestId);
+            var effectiveTimeout = timeoutOverride is { TotalMilliseconds: > 0 }
+                ? timeoutOverride.Value
+                : (RequestTimeout > TimeSpan.Zero ? RequestTimeout : TimeSpan.FromSeconds(120));
+
+            using var callerLinked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken);
+            using var ctsTimeout = new CancellationTokenSource(effectiveTimeout);
+            using var timeoutLinked = CancellationTokenSource.CreateLinkedTokenSource(callerLinked.Token, ctsTimeout.Token);
+
+            var tcs = _stateManager.CreateTrackedRequest(upstreamRequestId, originalId, null, callerLinked.Token, effectiveTimeout);
 
             try
             {
                 _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, SanitizeLogOutput(modifiedBody));
 
-                await _writeLock.WaitAsync(_cts.Token);
+                await _writeLock.WaitAsync(timeoutLinked.Token);
                 try
                 {
                     await _process.StandardInput.WriteLineAsync(modifiedBody);
@@ -436,10 +490,18 @@ namespace ModelContextGateway.Infrastructure.Transports
                     _writeLock.Release();
                 }
 
-                var response = await tcs.Task.WaitAsync(RequestTimeout, _cts.Token);
+                var response = await tcs.Task.WaitAsync(timeoutLinked.Token);
                 var responseJson = JsonSerializer.Serialize(response, _jsonOptions);
                 _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, SanitizeLogOutput(responseJson));
                 return response;
+            }
+            catch (TimeoutException)
+            {
+                throw new TimeoutException($"Request '{method}' to STDIO backend '{_server.Id}' timed out after {effectiveTimeout.TotalSeconds:0.#} seconds.");
+            }
+            catch (OperationCanceledException) when (ctsTimeout.IsCancellationRequested && !callerLinked.IsCancellationRequested)
+            {
+                throw new TimeoutException($"Request '{method}' to STDIO backend '{_server.Id}' timed out after {effectiveTimeout.TotalSeconds:0.#} seconds.");
             }
             catch (Exception ex)
             {
@@ -448,7 +510,7 @@ namespace ModelContextGateway.Infrastructure.Transports
             }
             finally
             {
-                _stateManager.TryCompleteRequest(requestId, null!);
+                _stateManager.TryRemoveRequest(upstreamRequestId);
             }
         }
 

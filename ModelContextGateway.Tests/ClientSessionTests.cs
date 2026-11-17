@@ -89,11 +89,12 @@ namespace ModelContextGateway.Tests
             var tools = await session.ListToolsAsync("{}", httpContext);
 
             tools.Should().NotBeNull();
-            tools.Should().HaveCount(2);
+            tools.Should().HaveCount(3);
 
             var json = JsonSerializer.Serialize(tools);
             json.Should().Contain("\"name\":\"search_tools\"");
             json.Should().Contain("\"name\":\"execute_tool\"");
+            json.Should().Contain("\"name\":\"read_output\"");
         }
 
         [Fact]

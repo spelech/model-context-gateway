@@ -228,8 +228,9 @@ Execute multi-step MCP workflows in a single turn using the sandboxed JavaScript
 
 ## 1. Sandbox Globals & Dispatchers
 
-- **`await tools.<server>.<tool>(args, options?)`**: Ergonomic proxy for calling any backend tool (automatically unboxes single-text JSON responses into native JS objects/arrays).
+- **`await tools.<server>.<tool>(args, options?)`**: Ergonomic proxy for calling any backend tool (automatically unboxes single-text JSON responses into native JS objects/arrays). `options` supports `{ authToken?, timeoutSeconds?, maxChars?, offset?, filter?, concurrencyKey? }`.
 - **`await mcg.callTool(name, args?, options?)`**: Explicit tool dispatcher (supports `'server__tool'`, `'server/tool'`, bare `'tool'`, or `'search_tools'`).
+- **`await mcg.readOutput(outputId, options?)`**: Pages through buffered tool output saved when `maxChars` clipped a large response (`options: { offset?: number, maxChars?: number }`).
 - **`await mcg.listServers()`**: Returns active authorized servers (`[{ id, alias, displayName, categories }]`).
 - **`await mcg.listResources(serverId?)`**: Lists authorized MCP resources (optionally filtered to a specific server ID or alias).
 - **`await mcg.searchResources(query)`**: Searches authorized MCP resources by keyword.
@@ -243,7 +244,7 @@ Execute multi-step MCP workflows in a single turn using the sandboxed JavaScript
 
 - **Full TypeScript SDK**: Read resource `router://code-mode/sdk.d.ts`
 - **Per-Server TypeScript Definitions**: Read resource `router://code-mode/types/{server_name}`
-- **Compact TypeScript Search**: Call `search_tools({ query: '...', format: 'typescript' })`
+- **Compact TypeScript Search**: Call `search_tools({ query: '...', server: '...', format: 'typescript' })`
 - **Resource & Prompt Catalogs**: Read `router://resources/catalog`, `router://resources/server/{server_name}`, or `router://prompts/catalog`
 
 ## 3. Example Multi-Step Script
@@ -265,6 +266,23 @@ return {
             sb.AppendLine("interface McgCallOptions {");
             sb.AppendLine("  /** Optional dynamic pass-through bearer token for downstream authentication. */");
             sb.AppendLine("  authToken?: string;");
+            sb.AppendLine("  /** Optional per-call timeout override in seconds. */");
+            sb.AppendLine("  timeoutSeconds?: number;");
+            sb.AppendLine("  /** Optional maximum output characters before buffering overflow for paging via mcg.readOutput(). */");
+            sb.AppendLine("  maxChars?: number;");
+            sb.AppendLine("  /** Optional starting character offset into tool output. */");
+            sb.AppendLine("  offset?: number;");
+            sb.AppendLine("  /** Optional regex or substring filter applied line-by-line before slicing output. */");
+            sb.AppendLine("  filter?: string;");
+            sb.AppendLine("  /** Optional explicit concurrency slot key for serialized backends (e.g. 'main', 'support'). */");
+            sb.AppendLine("  concurrencyKey?: string;");
+            sb.AppendLine("}");
+            sb.AppendLine();
+            sb.AppendLine("interface McgReadOutputOptions {");
+            sb.AppendLine("  /** Starting character offset (default 0). */");
+            sb.AppendLine("  offset?: number;");
+            sb.AppendLine("  /** Maximum characters to return in this chunk (default 4000). */");
+            sb.AppendLine("  maxChars?: number;");
             sb.AppendLine("}");
             sb.AppendLine();
             sb.AppendLine("interface McgServerInfo {");
@@ -291,6 +309,8 @@ return {
             sb.AppendLine("interface McgSandbox {");
             sb.AppendLine("  /** Invoke any downstream tool or meta-tool ('server__tool' or 'search_tools') and auto-unbox JSON results. */");
             sb.AppendLine("  callTool(name: string, args?: Record<string, any>, options?: McgCallOptions): Promise<any>;");
+            sb.AppendLine("  /** Read a chunk of previously buffered large tool output by outputId. */");
+            sb.AppendLine("  readOutput(outputId: string, options?: McgReadOutputOptions): Promise<any>;");
             sb.AppendLine("  /** List all active authorized MCP backend servers. */");
             sb.AppendLine("  listServers(): Promise<McgServerInfo[]>;");
             sb.AppendLine("  /** Retrieve the cached MCP initialize instructions for a specific backend server ID or alias. */");
@@ -313,6 +333,7 @@ return {
             sb.AppendLine();
             sb.AppendLine("declare const mcg: McgSandbox;");
             sb.AppendLine("declare const callTool: McgSandbox[\"callTool\"];");
+            sb.AppendLine("declare const readOutput: McgSandbox[\"readOutput\"];");
             sb.AppendLine("declare const args: Record<string, any> | undefined;");
         }
 
