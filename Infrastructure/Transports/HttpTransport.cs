@@ -419,12 +419,14 @@ namespace ModelContextGateway.Infrastructure.Transports
             using var ctsTimeout = new CancellationTokenSource(effectiveTimeout);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken, ctsTimeout.Token);
 
+            HttpResponseMessage? resp = null;
+            string responseBody = string.Empty;
             try
             {
                 string initialSessionSnapshot = _sessionId;
                 using var req = await CreateHttpRequestMessageAsync(bodyJson, targetAuthToken, initialSessionSnapshot);
 
-                using var resp = await ExecuteHttpRequestAsync(req, linked.Token);
+                resp = await ExecuteHttpRequestAsync(req, linked.Token);
 
                 // Handle session eviction / expiration (HTTP 404 or HTTP 400 when sent with a session id)
                 bool isSessionError = (resp.StatusCode == HttpStatusCode.NotFound || resp.StatusCode == HttpStatusCode.BadRequest);
@@ -461,7 +463,6 @@ namespace ModelContextGateway.Infrastructure.Transports
                     }
                 }
 
-                string responseBody = string.Empty;
                 var mediaType = resp.Content.Headers.ContentType?.MediaType?.ToLowerInvariant();
                 if (mediaType == "text/event-stream")
                 {
@@ -526,22 +527,29 @@ namespace ModelContextGateway.Infrastructure.Transports
                 {
                     responseBody = await resp.Content.ReadAsStringAsync(linked.Token);
                 }
-
-                _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(responseBody));
-                _logger.LogDebug("[HttpTransport DEBUG] Server {ServerId} responded with status {StatusCode}. Body: '{Body}'", _server.Id, resp.StatusCode, PiiSanitizer.SanitizePayload(responseBody));
-
-                if (string.IsNullOrWhiteSpace(responseBody))
-                {
-                    return new JsonRpcResponse();
-                }
-
-                var responseObj = JsonSerializer.Deserialize<JsonRpcResponse>(responseBody);
-                return responseObj ?? new JsonRpcResponse { Error = new JsonRpcError { Code = -32603, Message = "Failed to deserialize POST response" } };
             }
             catch (OperationCanceledException) when (ctsTimeout.IsCancellationRequested && !_cts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
             {
+                resp?.Dispose();
                 throw new TimeoutException($"Request '{method}' to HTTP backend '{_server.Id}' timed out after {effectiveTimeout.TotalSeconds:0.#} seconds.");
             }
+            catch
+            {
+                resp?.Dispose();
+                throw;
+            }
+
+            using var respScope = resp;
+            _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(responseBody));
+            _logger.LogDebug("[HttpTransport DEBUG] Server {ServerId} responded with status {StatusCode}. Body: '{Body}'", _server.Id, resp.StatusCode, PiiSanitizer.SanitizePayload(responseBody));
+
+            if (string.IsNullOrWhiteSpace(responseBody))
+            {
+                return new JsonRpcResponse();
+            }
+
+            var responseObj = JsonSerializer.Deserialize<JsonRpcResponse>(responseBody);
+            return responseObj ?? new JsonRpcResponse { Error = new JsonRpcError { Code = -32603, Message = "Failed to deserialize POST response" } };
         }
 
         public async Task<JsonRpcResponse> CallMethodAsync(string method, object parameters, string? overrideId = null)
