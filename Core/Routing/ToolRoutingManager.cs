@@ -98,6 +98,48 @@ namespace ModelContextGateway.Core.Routing
         /// </summary>
         public ConcurrentDictionary<string, string> ToolRoutingTable => _toolRoutingTable;
 
+        /// <summary>
+        /// Default tool description advertised for Meta-Mode <c>search_tools</c>.
+        /// Kept generic when no deployment override or active server list is supplied.
+        /// </summary>
+        public const string DefaultSearchToolsDescription =
+            "Semantically search across all registered internal MCP tools using keywords. Returns the matching tool names, descriptions, and input schemas (or compact TypeScript/compact/names outputs when format is set). Use this first to discover what tools are available.";
+
+        /// <summary>
+        /// Resolves the advertised <c>search_tools</c> description, preferring an explicit override,
+        /// the <c>MCG_SEARCH_TOOLS_DESCRIPTION</c> environment variable, or a dynamic list of active
+        /// server names before falling back to <see cref="DefaultSearchToolsDescription"/>.
+        /// </summary>
+        public static string ResolveSearchToolsDescription(
+            string? descriptionOverride = null,
+            IEnumerable<string>? availableServerNames = null,
+            Func<string, string?>? getEnvVar = null)
+        {
+            if (!string.IsNullOrWhiteSpace(descriptionOverride))
+            {
+                return descriptionOverride.Trim();
+            }
+
+            var envValue = (getEnvVar ?? Environment.GetEnvironmentVariable)("MCG_SEARCH_TOOLS_DESCRIPTION");
+            if (!string.IsNullOrWhiteSpace(envValue))
+            {
+                return envValue.Trim();
+            }
+
+            var serverLabels = availableServerNames?
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Select(n => n.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (serverLabels != null && serverLabels.Count > 0)
+            {
+                return $"Semantically search across all registered internal MCP tools (Available servers: {string.Join(", ", serverLabels)}) using keywords. Returns the matching tool names, descriptions, and input schemas (or compact TypeScript/compact/names outputs when format is set). Use this first to discover what tools are available.";
+            }
+
+            return DefaultSearchToolsDescription;
+        }
+
         public List<MetaToolDefinition> GetMetaTools(bool enableCodeMode = true) => GetMetaModeTools(enableCodeMode);
 
         public static List<MetaToolDefinition> GetMetaModeTools(bool enableCodeMode = false)
@@ -107,7 +149,7 @@ namespace ModelContextGateway.Core.Routing
                 new()
                 {
                     name = "search_tools",
-                    description = "Semantically search across all registered internal MCP tools (Excel, Docker, Plex, Home Assistant, etc.) using keywords. Returns the matching tool names, descriptions, and input schemas (or compact TypeScript/compact/names outputs when format is set). Use this first to discover what tools are available.",
+                    description = ResolveSearchToolsDescription(),
                     inputSchema = new
                     {
                         type = "object",

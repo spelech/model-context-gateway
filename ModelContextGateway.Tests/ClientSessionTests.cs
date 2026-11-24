@@ -98,6 +98,31 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-57", "MCP", RequirementType.Positive, "ClientSession Meta-Mode search_tools description dynamically includes enabled non-hidden servers and omits disabled or hidden servers.")]
+        public async Task ListToolsAsync_WhenInMetaMode_IncludesEnabledVisibleServersInSearchToolsDescription()
+        {
+            var (_, dbFactory) = CreateDbFactory();
+            var httpContext = CreateMockHttpContext(dbFactory);
+            var servers = new List<McpServer>
+            {
+                new() { Id = "ha", DisplayName = "Home Assistant", Enabled = true, Hidden = false, Type = "http", Url = "http://ha/mcp" },
+                new() { Id = "docker", Alias = "Docker", Enabled = true, Hidden = false, Type = "http", Url = "http://docker/mcp" },
+                new() { Id = "secret_srv", DisplayName = "Secret Server", Enabled = true, Hidden = true, Type = "http", Url = "http://secret/mcp" },
+                new() { Id = "disabled_srv", DisplayName = "Disabled Server", Enabled = false, Hidden = false, Type = "http", Url = "http://disabled/mcp" }
+            };
+
+            var session = new ClientSession("session-meta-servers", null, servers, new HttpClient(), null, NullLogger.Instance);
+            session.IsMetaMode = true;
+
+            var tools = await session.ListToolsAsync("{}", httpContext);
+            var searchTools = tools.OfType<MetaToolDefinition>().First(t => t.name == "search_tools");
+
+            searchTools.description.Should().Contain("Available servers: Home Assistant, Docker");
+            searchTools.description.Should().NotContain("Secret Server");
+            searchTools.description.Should().NotContain("Disabled Server");
+        }
+
+        [Fact]
         [Requirement("MCP-SESSION-BUILTIN-RESOURCES", "MCP", RequirementType.Positive, "ClientSession lists built-in resources including router://status.")]
         public async Task ListResourcesAsync_ReturnsBuiltinRouterStatusResource()
         {
