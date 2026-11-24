@@ -583,7 +583,7 @@ namespace ModelContextGateway.Tests
             });
             var ccRes = await session.CallToolAsync("execute_tool", downstreamBody, mockDbFactory.Object, httpCtx);
             var ccJson = JsonSerializer.Serialize(ccRes);
-            ccJson.Should().Contain("Mock executed tool execute_script");
+            ccJson.Should().Contain("Mock response for execute_script");
         }
     }
 }
