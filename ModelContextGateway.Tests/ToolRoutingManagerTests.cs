@@ -664,5 +664,38 @@ namespace ModelContextGateway.Tests
             Assert.Contains("'homebox_db/execute_sql'", err);
             Assert.Contains("'sure_db/execute_sql'", err);
         }
+
+        [Fact]
+        [Requirement("MCP-57", "MCP", RequirementType.Positive, "Meta-mode search_tools uses a generic default description, dynamically lists available servers when provided, and supports MCG_SEARCH_TOOLS_DESCRIPTION override.")]
+        public void GetMetaModeTools_SearchToolsDescription_UsesGenericDefaultAndSupportsDynamicServersOrOverride()
+        {
+            var tools = ToolRoutingManager.GetMetaModeTools();
+            var searchTools = tools.First(t => t.name == "search_tools");
+
+            searchTools.description.Should().Be(ToolRoutingManager.DefaultSearchToolsDescription);
+            searchTools.description.Should().Contain("Semantically search across all registered internal MCP tools");
+            searchTools.description.Should().NotContain("Sure Finance");
+            searchTools.description.Should().NotContain("Excel");
+
+            ToolRoutingManager.ResolveSearchToolsDescription(null, null, _ => null)
+                .Should().Be(ToolRoutingManager.DefaultSearchToolsDescription);
+            ToolRoutingManager.ResolveSearchToolsDescription(null, Array.Empty<string>(), _ => "   ")
+                .Should().Be(ToolRoutingManager.DefaultSearchToolsDescription);
+
+            var dynamicDesc = ToolRoutingManager.ResolveSearchToolsDescription(
+                null,
+                new[] { "Docker", "Home Assistant", "Docker" },
+                _ => null);
+            dynamicDesc.Should().Contain("Available servers: Docker, Home Assistant");
+
+            ToolRoutingManager.ResolveSearchToolsDescription(
+                    null,
+                    new[] { "Docker" },
+                    key => key == "MCG_SEARCH_TOOLS_DESCRIPTION" ? "  Custom domain tools  " : null)
+                .Should().Be("Custom domain tools");
+
+            ToolRoutingManager.ResolveSearchToolsDescription("Explicit override", new[] { "Docker" }, _ => "Env override")
+                .Should().Be("Explicit override");
+        }
     }
 }

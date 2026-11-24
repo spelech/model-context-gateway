@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-11-17T03:12:29.0769502Z",
-    "totalRequirements": 510,
-    "positiveCount": 402,
-    "guardrailCount": 108,
-    "totalProofs": 1156
+    "generatedAt": "2026-11-24T02:48:37.6251464Z",
+    "totalRequirements": 512,
+    "positiveCount": 403,
+    "guardrailCount": 109,
+    "totalProofs": 1159
   },
   "requirements": [
     {
@@ -4305,7 +4305,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 70,
+          "lineNumber": 71,
           "testName": "ExecuteScript_DisabledCodeMode_ReturnsError",
           "details": null
         }
@@ -4328,7 +4328,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 118,
+          "lineNumber": 119,
           "testName": "ExecuteScript_MissingScript_ReturnsError",
           "details": null
         }
@@ -4344,7 +4344,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 373,
+          "lineNumber": 374,
           "testName": "ExecuteScript_RuntimeError_ReturnsStructuredErrorEnvelope",
           "details": null
         }
@@ -4362,6 +4362,22 @@
           "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
           "lineNumber": 46,
           "testName": "ExecuteAsync_ToolCallsQuotaExceeded_FailsClosed",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "GUARD-CODE-05",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "Gateway meta-tools (search_tools, execute_tool, read_output, execute_script) are reserved during bare-name resolution so identically named downstream tools cannot shadow them.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 469,
+          "testName": "ReservedMetaTools_AreNotShadowedByDownstreamToolsWithIdenticalBareNames",
           "details": null
         }
       ]
@@ -6865,6 +6881,29 @@
       ]
     },
     {
+      "id": "MCP-57",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "ClientSession Meta-Mode search_tools description dynamically includes enabled non-hidden servers and omits disabled or hidden servers.",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
+          "lineNumber": 100,
+          "testName": "ListToolsAsync_WhenInMetaMode_IncludesEnabledVisibleServersInSearchToolsDescription",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 668,
+          "testName": "GetMetaModeTools_SearchToolsDescription_UsesGenericDefaultAndSupportsDynamicServersOrOverride",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-ADMIN-ENDPOINT-CALL-TOOL",
       "category": "MCP",
       "type": "Positive",
@@ -7549,21 +7588,21 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 13,
+          "lineNumber": 14,
           "testName": "GetMetaTools_IncludesExecuteScript_WhenEnabled",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 25,
+          "lineNumber": 26,
           "testName": "GetMetaTools_OmitsExecuteScript_WhenDisabled",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 421,
+          "lineNumber": 422,
           "testName": "ExecuteScript_ChainingSearchTools_ExecutesSuccessfully",
           "details": null
         }
@@ -7579,14 +7618,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 163,
+          "lineNumber": 164,
           "testName": "ExecuteScript_ValidExecution_ReturnsStructuredEnvelope",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 216,
+          "lineNumber": 217,
           "testName": "ExecuteScript_WithCodeParameter_ExecutesSuccessfully",
           "details": null
         }
@@ -8162,7 +8201,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
-          "lineNumber": 116,
+          "lineNumber": 141,
           "testName": "ListPromptsAsync_ReturnsBuiltinDiagnosticPrompts",
           "details": null
         }
@@ -8178,7 +8217,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
-          "lineNumber": 100,
+          "lineNumber": 125,
           "testName": "ListResourcesAsync_ReturnsBuiltinRouterStatusResource",
           "details": null
         }
@@ -8194,7 +8233,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
-          "lineNumber": 133,
+          "lineNumber": 158,
           "testName": "CallToolAsync_SearchTools_ExecutesSuccessfullyWithStructuredContent",
           "details": null
         }
@@ -8226,7 +8265,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
-          "lineNumber": 177,
+          "lineNumber": 202,
           "testName": "GetPromptAsync_DiagnoseFailure_ReturnsDiagnosticInstructions",
           "details": null
         }
@@ -8274,7 +8313,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
-          "lineNumber": 154,
+          "lineNumber": 179,
           "testName": "ReadResourceAsync_RouterStatus_ReturnsOnlineStatusPayload",
           "details": null
         }
@@ -8290,7 +8329,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
-          "lineNumber": 199,
+          "lineNumber": 224,
           "testName": "RegisterRequestCancellation_And_CancelRequest_CancelsActiveToken",
           "details": null
         }
@@ -8306,7 +8345,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/ClientSessionTests.cs",
-          "lineNumber": 215,
+          "lineNumber": 240,
           "testName": "TryHandleClientResponse_ReturnsFalse_WhenNoPendingRequest",
           "details": null
         }
@@ -9454,28 +9493,28 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 38,
+          "lineNumber": 39,
           "testName": "ExecuteScript_UnauthorizedGroup_ReturnsSecurityError",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 49,
+          "lineNumber": 50,
           "testName": "IsCodeModeAuthorized_PermitsAdminWildcardAndMatchingGroups",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 266,
+          "lineNumber": 267,
           "testName": "ExecuteScript_UnauthorizedCallerGroup_ReturnsSecurityErrorEnvelope",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 319,
+          "lineNumber": 320,
           "testName": "ExecuteScript_AdminBypass_ExecutesSuccessfully",
           "details": null
         }

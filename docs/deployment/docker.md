@@ -196,6 +196,7 @@ The following table provides the exhaustive list of configuration parameters acc
 | **`MCG_MASTER_KEY_FILE`** | `MCG_MASTER_KEY_FILE` | *(None)* | Path to file containing 256-bit master key (e.g. `/run/secrets/mcg_master_key`). |
 | **`MCG_ADMIN_AUTH_KEY`** | `MCG_ADMIN_AUTH_KEY` (or `MCG_ADMIN_KEY`) | *(Auto-generated)* | Custom admin token or compact Base62 key (`mcp-adm-...`) seeded for user `admin`. |
 | **`MCG_CLIENT_APP_KEYS`** | `MCG_CLIENT_APP_KEYS` | *(None)* | Pre-seeded client AppKeys in format: `key:Name:scope1,scope2`. |
+| **`MCG_SEARCH_TOOLS_DESCRIPTION`** | `MCG_SEARCH_TOOLS_DESCRIPTION` | *(Generic + dynamic authorized servers)* | Optional override for the Meta-Mode `search_tools` tool description advertised in `tools/list`. |
 | **`DB_PROVIDER`** | `DB_PROVIDER` | `sqlite` | Database engine dialect: `sqlite`, `mssql`, or `mysql`. |
 | **`ConnectionStrings:DefaultConnection`** | `ConnectionStrings__DefaultConnection` | `Data Source=/app/data/mcg.db` | ADO.NET connection string for database provider. |
 | **`CORS_ALLOWED_ORIGINS`** | `CORS_ALLOWED_ORIGINS` | `""` | Delimited list of allowed web browser origins (commas, semicolons). Empty blocks browser CORS in production. |
