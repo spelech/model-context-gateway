@@ -177,7 +177,7 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v5.25.1`** | 2026-11-23 | fix(routing): Dynamic RBAC-filtered active server list in Meta-Mode `search_tools` description with generic default fallback and `MCG_SEARCH_TOOLS_DESCRIPTION` environment override. |
+| **`v5.25.1`** | 2026-11-23 | fix(routing): Dynamic RBAC-filtered active server list in Meta-Mode `search_tools` description with `MCG_SEARCH_TOOLS_DESCRIPTION` override, plus reserved gateway meta-tool guard preventing downstream bare-name shadowing (e.g., `contextcortex/execute_script`). |
 | **`v5.25.0`** | 2026-11-16 | feat(routing,codemode,transports,ui): Configurable 120s Tool/Code Mode Timeouts, `read_output` Paging Buffer, Lean `search_tools` Formats, and FIFO Keyed Concurrency Slots. |
 | **`v5.24.3`** | 2026-11-14 | fix(oauth,ui): Persistent OpenIddict Certificates, Configurable Token Lifetimes, Guaranteed `offline_access` Refresh Token Issuance, and Consent Form Deduplication. |
 | **`v5.24.2`** | 2026-11-05 | fix(transports): Streamable HTTP Downstream Mcp-Session-Id Expiration Recovery and Session Latching Guard. |

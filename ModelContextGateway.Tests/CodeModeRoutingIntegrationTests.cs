@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using ModelContextGateway.Core.CodeMode;
@@ -463,6 +464,126 @@ namespace ModelContextGateway.Tests
             var text = doc.RootElement.GetProperty("content")[0].GetProperty("text").GetString();
             using var envDoc = JsonDocument.Parse(text!);
             envDoc.RootElement.GetProperty("toolCallsCount").GetInt32().Should().Be(1);
+        }
+
+        [Fact]
+        [Requirement("GUARD-CODE-05", "GUARD", RequirementType.FailClosedGuardrail, "Gateway meta-tools (search_tools, execute_tool, read_output, execute_script) are reserved during bare-name resolution so identically named downstream tools cannot shadow them.")]
+        public async Task ReservedMetaTools_AreNotShadowedByDownstreamToolsWithIdenticalBareNames()
+        {
+            var router = new ToolRoutingManager();
+            var servers = new List<McpServer>
+            {
+                new() { Id = "contextcortex", DisplayName = "ContextCortex", Enabled = true, Type = "http", Url = "http://contextcortex/mcp" }
+            };
+
+            foreach (var meta in new[] { "search_tools", "execute_tool", "read_output", "execute_script" })
+            {
+                router.ToolRoutingTable[$"contextcortex/{meta}"] = "contextcortex";
+                router.ToolRoutingTable[$"contextcortex__{meta}"] = "contextcortex";
+                router.ToolRoutingTable[$"contextcortex:{meta}"] = "contextcortex";
+
+                var (norm, err) = router.NormalizeTargetToolName(meta, servers);
+                err.Should().BeNull();
+                norm.Should().Be(meta);
+            }
+
+            var (namespacedNorm, namespacedErr) = router.NormalizeTargetToolName("contextcortex/execute_script", servers);
+            namespacedErr.Should().BeNull();
+            namespacedNorm.Should().Be("contextcortex__execute_script");
+
+            // End-to-end ClientSession verification with a downstream server advertising execute_script
+            var ccMock = new TestHelpers.MockDownstreamMcpServer();
+            ccMock.Tools.Clear();
+            ccMock.AddTool("execute_script", "ContextCortex local sandbox");
+            ccMock.AddTool("search", "ContextCortex code search");
+
+            using var sqlite = new Microsoft.Data.Sqlite.SqliteConnection("Filename=:memory:");
+            sqlite.Open();
+            Dapper.SqlMapper.Execute(sqlite, "CREATE TABLE Settings (Id TEXT PRIMARY KEY, EnableCodeMode INTEGER DEFAULT 1); INSERT INTO Settings (Id, EnableCodeMode) VALUES ('default', 1);");
+            var mockDbFactory = new Mock<IDbConnectionFactory>();
+            mockDbFactory.Setup(f => f.CreateConnection()).Returns(sqlite);
+            mockDbFactory.Setup(f => f.ProviderName).Returns("sqlite");
+
+            var services = new ServiceCollection();
+            services.AddSingleton(Mock.Of<IAuditLogger>());
+            services.AddSingleton(mockDbFactory.Object);
+            services.AddLogging();
+            var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?> { { "Admin:GroupSid", "full_admin" } })
+                .Build();
+            services.AddSingleton<Microsoft.Extensions.Configuration.IConfiguration>(config);
+            var sp = services.BuildServiceProvider();
+
+            var httpCtx = new Microsoft.AspNetCore.Http.DefaultHttpContext { RequestServices = sp };
+            httpCtx.User = new System.Security.Claims.ClaimsPrincipal(
+                new System.Security.Claims.ClaimsIdentity(new[]
+                {
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "admin"),
+                    new System.Security.Claims.Claim("Sid", "full_admin"),
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "full_admin")
+                }, "TestAuth"));
+
+            var embeddingMock = new Mock<DynamicEmbeddingService>(new HttpClient(), NullLoggerFactory.Instance, new ServiceCollection().BuildServiceProvider());
+            embeddingMock.Setup(s => s.GetSettings()).Returns(new RouterSettings { EnableCodeMode = true });
+
+            var session = new ClientSession(
+                "sess-shadow-test",
+                null,
+                servers,
+                ccMock.CreateHttpClient(),
+                embeddingMock.Object,
+                NullLogger<ClientSession>.Instance,
+                sp)
+            {
+                IsMetaMode = true
+            };
+
+            // Warm cache via non-meta listing so contextcortex/execute_script is registered in _toolRoutingTable
+            session.IsMetaMode = false;
+            await session.ListToolsAsync("{\"jsonrpc\":\"2.0\",\"id\":1}", httpCtx);
+            session.IsMetaMode = true;
+
+            // Calling bare execute_script must run MCG's Jint Code Mode engine (mcg.listServers() works), NOT contextcortex/execute_script
+            var jintBody = JsonSerializer.Serialize(new
+            {
+                jsonrpc = "2.0",
+                id = "req-jint",
+                method = "tools/call",
+                @params = new
+                {
+                    name = "execute_script",
+                    arguments = new
+                    {
+                        script = "const srvs = await mcg.listServers(); return { serverCount: srvs.length, firstId: srvs[0].id };"
+                    }
+                }
+            });
+            var jintRes = await session.CallToolAsync("execute_script", jintBody, mockDbFactory.Object, httpCtx);
+            var jintDoc = JsonDocument.Parse(JsonSerializer.Serialize(jintRes));
+            jintDoc.RootElement.GetProperty("isError").GetBoolean().Should().BeFalse();
+            var envJson = jintDoc.RootElement.GetProperty("content")[0].GetProperty("text").GetString();
+            using var parsedEnv = JsonDocument.Parse(envJson!);
+            parsedEnv.RootElement.GetProperty("result").GetProperty("firstId").GetString().Should().Be("contextcortex");
+
+            // Calling explicit contextcortex/execute_script via execute_tool must still route to downstream contextcortex
+            var downstreamBody = JsonSerializer.Serialize(new
+            {
+                jsonrpc = "2.0",
+                id = "req-cc",
+                method = "tools/call",
+                @params = new
+                {
+                    name = "execute_tool",
+                    arguments = new
+                    {
+                        name = "contextcortex/execute_script",
+                        arguments = new { code = "return 1;" }
+                    }
+                }
+            });
+            var ccRes = await session.CallToolAsync("execute_tool", downstreamBody, mockDbFactory.Object, httpCtx);
+            var ccJson = JsonSerializer.Serialize(ccRes);
+            ccJson.Should().Contain("Mock executed tool execute_script");
         }
     }
 }

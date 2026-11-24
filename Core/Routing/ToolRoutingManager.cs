@@ -330,6 +330,21 @@ namespace ModelContextGateway.Core.Routing
             return allowedGroups.Any(allowed => userGroupSet.Contains(allowed));
         }
 
+        private static readonly HashSet<string> _reservedMetaToolNames = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "search_tools",
+            "execute_tool",
+            "read_output",
+            "execute_script"
+        };
+
+        /// <summary>
+        /// Returns true when <paramref name="toolName"/> is one of the gateway's built-in Meta-Mode tool names
+        /// (<c>search_tools</c>, <c>execute_tool</c>, <c>read_output</c>, or <c>execute_script</c>).
+        /// </summary>
+        public static bool IsReservedMetaToolName(string? toolName) =>
+            !string.IsNullOrWhiteSpace(toolName) && _reservedMetaToolNames.Contains(toolName.Trim());
+
         /// <summary>
         /// Normalizes various tool name formats (e.g. 'server/tool', 'server:tool', or bare 'tool') into the canonical 'server__tool' format.
         /// </summary>
@@ -341,6 +356,13 @@ namespace ModelContextGateway.Core.Routing
             }
 
             var trimmed = targetName.Trim();
+
+            // Reserve built-in gateway meta-tools before checking downstream bare-name routing entries
+            // so downstream tools (e.g. contextcortex/execute_script) cannot shadow MCG's own handlers.
+            if (IsReservedMetaToolName(trimmed))
+            {
+                return (trimmed.ToLowerInvariant(), null);
+            }
 
             // 1. Check for namespace delimiters ('/', ':', '__')
             string? prefix = null;
