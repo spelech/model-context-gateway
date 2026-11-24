@@ -111,27 +111,34 @@ namespace ModelContextGateway.Core.Routing
             var settings = (_embeddingService as DynamicEmbeddingService)?.GetSettings();
             bool enableCodeMode = settings?.EnableCodeMode ?? false;
             var tools = await _toolRoutingManager.ListToolsAsync(body, IsMetaMode, _backendConnections, _logger, EnsureBackendsInitializedAsync, _servers, _sessionManager, enableCodeMode);
-            if (IsMetaMode && string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("MCG_SEARCH_TOOLS_DESCRIPTION")))
+            var authorizedLabels = await GetAuthorizedVisibleServerLabelsAsync(httpContext);
+            var searchTool = tools.OfType<MetaToolDefinition>().FirstOrDefault(t => t.name == "search_tools");
+            if (searchTool != null)
             {
-                var searchTool = tools.OfType<MetaToolDefinition>().FirstOrDefault(t => t.name == "search_tools");
-                if (searchTool != null)
-                {
-                    var authorizedLabels = new List<string>();
-                    foreach (var srv in _servers.Where(s => s.Enabled && !s.Hidden))
-                    {
-                        if (await IsServerAuthorizedForInstructionsAsync(srv.Id, httpContext))
-                        {
-                            var label = !string.IsNullOrWhiteSpace(srv.DisplayName)
-                                ? srv.DisplayName
-                                : (!string.IsNullOrWhiteSpace(srv.Alias) ? srv.Alias : srv.Id);
-                            authorizedLabels.Add(label);
-                        }
-                    }
-
-                    searchTool.description = ToolRoutingManager.ResolveSearchToolsDescription(availableServerNames: authorizedLabels);
-                }
+                searchTool.description = ToolRoutingManager.ResolveSearchToolsDescription(availableServerNames: authorizedLabels);
             }
             return await FilterAuthorizedAsync(tools, "tools/list", "name", httpContext);
+        }
+
+        private async Task<List<string>> GetAuthorizedVisibleServerLabelsAsync(HttpContext? httpContext)
+        {
+            var authorizedLabels = new List<string>();
+            foreach (var srv in _servers)
+            {
+                if (!srv.Enabled || srv.Hidden)
+                {
+                    continue;
+                }
+
+                if (await IsServerAuthorizedForInstructionsAsync(srv.Id, httpContext))
+                {
+                    var label = !string.IsNullOrWhiteSpace(srv.DisplayName)
+                        ? srv.DisplayName
+                        : (!string.IsNullOrWhiteSpace(srv.Alias) ? srv.Alias : srv.Id);
+                    authorizedLabels.Add(label);
+                }
+            }
+            return authorizedLabels;
         }
 
         public async Task<List<object>> FilterAuthorizedToolsAsync(List<object> tools, HttpContext? httpContext = null)
