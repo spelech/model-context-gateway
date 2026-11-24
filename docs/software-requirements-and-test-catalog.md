@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **511 Requirements Verified** across **1158 Test Proofs** (403 Functional Capabilities, 108 Safety Guardrails).
+> **Catalog Statistics:** **512 Requirements Verified** across **1159 Test Proofs** (403 Functional Capabilities, 109 Safety Guardrails).
 
 ---
 
@@ -14,7 +14,7 @@
 | **`CORE`** | CORE | **8** | 7 | 1 | 14 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
-| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **70** | 3 | 67 | 146 proofs |
+| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **71** | 3 | 68 | 147 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **153** | 143 | 10 | 319 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **68** | 56 | 12 | 144 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **40** | 34 | 6 | 46 proofs |
@@ -1596,16 +1596,16 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L68`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L68) (`ExecuteAsync_PreInjectedArgs_AccessibleInScript`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L96`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L96) (`ExecuteAsync_CallToolAndMcgCallTool_ForwardArgumentsAndOptions`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L137`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L137) (`ExecuteAsync_NonJsonContent_ReturnsRawText`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L13`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L13) (`GetMetaTools_IncludesExecuteScript_WhenEnabled`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L25`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L25) (`GetMetaTools_OmitsExecuteScript_WhenDisabled`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L421`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L421) (`ExecuteScript_ChainingSearchTools_ExecutesSuccessfully`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L14`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L14) (`GetMetaTools_IncludesExecuteScript_WhenEnabled`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L26`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L26) (`GetMetaTools_OmitsExecuteScript_WhenDisabled`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L422`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L422) (`ExecuteScript_ChainingSearchTools_ExecutesSuccessfully`)
 
 ### `[MCP-CODE-02]` ExecuteScript returns structured execution envelope with result and telemetry.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (2):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L163`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L163) (`ExecuteScript_ValidExecution_ReturnsStructuredEnvelope`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L216`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L216) (`ExecuteScript_WithCodeParameter_ExecutesSuccessfully`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L164`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L164) (`ExecuteScript_ValidExecution_ReturnsStructuredEnvelope`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L217`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L217) (`ExecuteScript_WithCodeParameter_ExecutesSuccessfully`)
 
 ### `[MCP-CODE-CONCURRENT-OPTIONS-READOUTPUT]` CodeModeExecutionEngine supports Promise.all concurrent tool calls with McgCallOptions and mcg.readOutput.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -3207,26 +3207,32 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L10`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L10) (`ExecuteAsync_InfiniteLoop_TerminatesOnStatementLimit`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L49`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L49) (`ExecuteAsync_MemoryLimit_TerminatesOnMemoryExceeded`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L63`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L63) (`ExecuteAsync_ConsoleLogging_CapturesLogs`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L70`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L70) (`ExecuteScript_DisabledCodeMode_ReturnsError`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L71`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L71) (`ExecuteScript_DisabledCodeMode_ReturnsError`)
 
 ### `[GUARD-CODE-02]` Execution timeout terminates long-running script.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (2):**
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L23`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L23) (`ExecuteAsync_Timeout_TerminatesExecution`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L118`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L118) (`ExecuteScript_MissingScript_ReturnsError`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L119`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L119) (`ExecuteScript_MissingScript_ReturnsError`)
 
 ### `[GUARD-CODE-03]` ExecuteScript returns structured envelope with isError on script runtime exception.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L373`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L373) (`ExecuteScript_RuntimeError_ReturnsStructuredErrorEnvelope`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L374`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L374) (`ExecuteScript_RuntimeError_ReturnsStructuredErrorEnvelope`)
 
 ### `[GUARD-CODE-04]` Exceeding MaxToolCalls aborts execution.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L46`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L46) (`ExecuteAsync_ToolCallsQuotaExceeded_FailsClosed`)
+
+### `[GUARD-CODE-05]` Gateway meta-tools (search_tools, execute_tool, read_output, execute_script) are reserved during bare-name resolution so identically named downstream tools cannot shadow them.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L469`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L469) (`ReservedMetaTools_AreNotShadowedByDownstreamToolsWithIdenticalBareNames`)
 
 ### `[GUARD-HTTP-NO-SECRET-RETRIEVER]` HTTP stateless transport fails closed with InvalidOperationException when no secret retriever is configured
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
@@ -3597,10 +3603,10 @@
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (4):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L38`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L38) (`ExecuteScript_UnauthorizedGroup_ReturnsSecurityError`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L49`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L49) (`IsCodeModeAuthorized_PermitsAdminWildcardAndMatchingGroups`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L266`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L266) (`ExecuteScript_UnauthorizedCallerGroup_ReturnsSecurityErrorEnvelope`)
-  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L319`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L319) (`ExecuteScript_AdminBypass_ExecutesSuccessfully`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L39`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L39) (`ExecuteScript_UnauthorizedGroup_ReturnsSecurityError`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L50`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L50) (`IsCodeModeAuthorized_PermitsAdminWildcardAndMatchingGroups`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L267`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L267) (`ExecuteScript_UnauthorizedCallerGroup_ReturnsSecurityErrorEnvelope`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L320`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L320) (`ExecuteScript_AdminBypass_ExecutesSuccessfully`)
 
 ### `[SEC-CODE-02]` Sandbox prevents CLR reflection and process spawning.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -3922,8 +3928,9 @@
 | `GUARD-CLIENT-MISSING-NAME` | **Guardrail** | `GUARD` | CreateClient fails closed when DisplayName is missing | [`ClientsControllerTests.cs:L270`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientsControllerTests.cs#L270) | Backend xUnit |
 | `GUARD-CODE-01` | **Guardrail** | `GUARD` | Statement cap terminates infinite loops within allotted execution budget. | [`CodeModeEngineSandboxTests.cs:L10`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L10) | Backend xUnit |
 | `GUARD-CODE-02` | **Guardrail** | `GUARD` | Execution timeout terminates long-running script. | [`CodeModeEngineSandboxTests.cs:L23`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L23) | Backend xUnit |
-| `GUARD-CODE-03` | **Guardrail** | `GUARD` | ExecuteScript returns structured envelope with isError on script runtime exception. | [`CodeModeRoutingIntegrationTests.cs:L373`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L373) | Backend xUnit |
+| `GUARD-CODE-03` | **Guardrail** | `GUARD` | ExecuteScript returns structured envelope with isError on script runtime exception. | [`CodeModeRoutingIntegrationTests.cs:L374`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L374) | Backend xUnit |
 | `GUARD-CODE-04` | **Guardrail** | `GUARD` | Exceeding MaxToolCalls aborts execution. | [`CodeModeRuntimeInteropTests.cs:L46`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs#L46) | Backend xUnit |
+| `GUARD-CODE-05` | **Guardrail** | `GUARD` | Gateway meta-tools (search_tools, execute_tool, read_output, execute_script) are reserved during bare-name resolution so identically named downstream tools cannot shadow them. | [`CodeModeRoutingIntegrationTests.cs:L469`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L469) | Backend xUnit |
 | `GUARD-DISPOSED-01` | Positive | `GUARD` | Stateless HTTP POST lifecycle: HTTP response completes, HttpContext is marked disposed, background backend initialization completes successfully without ObjectDisposedException. | [`DownstreamSessionIntegrationTests.cs:L225`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L225) | Backend xUnit |
 | `GUARD-HTTP-NO-SECRET-RETRIEVER` | **Guardrail** | `GUARD` | HTTP stateless transport fails closed with InvalidOperationException when no secret retriever is configured | [`HttpTransportTests.cs:L54`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/HttpTransportTests.cs#L54) | Backend xUnit |
 | `GUARD-HTTP-SECRET-RETRIEVAL-FAIL-CLOSED` | **Guardrail** | `GUARD` | HTTP stateless transport fails closed with SecurityException when secret resolution fails | [`HttpTransportTests.cs:L31`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/HttpTransportTests.cs#L31) | Backend xUnit |
@@ -4053,7 +4060,7 @@
 | `MCP-ADMIN-TOOLS-LIST-COUNT` | Positive | `MCP` | AdminMcpServer tools/list returns all 10 consolidated tools with complete JSON schemas. | [`AdminMcpServerTests.cs:L152`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminMcpServerTests.cs#L152) | Backend xUnit |
 | `MCP-ADMIN-ZOD-STRICT-RESPONSE` | Positive | `MCP` | JsonRpcResponse serialization omits null result, error, and _meta fields completely to satisfy Zod strict validation. | [`AdminEndpointsTests.cs:L452`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L452) | Backend xUnit |
 | `MCP-CODE-01` | Positive | `MCP` | RouterSettings provides default Code Mode configuration values. | [`CodeModeSettingsTests.cs:L7`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeSettingsTests.cs#L7) | Backend xUnit |
-| `MCP-CODE-02` | Positive | `MCP` | ExecuteScript returns structured execution envelope with result and telemetry. | [`CodeModeRoutingIntegrationTests.cs:L163`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L163) | Backend xUnit |
+| `MCP-CODE-02` | Positive | `MCP` | ExecuteScript returns structured execution envelope with result and telemetry. | [`CodeModeRoutingIntegrationTests.cs:L164`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L164) | Backend xUnit |
 | `MCP-CODE-CONCURRENT-OPTIONS-READOUTPUT` | Positive | `MCP` | CodeModeExecutionEngine supports Promise.all concurrent tool calls with McgCallOptions and mcg.readOutput. | [`ToolTimeoutOutputAndConcurrencyRoutingTests.cs:L564`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L564) | Backend xUnit |
 | `MCP-COLDSTART-01` | Positive | `MCP` | Full cold-start cycle: SessionManager cache seeded -> search_tools -> execute_tool dispatches to downstream mock server and returns output. | [`DownstreamSessionIntegrationTests.cs:L130`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L130) | Backend xUnit |
 | `MCP-CONCURRENCY-CANCEL-SAFETY` | Positive | `MCP` | Cancelling a queued waiter never leaks permits or blocks subsequent FIFO waiters. | [`BackendConcurrencyGateTests.cs:L113`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/BackendConcurrencyGateTests.cs#L113) | Backend xUnit |
@@ -4140,7 +4147,7 @@
 | `SEC-AUDIT-PER-REQUEST-ACTOR-ATTRIBUTION` | Positive | `SEC` | Audit logger attributes per-request actor credentials accurately across stateless calls. | [`McpIntegrationTests.cs:L128`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L128) | Backend xUnit |
 | `SEC-AUDIT-POLICY-SAVE-ACTION` | Positive | `SEC` | PermissionsController records audit action when access policy is saved. | [`AuditQueryApiTests.cs:L83`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditQueryApiTests.cs#L83) | Backend xUnit |
 | `SEC-AUDIT-QUERY-FILTERED-ROWS` | Positive | `SEC` | Audit queries support filtering by user, server, and pagination while recording query access in audit log. | [`AuditQueryApiTests.cs:L60`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AuditQueryApiTests.cs#L60) | Backend xUnit |
-| `SEC-CODE-01` | **Guardrail** | `SEC` | ExecuteScript rejects unauthorized SSO groups. | [`CodeModeRoutingIntegrationTests.cs:L38`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L38) | Backend xUnit |
+| `SEC-CODE-01` | **Guardrail** | `SEC` | ExecuteScript rejects unauthorized SSO groups. | [`CodeModeRoutingIntegrationTests.cs:L39`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs#L39) | Backend xUnit |
 | `SEC-CODE-02` | **Guardrail** | `SEC` | Sandbox prevents CLR reflection and process spawning. | [`CodeModeEngineSandboxTests.cs:L36`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeEngineSandboxTests.cs#L36) | Backend xUnit |
 | `SEC-GATEWAY-ZERO-CONFIG-BOOT` | Positive | `SEC` | Gateway boots from a blank slate with zero master key environment variables, auto-generates .master.key, and serves health and admin endpoints. | [`AdminAutomationSkillTests.cs:L352`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminAutomationSkillTests.cs#L352) | Backend xUnit |
 | `SEC-HTTP-SECRET-URL-FALLBACK` | Positive | `SEC` | HttpTransport falls back to URL and SecretItemKey when specific secret paths are unconfigured. | [`TransportsAuthShapeTests.cs:L160`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L160) | Backend xUnit |

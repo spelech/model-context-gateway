@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-11-24T02:16:30.0453901Z",
-    "totalRequirements": 511,
+    "generatedAt": "2026-11-24T02:48:37.6251464Z",
+    "totalRequirements": 512,
     "positiveCount": 403,
-    "guardrailCount": 108,
-    "totalProofs": 1158
+    "guardrailCount": 109,
+    "totalProofs": 1159
   },
   "requirements": [
     {
@@ -4305,7 +4305,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 70,
+          "lineNumber": 71,
           "testName": "ExecuteScript_DisabledCodeMode_ReturnsError",
           "details": null
         }
@@ -4328,7 +4328,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 118,
+          "lineNumber": 119,
           "testName": "ExecuteScript_MissingScript_ReturnsError",
           "details": null
         }
@@ -4344,7 +4344,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 373,
+          "lineNumber": 374,
           "testName": "ExecuteScript_RuntimeError_ReturnsStructuredErrorEnvelope",
           "details": null
         }
@@ -4362,6 +4362,22 @@
           "filePath": "ModelContextGateway.Tests/CodeModeRuntimeInteropTests.cs",
           "lineNumber": 46,
           "testName": "ExecuteAsync_ToolCallsQuotaExceeded_FailsClosed",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "GUARD-CODE-05",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "Gateway meta-tools (search_tools, execute_tool, read_output, execute_script) are reserved during bare-name resolution so identically named downstream tools cannot shadow them.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
+          "lineNumber": 469,
+          "testName": "ReservedMetaTools_AreNotShadowedByDownstreamToolsWithIdenticalBareNames",
           "details": null
         }
       ]
@@ -7572,21 +7588,21 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 13,
+          "lineNumber": 14,
           "testName": "GetMetaTools_IncludesExecuteScript_WhenEnabled",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 25,
+          "lineNumber": 26,
           "testName": "GetMetaTools_OmitsExecuteScript_WhenDisabled",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 421,
+          "lineNumber": 422,
           "testName": "ExecuteScript_ChainingSearchTools_ExecutesSuccessfully",
           "details": null
         }
@@ -7602,14 +7618,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 163,
+          "lineNumber": 164,
           "testName": "ExecuteScript_ValidExecution_ReturnsStructuredEnvelope",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 216,
+          "lineNumber": 217,
           "testName": "ExecuteScript_WithCodeParameter_ExecutesSuccessfully",
           "details": null
         }
@@ -9477,28 +9493,28 @@
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 38,
+          "lineNumber": 39,
           "testName": "ExecuteScript_UnauthorizedGroup_ReturnsSecurityError",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 49,
+          "lineNumber": 50,
           "testName": "IsCodeModeAuthorized_PermitsAdminWildcardAndMatchingGroups",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 266,
+          "lineNumber": 267,
           "testName": "ExecuteScript_UnauthorizedCallerGroup_ReturnsSecurityErrorEnvelope",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "ModelContextGateway.Tests/CodeModeRoutingIntegrationTests.cs",
-          "lineNumber": 319,
+          "lineNumber": 320,
           "testName": "ExecuteScript_AdminBypass_ExecutesSuccessfully",
           "details": null
         }
