@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **510 Requirements Verified** across **1156 Test Proofs** (402 Functional Capabilities, 108 Safety Guardrails).
+> **Catalog Statistics:** **511 Requirements Verified** across **1158 Test Proofs** (403 Functional Capabilities, 108 Safety Guardrails).
 
 ---
 
@@ -15,7 +15,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **23** | 22 | 1 | 35 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **70** | 3 | 67 | 146 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **152** | 142 | 10 | 317 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **153** | 143 | 10 | 319 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **68** | 56 | 12 | 144 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **40** | 34 | 6 | 46 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **43** | 36 | 7 | 215 proofs |
@@ -1340,6 +1340,13 @@
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L382`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L382) (`CompleteAsync_SupportsLocalRouterPromptsTemplatesAndUnescapesMcpUris`)
   - [Backend xUnit] [`ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs#L153`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeTypeGeneratorTests.cs#L153) (`GetMetaTools_IncludesAnnotationsAndOutputSchema`)
 
+### `[MCP-57]` ClientSession Meta-Mode search_tools description dynamically includes enabled non-hidden servers and omits disabled or hidden servers.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (2):**
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L100`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L100) (`ListToolsAsync_WhenInMetaMode_IncludesEnabledVisibleServersInSearchToolsDescription`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L668`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L668) (`GetMetaModeTools_SearchToolsDescription_UsesGenericDefaultAndSupportsDynamicServersOrOverride`)
+
 ### `[MCP-ADMIN-ENDPOINT-CALL-TOOL]` Admin endpoint /admin/message executes tools/call for manage_system diagnostics.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
@@ -1814,19 +1821,19 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L116`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L116) (`ListPromptsAsync_ReturnsBuiltinDiagnosticPrompts`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L141`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L141) (`ListPromptsAsync_ReturnsBuiltinDiagnosticPrompts`)
 
 ### `[MCP-SESSION-BUILTIN-RESOURCES]` ClientSession lists built-in resources including router://status.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L100`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L100) (`ListResourcesAsync_ReturnsBuiltinRouterStatusResource`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L125`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L125) (`ListResourcesAsync_ReturnsBuiltinRouterStatusResource`)
 
 ### `[MCP-SESSION-CALL-SEARCH-TOOLS]` ClientSession calls built-in search_tools and returns structured search results.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L133`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L133) (`CallToolAsync_SearchTools_ExecutesSuccessfullyWithStructuredContent`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L158`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L158) (`CallToolAsync_SearchTools_ExecutesSuccessfullyWithStructuredContent`)
 
 ### `[MCP-SESSION-ERROR-TRANSFORM-CANCEL-SAMPLING]` Translates backend error codes, handles cancellation tokens, and executes sampling requests.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1838,7 +1845,7 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L177`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L177) (`GetPromptAsync_DiagnoseFailure_ReturnsDiagnosticInstructions`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L202`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L202) (`GetPromptAsync_DiagnoseFailure_ReturnsDiagnosticInstructions`)
 
 ### `[MCP-SESSION-MANAGER-PER-SERVER-CACHE]` SessionManager caches and isolates connections per downstream backend server.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1856,19 +1863,19 @@
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L154`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L154) (`ReadResourceAsync_RouterStatus_ReturnsOnlineStatusPayload`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L179`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L179) (`ReadResourceAsync_RouterStatus_ReturnsOnlineStatusPayload`)
 
 ### `[MCP-SESSION-REQUEST-CANCELLATION]` ClientSession registers and triggers request cancellation for active cancellation tokens.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L199`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L199) (`RegisterRequestCancellation_And_CancelRequest_CancelsActiveToken`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L224`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L224) (`RegisterRequestCancellation_And_CancelRequest_CancelsActiveToken`)
 
 ### `[MCP-SESSION-UNREGISTERED-RESPONSE]` ClientSession returns false when handling client response for unregistered request ID.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L215`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L215) (`TryHandleClientResponse_ReturnsFalse_WhenNoPendingRequest`)
+  - [Backend xUnit] [`ModelContextGateway.Tests/ClientSessionTests.cs#L240`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L240) (`TryHandleClientResponse_ReturnsFalse_WhenNoPendingRequest`)
 
 ### `[MCP-TIMEOUT-CONCURRENCY-UI]` submits per-server timeout and concurrency slot settings when configured and sends null when cleared on edit
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -4004,6 +4011,7 @@
 | `MCP-54` | **Guardrail** | `MCP` | Meta-Mode compacts downstream mcp:// resources into router:// catalog and per-server resources while non-Meta-Mode preserves flat mcp:// listings. | [`CodeModeResourcesAndPromptsTests.cs:L208`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/CodeModeResourcesAndPromptsTests.cs#L208) | Backend xUnit |
 | `MCP-55` | Positive | `MCP` | GatewayMetadata.BuildGatewayInstructions generates MCP 2026-07-28 initialize instructions documenting Code Mode and resource catalogs. | [`DownstreamInstructionsTests.cs:L227`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L227) | Backend xUnit |
 | `MCP-56` | **Guardrail** | `MCP` | Downstream server initialize instructions are captured, cached in SessionManager, and returned directly in direct proxy mode (Surface 1) and rolled up in Meta-Mode initialize instructions (Surface 4). | [`DownstreamInstructionsTests.cs:L238`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamInstructionsTests.cs#L238) | Backend xUnit |
+| `MCP-57` | Positive | `MCP` | ClientSession Meta-Mode search_tools description dynamically includes enabled non-hidden servers and omits disabled or hidden servers. | [`ClientSessionTests.cs:L100`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L100) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-CALL-TOOL` | Positive | `MCP` | Admin endpoint /admin/message executes tools/call for manage_system diagnostics. | [`AdminEndpointsTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L294) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-HEAD-REQUEST` | Positive | `MCP` | Admin endpoint /admin handles HEAD request returning text/event-stream headers. | [`AdminEndpointsTests.cs:L212`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L212) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-LIST-TOOLS` | Positive | `MCP` | Admin endpoint /admin/message executes tools/list over active SSE session and returns 10 admin tools. | [`AdminEndpointsTests.cs:L224`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/AdminEndpointsTests.cs#L224) | Backend xUnit |
@@ -4081,16 +4089,16 @@
 | `MCP-PERSISTENCE-TIMEOUT-OUTPUT-CONCURRENCY` | Positive | `MCP` | DatabaseRepository persists and retrieves server timeout/concurrency fields and global tool timeout/output settings. | [`ToolTimeoutOutputAndConcurrencyRoutingTests.cs:L764`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L764) | Backend xUnit |
 | `MCP-RESILIENT-01` | Positive | `MCP` | Prefix-based resilient routing: execute_tool called with unregistered but prefixed tool name dynamically resolves server and executes. | [`DownstreamSessionIntegrationTests.cs:L294`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/DownstreamSessionIntegrationTests.cs#L294) | Backend xUnit |
 | `MCP-SEARCH-TOOL-LIMITS-AND-THRESHOLDS` | Positive | `MCP` | Renders GeneralTab with configurable tool search limits and thresholds and triggers save. | [`GeneralTab.test.tsx:L124`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/GeneralTab.test.tsx#L124) | Frontend Vitest |
-| `MCP-SESSION-BUILTIN-PROMPTS` | Positive | `MCP` | ClientSession lists built-in diagnostic and routing prompts. | [`ClientSessionTests.cs:L116`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L116) | Backend xUnit |
-| `MCP-SESSION-BUILTIN-RESOURCES` | Positive | `MCP` | ClientSession lists built-in resources including router://status. | [`ClientSessionTests.cs:L100`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L100) | Backend xUnit |
-| `MCP-SESSION-CALL-SEARCH-TOOLS` | Positive | `MCP` | ClientSession calls built-in search_tools and returns structured search results. | [`ClientSessionTests.cs:L133`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L133) | Backend xUnit |
+| `MCP-SESSION-BUILTIN-PROMPTS` | Positive | `MCP` | ClientSession lists built-in diagnostic and routing prompts. | [`ClientSessionTests.cs:L141`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L141) | Backend xUnit |
+| `MCP-SESSION-BUILTIN-RESOURCES` | Positive | `MCP` | ClientSession lists built-in resources including router://status. | [`ClientSessionTests.cs:L125`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L125) | Backend xUnit |
+| `MCP-SESSION-CALL-SEARCH-TOOLS` | Positive | `MCP` | ClientSession calls built-in search_tools and returns structured search results. | [`ClientSessionTests.cs:L158`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L158) | Backend xUnit |
 | `MCP-SESSION-ERROR-TRANSFORM-CANCEL-SAMPLING` | Positive | `MCP` | Translates backend error codes, handles cancellation tokens, and executes sampling requests. | [`McpIntegrationTests.cs:L880`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L880) | Backend xUnit |
-| `MCP-SESSION-GET-PROMPT-DIAGNOSE` | Positive | `MCP` | ClientSession gets router__diagnose_failure prompt and returns diagnostic prompt instructions. | [`ClientSessionTests.cs:L177`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L177) | Backend xUnit |
+| `MCP-SESSION-GET-PROMPT-DIAGNOSE` | Positive | `MCP` | ClientSession gets router__diagnose_failure prompt and returns diagnostic prompt instructions. | [`ClientSessionTests.cs:L202`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L202) | Backend xUnit |
 | `MCP-SESSION-MANAGER-PER-SERVER-CACHE` | Positive | `MCP` | SessionManager caches and isolates connections per downstream backend server. | [`McpIntegrationTests.cs:L1084`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/McpIntegrationTests.cs#L1084) | Backend xUnit |
 | `MCP-SESSION-METAMODE-TOOLS` | Positive | `MCP` | ClientSession exposes meta-mode tools search_tools and execute_tool in meta mode. | [`ClientSessionTests.cs:L80`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L80) | Backend xUnit |
-| `MCP-SESSION-READ-ROUTER-STATUS` | Positive | `MCP` | ClientSession reads router://status resource and returns online gateway metadata. | [`ClientSessionTests.cs:L154`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L154) | Backend xUnit |
-| `MCP-SESSION-REQUEST-CANCELLATION` | Positive | `MCP` | ClientSession registers and triggers request cancellation for active cancellation tokens. | [`ClientSessionTests.cs:L199`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L199) | Backend xUnit |
-| `MCP-SESSION-UNREGISTERED-RESPONSE` | Positive | `MCP` | ClientSession returns false when handling client response for unregistered request ID. | [`ClientSessionTests.cs:L215`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L215) | Backend xUnit |
+| `MCP-SESSION-READ-ROUTER-STATUS` | Positive | `MCP` | ClientSession reads router://status resource and returns online gateway metadata. | [`ClientSessionTests.cs:L179`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L179) | Backend xUnit |
+| `MCP-SESSION-REQUEST-CANCELLATION` | Positive | `MCP` | ClientSession registers and triggers request cancellation for active cancellation tokens. | [`ClientSessionTests.cs:L224`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L224) | Backend xUnit |
+| `MCP-SESSION-UNREGISTERED-RESPONSE` | Positive | `MCP` | ClientSession returns false when handling client response for unregistered request ID. | [`ClientSessionTests.cs:L240`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ClientSessionTests.cs#L240) | Backend xUnit |
 | `MCP-TIMEOUT-CONCURRENCY-UI` | Positive | `MCP` | submits per-server timeout and concurrency slot settings when configured and sends null when cleared on edit | [`ServerModal.test.tsx:L302`](https://github.com/spelech/model-context-gateway/blob/main/frontend/src/test/components/ServerModal.test.tsx#L302) | Frontend Vitest |
 | `MCP-TIMEOUT-HIERARCHY` | Positive | `MCP` | Timeout resolution honors per-call > HTTP header/query > server > global > 120s and strips MCG meta-parameters before forwarding. | [`ToolTimeoutOutputAndConcurrencyRoutingTests.cs:L86`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L86) | Backend xUnit |
 | `MCP-TIMEOUT-INFINITE-HTTPCLIENT` | Positive | `MCP` | Named McpClient HttpClient uses Timeout.InfiniteTimeSpan so per-request CancellationToken governs tool timeouts. | [`ToolTimeoutOutputAndConcurrencyRoutingTests.cs:L65`](https://github.com/spelech/model-context-gateway/blob/main/ModelContextGateway.Tests/ToolTimeoutOutputAndConcurrencyRoutingTests.cs#L65) | Backend xUnit |
