@@ -1,4 +1,13 @@
-# 📜 Release Changelog
+# Changelog
+
+## [5.25.1](https://github.com/spelech/model-context-gateway/compare/v5.25.0...v5.25.1) (2026-11-24)
+
+
+### Bug Fixes
+
+* **routing:** dynamic server-aware search_tools description and MCG_SEARCH_TOOLS_DESCRIPTION override (v5.25.1) ([#294](https://github.com/spelech/model-context-gateway/issues/294)) ([bfa5f86](https://github.com/spelech/model-context-gateway/commit/bfa5f8650131dc1ab7a1a8bae05d4799109f53e6))
+
+## 📜 Release Changelog
 
 All notable changes to **Model Context Gateway (MCG)** are documented in this file.
 
