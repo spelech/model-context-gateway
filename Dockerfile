@@ -22,7 +22,7 @@ COPY --from=frontend-build /wwwroot ./wwwroot
 RUN dotnet publish ModelContextGateway.csproj -c Release -o /app
 
 # Stage 3: Standard runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS runtime
 WORKDIR /app
 
 LABEL org.opencontainers.image.title="Model Context Gateway (MCG)"
